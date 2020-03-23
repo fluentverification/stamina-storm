@@ -1,7 +1,7 @@
 //
 // Created by Riley Layne Roberts on 2/28/20.
 //
-
+//Test of git control
 //#include <MacTypes.h>
 #include "StaminaModelChecker.h"
 
