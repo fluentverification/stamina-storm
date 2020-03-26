@@ -50,42 +50,8 @@ class StaminaModelChecker /*: public storm::modelchecker::SparseCtmcCslModelChec
 
 
 private:
-    class Result {
-    private:
-        double result;
-        std::string explanation;
 
-    public:
-        Result() {
-            result = NULL;
-            explanation = NULL;
-        }
-        void setResultAndExplanation(double newResult, std::string newExplanation) {
-            result = newResult;
-            explanation = newExplanation;
-        }
-
-        double getResult() {
-            return result;
-        }
-
-        std::string getExplanation() {
-            return explanation;
-        }
-
-        std::string toString() {
-            if (explanation == NULL) {
-                return std::to_string(result);
-            }
-            else {
-                std::stringstream returnString;
-                returnString << result << " (" << explanation << ")";
-                return returnString.str();
-            }
-        }
-
-    };
-    InfCTMCModelGenerator infModelGen = NULL;
+    InfCTMCModelGenerator* infModelGen;
 
     void modifyExpression(storm::expressions::BaseExpression const& expr, bool isMin, storm::prism::Program const& modulesFile);
     bool terminateModelCheck(double minProb, double maxProb, double termParam);// throws PrismLangException;
@@ -95,10 +61,7 @@ private:
         std::string explanation;
 
     public:
-        Result() {
-            result = NULL;
-            explanation = NULL;
-        }
+        Result() = default;
         void setResultAndExplanation(double newResult, std::string newExplanation) {
             result = newResult;
             explanation = newExplanation;
@@ -113,7 +76,7 @@ private:
         }
 
         std::string toString() {
-            if (explanation == NULL) {
+            if (explanation.empty()) {
                 return std::to_string(result);
             }
             else {
@@ -126,14 +89,14 @@ private:
     };
 
 public:
-    StaminaModelChecker() /*: CtmcModelChecker(model)*/;
+    StaminaModelChecker() {}/*: CtmcModelChecker(model)*/;
 
 
 
     void initialize();
     void setEngine();
-    void setMaxIters(int maxIters);
-    void loadPRISMModel(storm::prism::Program modulesFile);
+    void setMaxIters(int maxIters) {};
+    void loadPRISMModel(storm::prism::Program modulesFile) {};
     storm::prism::Program parseModelFile(std::string const& fileName);
 
 
@@ -141,7 +104,7 @@ public:
     std::vector<storm::jani::Property> parsePropertiesFile(storm::prism::Program const& modulesFile, std::string const& propertiesFileName);
 
 
-    storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile); /*throws PrismException*/
+    storm::modelchecker::CheckResult modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile); /*throws PrismException*/
 
 
 

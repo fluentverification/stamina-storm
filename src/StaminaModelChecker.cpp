@@ -113,18 +113,18 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
         Result* res_min_max[2] = {new Result(), new Result()};
 
-        double reachTh = Options::getReachabilityThreshold());
+        double reachTh = Options::getReachabilityThreshold();
 
         // Instantiate and load model generator
-        infModelGen = new InfCTMCModelGenerator(modulesFile, this);
-        super.loadModelGenerator(infModelGen);
+        infModelGen = new InfCTMCModelGenerator(modulesFile);
+        //super.loadModelGenerator(infModelGen);
 
         // Time bounds
         double lTime, uTime;
 
         // Split property into 2 to find P_min and P_max
 
-        std::string propName = prop.getName()==NULL ? "Prob" : prop.getName();
+        std::string propName = prop.getName().empty() ? "Prob" : prop.getName();
 
        // storm::jani::Property prop_min = new storm::jani::Property(propName + "_min", modifyExpression(prop.getFilter().getFormula()->toExpression().getBaseExpression(), true, modulesFile), prop.getUndefinedConstants(), prop.getComment());
 
@@ -152,14 +152,14 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
     if(exprProp->isProbabilityPathFormula()) {
 
 
-        while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), Options::getProbErrorWindow())) && (numRefineIteration < Options.getMaxApproxCount()))) {
+        while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), Options::getProbErrorWindow())) && (numRefineIteration < Options::getMaxApproxCount()))) {
 
 
                 auto expr = exprProp;
                 auto exprTemp = expr;
 
                 if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula()) && (!Options::getNoPropRefine())) {
-                    infModelGen.setPropertyExpression(exprTemp);
+                    infModelGen->setPropertyExpression(exprTemp);
                 }
 
                 if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula())) {
@@ -173,7 +173,7 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
                     std::cout << "========================================================================" << std::endl;
                     std::cout << "Approximation<" << (numRefineIteration+1) << "> : kappa = " << reachTh << std::endl;
                     std::cout << "========================================================================" << std::endl;
-                    infModelGen.setReachabilityThreshold(reachTh);
+                    infModelGen->setReachabilityThreshold(reachTh);
 
 
                     auto formulae = storm::api::extractFormulasFromProperties(propertiesVector);
@@ -211,7 +211,7 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
                     // (i.e. if until is of form U>=t)
                     timeExpr = &exprTemp->asBoundedUntilFormula().getUpperBound();
                     if (timeExpr != NULL) {
-                        auto tempValuation = new storm::expressions::SimpleValuation(timeExpr->getManager().getSharedPointer())
+                        auto tempValuation = new storm::expressions::SimpleValuation(timeExpr->getManager().getSharedPointer());
                         uTime = timeExpr->evaluateAsDouble(tempValuation);
                         delete tempValuation;
                         if (uTime < 0 || (uTime == 0 && exprTemp->asBoundedUntilFormula().isUpperBoundStrict())) {
@@ -233,7 +233,7 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
                     // verification step
                     std::cout << std::endl;
-                    std::cout << "---------------------------------------------------------------------" <<std::end;
+                    std::cout << "---------------------------------------------------------------------" << std::endl;
                     std::cout << std::endl;
                     std::cout << "Verifying " << propName << " ....." << std::endl;
 
@@ -241,21 +241,21 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
                     // run transient analysis
                     storm::Environment env;
-                    auto probsExpl = storm::modelchecker::helper::SparseCtmcCslHelper::computeAllTransientProbabilities(env, model->getTransitionMatrix(), model->getInitialStates(), b1.get()->getTruthValuesVector(), b2.get()->getTruthValuesVector(), model->getExitRateVector(), uTime);
+                    //auto probsExpl = storm::modelchecker::helper::SparseCtmcCslHelper::computeAllTransientProbabilities(env, model->getTransitionMatrix(), model->getInitialStates(), b1.get()->getTruthValuesVector(), b2.get()->getTruthValuesVector(), model->getExitRateVector(), uTime);
 
 
                     double ans_min = 0.0;
 
                     for(int i=0; i<model->getNumberOfStates(); ++i) {
 
-                        if(!minStatesNeg.get()->) ans_min += (double) probsExpl[i]; //TODO: this line needs to be fixed
+                       // if(!minStatesNeg.get()->) ans_min += (double) probsExpl[i]; //TODO: this line needs to be fixed
 
                     }
 
                     // TODO: need the index of absorbing state
-                    double ans_max =  ans_min + (double) probsExpl[0];
+                    //double ans_max =  ans_min + (double) probsExpl[0];
 
-                    std::chrono::duration timeElapsed = std::chrono::system_clock::now() - timer;
+                    auto timeElapsed = std::chrono::system_clock::now() - timer;
                     timeElapsed /= 1000.0;
                     std::cout << "\nTime for model checking: " << (timeElapsed.count()) << " seconds." << std::endl;
 
@@ -264,9 +264,9 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
 
                     // Print result to log
-                    std::cout << "\nResult: " << res_min_max[0]->toString() << std::endl);
+                    std::cout << "\nResult: " << res_min_max[0]->toString() << std::endl;
 
-                    res_min_max[1]->setResultAndExplanation(ans_max, "maximum bound");
+                    //res_min_max[1]->setResultAndExplanation(ans_max, "maximum bound");
 
                     // Print result to log
                     std::cout << "\nResult: " << res_min_max[1]->toString() << std::endl;

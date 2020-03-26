@@ -11,9 +11,10 @@
 #include "storm/exceptions/BaseException.h"
 #include "storm-gspn/storage/gspn/Transition.h"
 
-class InfCTMCModelGenerator : storm::builder::ExplicitModelBuilder {
-    typedef storm::storage::BitVector 	CompressedState;
-    typedef storm::exceptions::BaseException stormException;
+typedef storm::storage::BitVector 	CompressedState;
+typedef storm::exceptions::BaseException stormException;
+class InfCTMCModelGenerator /*: storm::builder::ExplicitModelBuilder*/ {
+
 
 
 
@@ -41,7 +42,7 @@ public:
      * @param modulesFile The PRISM model
      */
  InfCTMCModelGenerator(storm::prism::Program modulesFile) //throws PrismException
-            {
+            {/*
 
             // No support for PTAs yet
             if (modulesFile.getModelType() == storm::prism::Program::ModelType::PTA) {
@@ -81,13 +82,13 @@ public:
                     absorbingState.setValue(i, varList.getLow(i)-1);
 
                 }
-            }
+            }*/
    }
-
+/*
 CompressedState getAbsorbingState() {
 
         return absorbingState;
-    }
+    }*/
 
     /**
      * set reachability threshold
@@ -97,9 +98,9 @@ void setReachabilityThreshold(double th) {
     }
 
 
-public void setPropertyExpression(std::shared_ptr<const storm::logic::Formula> expr) {
+ void setPropertyExpression(std::shared_ptr<const storm::logic::Formula> expr) {
 
-        propertyExpression = *expr;
+        //propertyExpression = *expr;
 
     }
 
@@ -108,25 +109,6 @@ public void setPropertyExpression(std::shared_ptr<const storm::logic::Formula> e
      * (Re-)Initialise the class ready for model exploration
      * (can only be done once any constants needed have been provided)
      */
-private void initialise() //throws PrismLangException
-            {
-            // Evaluate constants on (a copy) of the modules file, insert constant values and optimize arithmetic expressions
-            modulesFile = modulesFile.substituteConstants(mfConstants) .replaceConstants(mfConstants).simplify(); //TODO: can't figure this out
-
-            // Get info
-            varList = modulesFile.getAllExpressionVariables();
-            labelList = modulesFile.getLabels();
-
-            for(int i = 0; i < labelList.size(); i++) {
-                labelNames.push_back(labelList[i].getName());
-            }
-
-
-            // Create data structures for exploring model
-            //TODO: Figure out what the updater is and if there is a similar storm component
-            updater = new Updater(modulesFile, varList, parent);
-            transitionListBuilt = false;
-            }
 
     /*// Methods for ModelInfo interface
 
@@ -538,8 +520,8 @@ public boolean rewardStructHasTransitionRewards(int i)
             return expr;
     }
 */
-public:
- void doReachabilityAnalysis() /*throws PrismException*/ {
+
+ void doReachabilityAnalysis() /*throws PrismException*/ {/*
 
 
             // Model gen from file
@@ -765,16 +747,37 @@ public:
             /////////////////reset proprty expression
             propertyExpression = null;
 
-    }
+    */}
 
 
 private:
-    CompressedState absorbingState;
+
+        void initialise() //throws PrismLangException
+        {/*
+            // Evaluate constants on (a copy) of the modules file, insert constant values and optimize arithmetic expressions
+            modulesFile = modulesFile.substituteConstants(mfConstants) .replaceConstants(mfConstants).simplify(); //TODO: can't figure this out
+
+            // Get info
+            varList = modulesFile.getAllExpressionVariables();
+            labelList = modulesFile.getLabels();
+
+            for(int i = 0; i < labelList.size(); i++) {
+                labelNames.push_back(labelList[i].getName());
+            }
+
+
+            // Create data structures for exploring model
+            //TODO: Figure out what the updater is and if there is a similar storm component
+            updater = new Updater(modulesFile, varList, parent);
+            transitionListBuilt = false;*/
+        }
+
+        CompressedState absorbingState;
 
     // PRISM model info
-    /** The original modules file (might have unresolved constants) */
+    /** The original modules file (might have unresolved constants)*/
 storm::prism::Program originalModulesFile;
-    /** The modules file used for generating (has no unresolved constants after {@code initialise}) */
+    /** The modules file used for generating (has no unresolved constants after {@code initialise})*/
 storm::prism::Program modulesFile;
 storm::prism::Program::ModelType modelType;
 std::vector<storm::prism::Constant> mfConstants;
@@ -783,7 +786,7 @@ std::vector<storm::prism::Label> labelList;
 std::vector<std::string> labelNames;
 
     double reachabilityThreshold = 1.0e-6;
-    HashMap<State, ProbState> globalStateSet = null;
+    //HashMap<State, ProbState> globalStateSet = null;
 
     // Model exploration info
 
@@ -793,7 +796,7 @@ CompressedState exploreState;
 protected:
 
     // Updater object for model
-Updater updater;
+//Updater updater;
     // List of currently available transitions
 std::vector<storm::gspn::Transition> transitionList;
     // Has the transition list been built?
@@ -801,7 +804,7 @@ bool transitionListBuilt;
 
 public:
     InfCTMCModelGenerator();
-    ExpressionTemporal propertyExpression = null;
+    //ExpressionTemporal propertyExpression = null;
 
     CompressedState getAbsorbingState() {
 
