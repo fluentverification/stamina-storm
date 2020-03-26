@@ -178,17 +178,20 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
                     auto formulae = storm::api::extractFormulasFromProperties(propertiesVector);
 
-                    // Now translate the prism program into a DTMC in the sparse format.
+                    // Now translate the prism program into a CTMC in the sparse format.
                     // Use the formulae to add the correct labelling.
+                    storm::builder::BuilderOptions options(formulae, modulesFile);
+                    auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
+
                     auto model = storm::api::buildSparseModel<double>(modulesFile, formulae)->template as<Ctmc>();
 
                     // model check operands first for all states
                     auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
-                    auto b1 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getLeftSubformula(), true));//.getBitSet();
-                    auto b2 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getRightSubformula(), true));//.getBitSet();
+                    /*auto b1 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getLeftSubformula(), true));.getBitSet();
+                    auto b2 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getRightSubformula(), true));.getBitSet();
 
                     std::shared_ptr<storm::modelchecker::CheckResult> minStatesNeg = b1.get()->clone();
-                    minStatesNeg.andNot(b2); //TODO: I need to figure out how to do this in storm
+                    minStatesNeg.andNot(b2);*/ //TODO: I need to figure out how to do this in storm
 
                     // lower bound is 0 if not specified
                     // (i.e. if until is of form U<=t)

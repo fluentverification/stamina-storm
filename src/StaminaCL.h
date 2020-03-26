@@ -5,8 +5,7 @@
 #ifndef STAMINA_STAMINACL_H
 #define STAMINA_STAMINACL_H
 
-#include <iostream>
-#include <vector>
+
 #include "options.h"
 #include "StaminaModelChecker.h"
 #include "storm/storage/prism/Constant.h"

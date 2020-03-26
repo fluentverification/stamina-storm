@@ -5,12 +5,13 @@
 #ifndef STAMINA_INFCTMCMODELGENERATOR_H
 #define STAMINA_INFCTMCMODELGENERATOR_H
 
+#include <storm/builder/ExplicitModelBuilder.h>
 #include "storm/storage/BitVector.h"
 #include "storm/storage/prism/Program.h"
 #include "storm/exceptions/BaseException.h"
 #include "storm-gspn/storage/gspn/Transition.h"
 
-class InfCTMCModelGenerator {
+class InfCTMCModelGenerator : storm::builder::ExplicitModelBuilder {
     typedef storm::storage::BitVector 	CompressedState;
     typedef storm::exceptions::BaseException stormException;
 
@@ -39,7 +40,7 @@ public:
      * Build a ModulesFileModelGenerator for a particular PRISM model, represented by a ModuleFile instance.
      * @param modulesFile The PRISM model
      */
-public InfCTMCModelGenerator(storm::prism::Program modulesFile) //throws PrismException
+ InfCTMCModelGenerator(storm::prism::Program modulesFile) //throws PrismException
             {
 
             // No support for PTAs yet
