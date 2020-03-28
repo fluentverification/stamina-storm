@@ -183,7 +183,10 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
                     storm::builder::BuilderOptions options(formulae, modulesFile);
                     auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 
-                    auto model = storm::api::buildSparseModel<double>(modulesFile, formulae)->template as<Ctmc>();
+                    storm::builder::ExplicitModelBuilder<double> builder(generator);
+                    auto model = builder.build();
+
+                    //auto model = storm::api::buildSparseModel<double>(modulesFile, formulae)->template as<Ctmc>();
 
                     // model check operands first for all states
                     auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);

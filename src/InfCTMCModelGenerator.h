@@ -5,13 +5,14 @@
 #ifndef STAMINA_INFCTMCMODELGENERATOR_H
 #define STAMINA_INFCTMCMODELGENERATOR_H
 
-#include <storm/builder/ExplicitModelBuilder.h>
-#include "storm/storage/BitVector.h"
+#include "ProbState.h"
+
+#include "storm/builder/ExplicitModelBuilder.h"
 #include "storm/storage/prism/Program.h"
 #include "storm/exceptions/BaseException.h"
 #include "storm-gspn/storage/gspn/Transition.h"
 
-typedef storm::storage::BitVector 	CompressedState;
+
 typedef storm::exceptions::BaseException stormException;
 class InfCTMCModelGenerator /*: storm::builder::ExplicitModelBuilder*/ {
 
