@@ -5,6 +5,7 @@
 #ifndef STAMINA_INFCTMCMODELGENERATOR_H
 #define STAMINA_INFCTMCMODELGENERATOR_H
 
+#include <storm/generator/PrismNextStateGenerator.h>
 #include "ProbState.h"
 
 #include "storm/builder/ExplicitModelBuilder.h"
@@ -14,7 +15,7 @@
 
 
 typedef storm::exceptions::BaseException stormException;
-class InfCTMCModelGenerator /*: storm::builder::ExplicitModelBuilder*/ {
+class InfCTMCModelGenerator : storm::builder::ExplicitModelBuilder<double> {
 
 
 
@@ -42,7 +43,7 @@ public:
      * Build a ModulesFileModelGenerator for a particular PRISM model, represented by a ModuleFile instance.
      * @param modulesFile The PRISM model
      */
- InfCTMCModelGenerator(storm::prism::Program modulesFile) //throws PrismException
+ InfCTMCModelGenerator(std::shared_ptr<storm::generator::PrismNextStateGenerator<double>> stateGenerator) : storm::builder::ExplicitModelBuilder<double>(stateGenerator) //throws PrismException
             {/*
 
             // No support for PTAs yet

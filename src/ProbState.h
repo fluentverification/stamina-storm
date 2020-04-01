@@ -5,34 +5,47 @@
 #ifndef STAMINA_PROBSTATE_H
 #define STAMINA_PROBSTATE_H
 #include "storm/storage/BitVector.h"
+#include <string>
+#include <utility>
 #include <unordered_map>
-
-typedef storm::storage::BitVector 	CompressedState;
-class ProbState : public CompressedState{
+typedef storm::storage::BitVector CompressedState;
+class ProbState{
 
 	private:
+    int stateId;
 	double curReachabilityProb;
 	double nextReachabilityProb;
 
 	bool stateIsTerminal;
 	bool stateIsAbsorbing;
+    class hashFunction {
+    public:
+
+        // Use sum of lengths of first and last names
+        // as hash function.
+        size_t operator()(const ProbState& state) const
+        {
+            std::hash<int> int_hash;
+            return int_hash(state.stateId);
+        }
+    };
 
 	/**
 	 * This maps stores transition rate for each outgoing transition.
 	 */
-	std::unordered_map<ProbState, double> predecessorPropMap;
+	std::unordered_map<ProbState, double, hashFunction> predecessorPropMap;
 
 
 	public:
-	 ProbState(CompressedState s) : CompressedState(s) {
+	 ProbState(uint32_t stateId) {
 
+        this->stateId = (int) stateId;
 		curReachabilityProb = 0.0;
 		nextReachabilityProb = 0.0;
 
 		stateIsTerminal = true;
 		stateIsAbsorbing = false;
 
-		predecessorPropMap = std::unordered_map<ProbState, double>();
 	}
 
 
@@ -41,20 +54,20 @@ class ProbState : public CompressedState{
 	}
 
 	void setStateTerminal(bool flag) {
-		isStateTerminal = flag;
+		stateIsTerminal = flag;
 	}
 
 	bool isStateAbsorbing(){
-		return isStateAbsorbing;
+		return stateIsAbsorbing;
 	}
 
 	void setStateAbsorbing(bool flag) {
-		isStateAbsorbing = flag;
+		stateIsAbsorbing = flag;
 	}
 
 
 	/* Probabilistic search */
-	double getCurReachabilityProb() {
+	double getCurReachabilityProb() const {
 
 		return curReachabilityProb;
 
@@ -64,7 +77,7 @@ class ProbState : public CompressedState{
 		curReachabilityProb = reachProb;
 	}
 
-    double getNextReachabilityProb() {
+    double getNextReachabilityProb() const {
 
 		return nextReachabilityProb;
 
@@ -78,33 +91,33 @@ class ProbState : public CompressedState{
 
 		nextReachabilityProb = 0.0;
 
-		for(ProbState pre: predecessorPropMap.keySet()) {
-			nextReachabilityProb += pre.getCurReachabilityProb() * predecessorPropMap.get(pre);
+		for(auto element : predecessorPropMap) {
+			nextReachabilityProb += element.first.getCurReachabilityProb() * element.second;
 		}
 
 		if (nextReachabilityProb > 1.0) {
-			throw new RuntimeException("Path Probability greater than 1.0");
+			//throw new stormException("Path Probability greater than 1.0");
 		}
 	}
 
 	void updatePredecessorProbMap(ProbState state, double tranProb) {
-		predecessorPropMap.put(state, tranProb);
+		predecessorPropMap.insert(std::make_pair(state.stateId, tranProb));
 	}
 
 
 	/**
 	 * Get string representation, e.g. "(0,true,5)".
 	 */
-	@Override
-	public String toString()
+
+	std::string toString()
 	{
 		int i, n;
-		String s = "(";
-		n = varValues.length;
+		std::string s = "(";
+		//n = varValues.length;
 		for (i = 0; i < n; i++) {
 			if (i > 0)
 				s += ",";
-			s += varValues[i];
+			//s += varValues[i];
 		}
 		s += "): ";
 
@@ -112,6 +125,16 @@ class ProbState : public CompressedState{
 		return s;
 	}
 
+    bool operator==(ProbState i) {
+        if ( i.curReachabilityProb==this->curReachabilityProb && i.nextReachabilityProb==this->nextReachabilityProb && i.stateIsAbsorbing==this->stateIsAbsorbing && i.stateIsTerminal==this->stateIsAbsorbing && i.predecessorPropMap==this->predecessorPropMap && i.stateId == this->stateId) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-}
+
+
+
+};
 #endif //STAMINA_PROBSTATE_H
