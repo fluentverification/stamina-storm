@@ -18,6 +18,25 @@ class ProbState{
 
 	bool stateIsTerminal;
 	bool stateIsAbsorbing;
+
+
+
+
+
+	public:
+
+
+	 ProbState(uint32_t stateId) {
+
+        this->stateId = (int) stateId;
+		curReachabilityProb = 0.0;
+		nextReachabilityProb = 0.0;
+
+		stateIsTerminal = true;
+		stateIsAbsorbing = false;
+
+	}
+
     class hashFunction {
     public:
 
@@ -30,23 +49,10 @@ class ProbState{
         }
     };
 
-	/**
-	 * This maps stores transition rate for each outgoing transition.
-	 */
-	std::unordered_map<ProbState, double, hashFunction> predecessorPropMap;
-
-
-	public:
-	 ProbState(uint32_t stateId) {
-
-        this->stateId = (int) stateId;
-		curReachabilityProb = 0.0;
-		nextReachabilityProb = 0.0;
-
-		stateIsTerminal = true;
-		stateIsAbsorbing = false;
-
-	}
+    /**
+    * This maps stores transition rate for each outgoing transition.
+    */
+    std::unordered_map<ProbState, double, hashFunction> predecessorPropMap;
 
 
 	bool isStateTerminal(){
