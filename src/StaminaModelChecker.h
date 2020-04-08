@@ -11,7 +11,7 @@
 #include <vector>
 #include <sstream>
 
-#include "options.h"
+#include "StaminaOptions.h"
 #include "InfCTMCModelGenerator.h"
 
 #include "storm/api/storm.h"
@@ -51,7 +51,7 @@ class StaminaModelChecker /*: public storm::modelchecker::SparseCtmcCslModelChec
 
 private:
 
-    InfCTMCModelGenerator* infModelGen;
+    InfCTMCModelGenerator<double>* infModelGen;
 
     void modifyExpression(storm::expressions::BaseExpression const& expr, bool isMin, storm::prism::Program const& modulesFile);
     bool terminateModelCheck(double minProb, double maxProb, double termParam);// throws PrismLangException;

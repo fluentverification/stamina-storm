@@ -131,7 +131,7 @@ class ProbState{
 		return s;
 	}
 
-    bool operator==(ProbState i) {
+    bool operator==(ProbState i) const{
         if ( i.curReachabilityProb==this->curReachabilityProb && i.nextReachabilityProb==this->nextReachabilityProb && i.stateIsAbsorbing==this->stateIsAbsorbing && i.stateIsTerminal==this->stateIsAbsorbing && i.predecessorPropMap==this->predecessorPropMap && i.stateId == this->stateId) {
             return true;
         } else {

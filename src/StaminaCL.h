@@ -6,11 +6,12 @@
 #define STAMINA_STAMINACL_H
 
 
-#include "options.h"
+#include "StaminaOptions.h"
 #include "StaminaModelChecker.h"
 #include "storm/storage/prism/Constant.h"
 
 #include "storm/exceptions/FileIoException.h"
+#include "storm/exceptions/BaseException.h"
 #include "storm/parser/CSVParser.h"
 #include "storm/utility/cli.h"
 #include "storm/modelchecker/results/CheckResult.h"
@@ -19,6 +20,7 @@ class StaminaCL {
 
 
 typedef storm::exceptions::FileIoException FileNotFoundException;
+typedef storm::exceptions::BaseException stormException;
 
 
 private:

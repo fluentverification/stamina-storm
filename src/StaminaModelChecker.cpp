@@ -113,10 +113,10 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
         Result* res_min_max[2] = {new Result(), new Result()};
 
-        double reachTh = Options::getReachabilityThreshold();
+        double reachTh = StaminaOptions::getReachabilityThreshold();
 
         // Instantiate and load model generator
-        infModelGen = new InfCTMCModelGenerator(modulesFile);
+        infModelGen = new InfCTMCModelGenerator<double>(modulesFile);
         //super.loadModelGenerator(infModelGen);
 
         // Time bounds
@@ -152,14 +152,14 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
     if(exprProp->isProbabilityPathFormula()) {
 
 
-        while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), Options::getProbErrorWindow())) && (numRefineIteration < Options::getMaxApproxCount()))) {
+        while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) {
 
 
                 auto expr = exprProp;
                 auto exprTemp = expr;
 
-                if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula()) && (!Options::getNoPropRefine())) {
-                    infModelGen->setPropertyExpression(exprTemp);
+                if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula()) && (!StaminaOptions::getNoPropRefine())) {
+                    //infModelGen->setPropertyExpression(exprTemp);
                 }
 
                 if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula())) {
@@ -173,7 +173,7 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
                     std::cout << "========================================================================" << std::endl;
                     std::cout << "Approximation<" << (numRefineIteration+1) << "> : kappa = " << reachTh << std::endl;
                     std::cout << "========================================================================" << std::endl;
-                    infModelGen->setReachabilityThreshold(reachTh);
+                    //infModelGen->setReachabilityThreshold(reachTh);
 
 
                     auto formulae = storm::api::extractFormulasFromProperties(propertiesVector);
@@ -189,7 +189,7 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
                     //auto model = storm::api::buildSparseModel<double>(modulesFile, formulae)->template as<Ctmc>();
 
                     // model check operands first for all states
-                    auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+                    //auto mcCTMC = std::make_shared<CtmcModelChecker>(*model); //TODO: Make model checker based on model
                     /*auto b1 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getLeftSubformula(), true));.getBitSet();
                     auto b2 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getRightSubformula(), true));.getBitSet();
 
@@ -307,7 +307,7 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
 
                 // Reduce kappa for refinement
-                reachTh /= Options::getKappaReductionFactor();
+                reachTh /= StaminaOptions::getKappaReductionFactor();
 
                 // increment refinement count
                 ++numRefineIteration;

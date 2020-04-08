@@ -165,13 +165,13 @@ void StaminaCL::processOptions() {
     try {
 
         // Configure options
-        if (reachabilityThreshold >= 0.0 )	Options::setReachabilityThreshold(reachabilityThreshold);
-        if (kappaReductionFactor >= 0.0 )	Options::setKappaReductionFactor(kappaReductionFactor);
-        if (maxApproxCount >= 0) Options::setMaxRefinementCount(maxApproxCount);
-        if (probErrorWindow >= 0.0) Options::setProbErrorWindow(probErrorWindow);
-        Options::setRankTransitions(rankTransitions);
+        if (reachabilityThreshold >= 0.0 )	StaminaOptions::setReachabilityThreshold(reachabilityThreshold);
+        if (kappaReductionFactor >= 0.0 )	StaminaOptions::setKappaReductionFactor(kappaReductionFactor);
+        if (maxApproxCount >= 0) StaminaOptions::setMaxRefinementCount(maxApproxCount);
+        if (probErrorWindow >= 0.0) StaminaOptions::setProbErrorWindow(probErrorWindow);
+        StaminaOptions::setRankTransitions(rankTransitions);
 
-        Options::setNoPropRefine(noPropRefine);
+        StaminaOptions::setNoPropRefine(noPropRefine);
 
         if (maxLinearSolnIter >= 0) staminaMC->setMaxIters(maxLinearSolnIter);
 

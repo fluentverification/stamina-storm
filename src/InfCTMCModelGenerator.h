@@ -43,8 +43,13 @@
 
          
          // Forward-declare classes.
-         template <typename ValueType> class RewardModelBuilder;
-         class ChoiceInformationBuilder;
+         namespace storm{
+             namespace builder {
+                 template <typename ValueType> class RewardModelBuilder;
+                 class ChoiceInformationBuilder;
+             }
+         }
+             
          
          template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
          class InfCTMCModelGenerator {
@@ -66,11 +71,11 @@
              std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build();
              
          private:
-             std::unordered_map<ProbState, double, ProbState::hashFunction> predecessorPropMap;
+             std::unordered_map<int, ProbState*> stateMap;
 
              StateType getOrAddStateIndex(CompressedState const& state);
      
-             void buildMatrices(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders, ChoiceInformationBuilder& choiceInformationBuilder, boost::optional<storm::storage::BitVector>& markovianChoices);
+             void buildMatrices(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder, std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders, storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder, boost::optional<storm::storage::BitVector>& markovianChoices);
              
              storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents();
              
@@ -87,8 +92,6 @@
              boost::optional<std::vector<uint_fast64_t>> stateRemapping;
  
          };
-         
-     } // namespace adapters
- } // namespace storm
+
 
 #endif  /* STORM_BUILDER_INFCTMCGENERATOR_H */

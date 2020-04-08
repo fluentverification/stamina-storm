@@ -2,12 +2,12 @@
 // Created by Riley Layne Roberts on 2/6/20.
 //
 
-#ifndef STAMINA_OPTIONS_H
-#define STAMINA_OPTIONS_H
+#ifndef STAMINA_STAMINAOPTIONS_H
+#define STAMINA_STAMINAOPTIONS_H
 
-class Options {
+class StaminaOptions {
 
-private:    //Probabilistic state search termination value : Defined by kappa in command line argument
+private:   //Probabilistic state search termination value : Defined by kappa in command line argument
     static double reachabilityThreshold;
 
 
@@ -78,4 +78,4 @@ public:
 
 
 
-#endif //STAMINA_OPTIONS_H
+#endif //STAMINA_STAMINAOPTIONS_H
