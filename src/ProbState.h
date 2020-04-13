@@ -106,8 +106,8 @@ class ProbState{
 		}
 	}
 
-	void updatePredecessorProbMap(ProbState state, double tranProb) {
-		predecessorPropMap.insert(std::make_pair(state.stateId, tranProb));
+	void updatePredecessorProbMap(ProbState* state, double tranProb) {
+		predecessorPropMap.insert(std::make_pair(state->stateId, tranProb));
 	}
 
 

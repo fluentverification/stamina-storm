@@ -104,7 +104,7 @@ public:
     std::vector<storm::jani::Property> parsePropertiesFile(storm::prism::Program const& modulesFile, std::string const& propertiesFileName);
 
 
-    storm::modelchecker::CheckResult modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile); /*throws PrismException*/
+    std::unique_ptr<storm::modelchecker::CheckResult> modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile); /*throws PrismException*/
 
 
 

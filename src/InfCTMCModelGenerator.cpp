@@ -104,6 +104,11 @@
             return actualIndex;
         }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex(CompressedState const& state) {
+    return 0;
+}
+
         template <typename ValueType, typename RewardModelType, typename StateType>
         void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder, std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders, storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder, boost::optional<storm::storage::BitVector>& markovianStates) {
 
@@ -115,7 +120,7 @@
 
             // Create a callback for the next-state generator to enable it to request the index of states.
             std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex, this, std::placeholders::_1);
-
+            std::function<StateType (CompressedState const&)> absorbingStateIndexFunc = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex, this, std::placeholders::_1);
             // If the exploration order is something different from breadth-first, we need to keep track of the remapping
             // from state ids to row groups. For this, we actually store the reversed mapping of row groups to state-ids
             // and later reverse it.
@@ -153,9 +158,141 @@
                 if (currentIndex % 100000 == 0) {
                     STORM_LOG_TRACE("Exploring state with id " << currentIndex << ".");
                 }
-                //if (stateMap.find(currentIndex)->second->getCurReachabilityProb() >= StaminaOptions::getReachabilityThreshold()) {
+                if (stateMap.find(currentIndex)->second->getCurReachabilityProb() >= StaminaOptions::getReachabilityThreshold()) {
                     generator->load(currentState);
-                    storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+                    storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(
+                            stateToIdCallback);
+
+
+                    // If there is no behavior, we might have to introduce a self-loop.
+                    if (behavior.empty()) {
+                        if (!storm::settings::getModule<storm::settings::modules::BuildSettings>().isDontFixDeadlocksSet() ||
+                            !behavior.wasExpanded()) {
+                            // If the behavior was actually expanded and yet there are no transitions, then we have a deadlock state.
+                            if (behavior.wasExpanded()) {
+                                this->stateStorage.deadlockStateIndices.push_back(currentIndex);
+                            }
+
+                            if (markovianStates) {
+                                markovianStates.get().grow(currentRowGroup + 1, false);
+                                markovianStates.get().set(currentRowGroup);
+                            }
+
+                            if (!generator->isDeterministicModel()) {
+                                transitionMatrixBuilder.newRowGroup(currentRow);
+                            }
+
+                            transitionMatrixBuilder.addNextValue(currentRow, currentIndex,
+                                                                 storm::utility::one<ValueType>());
+
+                            for (auto &RewardModelBuilder : RewardModelBuilders) {
+                                if (RewardModelBuilder.hasStateRewards()) {
+                                    RewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
+                                }
+
+                                if (RewardModelBuilder.hasStateActionRewards()) {
+                                    RewardModelBuilder.addStateActionReward(storm::utility::zero<ValueType>());
+                                }
+                            }
+
+                            ++currentRow;
+                            ++currentRowGroup;
+                        } else {
+                            STORM_LOG_THROW(false, storm::exceptions::WrongFormatException,
+                                            "Error while creating sparse matrix from probabilistic program: found deadlock state ("
+                                                    << generator->toValuation(currentState).toString(true)
+                                                    << "). For fixing these, please provide the appropriate option.");
+                        }
+                    } else {
+                        // Add the state rewards to the corresponding reward models.
+                        auto stateRewardIt = behavior.getStateRewards().begin();
+                        for (auto &RewardModelBuilder : RewardModelBuilders) {
+                            if (RewardModelBuilder.hasStateRewards()) {
+                                RewardModelBuilder.addStateReward(*stateRewardIt);
+                            }
+                            ++stateRewardIt;
+                        }
+
+                        // If the model is nondeterministic, we need to open a row group.
+                        if (!generator->isDeterministicModel()) {
+                            transitionMatrixBuilder.newRowGroup(currentRow);
+                        }
+
+                        // Now add all choices.
+                        for (auto const &choice : behavior) {
+
+                            // add the generated choice information
+                            if (choice.hasLabels()) {
+                                for (auto const &label : choice.getLabels()) {
+                                    ChoiceInformationBuilder.addLabel(label, currentRow);
+                                }
+                            }
+                            if (choice.hasOriginData()) {
+                                ChoiceInformationBuilder.addOriginData(choice.getOriginData(), currentRow);
+                            }
+
+                            // If we keep track of the Markovian choices, store whether the current one is Markovian.
+                            if (markovianStates && choice.isMarkovian()) {
+                                markovianStates.get().grow(currentRowGroup + 1, false);
+                                markovianStates.get().set(currentRowGroup);
+                            }
+
+                            // Add the probabilistic behavior to the matrix.
+                            for (auto const &stateProbabilityPair : choice) {
+                                transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first,
+                                                                     stateProbabilityPair.second);
+                                auto nextState =  stateMap.find(stateProbabilityPair.first)->second;
+                               nextState->updatePredecessorProbMap(stateMap.find(currentIndex)->second, stateProbabilityPair.second);
+                               nextState->computeNextReachabilityProb();
+                               nextState->setNextReachabilityProbToCurrent();
+                            }
+
+                            // Add the rewards to the reward models.
+                            auto choiceRewardIt = choice.getRewards().begin();
+                            for (auto &RewardModelBuilder : RewardModelBuilders) {
+                                if (RewardModelBuilder.hasStateActionRewards()) {
+                                    RewardModelBuilder.addStateActionReward(*choiceRewardIt);
+                                }
+                                ++choiceRewardIt;
+                            }
+                            ++currentRow;
+                        }
+                        ++currentRowGroup;
+                    }
+
+                    ++numberOfExploredStates;
+                    if (generator->getOptions().isShowProgressSet()) {
+                        ++numberOfExploredStatesSinceLastMessage;
+
+                        auto now = std::chrono::high_resolution_clock::now();
+                        auto durationSinceLastMessage = std::chrono::duration_cast<std::chrono::seconds>(
+                                now - timeOfLastMessage).count();
+                        if (static_cast<uint64_t>(durationSinceLastMessage) >=
+                            generator->getOptions().getShowProgressDelay()) {
+                            auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
+                            auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(
+                                    now - timeOfStart).count();
+                            std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart
+                                      << " seconds (currently " << statesPerSecond << " states per second)."
+                                      << std::endl;
+                            timeOfLastMessage = std::chrono::high_resolution_clock::now();
+                            numberOfExploredStatesSinceLastMessage = 0;
+                        }
+                    }
+
+                    if (storm::utility::resources::isTerminate()) {
+                        auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(
+                                std::chrono::high_resolution_clock::now() - timeOfStart).count();
+                        std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart
+                                  << " seconds before abort." << std::endl;
+                        STORM_LOG_THROW(false, storm::exceptions::AbortException,
+                                        "Aborted in state space exploration.");
+                        break;
+                    }
+                }
+                else {
+                    generator->load(currentState);
+                    storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(absorbingStateIndexFunc);
 
 
                     // If there is no behavior, we might have to introduce a self-loop.
@@ -263,7 +400,8 @@
                             auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(
                                     now - timeOfStart).count();
                             std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart
-                                      << " seconds (currently " << statesPerSecond << " states per second)." << std::endl;
+                                      << " seconds (currently " << statesPerSecond << " states per second)."
+                                      << std::endl;
                             timeOfLastMessage = std::chrono::high_resolution_clock::now();
                             numberOfExploredStatesSinceLastMessage = 0;
                         }
@@ -274,9 +412,11 @@
                                 std::chrono::high_resolution_clock::now() - timeOfStart).count();
                         std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart
                                   << " seconds before abort." << std::endl;
-                        STORM_LOG_THROW(false, storm::exceptions::AbortException, "Aborted in state space exploration.");
+                        STORM_LOG_THROW(false, storm::exceptions::AbortException,
+                                        "Aborted in state space exploration.");
                         break;
                     }
+                }
             }
 
             if (markovianStates) {

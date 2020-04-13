@@ -74,6 +74,7 @@
              std::unordered_map<int, ProbState*> stateMap;
 
              StateType getOrAddStateIndex(CompressedState const& state);
+             StateType getAbsorbingStateIndex(CompressedState const& state);
      
              void buildMatrices(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder, std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders, storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder, boost::optional<storm::storage::BitVector>& markovianChoices);
              

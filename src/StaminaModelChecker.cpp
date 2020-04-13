@@ -109,7 +109,7 @@ bool StaminaModelChecker::terminateModelCheck(double minProb, double maxProb, do
 
 }
 
-storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile) /*throws PrismException*/ {
+std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile) /*throws PrismException*/ {
 
         Result* res_min_max[2] = {new Result(), new Result()};
 
@@ -181,15 +181,17 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
                     // Now translate the prism program into a CTMC in the sparse format.
                     // Use the formulae to add the correct labelling.
                     storm::builder::BuilderOptions options(formulae, modulesFile);
+
                     auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-
                     storm::builder::ExplicitModelBuilder<double> builder(generator);
-                    auto model = builder.build();
+                    auto model = *builder.build()->as<Ctmc>();
+                    auto mcCTMC = std::make_shared<CtmcModelChecker>(model);
+                    return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
 
-                    //auto model = storm::api::buildSparseModel<double>(modulesFile, formulae)->template as<Ctmc>();
+
 
                     // model check operands first for all states
-                    //auto mcCTMC = std::make_shared<CtmcModelChecker>(*model); //TODO: Make model checker based on model
+                     //TODO: Make model checker based on model
                     /*auto b1 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getLeftSubformula(), true));.getBitSet();
                     auto b2 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getRightSubformula(), true));.getBitSet();
 
@@ -249,7 +251,7 @@ storm::modelchecker::CheckResult StaminaModelChecker::modelCheckStamina(std::vec
 
                     double ans_min = 0.0;
 
-                    for(int i=0; i<model->getNumberOfStates(); ++i) {
+                    for(int i=0; i<model.getNumberOfStates(); ++i) {
 
                        // if(!minStatesNeg.get()->) ans_min += (double) probsExpl[i]; //TODO: this line needs to be fixed
 

@@ -131,6 +131,11 @@ void StaminaCL::run(int argv, char* argc[]) {
 
         }*/
 
+        for(auto property: propertiesVector) {
+            std::cout << "Got to here" << std::endl;
+            auto result = staminaMC->modelCheckStamina(propertiesVector, property, modulesFile);
+        }
+
     } catch (stormException e) {
         errorAndExit(e.what());
     }
@@ -323,11 +328,11 @@ void StaminaCL::parseModelProperties(){
 
     try {
         // Parse and load a PRISM model from a file
-        delete &modulesFile;
+       // delete &modulesFile;
         modulesFile = staminaMC->parseModelFile(modelFilename);
 
         // Parse and load a properties model for the model
-        delete &propertiesVector;
+        //delete &propertiesVector;
         propertiesVector = staminaMC->parsePropertiesFile(modulesFile, propertiesFilename);
 
 
