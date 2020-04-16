@@ -128,6 +128,10 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
                 stateRemapping = std::vector<uint_fast64_t>();
             }
 
+            //Make absorbing state
+            CompressedState absorbingState;
+            stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+
             // Let the generator create all initial states.
             this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
             stateMap.find(this->stateStorage.initialStateIndices[0])->second->setCurReachabilityProb(1);
@@ -136,6 +140,10 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
             // Now explore the current state until there is no more reachable state.
             uint_fast64_t currentRowGroup = 0;
             uint_fast64_t currentRow = 0;
+
+            transitionMatrixBuilder.addNextValue(currentRow, 0, 1);
+            currentRow++;
+            currentRowGroup++;
 
             auto timeOfStart = std::chrono::high_resolution_clock::now();
             auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
@@ -242,7 +250,8 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
                                 transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first,
                                                                      stateProbabilityPair.second);
                                 auto nextState =  stateMap.find(stateProbabilityPair.first)->second;
-                               nextState->updatePredecessorProbMap(stateMap.find(currentIndex)->second, stateProbabilityPair.second);
+                                auto currentProbState = stateMap.find(currentIndex)->second;
+                               nextState->updatePredecessorProbMap(currentProbState, stateProbabilityPair.second);
                                nextState->computeNextReachabilityProb();
                                nextState->setNextReachabilityProbToCurrent();
                             }

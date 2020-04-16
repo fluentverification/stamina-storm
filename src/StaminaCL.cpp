@@ -132,8 +132,8 @@ void StaminaCL::run(int argv, char* argc[]) {
         }*/
 
         for(auto property: propertiesVector) {
-            std::cout << "Got to here" << std::endl;
             auto result = staminaMC->modelCheckStamina(propertiesVector, property, modulesFile);
+            std::cout << "Result: " << *result << std::endl;
         }
 
     } catch (stormException e) {

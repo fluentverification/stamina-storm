@@ -149,7 +149,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     bool switchToCombinedCTMC = false;
 
     auto exprProp = prop.getRawFormula();
-    if(exprProp->isProbabilityPathFormula()) {
+    //if(exprProp->isProbabilityPathFormula()) {
 
 
         while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) {
@@ -166,7 +166,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     switchToCombinedCTMC = true;
                 }
 
-                if(switchToCombinedCTMC) {
+
 
                     //////////////////////////Approximation Step///////////////////////////
                     std::cout << std::endl;
@@ -183,7 +183,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     storm::builder::BuilderOptions options(formulae, modulesFile);
 
                     auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-                    storm::builder::ExplicitModelBuilder<double> builder(generator);
+                    InfCTMCModelGenerator<double> builder(generator);
                     auto model = *builder.build()->as<Ctmc>();
                     auto mcCTMC = std::make_shared<CtmcModelChecker>(model);
                     return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
@@ -278,36 +278,6 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
 
 
 
-                }
-
-                //Not using this for now
-                /*else {
-
-                    //////////////////////////Approximation Step///////////////////////////
-                    mainLog.println();
-                    mainLog.println("========================================================================");
-                    mainLog.println("Approximation<" + (numRefineIteration+1) + "> : kappa = " + reachTh);
-                    mainLog.println("========================================================================");
-                    infModelGen.setReachabilityThreshold(reachTh);
-
-                    // Explicitely invoke model build
-                    super.buildModel();
-
-
-                    mainLog.println();
-                    mainLog.println("---------------------------------------------------------------------");
-                    mainLog.println();
-                    mainLog.println("Verifying Lower Bound for " + prop_min.getName() + " .....");
-                    res_min_max[0] = super.modelCheck(propertiesFile, prop_min);
-
-                    mainLog.println();
-                    mainLog.println("---------------------------------------------------------------------");
-                    mainLog.println();
-                    mainLog.println("Verifying Upper Bound for " + prop_max.getName() + " .....");
-                    res_min_max[1] = super.modelCheck(propertiesFile, prop_max);
-                }*/
-
-
                 // Reduce kappa for refinement
                 reachTh /= StaminaOptions::getKappaReductionFactor();
 
@@ -316,7 +286,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
 
         }
 
-    }
+    //}
 
 }
 

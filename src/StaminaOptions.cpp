@@ -3,7 +3,7 @@
 //
 #include "StaminaOptions.h"
 
-double StaminaOptions::reachabilityThreshold = 1e-6;
+double StaminaOptions::reachabilityThreshold = 1e-10;
 
 
 // Kappa reduction factor
