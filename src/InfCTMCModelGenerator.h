@@ -72,7 +72,7 @@
              
          private:
              std::unordered_map<int, ProbState*> stateMap;
-
+             double currentStateReachability;
              StateType getOrAddStateIndex(CompressedState const& state);
              StateType getAbsorbingStateIndex(CompressedState const& state);
      

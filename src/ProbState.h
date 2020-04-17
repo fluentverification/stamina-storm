@@ -37,22 +37,10 @@ class ProbState{
 
 	}
 
-    class hashFunction {
-    public:
-
-        // Use sum of lengths of first and last names
-        // as hash function.
-        size_t operator()(const ProbState& state) const
-        {
-            std::hash<int> int_hash;
-            return int_hash(state.stateId);
-        }
-    };
-
     /**
     * This maps stores transition rate for each outgoing transition.
     */
-    std::unordered_map<ProbState, double, hashFunction> predecessorPropMap;
+    std::unordered_map<int, double> predecessorPropMap;
 
 
 	bool isStateTerminal(){
@@ -93,7 +81,7 @@ class ProbState{
 		curReachabilityProb = nextReachabilityProb;
 	}
 
-	void computeNextReachabilityProb() {
+	/*void computeNextReachabilityProb() {
 
 		nextReachabilityProb = 0.0;
 
@@ -104,10 +92,10 @@ class ProbState{
 		if (nextReachabilityProb > 1.0) {
 			//throw new stormException("Path Probability greater than 1.0");
 		}
-	}
+	}*/
 
-	void updatePredecessorProbMap(ProbState* state, double tranProb) {
-		predecessorPropMap.insert(std::make_pair(*state, tranProb));
+	void updatePredecessorProbMap(int index, double tranProb) {
+		predecessorPropMap.insert(std::make_pair(index, tranProb));
 	}
 
 
@@ -131,13 +119,6 @@ class ProbState{
 		return s;
 	}
 
-    bool operator==(ProbState i) const{
-        if ( i.curReachabilityProb==this->curReachabilityProb && i.nextReachabilityProb==this->nextReachabilityProb && i.stateIsAbsorbing==this->stateIsAbsorbing && i.stateIsTerminal==this->stateIsAbsorbing && i.predecessorPropMap==this->predecessorPropMap && i.stateId == this->stateId) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
 
 

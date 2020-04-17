@@ -127,6 +127,7 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
             if (options.explorationOrder != storm::builder::ExplorationOrder::Bfs) {
                 stateRemapping = std::vector<uint_fast64_t>();
             }
+            stateMap.reserve(16000);
 
             //Make absorbing state
             CompressedState absorbingState;
@@ -166,8 +167,11 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
                 if (currentIndex % 100000 == 0) {
                     STORM_LOG_TRACE("Exploring state with id " << currentIndex << ".");
                 }
-                if (stateMap.find(currentIndex)->second->getCurReachabilityProb() >= StaminaOptions::getReachabilityThreshold()) {
+                currentStateReachability = stateMap.find(currentIndex)->second->getCurReachabilityProb();
+                if (currentStateReachability >= StaminaOptions::getReachabilityThreshold()) {
+
                     generator->load(currentState);
+
                     storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(
                             stateToIdCallback);
 
@@ -251,9 +255,17 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
                                                                      stateProbabilityPair.second);
                                 auto nextState =  stateMap.find(stateProbabilityPair.first)->second;
                                 auto currentProbState = stateMap.find(currentIndex)->second;
-                               nextState->updatePredecessorProbMap(currentProbState, stateProbabilityPair.second);
-                               nextState->computeNextReachabilityProb();
-                               nextState->setNextReachabilityProbToCurrent();
+
+                                nextState->updatePredecessorProbMap(currentIndex, stateProbabilityPair.second);
+
+                                double nextReachabilityProb = 0.0;
+                                for(auto element : nextState->predecessorPropMap) {
+                                    nextReachabilityProb += stateMap.find(element.first)->second->getCurReachabilityProb() * element.second;
+                                }
+                                if (nextReachabilityProb > 1.0) {
+                                    //throw new stormException("Path Probability greater than 1.0");
+                                }
+                                nextState->setCurReachabilityProb(nextReachabilityProb);
                             }
 
                             // Add the rewards to the reward models.

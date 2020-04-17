@@ -152,7 +152,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     //if(exprProp->isProbabilityPathFormula()) {
 
 
-        while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) {
+        //while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) {
 
 
                 auto expr = exprProp;
@@ -184,10 +184,11 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
 
                     auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
                     InfCTMCModelGenerator<double> builder(generator);
+                    //storm::builder::ExplicitModelBuilder<double> builder(generator);
                     auto model = *builder.build()->as<Ctmc>();
                     auto mcCTMC = std::make_shared<CtmcModelChecker>(model);
                     return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
-
+/*
 
 
                     // model check operands first for all states
@@ -196,7 +197,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     auto b2 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getRightSubformula(), true));.getBitSet();
 
                     std::shared_ptr<storm::modelchecker::CheckResult> minStatesNeg = b1.get()->clone();
-                    minStatesNeg.andNot(b2);*/ //TODO: I need to figure out how to do this in storm
+                    minStatesNeg.andNot(b2); //TODO: I need to figure out how to do this in storm
 
                     // lower bound is 0 if not specified
                     // (i.e. if until is of form U<=t)
@@ -284,10 +285,10 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                 // increment refinement count
                 ++numRefineIteration;
 
-        }
+        //}
 
     //}
-
+*/
 }
 
 
