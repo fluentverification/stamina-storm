@@ -68,9 +68,10 @@
  
              InfCTMCModelGenerator(storm::jani::Model const& model, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions(), Options const& builderOptions = Options());
              
-             std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build();
+             std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build(storm::generator::VariableInformation const& variableInformation);
              
          private:
+             storm::generator::VariableInformation variableInformation;
              std::unordered_map<int, ProbState*> stateMap;
              double currentStateReachability;
              StateType getOrAddStateIndex(CompressedState const& state);

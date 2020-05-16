@@ -56,9 +56,9 @@
         }
 
         template <typename ValueType, typename RewardModelType, typename StateType>
-        std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build() {
+        std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build(storm::generator::VariableInformation const& variableInformation) {
             STORM_LOG_DEBUG("Exploration order is: " << options.explorationOrder);
-
+            this->variableInformation = variableInformation;
             switch (generator->getModelType()) {
                 case storm::generator::ModelType::DTMC:
                     return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, buildModelComponents());
@@ -129,9 +129,30 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
             }
             stateMap.reserve(16000);
 
+            uint_fast64_t currentRowGroup = 0;
+            uint_fast64_t currentRow = 0;
+
+
+
             //Make absorbing state
-            CompressedState absorbingState;
+            CompressedState absorbingState(variableInformation.getTotalBitOffset(true));
             stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+            /*auto boolIt = variableInformation.booleanVariables.begin();
+            auto boolEnd = variableInformation.booleanVariables.end();
+            while (boolIt != boolEnd) {
+                absorbingState.set(boolIt->bitOffset, false);
+                boolIt++;
+            }
+            auto integerIt = variableInformation.integerVariables.begin();
+            auto integerEnd = variableInformation.integerVariables.end();
+            while (integerIt != integerEnd) {
+                absorbingState.set(integerIt->bitOffset, -1);
+                integerIt++;
+            }*/
+            transitionMatrixBuilder.addNextValue(currentRow, 0, storm::utility::one<ValueType>());
+            this->stateStorage.deadlockStateIndices.push_back(0);
+            currentRow++;
+            currentRowGroup++;
 
             // Let the generator create all initial states.
             this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
@@ -139,12 +160,7 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
             STORM_LOG_THROW(!this->stateStorage.initialStateIndices.empty(), storm::exceptions::WrongFormatException, "The model does not have a single initial state.");
 
             // Now explore the current state until there is no more reachable state.
-            uint_fast64_t currentRowGroup = 0;
-            uint_fast64_t currentRow = 0;
 
-            transitionMatrixBuilder.addNextValue(currentRow, 0, 1);
-            currentRow++;
-            currentRowGroup++;
 
             auto timeOfStart = std::chrono::high_resolution_clock::now();
             auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
@@ -253,8 +269,12 @@ StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsor
                             for (auto const &stateProbabilityPair : choice) {
                                 transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first,
                                                                      stateProbabilityPair.second);
-                                auto nextState =  stateMap.find(stateProbabilityPair.first)->second;
+                                if(currentIndex == 544) {
+                                    auto x = 1;
+                                }
                                 auto currentProbState = stateMap.find(currentIndex)->second;
+                                auto nextState =  stateMap.find(stateProbabilityPair.first)->second;
+
 
                                 nextState->updatePredecessorProbMap(currentIndex, stateProbabilityPair.second);
 
