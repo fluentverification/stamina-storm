@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 3.16)  # CMake version check
+cmake_minimum_required(VERSION 3.10)  # CMake version check
 project(stamina-cplusplus)               # Create project "simple_example"
 set(CMAKE_CXX_STANDARD 14)            # Enable c++14 standard
 
 
 
 # Add main.cpp file of project root directory as source file
-set(SOURCE_FILES src/InfCTMCModelGenerator.cpp src/InfCTMCModelGenerator.h src/main.cpp src/ProbState.h src/StaminaCL.cpp
+set(SOURCE_FILES src/InfCTMCNextStateGenerator.h src/InfCTMCNextStateGenerator.cpp src/InfCTMCModelGenerator.cpp src/InfCTMCModelGenerator.h src/main.cpp src/ProbState.h src/StaminaCL.cpp
         src/StaminaCL.h src/StaminaModelChecker.cpp src/StaminaModelChecker.h src/StaminaOptions.cpp src/StaminaOptions.h)
-set(STORM_PATH /Users/Riley/Desktop/storm)
+set(STORM_PATH /home/awilliams/stamina/storm)
 
 find_package(Boost)
 if (Boost_FOUND)
@@ -41,4 +41,4 @@ find_package(storm REQUIRED PATHS ${STORM_PATH})
 add_executable(stamina-cplusplus ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_FILES} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PRIVATE storm storm-parsers)
-#add_dependencies(stamina-cplusplus storm)
+add_dependencies(stamina-cplusplus storm)
