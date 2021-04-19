@@ -11,7 +11,8 @@ inline bool instanceof(const CurrentClass*) {
 }
 
 storm::prism::Program StaminaModelChecker::parseModelFile(std::string const& fileName) {
-    return storm::parser::PrismParser::parse(fileName);
+    bool prismCompatibility = true;
+    return storm::parser::PrismParser::parse(fileName, prismCompatibility);
 };
 
 std::vector<storm::jani::Property> StaminaModelChecker::parsePropertiesFile(storm::prism::Program const& modulesFile, std::string const& propertiesFileName) {
@@ -95,7 +96,7 @@ void StaminaModelChecker::initialize() {
 }*/
 
 bool StaminaModelChecker::terminateModelCheck(double minProb, double maxProb, double termParam) {
-    if(minProb == NULL || maxProb == NULL) {
+    if(!minProb || !maxProb) {
         return false;
     }
     else if((( maxProb) - ( minProb)) <= termParam) {
@@ -109,14 +110,15 @@ bool StaminaModelChecker::terminateModelCheck(double minProb, double maxProb, do
 
 }
 
-std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile) /*throws PrismException*/ {
-
+std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile) {
+        std::cout << "in modelCheckStamina" << std::endl;
         Result* res_min_max[2] = {new Result(), new Result()};
 
         double reachTh = StaminaOptions::getReachabilityThreshold();
+        std::cout << "got Reachability threshold" << std::endl;
 
         // Instantiate and load model generator
-        infModelGen = new InfCTMCModelGenerator<double>(modulesFile);
+       // infModelGen = new InfCTMCNextStateGenerator<double>(modulesFile);
         //super.loadModelGenerator(infModelGen);
 
         // Time bounds
@@ -182,13 +184,15 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     // Use the formulae to add the correct labelling.
                     storm::builder::BuilderOptions options(formulae, modulesFile);
 
-                    auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
+                    // auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
+                    auto generator = std::make_shared<storm::generator::InfCTMCNextStateGenerator<double, uint32_t>>(modulesFile, options);
                     auto variableInformation = VariableInformation(modulesFile, options.isAddOutOfBoundsStateSet());
-                    InfCTMCModelGenerator<double> builder(generator);
-                    //storm::builder::ExplicitModelBuilder<double> builder(generator);
-                    auto model = *builder.build(variableInformation)->as<Ctmc>();
-                    auto mcCTMC = std::make_shared<CtmcModelChecker>(model);
-                    return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
+                    // InfCTMCModelGenerator<double> builder(generator);
+                    storm::builder::ExplicitModelBuilder<double> builder(generator);
+                    auto model = builder.build()->as<Ctmc>();
+                    auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+                    return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));   // should return pMin? or maaaaybe pMax
+                    // Eventually replace this^^ line with transient check (including absorbing state)
 /*
 
 
@@ -291,5 +295,3 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     //}
 */
 }
-
-

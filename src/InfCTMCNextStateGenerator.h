@@ -2,6 +2,10 @@
 #define STORM_GENERATOR_INFCTMCNEXTSTATEGENERATOR_H_
 
 #include "storm/generator/NextStateGenerator.h"
+#include "storm/generator/PrismNextStateGenerator.h"
+#include "ProbState.h"
+
+#include <unordered_map>
 
 #include "storm/storage/prism/Program.h"
 #include "storm/storage/BoostTypes.h"
@@ -21,6 +25,7 @@ namespace storm {
         public:
             typedef typename NextStateGenerator<ValueType, StateType>::StateToIdCallback StateToIdCallback;
             typedef storm::storage::FlatSet<uint_fast64_t> CommandSet;
+            
             enum class CommandFilter {All, Markovian, Probabilistic};
 
             InfCTMCNextStateGenerator(storm::prism::Program const& program, NextStateGeneratorOptions const& options = NextStateGeneratorOptions());
@@ -49,6 +54,17 @@ namespace storm {
             virtual std::shared_ptr<storm::storage::sparse::ChoiceOrigins> generateChoiceOrigins(std::vector<boost::any>& dataForChoiceOrigins) const override;
 
         private:
+            // stamina
+            std::shared_ptr<PrismNextStateGenerator<ValueType, StateType>> generator;
+            storm::generator::VariableInformation variableInformation;
+            std::unordered_map<StateType, ProbState<ValueType, StateType>> stateMap;
+            double currentStateReachability; // delete?
+            double reachabilityThreshold = 1.0e-6;
+            StateType getOrAddStateIndex(CompressedState const& state);
+            StateType getAbsorbingStateIndex(CompressedState const& state);
+            void doReachabilityAnalysis();
+            // end stamina
+
             void checkValid() const;
 
             /*!

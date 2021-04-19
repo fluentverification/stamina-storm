@@ -13,6 +13,7 @@
 
 #include "StaminaOptions.h"
 #include "InfCTMCModelGenerator.h"
+#include "InfCTMCNextStateGenerator.h"
 
 #include "storm/api/storm.h"
 #include "storm-parsers/parser/PrismParser.h"
@@ -41,6 +42,7 @@
 #include "storm/environment/Environment.h"
 #include "storm/modelchecker/results/CheckResult.h"
 #include "storm/builder/BuilderOptions.h"
+#include "storm/generator/VariableInformation.h"
 
 
 class StaminaModelChecker /*: public storm::modelchecker::SparseCtmcCslModelChecker<storm::models::sparse::Ctmc<double>>*/ {
@@ -51,7 +53,7 @@ class StaminaModelChecker /*: public storm::modelchecker::SparseCtmcCslModelChec
 
 private:
 
-    InfCTMCModelGenerator<double>* infModelGen;
+    // InfCTMCModelGenerator<double>* infModelGen;
 
     void modifyExpression(storm::expressions::BaseExpression const& expr, bool isMin, storm::prism::Program const& modulesFile);
     bool terminateModelCheck(double minProb, double maxProb, double termParam);// throws PrismLangException;

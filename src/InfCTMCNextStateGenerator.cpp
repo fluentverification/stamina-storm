@@ -1,4 +1,12 @@
-#include "storm/generator/InfCTMCNextStateGenerator.h"
+#include "InfCTMCNextStateGenerator.h"
+
+#include "StaminaOptions.h"
+#include "ProbState.h"
+
+#include <map>
+#include <unordered_set>
+#include <typeinfo>
+
 
 #include <boost/container/flat_map.hpp>
 #include <boost/any.hpp>
@@ -85,6 +93,9 @@ namespace storm {
                 moduleIndexToPlayerIndexMap = program.buildModuleIndexToPlayerIndexMap();
                 actionIndexToPlayerIndexMap = program.buildActionIndexToPlayerIndexMap();
             }
+
+            //Instantiate PrismNextStateGenerator to use getInitialStates
+            generator = std::make_shared<PrismNextStateGenerator<ValueType, StateType>>(program);
         }
 
         template<typename ValueType, typename StateType>
@@ -156,115 +167,291 @@ namespace storm {
         //TODO: Override this method
         template<typename ValueType, typename StateType>
         std::vector<StateType> InfCTMCNextStateGenerator<ValueType, StateType>::getInitialStates(StateToIdCallback const& stateToIdCallback) {
-            std::vector<StateType> initialStateIndices;
+            doReachabilityAnalysis();
+            // generator = std::make_shared<PrismNextStateGenerator<ValueType, StateType>>(program);
+            std::vector<StateType> initialStateIndices = generator->getInitialStates(stateToIdCallback);
+            // std::vector<StateType> initialStateIndices{getInitialState()};
 
+            // std::set<StateType> singleton(initialStateIndices.begin(), initialStateIndices.end());
+            // initialStateIndices.assign(singleton.begin(), singleton.end());
+            
             // If all states are initial, we can simplify the enumeration substantially.
-            if (program.hasInitialConstruct() && program.getInitialConstruct().getInitialStatesExpression().isTrue()) {
-                CompressedState initialState(this->variableInformation.getTotalBitOffset(true));
+            // if (program.hasInitialConstruct() && program.getInitialConstruct().getInitialStatesExpression().isTrue()) {
+            //     CompressedState initialState(this->variableInformation.getTotalBitOffset(true));
 
-                std::vector<int_fast64_t> currentIntegerValues;
-                currentIntegerValues.reserve(this->variableInformation.integerVariables.size());
-                for (auto const& variable : this->variableInformation.integerVariables) {
-                    STORM_LOG_THROW(variable.lowerBound <= variable.upperBound, storm::exceptions::InvalidArgumentException, "Expecting variable with non-empty set of possible values.");
-                    currentIntegerValues.emplace_back(0);
-                    initialState.setFromInt(variable.bitOffset, variable.bitWidth, 0);
-                }
+            //     std::vector<int_fast64_t> currentIntegerValues;
+            //     currentIntegerValues.reserve(this->variableInformation.integerVariables.size());
+            //     for (auto const& variable : this->variableInformation.integerVariables) {
+            //         STORM_LOG_THROW(variable.lowerBound <= variable.upperBound, storm::exceptions::InvalidArgumentException, "Expecting variable with non-empty set of possible values.");
+            //         currentIntegerValues.emplace_back(0);
+            //         initialState.setFromInt(variable.bitOffset, variable.bitWidth, 0);
+            //     }
 
-                initialStateIndices.emplace_back(stateToIdCallback(initialState));
+            //     initialStateIndices.emplace_back(stateToIdCallback(initialState));
 
-                bool done = false;
-                while (!done) {
-                    bool changedBooleanVariable = false;
-                    for (auto const& booleanVariable : this->variableInformation.booleanVariables) {
-                        if (initialState.get(booleanVariable.bitOffset)) {
-                            initialState.set(booleanVariable.bitOffset);
-                            changedBooleanVariable = true;
-                            break;
-                        } else {
-                            initialState.set(booleanVariable.bitOffset, false);
-                        }
-                    }
+            //     bool done = false;
+            //     while (!done) {
+            //         bool changedBooleanVariable = false;
+            //         for (auto const& booleanVariable : this->variableInformation.booleanVariables) {
+            //             if (initialState.get(booleanVariable.bitOffset)) {
+            //                 initialState.set(booleanVariable.bitOffset);
+            //                 changedBooleanVariable = true;
+            //                 break;
+            //             } else {
+            //                 initialState.set(booleanVariable.bitOffset, false);
+            //             }
+            //         }
 
-                    bool changedIntegerVariable = false;
-                    if (changedBooleanVariable) {
-                        initialStateIndices.emplace_back(stateToIdCallback(initialState));
-                    } else {
-                        for (uint64_t integerVariableIndex = 0; integerVariableIndex < this->variableInformation.integerVariables.size(); ++integerVariableIndex) {
-                            auto const& integerVariable = this->variableInformation.integerVariables[integerVariableIndex];
-                            if (currentIntegerValues[integerVariableIndex] < integerVariable.upperBound - integerVariable.lowerBound) {
-                                ++currentIntegerValues[integerVariableIndex];
-                                changedIntegerVariable = true;
-                            } else {
-                                currentIntegerValues[integerVariableIndex] = integerVariable.lowerBound;
-                            }
-                            initialState.setFromInt(integerVariable.bitOffset, integerVariable.bitWidth, currentIntegerValues[integerVariableIndex]);
+            //         bool changedIntegerVariable = false;
+            //         if (changedBooleanVariable) {
+            //             initialStateIndices.emplace_back(stateToIdCallback(initialState));
+            //         } else {
+            //             for (uint64_t integerVariableIndex = 0; integerVariableIndex < this->variableInformation.integerVariables.size(); ++integerVariableIndex) {
+            //                 auto const& integerVariable = this->variableInformation.integerVariables[integerVariableIndex];
+            //                 if (currentIntegerValues[integerVariableIndex] < integerVariable.upperBound - integerVariable.lowerBound) {
+            //                     ++currentIntegerValues[integerVariableIndex];
+            //                     changedIntegerVariable = true;
+            //                 } else {
+            //                     currentIntegerValues[integerVariableIndex] = integerVariable.lowerBound;
+            //                 }
+            //                 initialState.setFromInt(integerVariable.bitOffset, integerVariable.bitWidth, currentIntegerValues[integerVariableIndex]);
 
-                            if (changedIntegerVariable) {
-                                break;
-                            }
-                        }
-                    }
+            //                 if (changedIntegerVariable) {
+            //                     break;
+            //                 }
+            //             }
+            //         }
 
-                    if (changedIntegerVariable) {
-                        initialStateIndices.emplace_back(stateToIdCallback(initialState));
-                    }
+            //         if (changedIntegerVariable) {
+            //             initialStateIndices.emplace_back(stateToIdCallback(initialState));
+            //         }
 
-                    done = !changedBooleanVariable && !changedIntegerVariable;
-                }
+            //         done = !changedBooleanVariable && !changedIntegerVariable;
+            //     }
 
-                STORM_LOG_DEBUG("Enumerated " << initialStateIndices.size() << " initial states using brute force enumeration.");
-            } else {
-                // Prepare an SMT solver to enumerate all initial states.
-                storm::utility::solver::SmtSolverFactory factory;
-                std::unique_ptr<storm::solver::SmtSolver> solver = factory.create(program.getManager());
+            //     STORM_LOG_DEBUG("Enumerated " << initialStateIndices.size() << " initial states using brute force enumeration.");
+            // } else {
+            //     // Prepare an SMT solver to enumerate all initial states.
+            //     storm::utility::solver::SmtSolverFactory factory;
+            //     std::unique_ptr<storm::solver::SmtSolver> solver = factory.create(program.getManager());
 
-                std::vector<storm::expressions::Expression> rangeExpressions = program.getAllRangeExpressions();
-                for (auto const& expression : rangeExpressions) {
-                    solver->add(expression);
-                }
-                solver->add(program.getInitialStatesExpression());
+            //     std::vector<storm::expressions::Expression> rangeExpressions = program.getAllRangeExpressions();
+            //     for (auto const& expression : rangeExpressions) {
+            //         solver->add(expression);
+            //     }
+            //     solver->add(program.getInitialStatesExpression());
 
-                // Proceed ss long as the solver can still enumerate initial states.
-                while (solver->check() == storm::solver::SmtSolver::CheckResult::Sat) {
-                    // Create fresh state.
-                    CompressedState initialState(this->variableInformation.getTotalBitOffset(true));
+            //     // Proceed ss long as the solver can still enumerate initial states.
+            //     while (solver->check() == storm::solver::SmtSolver::CheckResult::Sat) {
+            //         // Create fresh state.
+            //         CompressedState initialState(this->variableInformation.getTotalBitOffset(true));
 
-                    // Read variable assignment from the solution of the solver. Also, create an expression we can use to
-                    // prevent the variable assignment from being enumerated again.
-                    storm::expressions::Expression blockingExpression;
-                    std::shared_ptr<storm::solver::SmtSolver::ModelReference> model = solver->getModel();
-                    for (auto const& booleanVariable : this->variableInformation.booleanVariables) {
-                        bool variableValue = model->getBooleanValue(booleanVariable.variable);
-                        storm::expressions::Expression localBlockingExpression = variableValue ? !booleanVariable.variable : booleanVariable.variable;
-                        blockingExpression = blockingExpression.isInitialized() ? blockingExpression || localBlockingExpression : localBlockingExpression;
-                        initialState.set(booleanVariable.bitOffset, variableValue);
-                    }
-                    for (auto const& integerVariable : this->variableInformation.integerVariables) {
-                        int_fast64_t variableValue = model->getIntegerValue(integerVariable.variable);
-                        storm::expressions::Expression localBlockingExpression = integerVariable.variable != model->getManager().integer(variableValue);
-                        blockingExpression = blockingExpression.isInitialized() ? blockingExpression || localBlockingExpression : localBlockingExpression;
-                        initialState.setFromInt(integerVariable.bitOffset, integerVariable.bitWidth, static_cast<uint_fast64_t>(variableValue - integerVariable.lowerBound));
-                    }
+            //         // Read variable assignment from the solution of the solver. Also, create an expression we can use to
+            //         // prevent the variable assignment from being enumerated again.
+            //         storm::expressions::Expression blockingExpression;
+            //         std::shared_ptr<storm::solver::SmtSolver::ModelReference> model = solver->getModel();
+            //         for (auto const& booleanVariable : this->variableInformation.booleanVariables) {
+            //             bool variableValue = model->getBooleanValue(booleanVariable.variable);
+            //             storm::expressions::Expression localBlockingExpression = variableValue ? !booleanVariable.variable : booleanVariable.variable;
+            //             blockingExpression = blockingExpression.isInitialized() ? blockingExpression || localBlockingExpression : localBlockingExpression;
+            //             initialState.set(booleanVariable.bitOffset, variableValue);
+            //         }
+            //         for (auto const& integerVariable : this->variableInformation.integerVariables) {
+            //             int_fast64_t variableValue = model->getIntegerValue(integerVariable.variable);
+            //             storm::expressions::Expression localBlockingExpression = integerVariable.variable != model->getManager().integer(variableValue);
+            //             blockingExpression = blockingExpression.isInitialized() ? blockingExpression || localBlockingExpression : localBlockingExpression;
+            //             initialState.setFromInt(integerVariable.bitOffset, integerVariable.bitWidth, static_cast<uint_fast64_t>(variableValue - integerVariable.lowerBound));
+            //         }
 
-                    // Register initial state and return it.
-                    StateType id = stateToIdCallback(initialState);
-                    initialStateIndices.push_back(id);
+            //         // Register initial state and return it.
+            //         StateType id = stateToIdCallback(initialState);
+            //         initialStateIndices.push_back(id);
 
-                    // Block the current initial state to search for the next one.
-                    if (!blockingExpression.isInitialized()) {
-                        break;
-                    }
-                    solver->add(blockingExpression);
-                }
+            //         // Block the current initial state to search for the next one.
+            //         if (!blockingExpression.isInitialized()) {
+            //             break;
+            //         }
+            //         solver->add(blockingExpression);
+            //     }
 
-                STORM_LOG_DEBUG("Enumerated " << initialStateIndices.size() << " initial states using SMT solving.");
-            }
+            //     STORM_LOG_DEBUG("Enumerated " << initialStateIndices.size() << " initial states using SMT solving.");
+            // }
 
             return initialStateIndices;
         }
 
         template<typename ValueType, typename StateType>
+        StateType InfCTMCNextStateGenerator<ValueType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+            StateType actualIndex = static_cast<StateType>(state.getAsInt(0, 64));  // get 64 bits starting at bit 0
+            // StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
+
+            // // Check, if the state was already registered.
+            // std::pair<StateType, std::size_t> actualIndexBucketPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
+
+            // StateType actualIndex = actualIndexBucketPair.first;
+
+            // if (actualIndex == newIndex) {
+            //     if (options.explorationOrder == storm::builder::ExplorationOrder::Dfs) {
+            //         statesToExplore.emplace_front(state, actualIndex);
+
+            //         // Reserve one slot for the new state in the remapping.
+            //         stateRemapping.get().push_back(storm::utility::zero<StateType>());
+            //     } else if (options.explorationOrder == storm::builder::ExplorationOrder::Bfs) {
+            //         statesToExplore.emplace_back(state, actualIndex);
+            //         auto newProbState = new ProbState(actualIndex);
+            //         stateMap.emplace(actualIndex, newProbState);
+            //     } else {
+            //         STORM_LOG_ASSERT(false, "Invalid exploration order.");
+            //     }
+            // }
+
+            return actualIndex;
+        }
+
+        template<typename ValueType, typename StateType>
         void InfCTMCNextStateGenerator<ValueType, StateType>::doReachabilityAnalysis() {
+            // Model gen from file? probably not from API
+
+            // Check if model is based on infinite state system and print warning
+
+            // display progress
+
+            // Check that the model type is CTMC
+
+            // Create unordered_set statesK of ProbStates
+            std::unordered_set<ProbState<ValueType, StateType>> statesK;
+            // Create linked list exploredK of ProbStates
+            std::list<ProbState<ValueType, StateType>> exploredK;
+
+            // Get initial state and set reachProb
+            std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(&InfCTMCNextStateGenerator<ValueType, StateType>::getOrAddStateIndex, this, std::placeholders::_1);
+            std::vector<StateType> initialStates = generator->getInitialStates(stateToIdCallback); //???
+            for (auto &state : initialStates) {
+                std::cout << "state: " << state << std::endl;
+                // Check if state is in stateMap
+                ProbState<ValueType, StateType> probInitState;
+                auto initStateFound = stateMap.find(state);
+                if(initStateFound != stateMap.end()) {
+                    probInitState = initStateFound->second;
+                } else {
+                    // Add initial state(s) to explore, states, and to the model //???
+                    probInitState.setCurReachabilityProb(storm::utility::one<ValueType>());
+                    stateMap.emplace(state, probInitState);
+                }
+
+                // Add state to exploration queue
+                exploredK.push_back(probInitState);
+                statesK.emplace(probInitState);
+            }
+            std::cout << "Constructed vectors" << std::endl;
+            
+
+            // Start the exploration
+            int prevStateCount = stateMap.size();
+            double perimReachability = 1;
+
+            // State search
+            //while(perimReachability >= Options.getProbErrorWindow()/Options.getMispredictionFactor()) {
+            while(!exploredK.empty()) {
+                // Get next state to explore
+                ProbState<ValueType, StateType> curProbState = exploredK.front();
+                // delete first element
+                exploredK.pop_front();
+                CompressedState curState = curProbState.state;
+                StateType curId = curProbState.stateId;
+
+                //modelGen.exploreState(curProbState); //???
+                // maybe expand???
+                generator->load(curProbState.state);    // maybe move this into if statement if we don't use it anywhere else ???
+
+                // TODO: figure out the storm equivalent for this
+                // if(propertyExpression) { // if you can't figure this out, comment it out for now
+                //     // set absorbing state if property is not satisfied
+                //     curProbState.setStateAbsorbing(true);
+                //     // perimeterStates.addElement(curProbState.toString()); //???
+                //     curProbState.setStateTerminal(false);
+                //     continue;
+                // }
+
+                double curStateReachability = curProbState.getCurReachabilityProb();
+                // TODO: override ProbState << operator
+                // std::cout << "probstate" << curProbState << std::endl;
+                bool exploreState = (!curProbState.isStateTerminal() || curStateReachability >= reachabilityThreshold);
+                if(exploreState) {
+                    storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+                    // optimization: If reachability is 0, we don't need to do
+                    //               the rest of the computation
+                    if(0 == curStateReachability) {
+                        if(behavior.empty()) {
+                            //be sad
+                            std::cout << "behavior empty" << std::endl;
+                        } else {
+                            for(auto const &choice : behavior) {
+                                for(auto const &stateProbabilityPair : choice) {
+                                    // get next ProbState
+                                    //TODO: Maybe check if this find was successful first???
+                                    // StateType nextState = stateMap.find(stateProbabilityPair.first)->first;
+                                    // Check if state is in stateMap
+                                    auto nextStateFound = stateMap.find(stateProbabilityPair.first);
+                                    if(nextStateFound != stateMap.end()) {
+                                        ProbState nextProbState = nextStateFound->second;
+                                        // Add state to states and explored if new state
+                                        if(statesK.emplace(nextProbState).second) {
+                                            exploredK.push_back(nextProbState);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        auto totalNumberOfChoices = behavior.getNumberOfChoices();
+                        ValueType totalExitRate = this->isDiscreteTimeModel() ? static_cast<ValueType>(totalNumberOfChoices) : storm::utility::zero<ValueType>();
+                        // TODO: come back to this. Why is ValueType RationalFunction/MultivariatePolynomial?
+                        for(auto const &choice : behavior) {
+                                std::cout << "choise: " << choice.getTotalMass() << std::endl;
+                                totalExitRate += choice.getTotalMass();
+                                // double rate = choice.getTotalMass().toDouble();
+                                // std::string s = typeid(choice.getTotalMass()).name();
+                                // std::string d = typeid(exitRateSum).name();
+                                // std::string equal = typeid(choice.getTotalMass()) == typeid(exitRateSum) ? "true" : "false";
+                                // std::cout << "class: " << s << ", " << d << " " << equal << std::endl;
+                                // double rate = choice.getTotalMass();
+                                // exitRateSum += choice.getTotalMass();
+                                // for(auto const &stateProbabilityPair : choice) {
+                                //     // exitRateSum += stateProbabilityPair.second;
+                                //     std::cout << "exitRateSum (" << exitRateSum << ") + stateProb (" << stateProbabilityPair.second << ")\n";
+                                //     std::cout << "first: " << stateProbabilityPair.first << std::endl;
+                                //     std::cout << "second: " << stateProbabilityPair.second << std::endl;
+                                // }
+                        }
+
+                        for(auto const &choice : behavior) {
+                            for(auto const &stateProbabilityPair : choice) {
+                                // get next ProbState
+                                auto nextStateFound = stateMap.find(stateProbabilityPair.first);
+                                if(nextStateFound != stateMap.end()) {
+                                    ProbState* nextProbState = &(nextStateFound->second);
+                                    
+                                    ValueType tranRate = stateProbabilityPair.second;
+                                    ValueType tranProb = tranRate / totalExitRate;
+                                    ValueType leavingProb = tranProb * curStateReachability;
+                                    nextProbState->addToReachability(leavingProb);
+
+                                    // Add state to states and explored if new state
+                                    if(statesK.emplace(*nextProbState).second) {
+                                        exploredK.push_back(*nextProbState);
+                                    }
+                                } else {
+
+                                }
+                                
+                            }
+                        }
+                    }
+        
+
+                }
+            }
 
         }
         
