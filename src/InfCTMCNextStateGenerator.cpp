@@ -335,7 +335,7 @@ namespace storm {
                     probInitState = initStateFound->second;
                 } else {
                     // Add initial state(s) to explore, states, and to the model //???
-                    probInitState.setCurReachabilityProb(storm::utility::one<ValueType>());
+                    probInitState.setCurReachabilityProb(1);
                     stateMap.emplace(state, probInitState);
                 }
 
@@ -398,7 +398,6 @@ namespace storm {
                                         // Add state to states and explored if new state
                                         if(statesK.emplace(nextProbState).second) {
                                             exploredK.push_back(nextProbState);
-                                            // ‘carl::RationalFunction<carl::FactorizedPolynomial<carl::MultivariatePolynomial<cln::cl_RA> >, true>’ 
                                         }
                                     }
                                 }
@@ -412,7 +411,7 @@ namespace storm {
                                 // double rate = static_cast<double>(choice.getTotalMass());
                                 std::cout << "choise: " << choice.getTotalMass() << std::endl;
                                 totalExitRate += choice.getTotalMass();
-                                double rate = choice.getTotalMass().nominatorAsNumber();
+                                // double rate = choice.getTotalMass().nominatorAsNumber();
                                 // std::string s = typeid(choice.getTotalMass()).name();
                                 // std::string d = typeid(exitRateSum).name();
                                 // std::string equal = typeid(choice.getTotalMass()) == typeid(exitRateSum) ? "true" : "false";
@@ -430,7 +429,7 @@ namespace storm {
                         for(auto const &choice : behavior) {
                             for(auto const &stateProbabilityPair : choice) {
                                 // get next ProbState id and exit rate
-                                StateType nextState = stateProbabilityPair.first
+                                StateType nextState = stateProbabilityPair.first;
                                 ValueType tranRate = stateProbabilityPair.second;
                                 ValueType tranProb = tranRate / totalExitRate;
                                 ValueType leavingProb = tranProb * curStateReachability;
@@ -448,8 +447,8 @@ namespace storm {
                                 } else {
                                     // Create state and add to state map
                                     ProbState nextProbState(nextState);                                    
-                                    nextProbState->addToReachability(leavingProb);
-                                    stateMap.emplace(state, probInitState);
+                                    nextProbState.addToReachability(leavingProb);
+                                    stateMap.emplace(nextState, nextProbState);
                                     statesK.emplace(nextProbState);
                                     exploredK.push_back(nextProbState);
                                 }
@@ -461,20 +460,32 @@ namespace storm {
                 }
 
                 //update progress with stateMap.size() + 1
-                std::cout << "progress: " stateMap.size() << std::endl;
+                std::cout << "progress: " << stateMap.size() << std::endl;
             }
             exploredK.clear();
             statesK.clear();
             for (auto &state : initialStates) {
+                std::cout << "state: " << state << std::endl;
+                // Check if state is in stateMap
+                ProbState probInitState;
+                auto initStateFound = stateMap.find(state);
+                if(initStateFound != stateMap.end()) {
+                    probInitState = initStateFound->second;
+                } else {
+                    // Add initial state(s) to explore, states, and to the model //???
+                    probInitState.setCurReachabilityProb(1);
+                    stateMap.emplace(state, probInitState);
+                }
+
                 // Add state to exploration queue
                 exploredK.push_back(probInitState);
                 statesK.emplace(probInitState);
             }
             perimReachability = 0;
             // Iterate over state map
-            for(auto const &localState : stateMap) {
+            for(auto &localState : stateMap) {
                 // Add reachability to threshold if state is terminal
-                if(localState.isStateTerminal()) {
+                if(localState.second.isStateTerminal()) {
                     perimReachability += reachabilityThreshold;
                 }
             }
@@ -482,7 +493,7 @@ namespace storm {
             reachabilityThreshold /= StaminaOptions::getKappaReductionFactor(); //not implemented???
 
             // Finish progress display
-            std::cout << "progress: " stateMap.size() << "states" << std::endl;
+            std::cout << "progress: " << stateMap.size() << " states" << std::endl;
 
             // TODO: Reset property expression ???
 
@@ -1050,8 +1061,8 @@ namespace storm {
         template class InfCTMCNextStateGenerator<double>;
 
 #ifdef STORM_HAVE_CARL
-        template class InfCTMCNextStateGenerator<storm::RationalNumber>;
-        template class InfCTMCNextStateGenerator<storm::RationalFunction>;
+        // template class InfCTMCNextStateGenerator<storm::RationalNumber>;
+        // template class InfCTMCNextStateGenerator<storm::RationalFunction>;
 #endif
     }
 }

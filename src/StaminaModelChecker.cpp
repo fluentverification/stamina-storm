@@ -186,8 +186,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
 
                     // auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
                     auto generator = std::make_shared<storm::generator::InfCTMCNextStateGenerator<double, uint32_t>>(modulesFile, options);
-                    auto variableInformation = VariableInformation(modulesFile, options.isAddOutOfBoundsStateSet());
-                    // InfCTMCModelGenerator<double> builder(generator);
+                    // auto variableInformation = VariableInformation(modulesFile, options.isAddOutOfBoundsStateSet());
                     storm::builder::ExplicitModelBuilder<double> builder(generator);
                     auto model = builder.build()->as<Ctmc>();
                     auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
