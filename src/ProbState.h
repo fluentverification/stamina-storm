@@ -10,10 +10,8 @@
 #include <unordered_map>
 typedef storm::storage::BitVector CompressedState;
 
-template<typename ValueType, typename StateType = uint32_t>
 class ProbState {
 public:
-	typedef typename ProbState<ValueType, StateType> ProbState;
 	ProbState() 
 		: stateId(0),
 		state(0),
@@ -22,7 +20,7 @@ public:
 		stateIsTerminal(true),
 		stateIsAbsorbing(false)
 	{}
-	ProbState(StateType id) 
+	ProbState(uint32_t id) 
 		: stateId(id),
 		state(id),
 		curReachabilityProb(0),
@@ -35,9 +33,9 @@ public:
 	/**
 	* This maps stores transition rate for each outgoing transition.
 	*/
-	std::unordered_map<StateType, ValueType> predecessorPropMap;
+	std::unordered_map<uint32_t, double> predecessorPropMap;
 	
-  StateType stateId;
+  uint32_t stateId;
 	CompressedState state;
 
 
@@ -59,31 +57,31 @@ public:
 
 
 	/* Probabilistic search */
-	ValueType getCurReachabilityProb() const {
+	double getCurReachabilityProb() const {
 
 		return curReachabilityProb;
 
 	}
 
-	void setCurReachabilityProb(ValueType reachProb) {
+	void setCurReachabilityProb(double reachProb) {
 		curReachabilityProb = reachProb;
 	}
 
-	void addToReachability(ValueType newReach) {
+	void addToReachability(double newReach) {
 		curReachabilityProb += newReach;
 		if(curReachabilityProb >= 1.0) {
 			curReachabilityProb = 1.0;
 		}
 	}
 
-	void subtractFromReachability(ValueType minusReach) {
+	void subtractFromReachability(double minusReach) {
 		curReachabilityProb -= minusReach;
 		if(curReachabilityProb <= 0.0) {
 			curReachabilityProb = 0.0;
 		}
 	}
 
-	ValueType getNextReachabilityProb() const {
+	double getNextReachabilityProb() const {
 		return nextReachabilityProb;
 	}
 
@@ -104,7 +102,7 @@ public:
 		}
 	}*/
 
-	void updatePredecessorProbMap(StateType index, ValueType tranProb) {
+	void updatePredecessorProbMap(uint32_t index, double tranProb) {
 		predecessorPropMap.insert(std::make_pair(index, tranProb));
 	}
 
@@ -139,8 +137,8 @@ public:
 	}
 
 private:
-	ValueType curReachabilityProb;
-	ValueType nextReachabilityProb;
+	double curReachabilityProb;
+	double nextReachabilityProb;
 
 	bool stateIsTerminal;
 	bool stateIsAbsorbing;
@@ -148,11 +146,11 @@ private:
 
 namespace std
 {
-		template<typename ValueType, typename StateType> 
-		struct hash<ProbState<ValueType, StateType>> {
+		template<> 
+		struct hash<ProbState> {
 			std::size_t operator()(ProbState const& p) const noexcept
 			{
-					std::size_t h = std::hash<StateType>{}(p.stateId);
+					std::size_t h = std::hash<uint32_t>{}(p.stateId);
 					return h;
 			}
 		};

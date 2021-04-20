@@ -57,7 +57,7 @@ namespace storm {
             // stamina
             std::shared_ptr<PrismNextStateGenerator<ValueType, StateType>> generator;
             storm::generator::VariableInformation variableInformation;
-            std::unordered_map<StateType, ProbState<ValueType, StateType>> stateMap;
+            std::unordered_map<StateType, ProbState> stateMap;
             double currentStateReachability; // delete?
             double reachabilityThreshold = 1.0e-6;
             StateType getOrAddStateIndex(CompressedState const& state);

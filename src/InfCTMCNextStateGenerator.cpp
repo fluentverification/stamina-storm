@@ -319,9 +319,9 @@ namespace storm {
             // Check that the model type is CTMC
 
             // Create unordered_set statesK of ProbStates
-            std::unordered_set<ProbState<ValueType, StateType>> statesK;
+            std::unordered_set<ProbState> statesK;
             // Create linked list exploredK of ProbStates
-            std::list<ProbState<ValueType, StateType>> exploredK;
+            std::list<ProbState> exploredK;
 
             // Get initial state and set reachProb
             std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(&InfCTMCNextStateGenerator<ValueType, StateType>::getOrAddStateIndex, this, std::placeholders::_1);
@@ -329,7 +329,7 @@ namespace storm {
             for (auto &state : initialStates) {
                 std::cout << "state: " << state << std::endl;
                 // Check if state is in stateMap
-                ProbState<ValueType, StateType> probInitState;
+                ProbState probInitState;
                 auto initStateFound = stateMap.find(state);
                 if(initStateFound != stateMap.end()) {
                     probInitState = initStateFound->second;
@@ -354,7 +354,7 @@ namespace storm {
             //while(perimReachability >= Options.getProbErrorWindow()/Options.getMispredictionFactor()) {
             while(!exploredK.empty()) {
                 // Get next state to explore
-                ProbState<ValueType, StateType> curProbState = exploredK.front();
+                ProbState curProbState = exploredK.front();
                 // delete first element
                 exploredK.pop_front();
                 CompressedState curState = curProbState.state;
@@ -398,6 +398,7 @@ namespace storm {
                                         // Add state to states and explored if new state
                                         if(statesK.emplace(nextProbState).second) {
                                             exploredK.push_back(nextProbState);
+                                            // ‘carl::RationalFunction<carl::FactorizedPolynomial<carl::MultivariatePolynomial<cln::cl_RA> >, true>’ 
                                         }
                                     }
                                 }
@@ -408,9 +409,10 @@ namespace storm {
                         ValueType totalExitRate = this->isDiscreteTimeModel() ? static_cast<ValueType>(totalNumberOfChoices) : storm::utility::zero<ValueType>();
                         // TODO: come back to this. Why is ValueType RationalFunction/MultivariatePolynomial?
                         for(auto const &choice : behavior) {
+                                // double rate = static_cast<double>(choice.getTotalMass());
                                 std::cout << "choise: " << choice.getTotalMass() << std::endl;
                                 totalExitRate += choice.getTotalMass();
-                                // double rate = choice.getTotalMass().toDouble();
+                                double rate = choice.getTotalMass().nominatorAsNumber();
                                 // std::string s = typeid(choice.getTotalMass()).name();
                                 // std::string d = typeid(exitRateSum).name();
                                 // std::string equal = typeid(choice.getTotalMass()) == typeid(exitRateSum) ? "true" : "false";
@@ -427,14 +429,16 @@ namespace storm {
 
                         for(auto const &choice : behavior) {
                             for(auto const &stateProbabilityPair : choice) {
-                                // get next ProbState
-                                auto nextStateFound = stateMap.find(stateProbabilityPair.first);
+                                // get next ProbState id and exit rate
+                                StateType nextState = stateProbabilityPair.first
+                                ValueType tranRate = stateProbabilityPair.second;
+                                ValueType tranProb = tranRate / totalExitRate;
+                                ValueType leavingProb = tranProb * curStateReachability;
+
+                                // Check if state exists
+                                auto nextStateFound = stateMap.find(nextState);
                                 if(nextStateFound != stateMap.end()) {
                                     ProbState* nextProbState = &(nextStateFound->second);
-                                    
-                                    ValueType tranRate = stateProbabilityPair.second;
-                                    ValueType tranProb = tranRate / totalExitRate;
-                                    ValueType leavingProb = tranProb * curStateReachability;
                                     nextProbState->addToReachability(leavingProb);
 
                                     // Add state to states and explored if new state
@@ -442,16 +446,46 @@ namespace storm {
                                         exploredK.push_back(*nextProbState);
                                     }
                                 } else {
-
+                                    // Create state and add to state map
+                                    ProbState nextProbState(nextState);                                    
+                                    nextProbState->addToReachability(leavingProb);
+                                    stateMap.emplace(state, probInitState);
+                                    statesK.emplace(nextProbState);
+                                    exploredK.push_back(nextProbState);
                                 }
-                                
                             }
                         }
                     }
-        
+                    curProbState.setCurReachabilityProb(0);
+                    curProbState.setStateTerminal(false);
+                }
 
+                //update progress with stateMap.size() + 1
+                std::cout << "progress: " stateMap.size() << std::endl;
+            }
+            exploredK.clear();
+            statesK.clear();
+            for (auto &state : initialStates) {
+                // Add state to exploration queue
+                exploredK.push_back(probInitState);
+                statesK.emplace(probInitState);
+            }
+            perimReachability = 0;
+            // Iterate over state map
+            for(auto const &localState : stateMap) {
+                // Add reachability to threshold if state is terminal
+                if(localState.isStateTerminal()) {
+                    perimReachability += reachabilityThreshold;
                 }
             }
+
+            reachabilityThreshold /= StaminaOptions::getKappaReductionFactor(); //not implemented???
+
+            // Finish progress display
+            std::cout << "progress: " stateMap.size() << "states" << std::endl;
+
+            // TODO: Reset property expression ???
+
 
         }
         
