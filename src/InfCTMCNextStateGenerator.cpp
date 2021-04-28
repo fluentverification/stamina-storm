@@ -313,10 +313,12 @@ namespace storm {
             // Model gen from file? probably not from API
 
             // Check if model is based on infinite state system and print warning
+            // TODO: Implement once Tim Q merges prism-unbounded-variables branch into master
 
             // display progress
 
             // Check that the model type is CTMC
+            STORM_LOG_THROW(program.getModelType() == storm::prism::Program::ModelType::CTMC, storm::exceptions::WrongFormatException, "Probabilistic model construction not supported for model type: " << program.getModelType());
 
             // Create unordered_set statesK of ProbStates
             std::unordered_set<ProbState> statesK;
@@ -406,24 +408,9 @@ namespace storm {
                     } else {
                         auto totalNumberOfChoices = behavior.getNumberOfChoices();
                         ValueType totalExitRate = this->isDiscreteTimeModel() ? static_cast<ValueType>(totalNumberOfChoices) : storm::utility::zero<ValueType>();
-                        // TODO: come back to this. Why is ValueType RationalFunction/MultivariatePolynomial?
                         for(auto const &choice : behavior) {
-                                // double rate = static_cast<double>(choice.getTotalMass());
-                                std::cout << "choise: " << choice.getTotalMass() << std::endl;
-                                totalExitRate += choice.getTotalMass();
-                                // double rate = choice.getTotalMass().nominatorAsNumber();
-                                // std::string s = typeid(choice.getTotalMass()).name();
-                                // std::string d = typeid(exitRateSum).name();
-                                // std::string equal = typeid(choice.getTotalMass()) == typeid(exitRateSum) ? "true" : "false";
-                                // std::cout << "class: " << s << ", " << d << " " << equal << std::endl;
-                                // double rate = choice.getTotalMass();
-                                // exitRateSum += choice.getTotalMass();
-                                // for(auto const &stateProbabilityPair : choice) {
-                                //     // exitRateSum += stateProbabilityPair.second;
-                                //     std::cout << "exitRateSum (" << exitRateSum << ") + stateProb (" << stateProbabilityPair.second << ")\n";
-                                //     std::cout << "first: " << stateProbabilityPair.first << std::endl;
-                                //     std::cout << "second: " << stateProbabilityPair.second << std::endl;
-                                // }
+                            std::cout << "choice: " << choice.getTotalMass() << std::endl;
+                            totalExitRate += choice.getTotalMass();
                         }
 
                         for(auto const &choice : behavior) {

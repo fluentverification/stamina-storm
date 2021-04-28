@@ -190,7 +190,16 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     storm::builder::ExplicitModelBuilder<double> builder(generator);
                     auto model = builder.build()->as<Ctmc>();
                     auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
-                    return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));   // should return pMin? or maaaaybe pMax
+                    auto result = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));   // should return pMin? or maaaaybe pMax
+                    auto quantRes = result->asExplicitQuantitativeCheckResult<double>();
+
+                    // if(result->isExplicitQuantitativeCheckResult()) {
+                    //     retu
+                    // } else {
+                    //     return null;
+                    // }
+
+                    return quantRes;
                     // Eventually replace this^^ line with transient check (including absorbing state)
 /*
 
