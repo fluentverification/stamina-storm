@@ -4,26 +4,31 @@
 
 #include "StaminaCL.h"
 
-    const std::string StaminaCL::dotPrism = ".prism";
-    const std::string StaminaCL::dotSm = ".sm";
-    const std::string StaminaCL::dotCsl = ".csl";
-    double StaminaCL::reachabilityThreshold = -1.0;
-    double StaminaCL::kappaReductionFactor = -1;
-    int StaminaCL::numPropertiesToCheck = 0;
-    int StaminaCL::maxApproxCount = -1;
-    double StaminaCL::probErrorWindow = -1.0;
-    bool StaminaCL::noPropRefine = false;
-    bool StaminaCL::rankTransitions = false;
-    int StaminaCL::maxLinearSolnIter = -1;
-    std::string StaminaCL::constSwitch = "";
-    std::string StaminaCL::modelFilename = "";
-    std::string StaminaCL::propertiesFilename = "";
-    std::string StaminaCL::solutionMethod = "";
-    StaminaModelChecker* StaminaCL::staminaMC = nullptr;
-    storm::prism::Program StaminaCL::modulesFile = storm::prism::Program();
-    std::vector<storm::jani::Property> StaminaCL::propertiesVector = std::vector<storm::jani::Property>();
+const std::string StaminaCL::dotPrism = ".prism";
+const std::string StaminaCL::dotSm = ".sm";
+const std::string StaminaCL::dotCsl = ".csl";
+double StaminaCL::reachabilityThreshold = -1.0;
+double StaminaCL::kappaReductionFactor = -1;
+int StaminaCL::numPropertiesToCheck = 0;
+int StaminaCL::maxApproxCount = -1;
+double StaminaCL::probErrorWindow = -1.0;
+bool StaminaCL::noPropRefine = false;
+bool StaminaCL::rankTransitions = false;
+int StaminaCL::maxLinearSolnIter = -1;
+std::string StaminaCL::constSwitch = "";
+std::string StaminaCL::modelFilename = "";
+std::string StaminaCL::propertiesFilename = "";
+std::string StaminaCL::solutionMethod = "";
+StaminaModelChecker* StaminaCL::staminaMC = nullptr;
+storm::prism::Program StaminaCL::modulesFile = storm::prism::Program();
+std::vector<storm::jani::Property> StaminaCL::propertiesVector = std::vector<storm::jani::Property>();
 
-
+/**
+ * Reads all command line options, parses them, initializes STAMINA, and runs the simulation.
+ * 
+ * @param argc The count of arguments
+ * @param argv The command line arguments.
+ * */
 void StaminaCL::run(int argv, char* argc[]) {
 
     //Need Result type possibly Result res;
@@ -41,10 +46,6 @@ void StaminaCL::run(int argv, char* argc[]) {
 
     try {
         // process info about undefined constant
-
-
-
-
         /*std::set<storm::expressions::Variable> undefinedConstants[numPropertiesToCheck];
          for (int i = 0; i < numPropertiesToCheck; i++) {
              undefinedConstants[i] = propertiesVector[i].getUndefinedConstants();
@@ -136,13 +137,15 @@ void StaminaCL::run(int argv, char* argc[]) {
             std::cout << "Result: " << *result << std::endl;
         }
 
-    } catch (stormException e) {
+    }
+    catch (stormException e) {
         errorAndExit(e.what());
     }
-
 }
 
-
+/**
+ * Initializes everything we need for STAMINA.
+ * */
 void StaminaCL::initializeSTAMINA() {
 
     //init prism
@@ -157,14 +160,16 @@ void StaminaCL::initializeSTAMINA() {
         //staminaMC->setEngine(Prism.EXPLICIT); Don't think we need this for Storm intergace
 
 
-    } catch (stormException e) {
+    } 
+    catch (stormException e) {
         std::cout << "Error: " << e.what() << std::endl;
         std::exit(1);
     }
 }
 
-
-
+/**
+ * Proccesses command line options for STAMINA.
+ */
 void StaminaCL::processOptions() {
 
     try {
@@ -209,14 +214,24 @@ void StaminaCL::processOptions() {
     }
 }
 
-
+/**
+ * Does all parsing, both arguments and model properties, for STAMINA.
+ * 
+ * @param argc The count of arguments
+ * @param argv The command line arguments.
+ * */
 void StaminaCL::doParsing(int argc, char* argv[]) {
 
     parseArguments(argc, argv);
     parseModelProperties();
 
 }
-
+/**
+ * Parses the command line arguments passed into STAMINA.
+ * 
+ * @param argc The count of arguments
+ * @param argv The command line arguments.
+ * */
 void StaminaCL::parseArguments(int argc, char* argv[]) {
 
     std::string sw;
@@ -280,7 +295,7 @@ void StaminaCL::parseArguments(int argc, char* argv[]) {
                 maxLinearSolnIter = std::stoi(argv[++i]);
 
             }
-            else if (sw.compare("power") == 0 || sw.compare("jacobi") == 0 || sw.compare("gaussseidel") == 0 || sw.compare("bgaussseidel") ==0 ) {
+            else if (sw.compare("power") == 0 || sw.compare("jacobi") == 0 || sw.compare("gaussseidel") == 0 || sw.compare("bgaussseidel") == 0 ) {
 
                 solutionMethod = argv[++i];
 
@@ -307,28 +322,30 @@ void StaminaCL::parseArguments(int argc, char* argv[]) {
             }
 
         }
-            // otherwise argument must be a filename
+        // otherwise argument must be a filename
         else if (((modelFilename.empty()) && endsWith(argv[i], dotPrism)) || endsWith(argv[i], dotSm)) {
             modelFilename = argv[i];
         }
         else if ((propertiesFilename.empty() && endsWith(argv[i], dotCsl))) {
             propertiesFilename = argv[i];
         }
-            // anything else - must be something wrong with command line syntax
+        // anything else - must be something wrong with command line syntax
         else {
             errorAndExit("Invalid argument syntax");
         }
 
     }
 }
-
+/**
+ * Parses the properties for a particular PRISM model using the STORM API.
+ * */
 void StaminaCL::parseModelProperties(){
 
     std::vector<storm::jani::Property> propertiesToCheck;
 
     try {
         // Parse and load a PRISM model from a file
-       // delete &modulesFile;
+        // delete &modulesFile;
         modulesFile = staminaMC->parseModelFile(modelFilename);
 
         // Parse and load a properties model for the model
@@ -339,16 +356,24 @@ void StaminaCL::parseModelProperties(){
         numPropertiesToCheck = (int) propertiesVector.size();
 
 
-    } catch (FileNotFoundException const& e) {
+    } 
+    catch (FileNotFoundException const& e) {
         std::cout << "Error: " << e.what() << std::endl;
         std::exit(1);
-    } catch (stormException const& e) {
+    } 
+    catch (stormException const& e) {
         std::cout << "Error: " << e.what() << std::endl;
         std::exit(1);
     }
 
 }
-
+/**
+ * Determines if a (std::) string ends with the contents of another string.
+ * 
+ * @param original String to check
+ * @param ending String which contains potential ending.
+ * @return Whether or not ending is at the end of original.
+ * */
 bool StaminaCL::endsWith(std::string const& original, std::string const& ending) {
     if (original.length() >= ending.length()) {
         return (original.compare(original.length() - ending.length(), ending.length(), ending) == 0);
@@ -357,7 +382,12 @@ bool StaminaCL::endsWith(std::string const& original, std::string const& ending)
         return false;
     }
 }
-
+/**
+ * Trims a (C-style, not std::) string to remove the whitespace.
+ * 
+ * @param input The C str to remove the whitespace of.
+ * @return Trimmed string.
+ * */
 char* StaminaCL::trim(char* input) {
 
     for(int i = 0; input[i]== ' '; input++);
@@ -376,7 +406,9 @@ char* StaminaCL::trim(char* input) {
     }
     return input;
 }
-
+/**
+ * Prints a help message with all command line options available to the user.
+ * */
 void StaminaCL::printHelp() {
     std::cout << "Usage: stamina <model-file> <properties-file> [options]" << std::endl;
     std::cout << std::endl ;
@@ -406,7 +438,9 @@ void StaminaCL::printHelp() {
     std::cout << "-bgaussseidel ...................... Backward Gauss-Seidel method" << std::endl ;
     std::cout << std::endl ;
 }
-
+/**
+ * Exit cleanly.
+ * */
 void StaminaCL::exit()
 {
     /*staminaMC.closeDown();
@@ -418,6 +452,8 @@ void StaminaCL::exit()
 
 /**
  * Report a (fatal) error and exit cleanly (with exit code 1).
+ * 
+ * @param s std::string The error message to display.
  */
 void StaminaCL::errorAndExit(std::string s)
 {

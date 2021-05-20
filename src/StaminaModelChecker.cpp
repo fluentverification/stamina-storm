@@ -1,8 +1,8 @@
 //
 // Created by Riley Layne Roberts on 2/28/20.
 //
-//Test of git control
-//#include <MacTypes.h>
+// Test of git control
+// #include <MacTypes.h>
 #include "StaminaModelChecker.h"
 
 template<typename BaseClass, typename CurrentClass>
@@ -13,11 +13,21 @@ inline bool instanceof(const CurrentClass*) {
 storm::prism::Program StaminaModelChecker::parseModelFile(std::string const& fileName) {
     return storm::parser::PrismParser::parse(fileName);
 };
-
-std::vector<storm::jani::Property> StaminaModelChecker::parsePropertiesFile(storm::prism::Program const& modulesFile, std::string const& propertiesFileName) {
+/**
+ * brief parsePropertiesFile - Parses the properties file passed in using the storm API
+ * 
+ * @param modulesFile The modules file.
+ * @param propertiesFileName The properties file to parse.
+ * */
+std::vector<storm::jani::Property> StaminaModelChecker::parsePropertiesFile(
+    storm::prism::Program const& modulesFile
+    , std::string const& propertiesFileName
+) {
     return storm::api::parsePropertiesForPrismProgram(propertiesFileName, modulesFile);
 };
-
+/**
+ * brief initialize - Initializes everything we need for the STAMINA model checker.
+ * */
 void StaminaModelChecker::initialize() {
     // Init loggers
     storm::utility::setUp();
@@ -27,7 +37,10 @@ void StaminaModelChecker::initialize() {
 
 //This is only used for non-combined
 
-/*void StaminaModelChecker::modifyExpression(const storm::expressions::BaseExpression* expr, bool isMin, storm::prism::Program const& modulesFile) throws PrismLangException {
+/*void StaminaModelChecker::modifyExpression(
+    const storm::expressions::BaseExpression* expr
+    , bool isMin, storm::prism::Program const& modulesFile
+) {
 
         if(instanceof<storm::expressions::BinaryExpression>(&expr) ) {
             if(expr->isBinaryRelationExpression()) {
@@ -93,49 +106,63 @@ void StaminaModelChecker::initialize() {
 
         //return expr;
 }*/
-
+/**
+ * Whether or not we can terminate the model checking.
+ * 
+ * @param minProb The lower bound on the probability.
+ * @param maxProb The upper bound on the probability.
+ * @param termParam The (tight) range we want for Pmax - Pmin
+ * @return Whether or not the model achieved maxProb - minProb <= termParam
+ * */
 bool StaminaModelChecker::terminateModelCheck(double minProb, double maxProb, double termParam) {
     if(minProb == NULL || maxProb == NULL) {
         return false;
     }
-    else if((( maxProb) - ( minProb)) <= termParam) {
-
+    else if (((maxProb) - (minProb)) <= termParam) {
         return true;
     }
     else {
         return false;
     }
-
-
 }
+/**
+ * brief modelCheckStamina - Performs the model checking of properies file and returns results.
+ * 
+ * @param propertiesVector List of properties in modules.
+ * @param prop Property to check.
+ * @param modulesFile PRISM modules file. (To be read in by STORM)
+ * */
+std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckStamina(
+    std::vector<storm::jani::Property> propertiesVector
+    , storm::jani::Property prop
+    , storm::prism::Program const& modulesFile
+) {
 
-std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile) /*throws PrismException*/ {
+    Result* res_min_max[2] = {new Result(), new Result()};
 
-        Result* res_min_max[2] = {new Result(), new Result()};
+    double reachTh = StaminaOptions::getReachabilityThreshold();
 
-        double reachTh = StaminaOptions::getReachabilityThreshold();
+    // Instantiate and load model generator
+    infModelGen = new InfCTMCModelGenerator<double>(modulesFile);
+    //super.loadModelGenerator(infModelGen);
 
-        // Instantiate and load model generator
-        infModelGen = new InfCTMCModelGenerator<double>(modulesFile);
-        //super.loadModelGenerator(infModelGen);
+    // Time bounds
+    double lTime, uTime;
 
-        // Time bounds
-        double lTime, uTime;
+    // Split property into 2 to find P_min and P_max
 
-        // Split property into 2 to find P_min and P_max
+    std::string propName = prop.getName().empty() ? "Prob" : prop.getName();
 
-        std::string propName = prop.getName().empty() ? "Prob" : prop.getName();
+    // storm::jani::Property prop_min = new storm::jani::Property(propName + "_min", modifyExpression(prop.getFilter().getFormula()->toExpression().getBaseExpression(), true, modulesFile), prop.getUndefinedConstants(), prop.getComment());
 
-       // storm::jani::Property prop_min = new storm::jani::Property(propName + "_min", modifyExpression(prop.getFilter().getFormula()->toExpression().getBaseExpression(), true, modulesFile), prop.getUndefinedConstants(), prop.getComment());
+    //Old way to call modify expression
+    /*prop_min.setName(propName+"_min");
+    modifyExpression(prop_min.getExpression(), true);*/
 
-        //Old way to call modify expression
-        /*prop_min.setName(propName+"_min");
-        modifyExpression(prop_min.getExpression(), true);*/
+    //storm::jani::Property prop_max = new storm::jani::Property(propName + "_max", modifyExpression(prop.getFilter().getFormula()->toExpression().getBaseExpression(), false, modulesFile), prop.getUndefinedConstants(), prop.getComment());
 
-        //storm::jani::Property prop_max = new storm::jani::Property(propName + "_max", modifyExpression(prop.getFilter().getFormula()->toExpression().getBaseExpression(), false, modulesFile), prop.getUndefinedConstants(), prop.getComment());
-
-        //Old way to call modify expression
-        /*prop_max.setName(propName+"_max");
+    //Old way to call modify expression
+    /*prop_max.setName(propName+"_max");
         modifyExpression(prop_max.getExpression(), false);*/
 
 
@@ -152,43 +179,43 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     //if(exprProp->isProbabilityPathFormula()) {
 
 
-        //while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) {
+    //while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) {
 
 
-                auto expr = exprProp;
-                auto exprTemp = expr;
+    auto expr = exprProp;
+    auto exprTemp = expr;
 
-                if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula()) && (!StaminaOptions::getNoPropRefine())) {
-                    //infModelGen->setPropertyExpression(exprTemp);
-                }
+    if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula()) && (!StaminaOptions::getNoPropRefine())) {
+        //infModelGen->setPropertyExpression(exprTemp);
+    }
 
-                if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula())) {
-                    switchToCombinedCTMC = true;
-                }
-
-
-
-                    //////////////////////////Approximation Step///////////////////////////
-                    std::cout << std::endl;
-                    std::cout << "========================================================================" << std::endl;
-                    std::cout << "Approximation<" << (numRefineIteration+1) << "> : kappa = " << reachTh << std::endl;
-                    std::cout << "========================================================================" << std::endl;
-                    //infModelGen->setReachabilityThreshold(reachTh);
+    if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula())) {
+        switchToCombinedCTMC = true;
+    }
 
 
-                    auto formulae = storm::api::extractFormulasFromProperties(propertiesVector);
 
-                    // Now translate the prism program into a CTMC in the sparse format.
-                    // Use the formulae to add the correct labelling.
-                    storm::builder::BuilderOptions options(formulae, modulesFile);
+    //////////////////////////Approximation Step///////////////////////////
+    std::cout << std::endl;
+    std::cout << "========================================================================" << std::endl;
+    std::cout << "Approximation<" << (numRefineIteration+1) << "> : kappa = " << reachTh << std::endl;
+    std::cout << "========================================================================" << std::endl;
+    //infModelGen->setReachabilityThreshold(reachTh);
 
-                    auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-                    auto variableInformation = VariableInformation(modulesFile, options.isAddOutOfBoundsStateSet());
-                    InfCTMCModelGenerator<double> builder(generator);
-                    //storm::builder::ExplicitModelBuilder<double> builder(generator);
-                    auto model = *builder.build(variableInformation)->as<Ctmc>();
-                    auto mcCTMC = std::make_shared<CtmcModelChecker>(model);
-                    return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
+
+    auto formulae = storm::api::extractFormulasFromProperties(propertiesVector);
+
+    // Now translate the prism program into a CTMC in the sparse format.
+    // Use the formulae to add the correct labelling.
+    storm::builder::BuilderOptions options(formulae, modulesFile);
+
+    auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
+    auto variableInformation = VariableInformation(modulesFile, options.isAddOutOfBoundsStateSet());
+    InfCTMCModelGenerator<double> builder(generator);
+    //storm::builder::ExplicitModelBuilder<double> builder(generator);
+    auto model = *builder.build(variableInformation)->as<Ctmc>();
+    auto mcCTMC = std::make_shared<CtmcModelChecker>(model);
+    return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
 /*
 
 
