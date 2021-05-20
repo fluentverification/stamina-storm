@@ -111,5 +111,4 @@ class InfCTMCModelGenerator {
 
 };
 
-
 #endif  /* STORM_BUILDER_INFCTMCGENERATOR_H */
