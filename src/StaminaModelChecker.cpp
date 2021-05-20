@@ -111,11 +111,9 @@ bool StaminaModelChecker::terminateModelCheck(double minProb, double maxProb, do
 }
 
 std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile) {
-        std::cout << "in modelCheckStamina" << std::endl;
         Result* res_min_max[2] = {new Result(), new Result()};
 
         double reachTh = StaminaOptions::getReachabilityThreshold();
-        std::cout << "got Reachability threshold" << std::endl;
 
         // Instantiate and load model generator
        // infModelGen = new InfCTMCNextStateGenerator<double>(modulesFile);
@@ -192,7 +190,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
                     auto result = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));   // should return pMin? or maaaaybe pMax
                     auto quantRes = result->asExplicitQuantitativeCheckResult<double>();
-                    std::cout << "Result (for real): " << quantRes << std::endl;
+                    std::cout << "Quantitative Result: " << quantRes << std::endl;
                     return result;
                     // if(result->isExplicitQuantitativeCheckResult()) {
                     //     retu

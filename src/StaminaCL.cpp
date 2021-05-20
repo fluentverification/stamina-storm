@@ -37,7 +37,6 @@ void StaminaCL::run(int argv, char* argc[]) {
 
     // Process options
     processOptions();
-    std::cout << "past options" << std::endl;
 
     try {
         // process info about undefined constant
@@ -55,13 +54,9 @@ void StaminaCL::run(int argv, char* argc[]) {
         for (int i = 0; i < numPropertiesToCheck; i++) {
             propertiesVector[i].substitute(constMap); //Not sure if this works, need to check
         }
-        std::cout << "past constants" << std::endl;
-
-
 
         // initialise storage for results
         storm::modelchecker::CheckResult* results[numPropertiesToCheck];
-        std::cout << "past initialise storage" << std::endl;
 
         //still need to figure this part out
         /*for (int i = 0; i < numPropertiesToCheck; i++) {
@@ -88,8 +83,6 @@ void StaminaCL::run(int argv, char* argc[]) {
                 undefinedMFConstants.iterateModel();
                 for (int j = 0; j < numPropertiesToCheck; j++) {
                     undefinedConstants[j].iterateModel();
-                }
-                continue;
             }
 
             // Work through list of properties to be checked
@@ -131,21 +124,14 @@ void StaminaCL::run(int argv, char* argc[]) {
             }
 
         }*/
-        int i = 0;
         for(auto property: propertiesVector) {
-            std::cout << "loop: " << i++ << std::endl;
-            std::cout << "prop: " << property << std::endl;
             auto result = staminaMC->modelCheckStamina(propertiesVector, property, modulesFile);
-            std::cout << "Result: " << std::endl;
-            // std::cout << "Result: " << *result << std::endl;
         }
-        std::cout << "out of loop" << std::endl;
 
     } catch (stormException e) {
-        std::cout << "storm exception yo" << std::endl;
+        std::cout << "Error: " << e.what() << std::endl;
         errorAndExit(e.what());
     }
-    std::cout << "done" << std::endl;
 }
 
 
