@@ -26,18 +26,41 @@
 #include "storm/exceptions/WrongFormatException.h"
 #include "storm/exceptions/UnexpectedException.h"
 
+
 namespace storm {
     namespace generator {
-
+        /**
+         * Constructor for InfCTMCNextStateGenerator. 
+         * 
+         * @param program The PRISM program passed in through the STORM API.
+         * @param options Options for the next state generator.
+         * */
         template<typename ValueType, typename StateType>
-        InfCTMCNextStateGenerator<ValueType, StateType>::InfCTMCNextStateGenerator(storm::prism::Program const& program, NextStateGeneratorOptions const& options) : InfCTMCNextStateGenerator<ValueType, StateType>(program.substituteConstantsFormulas(), options, false) {
+        InfCTMCNextStateGenerator<ValueType, StateType>::InfCTMCNextStateGenerator(
+            storm::prism::Program const& program
+            , NextStateGeneratorOptions const& options
+        ) : InfCTMCNextStateGenerator<ValueType, StateType>(program.substituteConstantsFormulas(), options, false) {
             // Intentionally left empty.
         }
-
+        /**
+         * Constructor for InfCTMCNextStateGenerator.
+         * 
+         * @param program The PRISM program passed in through the STORM API.
+         * @param options Options for the next state generator.
+         * @param stateActionRewards Not implemented yet
+         * */
         template<typename ValueType, typename StateType>
-        InfCTMCNextStateGenerator<ValueType, StateType>::InfCTMCNextStateGenerator(storm::prism::Program const& program, NextStateGeneratorOptions const& options, bool) : NextStateGenerator<ValueType, StateType>(program.getManager(), options), program(program), rewardModels(), hasStateActionRewards(false) {
+        InfCTMCNextStateGenerator<ValueType, StateType>::InfCTMCNextStateGenerator(
+            storm::prism::Program const& program
+            , NextStateGeneratorOptions const& options
+            , bool stateActionRewards // Not implemented yet
+        ) : NextStateGenerator<ValueType, StateType>(program.getManager(), options), program(program), rewardModels(), hasStateActionRewards(false) {
             STORM_LOG_TRACE("Creating next-state generator for PRISM program: " << program);
-            STORM_LOG_THROW(!this->program.specifiesSystemComposition(), storm::exceptions::WrongFormatException, "The explicit next-state generator currently does not support custom system compositions.");
+            STORM_LOG_THROW(
+                !this->program.specifiesSystemComposition()
+                , storm::exceptions::WrongFormatException
+                , "The explicit next-state generator currently does not support custom system compositions."
+            );
 
             // Only after checking validity of the program, we initialize the variable information.
             this->checkValid();
@@ -56,8 +79,16 @@ namespace storm {
                     if (this->program.hasRewardModel(rewardModelName)) {
                         rewardModels.push_back(this->program.getRewardModel(rewardModelName));
                     } else {
-                        STORM_LOG_THROW(rewardModelName.empty(), storm::exceptions::InvalidArgumentException, "Cannot build unknown reward model '" << rewardModelName << "'.");
-                        STORM_LOG_THROW(this->program.getNumberOfRewardModels() == 1, storm::exceptions::InvalidArgumentException, "Reference to standard reward model is ambiguous.");
+                        STORM_LOG_THROW(
+                            rewardModelName.empty()
+                            , storm::exceptions::InvalidArgumentException
+                            , "Cannot build unknown reward model '" << rewardModelName << "'."
+                        );
+                        STORM_LOG_THROW(
+                            this->program.getNumberOfRewardModels() == 1
+                            , storm::exceptions::InvalidArgumentException
+                            , "Reference to standard reward model is ambiguous."
+                        );
                     }
                 }
 
@@ -83,7 +114,11 @@ namespace storm {
                             this->terminalStates.push_back(std::make_pair(this->program.getLabelExpression(expressionOrLabelAndBool.first.getLabel()), expressionOrLabelAndBool.second));
                         } else {
                             // If the label is not present in the program and is not a special one, we raise an error.
-                            STORM_LOG_THROW(expressionOrLabelAndBool.first.getLabel() == "init" || expressionOrLabelAndBool.first.getLabel() == "deadlock", storm::exceptions::InvalidArgumentException, "Terminal states refer to illegal label '" << expressionOrLabelAndBool.first.getLabel() << "'.");
+                            STORM_LOG_THROW(
+                                expressionOrLabelAndBool.first.getLabel() == "init" || expressionOrLabelAndBool.first.getLabel() == "deadlock"
+                                , storm::exceptions::InvalidArgumentException
+                                , "Terminal states refer to illegal label '" << expressionOrLabelAndBool.first.getLabel() << "'."
+                            );
                         }
                     }
                 }
@@ -97,13 +132,22 @@ namespace storm {
             //Instantiate PrismNextStateGenerator to use getInitialStates
             generator = std::make_shared<PrismNextStateGenerator<ValueType, StateType>>(program);
         }
-
+        /**
+         * Determines whether STAMINA can handle a specific program. STAMINA handles all except for PTAs.
+         * 
+         * @param program The PRISM program to pass in, via the STORM API.
+         * @return Whether or not STAMINA can handle it.
+         * */
         template<typename ValueType, typename StateType>
         bool InfCTMCNextStateGenerator<ValueType, StateType>::canHandle(storm::prism::Program const& program) {
             // We can handle all valid prism programs (except for PTAs)
             return program.getModelType() != storm::prism::Program::ModelType::PTA;
         }
-
+        /**
+         * Determines whether this next state generator has entirely valid settings and input. If the program
+         * passed in has any issues, e.g., undefined constants, this function will throw an exception directly
+         * to the STORM log.
+         * */
         template<typename ValueType, typename StateType>
         void InfCTMCNextStateGenerator<ValueType, StateType>::checkValid() const {
             // If the program still contains undefined constants and we are not in a parametric setting, assemble an appropriate error message.
@@ -130,11 +174,18 @@ namespace storm {
 #ifdef STORM_HAVE_CARL
             else if (std::is_same<ValueType, storm::RationalFunction>::value && !program.undefinedConstantsAreGraphPreserving()) {
                 auto undef = program.getUndefinedConstantsAsString();
-                STORM_LOG_THROW(false, storm::exceptions::InvalidArgumentException, "The program contains undefined constants that appear in some places other than update probabilities and reward value expressions, which is not admitted. Undefined constants are: " << undef);
+                STORM_LOG_THROW(
+                    false
+                    , storm::exceptions::InvalidArgumentException
+                    , "The program contains undefined constants that appear in some places other than update probabilities and reward value expressions, which is not admitted. Undefined constants are: " << undef);
             }
 #endif
         }
-
+        /**
+         * Gets the model type that we are working with.
+         * 
+         * @return The model type.
+         * */
         template<typename ValueType, typename StateType>
         ModelType InfCTMCNextStateGenerator<ValueType, StateType>::getModelType() const {
             switch (program.getModelType()) {
@@ -148,22 +199,39 @@ namespace storm {
                     STORM_LOG_THROW(false, storm::exceptions::WrongFormatException, "Invalid model type.");
             }
         }
-
+        /**
+         * Tells if our model (the program we passed in through the constructor) is deterministic.
+         * 
+         * @return Whether the model is deterministic.
+         * */
         template<typename ValueType, typename StateType>
         bool InfCTMCNextStateGenerator<ValueType, StateType>::isDeterministicModel() const {
             return program.isDeterministicModel();
         }
-
+        /**
+         * Tells if our model (the PRISM program passed into the constructor) is discrete-time.
+         * 
+         * @return Whether or not the model is in discrete or continuous time.
+         * */
         template<typename ValueType, typename StateType>
         bool InfCTMCNextStateGenerator<ValueType, StateType>::isDiscreteTimeModel() const {
             return program.isDiscreteTimeModel();
         }
-
+        /**
+         * Tells if our model (PRISM program) is partially observable.
+         * 
+         * @return Whether or not the model is partially observable.
+         * */
         template<typename ValueType,typename StateType>
         bool InfCTMCNextStateGenerator<ValueType, StateType>::isPartiallyObservable() const {
             return program.isPartiallyObservable();
         }
-
+        /**
+         * Gets a vector of our initial states.
+         * 
+         * @param stateToIdCallback TODO...I'm not entirely sure what this parameter is.
+         * @return All initial states
+         * */
         template<typename ValueType, typename StateType>
         std::vector<StateType> InfCTMCNextStateGenerator<ValueType, StateType>::getInitialStates(StateToIdCallback const& stateToIdCallback) {
             doReachabilityAnalysis();
@@ -171,7 +239,12 @@ namespace storm {
 
             return initialStateIndices;
         }
-
+        /**
+         * Gets the state index or adds it to the state-exploration queue.
+         * 
+         * @param state State to get index of or add to queue.
+         * @return The index of that state
+         * */
         template<typename ValueType, typename StateType>
         StateType InfCTMCNextStateGenerator<ValueType, StateType>::getOrAddStateIndex(CompressedState const& state) {
             StateType actualIndex = static_cast<StateType>(state.getAsInt(0, 64));  // get 64 bits starting at bit 0
@@ -200,7 +273,9 @@ namespace storm {
 
             return actualIndex;
         }
-
+        /**
+         * Performs a reachability analysis for our state space doing a breadth first search.
+         * */
         template<typename ValueType, typename StateType>
         void InfCTMCNextStateGenerator<ValueType, StateType>::doReachabilityAnalysis() {
             // Check if model is based on infinite state system and print warning
@@ -208,7 +283,11 @@ namespace storm {
             // TODO: display progress
 
             // Check that the model type is CTMC
-            STORM_LOG_THROW(program.getModelType() == storm::prism::Program::ModelType::CTMC, storm::exceptions::WrongFormatException, "Probabilistic model construction not supported for model type: " << program.getModelType());
+            STORM_LOG_THROW(
+                program.getModelType() == storm::prism::Program::ModelType::CTMC
+                , storm::exceptions::WrongFormatException
+                , "Probabilistic model construction not supported for model type: " << program.getModelType()
+            );
 
             // Create unordered_set statesK of ProbStates
             std::unordered_set<ProbState> statesK;
@@ -371,6 +450,13 @@ namespace storm {
         
 
         //TODO: Override this method?
+        /**
+         * Expands all choices for a state. First, state rewards are computed, and then choices are expanded
+         * and explored.
+         * 
+         * @param stateToIdCallback The state to explore.
+         * @return A list of state choices and rewards.
+         * */
         template<typename ValueType, typename StateType>
         StateBehavior<ValueType, StateType> InfCTMCNextStateGenerator<ValueType, StateType>::expand(StateToIdCallback const& stateToIdCallback) {
             // Prepare the result, in case we return early.
@@ -486,13 +572,31 @@ namespace storm {
             // For SMG we check whether the state has a unique player
             if (program.getModelType() == storm::prism::Program::ModelType::SMG && allChoices.size() > 1) {
                 auto choiceIt = allChoices.begin();
-                STORM_LOG_ASSERT(choiceIt->hasPlayerIndex(), "State '" << this->stateToString(*this->state) << "' features a choice without player index."); // This should have been catched while creating the choice already
+                // This should have been catched while creating the choice already
+                STORM_LOG_ASSERT(
+                    choiceIt->hasPlayerIndex()
+                    , "State '" << this->stateToString(*this->state) << "' features a choice without player index."
+                ); 
                 storm::storage::PlayerIndex statePlayerIndex = choiceIt->getPlayerIndex();
-                STORM_LOG_ASSERT(statePlayerIndex != storm::storage::INVALID_PLAYER_INDEX, "State '" << this->stateToString(*this->state) << "' features a choice with invalid player index."); // This should have been catched while creating the choice already
+                // This should have been catched while creating the choice already
+                STORM_LOG_ASSERT(
+                    statePlayerIndex != storm::storage::INVALID_PLAYER_INDEX
+                    , "State '" << this->stateToString(*this->state) << "' features a choice with invalid player index."
+                ); 
                 for (++choiceIt; choiceIt != allChoices.end(); ++choiceIt) {
-                    STORM_LOG_ASSERT(choiceIt->hasPlayerIndex(), "State '" << this->stateToString(*this->state) << "' features a choice without player index."); // This should have been catched while creating the choice already
-                    STORM_LOG_ASSERT(choiceIt->getPlayerIndex() != storm::storage::INVALID_PLAYER_INDEX, "State '" << this->stateToString(*this->state) << "' features a choice with invalid player index."); // This should have been catched while creating the choice already
-                    STORM_LOG_THROW(statePlayerIndex == choiceIt->getPlayerIndex(), storm::exceptions::WrongFormatException, "The player for state '" << this->stateToString(*this->state) << "' is not unique. At least one choice is owned by player '" << statePlayerIndex << "' while another is owned by player '" << choiceIt->getPlayerIndex() << "'.");
+                    // This should have been catched while creating the choice already
+                    STORM_LOG_ASSERT(choiceIt->hasPlayerIndex(), "State '" << this->stateToString(*this->state) << "' features a choice without player index."); 
+                    // This should have been catched while creating the choice already
+                    STORM_LOG_ASSERT(
+                        choiceIt->getPlayerIndex() != storm::storage::INVALID_PLAYER_INDEX
+                        , "State '" << this->stateToString(*this->state) << "' features a choice with invalid player index."
+                    ); 
+                    STORM_LOG_THROW(
+                        statePlayerIndex == choiceIt->getPlayerIndex()
+                        , storm::exceptions::WrongFormatException
+                        , "The player for state '" << this->stateToString(*this->state) << "' is not unique. At least one choice is owned by player '" 
+                                                << statePlayerIndex << "' while another is owned by player '" << choiceIt->getPlayerIndex() << "'."
+                    );
                 }
             }
 
@@ -505,7 +609,13 @@ namespace storm {
 
             return result;
         }
-
+        /**
+         * Updates a state and returns the updated state.
+         * 
+         * @param state State to update
+         * @param update The update to be made to the state
+         * @return The updated state
+         * */
         template<typename ValueType, typename StateType>
         CompressedState InfCTMCNextStateGenerator<ValueType, StateType>::applyUpdate(CompressedState const& state, storm::prism::Update const& update) {
             CompressedState newState(state);
@@ -539,11 +649,22 @@ namespace storm {
                         return this->outOfBoundsState;
                     }
                 } else if (integerIt->forceOutOfBoundsCheck || this->options.isExplorationChecksSet()) {
-                    STORM_LOG_THROW(assignedValue >= integerIt->lowerBound, storm::exceptions::WrongFormatException, "The update " << update << " leads to an out-of-bounds value (" << assignedValue << ") for the variable '" << assignmentIt->getVariableName() << "'.");
-                    STORM_LOG_THROW(assignedValue <= integerIt->upperBound, storm::exceptions::WrongFormatException, "The update " << update << " leads to an out-of-bounds value (" << assignedValue << ") for the variable '" << assignmentIt->getVariableName() << "'.");
+                    STORM_LOG_THROW(
+                        assignedValue >= integerIt->lowerBound
+                        , storm::exceptions::WrongFormatException
+                        , "The update " << update << " leads to an out-of-bounds value (" << assignedValue << ") for the variable '" << assignmentIt->getVariableName() << "'."
+                    );
+                    STORM_LOG_THROW(
+                        assignedValue <= integerIt->upperBound
+                        , storm::exceptions::WrongFormatException
+                        , "The update " << update << " leads to an out-of-bounds value (" << assignedValue << ") for the variable '" << assignmentIt->getVariableName() << "'."
+                    );
                 }
                 newState.setFromInt(integerIt->bitOffset, integerIt->bitWidth, assignedValue - integerIt->lowerBound);
-                STORM_LOG_ASSERT(static_cast<int_fast64_t>(newState.getAsInt(integerIt->bitOffset, integerIt->bitWidth)) + integerIt->lowerBound == assignedValue, "Writing to the bit vector bucket failed (read " << newState.getAsInt(integerIt->bitOffset, integerIt->bitWidth) << " but wrote " << assignedValue << ").");
+                STORM_LOG_ASSERT(
+                    static_cast<int_fast64_t>(newState.getAsInt(integerIt->bitOffset, integerIt->bitWidth)) + integerIt->lowerBound == assignedValue
+                    , "Writing to the bit vector bucket failed (read " << newState.getAsInt(integerIt->bitOffset, integerIt->bitWidth) << " but wrote " << assignedValue << ")."
+                );
             }
 
             // Check that we processed all assignments.
@@ -553,16 +674,29 @@ namespace storm {
         }
 
         struct ActiveCommandData {
-            ActiveCommandData(storm::prism::Module const* modulePtr, std::set<uint_fast64_t> const* commandIndicesPtr, typename std::set<uint_fast64_t>::const_iterator currentCommandIndexIt) : modulePtr(modulePtr), commandIndicesPtr(commandIndicesPtr), currentCommandIndexIt(currentCommandIndexIt) {
+            ActiveCommandData(
+                storm::prism::Module const* modulePtr
+                , std::set<uint_fast64_t> const* commandIndicesPtr
+                , typename std::set<uint_fast64_t>::const_iterator currentCommandIndexIt
+            ) : modulePtr(modulePtr), commandIndicesPtr(commandIndicesPtr), currentCommandIndexIt(currentCommandIndexIt) {
                 // Intentionally left empty
             }
             storm::prism::Module const* modulePtr;
             std::set<uint_fast64_t> const* commandIndicesPtr;
             typename std::set<uint_fast64_t>::const_iterator currentCommandIndexIt;
         };
-
+        /**
+         * Gets all active commands, filtered by a CommandFilter, at a specific action index.
+         * 
+         * @param actionIndex The index to look for active commands.
+         * @param commandFilter The filter to apply.
+         * @return All active commands.
+         * */
         template<typename ValueType, typename StateType>
-        boost::optional<std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>>> InfCTMCNextStateGenerator<ValueType, StateType>::getActiveCommandsByActionIndex(uint_fast64_t const& actionIndex, CommandFilter const& commandFilter) {
+        boost::optional<std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>>> InfCTMCNextStateGenerator<ValueType, StateType>::getActiveCommandsByActionIndex(
+            uint_fast64_t const& actionIndex
+            , CommandFilter const& commandFilter
+        ) {
 
             // First check whether there is at least one enabled command at each module
             // This avoids evaluating unnecessarily many guards.
@@ -642,9 +776,20 @@ namespace storm {
             STORM_LOG_ASSERT(!result.empty(), "Expected non-empty list.");
             return result;
         }
-
+        /**
+         * Gets a std::vector containing all unlabeled choices in our PRISM model.
+         * 
+         * @param state
+         * @param stateToIdCallBack
+         * @param commandFilter
+         * @return All unlabeled choices in the form of a std::vector.
+         * */
         template<typename ValueType, typename StateType>
-        std::vector<Choice<ValueType>> InfCTMCNextStateGenerator<ValueType, StateType>::getUnlabeledChoices(CompressedState const& state, StateToIdCallback stateToIdCallback, CommandFilter const& commandFilter) {
+        std::vector<Choice<ValueType>> InfCTMCNextStateGenerator<ValueType, StateType>::getUnlabeledChoices(
+            CompressedState const& state
+            , StateToIdCallback stateToIdCallback
+            , CommandFilter const& commandFilter
+        ) {
             std::vector<Choice<ValueType>> result;
 
             // Iterate over all modules.
@@ -713,13 +858,21 @@ namespace storm {
 
                     if (program.getModelType() == storm::prism::Program::ModelType::SMG) {
                         storm::storage::PlayerIndex const& playerOfModule = moduleIndexToPlayerIndexMap.at(i);
-                        STORM_LOG_THROW(playerOfModule != storm::storage::INVALID_PLAYER_INDEX, storm::exceptions::WrongFormatException, "Module " << module.getName() << " is not owned by any player but has at least one enabled, unlabeled command.");
+                        STORM_LOG_THROW(
+                            playerOfModule != storm::storage::INVALID_PLAYER_INDEX
+                            , storm::exceptions::WrongFormatException
+                            , "Module " << module.getName() << " is not owned by any player but has at least one enabled, unlabeled command."
+                        );
                         choice.setPlayerIndex(playerOfModule);
                     }
 
                     if (this->options.isExplorationChecksSet()) {
                         // Check that the resulting distribution is in fact a distribution.
-                        STORM_LOG_THROW(!program.isDiscreteTimeModel() || this->comparator.isOne(probabilitySum), storm::exceptions::WrongFormatException, "Probabilities do not sum to one for command '" << command << "' (actually sum to " << probabilitySum << ").");
+                        STORM_LOG_THROW(
+                            !program.isDiscreteTimeModel() || this->comparator.isOne(probabilitySum)
+                            , storm::exceptions::WrongFormatException
+                            , "Probabilities do not sum to one for command '" << command << "' (actually sum to " << probabilitySum << ")."
+                        );
                     }
                 }
             }
@@ -728,7 +881,14 @@ namespace storm {
         }
 
         template<typename ValueType, typename StateType>
-        void InfCTMCNextStateGenerator<ValueType, StateType>::generateSynchronizedDistribution(storm::storage::BitVector const& state, ValueType const& probability, uint64_t position, std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> const& iteratorList, storm::builder::jit::Distribution<StateType, ValueType>& distribution, StateToIdCallback stateToIdCallback) {
+        void InfCTMCNextStateGenerator<ValueType, StateType>::generateSynchronizedDistribution(
+            storm::storage::BitVector const& state
+            , ValueType const& probability
+            , uint64_t position
+            , std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> const& iteratorList
+            , storm::builder::jit::Distribution<StateType, ValueType>& distribution
+            , StateToIdCallback stateToIdCallback
+        ) {
 
             if (storm::utility::isZero<ValueType>(probability)) {
                 return;
@@ -741,13 +901,25 @@ namespace storm {
                 storm::prism::Command const& command = *iteratorList[position];
                 for (uint_fast64_t j = 0; j < command.getNumberOfUpdates(); ++j) {
                     storm::prism::Update const& update = command.getUpdate(j);
-                    generateSynchronizedDistribution(applyUpdate(state, update), probability * this->evaluator->asRational(update.getLikelihoodExpression()), position + 1, iteratorList, distribution, stateToIdCallback);
+                    generateSynchronizedDistribution(
+                        applyUpdate(state, update)
+                        , probability * this->evaluator->asRational(update.getLikelihoodExpression())
+                        , position + 1
+                        , iteratorList
+                        , distribution
+                        , stateToIdCallback
+                    );
                 }
             }
         }
 
         template<typename ValueType, typename StateType>
-        void InfCTMCNextStateGenerator<ValueType, StateType>::addLabeledChoices(std::vector<Choice<ValueType>>& choices, CompressedState const& state, StateToIdCallback stateToIdCallback, CommandFilter const& commandFilter) {
+        void InfCTMCNextStateGenerator<ValueType, StateType>::addLabeledChoices(
+            std::vector<Choice<ValueType>>& choices
+            , CompressedState const& state
+            , StateToIdCallback stateToIdCallback
+            , CommandFilter const& commandFilter
+        ) {
 
             for (uint_fast64_t actionIndex : program.getSynchronizingActionIndices()) {
                 boost::optional<std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>>> optionalActiveCommandLists = getActiveCommandsByActionIndex(actionIndex, commandFilter);
@@ -781,7 +953,11 @@ namespace storm {
 
                         if (program.getModelType() == storm::prism::Program::ModelType::SMG) {
                             storm::storage::PlayerIndex const& playerOfAction = actionIndexToPlayerIndexMap.at(actionIndex);
-                            STORM_LOG_THROW(playerOfAction != storm::storage::INVALID_PLAYER_INDEX, storm::exceptions::WrongFormatException, "Action " << program.getActionName(actionIndex) << " is not owned by any player but has at least one enabled, unlabeled (synchronized) command.");
+                            STORM_LOG_THROW(
+                                playerOfAction != storm::storage::INVALID_PLAYER_INDEX
+                                , storm::exceptions::WrongFormatException
+                                , "Action " << program.getActionName(actionIndex) << " is not owned by any player but has at least one enabled, unlabeled (synchronized) command."
+                            );
                             choice.setPlayerIndex(playerOfAction);
                         }
 
@@ -809,7 +985,11 @@ namespace storm {
 
                         if (this->options.isExplorationChecksSet()) {
                             // Check that the resulting distribution is in fact a distribution.
-                            STORM_LOG_THROW(!program.isDiscreteTimeModel() || !this->comparator.isConstant(probabilitySum) || this->comparator.isOne(probabilitySum), storm::exceptions::WrongFormatException, "Sum of update probabilities do not some to one for some command (actually sum to " << probabilitySum << ").");
+                            STORM_LOG_THROW(
+                                !program.isDiscreteTimeModel() || !this->comparator.isConstant(probabilitySum) || this->comparator.isOne(probabilitySum)
+                                , storm::exceptions::WrongFormatException
+                                , "Sum of update probabilities do not some to one for some command (actually sum to " << probabilitySum << ")."
+                            );
                         }
 
                         // Create the state-action reward for the newly created choice.
@@ -849,7 +1029,11 @@ namespace storm {
         }
 
         template<typename ValueType, typename StateType>
-        storm::models::sparse::StateLabeling InfCTMCNextStateGenerator<ValueType, StateType>::label(storm::storage::sparse::StateStorage<StateType> const& stateStorage, std::vector<StateType> const& initialStateIndices, std::vector<StateType> const& deadlockStateIndices) {
+        storm::models::sparse::StateLabeling InfCTMCNextStateGenerator<ValueType, StateType>::label(
+            storm::storage::sparse::StateStorage<StateType> const& stateStorage
+            , std::vector<StateType> const& initialStateIndices
+            , std::vector<StateType> const& deadlockStateIndices
+        ) {
             // Gather a vector of labels and their expressions.
             std::vector<std::pair<std::string, storm::expressions::Expression>> labels;
             if (this->options.isBuildAllLabelsSet()) {

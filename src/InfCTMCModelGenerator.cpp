@@ -52,6 +52,8 @@
         // Actual function code.
     }
 
+    This same thing can be applied to functions whose parameters are super long.
+
     If someone doesn't like this, let me know and I'll change it back. If you're cool with
     it, then delete this message or something I guess.
 */
@@ -120,7 +122,8 @@ InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenera
  * @return Pointer to the model generated from components.
  * */
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build(storm::generator::VariableInformation const& variableInformation) {
+std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build(storm::generator::VariableInformation const& variableInformation) 
+{
     STORM_LOG_DEBUG("Exploration order is: " << options.explorationOrder);
     this->variableInformation = variableInformation;
     switch (generator->getModelType()) {
@@ -287,31 +290,53 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
             generator->load(currentState);
 
             storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(
-                    stateToIdCallback);
+            stateToIdCallback);
 
 
-                    // Reserve one slot for the new state in the remapping.
-                    stateRemapping.get().push_back(storm::utility::zero<StateType>());
-                } else if (options.explorationOrder == storm::builder::ExplorationOrder::Bfs) {
-                    statesToExplore.emplace_back(state, actualIndex);
-                    auto newProbState = new ProbState(actualIndex);
-                    stateMap.emplace(actualIndex, newProbState);
-                } else {
-                    STORM_LOG_ASSERT(false, "Invalid exploration order.");
-                }
-            }
-
-            return actualIndex;
+            // Reserve one slot for the new state in the remapping.
+            stateRemapping.get().push_back(storm::utility::zero<StateType>());
+        } else if (options.explorationOrder == storm::builder::ExplorationOrder::Bfs) {
+            statesToExplore.emplace_back(state, actualIndex);
+            auto newProbState = new ProbState(actualIndex);
+            stateMap.emplace(actualIndex, newProbState);
+        } 
+        else {
+            STORM_LOG_ASSERT(false, "Invalid exploration order.");
         }
+    }
 
+    return actualIndex;
+}
+/**
+ * Gets the index of traversal for an absorbing state.
+ * 
+ * @param state CompressedState& the state to get the index of.
+ * 
+ * @return Always returns 0, since state is absorbing.
+ * */
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex(CompressedState const& state) {
     return 0;
 }
-
+/**
+ * Builds the transition matrices of the truncated state space.
+ * 
+ * This function performs the traversal of the state space and truncates it at the majority of the probability mass.
+ * I believe this version currently uses the STAMINA 1.0 algorithm, so we need to update it to STAMINA 2.0 (the one that Riley
+ * came up with). TODO: update to STAMINA 2.0 algorithm.
+ * 
+ * @param transitionMatrixBuilder SparseMatrixBuilder&
+ * @param RewardModelBuilders RewardModelBuilder&
+ * @param ChoiceInformationBuilder ChoiceInformationBuilder&
+ * @param markovianStates optional&
+ * */
 template <typename ValueType, typename RewardModelType, typename StateType>
-void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder, std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders, storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder, boost::optional<storm::storage::BitVector>& markovianStates) {
-
+void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices(
+    storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+    , std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders
+    , storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder
+    , boost::optional<storm::storage::BitVector>& markovianStates
+){
     // Create markovian states bit vector, if required.
     if (generator->getModelType() == storm::generator::ModelType::MA) {
         // The bit vector will be resized when the correct size is known.
@@ -696,7 +721,14 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
         this->generator->remapStateIds([&remapping] (StateType const& state) { return remapping[state]; });
     }
 }
-
+/**
+ * Builds the model components for this model.
+ * 
+ * details This function builds the ModelComponents for this model. In order to do this, it first calls buildMatrices(), which
+ * are then placed into the ModelComponents class. After this is done we finalize the models and build labeling.
+ * 
+ * @return The model components we have built.
+ * */
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::ModelComponents<ValueType, RewardModelType> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildModelComponents() {
 

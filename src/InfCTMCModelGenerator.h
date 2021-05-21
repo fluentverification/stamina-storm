@@ -61,11 +61,22 @@ public:
         storm::builder::ExplorationOrder explorationOrder;
     };
     
-    InfCTMCModelGenerator(std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> const& generator, Options const& options = Options());
+    InfCTMCModelGenerator(
+        std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> const& generator
+        , Options const& options = Options()
+    );
 
-    InfCTMCModelGenerator(storm::prism::Program const& program, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions(), Options const& builderOptions = Options());
+    InfCTMCModelGenerator(
+        storm::prism::Program const& program
+        , storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
+        , Options const& builderOptions = Options()
+    );
 
-    InfCTMCModelGenerator(storm::jani::Model const& model, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions(), Options const& builderOptions = Options());
+    InfCTMCModelGenerator(
+        storm::jani::Model const& model
+        , storm::generator::NextStateGeneratorOptions const& generatorOptions = dstorm::generator::NextStateGeneratorOptions()
+        , Options const& builderOptions = Options()
+    );
     
     std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build(storm::generator::VariableInformation const& variableInformation);
     
@@ -76,7 +87,12 @@ private:
     StateType getOrAddStateIndex(CompressedState const& state);
     StateType getAbsorbingStateIndex(CompressedState const& state);
 
-    void buildMatrices(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder, std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders, storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder, boost::optional<storm::storage::BitVector>& markovianChoices);
+    void buildMatrices(
+        storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+        , std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders
+        , storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder
+        , boost::optional<storm::storage::BitVector>& markovianChoices
+    );
     
     storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents();
     
