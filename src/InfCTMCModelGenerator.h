@@ -41,7 +41,6 @@ using namespace storm::utility::prism;
 using namespace storm::generator;
 
 
-
 // Forward-declare classes.
 namespace storm{
     namespace builder {
@@ -95,5 +94,6 @@ private:
 
 };
 
+};
 
 #endif  /* STORM_BUILDER_INFCTMCGENERATOR_H */

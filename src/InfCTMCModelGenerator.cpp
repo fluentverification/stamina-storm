@@ -34,61 +34,261 @@
 #include "storm/utility/SignalHandler.h"
 
 
+/* 
+    If function/method definition names are going to have names that are long enough to 
+    reach halfway across the planet, we should at *least* put a line break in there
+    somewhere, right?
 
-        template <typename ValueType, typename RewardModelType, typename StateType>
-        InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::Options::Options() : explorationOrder(storm::settings::getModule<storm::settings::modules::BuildSettings>().getExplorationOrder()) {
-            // Intentionally left empty.
+    - Josh
+
+    Here's what I was thinking style-wise for such long templated names:
+
+    returnType<ValueType, RewardModelType, StateType> InfCTMCModelGenerator::functionName(
+            ParameterOneType<ValueType, RewardModelType, StateType> param1
+            , ParameterTwoType<ValueType, RewardModelType, StateType> param2
+            , ParameterThreeType<ValueType, RewardModelType, StateType> param3
+        )
+        : superClassThing(), superClassThing2() {
+        // Actual function code.
+    }
+
+    If someone doesn't like this, let me know and I'll change it back. If you're cool with
+    it, then delete this message or something I guess.
+*/
+
+/**
+ * Constructor for InfCTMCModelGenerator::Options()
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::Options::Options() 
+    : explorationOrder(storm::settings::getModule<storm::settings::modules::BuildSettings>().getExplorationOrder()) {
+    // Intentionally left empty.
+}
+/**
+ * Constructor for InfCTMCModelGenerator().
+ * 
+ * @param generator std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> Smart pointer to the STORM generator
+ * @param options Options& Options for the generator.
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenerator(
+        std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> const& generator
+        , Options const& options
+    ) 
+    : generator(generator), options(options), stateStorage(generator->getStateSize()) {
+    // Intentionally left empty.
+}
+/**
+ * Constructor for InfCTMCModelGenerator().
+ * 
+ * @param generatorOptions storm::prism::Program const& program, storm::generator::NextStateGeneratorOptions&
+ * @param options Options& Options for the generator.
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenerator(
+        storm::prism::Program const& program, storm::generator::NextStateGeneratorOptions const& generatorOptions
+        , Options const& builderOptions
+    ) 
+    : InfCTMCModelGenerator(std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(program, generatorOptions), builderOptions) {
+    // Intentionally left empty.
+}
+/**
+ * Constructor for InfCTMCModelGenerator().
+ * 
+ * @param model storm::jani::Model& The model to start with.
+ * @param generatorOptions storm::generator::NextStateGeneratorOptions& The options for the model generator.
+ * @param builderOptions Options& The options for the builder.
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenerator(
+        storm::jani::Model const& model
+        , storm::generator::NextStateGeneratorOptions const& generatorOptions
+        , Options const& builderOptions
+    ) 
+    : InfCTMCModelGenerator(std::make_shared<storm::generator::JaniNextStateGenerator<ValueType, StateType>>(model, generatorOptions), builderOptions) {
+    // Intentionally left empty.
+}
+/** 
+ * Builds STORM model components based on the model type of the generator.
+ * 
+ * details This function takes a parameter of type storm::generator::VariableInformation, which it then stores into this particular instance of InfCTMCModelGenerator.
+ * After it has finished this, it takes a look at the model type of this->generator, and builds a model from that. If the model type is not one of the following:
+ * DTMC, CTMC, MDP, POMDP, or MA, it throws a WrongFormatException and returns nullptr.
+ * 
+ * @param variableInformation storm::generator::VariableInformation& The variable information to store for the STORM model.
+ * 
+ * @return Pointer to the model generated from components.
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build(storm::generator::VariableInformation const& variableInformation) {
+    STORM_LOG_DEBUG("Exploration order is: " << options.explorationOrder);
+    this->variableInformation = variableInformation;
+    switch (generator->getModelType()) {
+        case storm::generator::ModelType::DTMC:
+            return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, buildModelComponents());
+        case storm::generator::ModelType::CTMC:
+            return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
+        case storm::generator::ModelType::MDP:
+            return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Mdp, buildModelComponents());
+        case storm::generator::ModelType::POMDP:
+            return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Pomdp, buildModelComponents());
+        case storm::generator::ModelType::MA:
+            return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::MarkovAutomaton, buildModelComponents());
+        default:
+            STORM_LOG_THROW(false, storm::exceptions::WrongFormatException, "Error while creating model: cannot handle this model type.");
+    }
+
+    return nullptr;
+}
+/**
+ * Gets the index of a state of type CompressedState& and returns it. 
+ * 
+ * details This function takes a state of type CompressedState and tries to register a new index
+ * for that in our breadth-first traversal or depth first traversal. If the state is already registered 
+ * with an index, this function will not add it to the states yet to explore. However, if it does not,
+ * this method will add it to the states to explore in either depth first or breadth first, asserting
+ * to the STORM log if the exploration order is neither one.
+ * 
+ * @param state CompressedState& The state to add (if not already added) into our states to explore.
+ * 
+ * @return The actual index of this state after it has been added.
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+    StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
+
+    // Check, if the state was already registered.
+    std::pair<StateType, std::size_t> actualIndexBucketPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
+
+    StateType actualIndex = actualIndexBucketPair.first;
+
+    if (actualIndex == newIndex) {
+        if (options.explorationOrder == storm::builder::ExplorationOrder::Dfs) {
+            statesToExplore.emplace_front(state, actualIndex);
+
+            // Reserve one slot for the new state in the remapping.
+            stateRemapping.get().push_back(storm::utility::zero<StateType>());
+        } 
+        else if (options.explorationOrder == storm::builder::ExplorationOrder::Bfs) {
+            statesToExplore.emplace_back(state, actualIndex);
+            auto newProbState = new ProbState(actualIndex);
+            stateMap.emplace(actualIndex, newProbState);
+        } 
+        else {
+            STORM_LOG_ASSERT(false, "Invalid exploration order.");
+        }
+    }
+
+    return actualIndex;
+}
+/**
+ * Gets the index of traversal for an absorbing state.
+ * 
+ * @param state CompressedState& the state to get the index of.
+ * 
+ * @return Always returns 0, since state is absorbing.
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex(CompressedState const& state) {
+    return 0;
+}
+/**
+ * brief buildMatrices - Builds the transition matrices of the truncated state space.
+ * 
+ * details This function performs the traversal of the state space and truncates it at the majority of the probability mass.
+ * I believe this version currently uses the STAMINA 1.0 algorithm, so we need to update it to STAMINA 2.0 (the one that Riley
+ * came up with). TODO: update to STAMINA 2.0 algorithm.
+ * 
+ * @param transitionMatrixBuilder SparseMatrixBuilder&
+ * @param RewardModelBuilders RewardModelBuilder&
+ * @param ChoiceInformationBuilder ChoiceInformationBuilder&
+ * @param markovianStates optional&
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices(
+    storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+    , std::vector<storm::builder::RewardModelBuilder<typename RewardModelType::ValueType>>& RewardModelBuilders
+    , storm::builder::ChoiceInformationBuilder& ChoiceInformationBuilder, boost::optional<storm::storage::BitVector>& markovianStates) {
+
+    // Create markovian states bit vector, if required.
+    if (generator->getModelType() == storm::generator::ModelType::MA) {
+        // The bit vector will be resized when the correct size is known.
+        markovianStates = storm::storage::BitVector(1000);
+    }
+
+    // Create a callback for the next-state generator to enable it to request the index of states.
+    std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex, this, std::placeholders::_1);
+    std::function<StateType (CompressedState const&)> absorbingStateIndexFunc = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex, this, std::placeholders::_1);
+    // If the exploration order is something different from breadth-first, we need to keep track of the remapping
+    // from state ids to row groups. For this, we actually store the reversed mapping of row groups to state-ids
+    // and later reverse it.
+    if (options.explorationOrder != storm::builder::ExplorationOrder::Bfs) {
+        stateRemapping = std::vector<uint_fast64_t>();
+    }
+    stateMap.reserve(16000);
+
+    uint_fast64_t currentRowGroup = 0;
+    uint_fast64_t currentRow = 0;
+
+
+
+    //Make absorbing state
+    CompressedState absorbingState(variableInformation.getTotalBitOffset(true));
+    stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+    /*auto boolIt = variableInformation.booleanVariables.begin();
+    auto boolEnd = variableInformation.booleanVariables.end();
+    while (boolIt != boolEnd) {
+        absorbingState.set(boolIt->bitOffset, false);
+        boolIt++;
+    }
+    auto integerIt = variableInformation.integerVariables.begin();
+    auto integerEnd = variableInformation.integerVariables.end();
+    while (integerIt != integerEnd) {
+        absorbingState.set(integerIt->bitOffset, -1);
+        integerIt++;
+    }*/
+    transitionMatrixBuilder.addNextValue(currentRow, 0, storm::utility::one<ValueType>());
+    this->stateStorage.deadlockStateIndices.push_back(0);
+    currentRow++;
+    currentRowGroup++;
+
+    // Let the generator create all initial states.
+    this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+    stateMap.find(this->stateStorage.initialStateIndices[0])->second->setCurReachabilityProb(1);
+    STORM_LOG_THROW(!this->stateStorage.initialStateIndices.empty(), storm::exceptions::WrongFormatException, "The model does not have a single initial state.");
+
+    // Now explore the current state until there is no more reachable state.
+
+
+    auto timeOfStart = std::chrono::high_resolution_clock::now();
+    auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
+    uint64_t numberOfExploredStates = 0;
+    uint64_t numberOfExploredStatesSinceLastMessage = 0;
+
+    // Perform a search through the model.
+    while (!statesToExplore.empty()) {
+        // Get the first state in the queue.
+        CompressedState currentState = statesToExplore.front().first;
+        StateType currentIndex = statesToExplore.front().second;
+        statesToExplore.pop_front();
+
+        // If the exploration order differs from breadth-first, we remember that this row group was actually
+        // filled with the transitions of a different state.
+        if (options.explorationOrder != storm::builder::ExplorationOrder::Bfs) {
+            stateRemapping.get()[currentIndex] = currentRowGroup;
         }
 
-        template <typename ValueType, typename RewardModelType, typename StateType>
-        InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenerator(std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> const& generator, Options const& options) : generator(generator), options(options), stateStorage(generator->getStateSize()) {
-            // Intentionally left empty.
+        if (currentIndex % 100000 == 0) {
+            STORM_LOG_TRACE("Exploring state with id " << currentIndex << ".");
         }
+        currentStateReachability = stateMap.find(currentIndex)->second->getCurReachabilityProb();
+        if (currentStateReachability >= StaminaOptions::getReachabilityThreshold()) {
 
-        template <typename ValueType, typename RewardModelType, typename StateType>
-        InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenerator(storm::prism::Program const& program, storm::generator::NextStateGeneratorOptions const& generatorOptions, Options const& builderOptions) : InfCTMCModelGenerator(std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(program, generatorOptions), builderOptions) {
-            // Intentionally left empty.
-        }
+            generator->load(currentState);
 
-        template <typename ValueType, typename RewardModelType, typename StateType>
-        InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenerator(storm::jani::Model const& model, storm::generator::NextStateGeneratorOptions const& generatorOptions, Options const& builderOptions) : InfCTMCModelGenerator(std::make_shared<storm::generator::JaniNextStateGenerator<ValueType, StateType>>(model, generatorOptions), builderOptions) {
-            // Intentionally left empty.
-        }
+            storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(
+                    stateToIdCallback);
 
-        template <typename ValueType, typename RewardModelType, typename StateType>
-        std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build(storm::generator::VariableInformation const& variableInformation) {
-            STORM_LOG_DEBUG("Exploration order is: " << options.explorationOrder);
-            this->variableInformation = variableInformation;
-            switch (generator->getModelType()) {
-                case storm::generator::ModelType::DTMC:
-                    return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, buildModelComponents());
-                case storm::generator::ModelType::CTMC:
-                    return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
-                case storm::generator::ModelType::MDP:
-                    return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Mdp, buildModelComponents());
-                case storm::generator::ModelType::POMDP:
-                    return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Pomdp, buildModelComponents());
-                case storm::generator::ModelType::MA:
-                    return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::MarkovAutomaton, buildModelComponents());
-                default:
-                    STORM_LOG_THROW(false, storm::exceptions::WrongFormatException, "Error while creating model: cannot handle this model type.");
-            }
-
-            return nullptr;
-        }
-
-        template <typename ValueType, typename RewardModelType, typename StateType>
-        StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-            StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
-
-            // Check, if the state was already registered.
-            std::pair<StateType, std::size_t> actualIndexBucketPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
-
-            StateType actualIndex = actualIndexBucketPair.first;
-
-            if (actualIndex == newIndex) {
-                if (options.explorationOrder == storm::builder::ExplorationOrder::Dfs) {
-                    statesToExplore.emplace_front(state, actualIndex);
 
                     // Reserve one slot for the new state in the remapping.
                     stateRemapping.get().push_back(storm::utility::zero<StateType>());
@@ -191,6 +391,10 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
             storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(
                     stateToIdCallback);
 
+                    for (auto &RewardModelBuilder : RewardModelBuilders) {
+                        if (RewardModelBuilder.hasStateRewards()) {
+                            RewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
+                        }
 
             // If there is no behavior, we might have to introduce a self-loop.
             if (behavior.empty()) {
@@ -601,7 +805,11 @@ storm::storage::sparse::ModelComponents<ValueType, RewardModelType> InfCTMCModel
     }
     return modelComponents;
 }
-
+/**
+ * brief buildStateLabeling - Builds a state space labelling for our state space.
+ * 
+ * @return A labelling for our state space.
+ * */
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildStateLabeling() {
     return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
