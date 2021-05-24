@@ -779,9 +779,9 @@ namespace storm {
         /**
          * Gets a std::vector containing all unlabeled choices in our PRISM model.
          * 
-         * @param state
+         * @param state The state to get all unlabeled choices from.
          * @param stateToIdCallBack
-         * @param commandFilter
+         * @param commandFilter The filter to 
          * @return All unlabeled choices in the form of a std::vector.
          * */
         template<typename ValueType, typename StateType>
@@ -879,7 +879,14 @@ namespace storm {
 
             return result;
         }
-
+        /**
+         * Recursively generates a synchronized distribution of states.
+         * 
+         * @param state The state to start at.
+         * @param probability The probability of taking that state
+         * @param position The index of that state.
+         * @param iteratorList A list of commands that we are to go through, applying iteratorList[position]'s updates to state each call.
+         * */
         template<typename ValueType, typename StateType>
         void InfCTMCNextStateGenerator<ValueType, StateType>::generateSynchronizedDistribution(
             storm::storage::BitVector const& state
@@ -912,7 +919,16 @@ namespace storm {
                 }
             }
         }
-
+        /**
+         * Gets labeled choices to the next state's choice list
+         * 
+         * @param choices Choices to add.
+         * @param state State to add them to
+         * @param stateToIdCallback Needed to get the distribution
+         * @param commandFilter Filter for commands.
+         * 
+         * @return Labeled choices for the state
+         * */
         template<typename ValueType, typename StateType>
         void InfCTMCNextStateGenerator<ValueType, StateType>::addLabeledChoices(
             std::vector<Choice<ValueType>>& choices
@@ -925,104 +941,108 @@ namespace storm {
                 boost::optional<std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>>> optionalActiveCommandLists = getActiveCommandsByActionIndex(actionIndex, commandFilter);
 
                 // Only process this action label, if there is at least one feasible solution.
-                if (optionalActiveCommandLists) {
-                    std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>> const& activeCommandList = optionalActiveCommandLists.get();
-                    std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> iteratorList(activeCommandList.size());
+                if (!optionalActiveCommandLists) {
+                    continue; // Continue to next iteration of loop.
+                }
 
-                    // Initialize the list of iterators.
-                    for (size_t i = 0; i < activeCommandList.size(); ++i) {
-                        iteratorList[i] = activeCommandList[i].cbegin();
+                std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>> const& activeCommandList = optionalActiveCommandLists.get();
+                std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> iteratorList(activeCommandList.size());
+
+                // Initialize the list of iterators.
+                for (size_t i = 0; i < activeCommandList.size(); ++i) {
+                    iteratorList[i] = activeCommandList[i].cbegin();
+                }
+
+                storm::builder::jit::Distribution<StateType, ValueType> distribution;
+
+                // As long as there is one feasible combination of commands, keep on expanding it.
+                bool done = false;
+                while (!done) {
+                    distribution.clear();
+                    generateSynchronizedDistribution(state, storm::utility::one<ValueType>(), 0, iteratorList, distribution, stateToIdCallback);
+                    distribution.compress();
+
+                    // At this point, we applied all commands of the current command combination and newTargetStates
+                    // contains all target states and their respective probabilities. That means we are now ready to
+                    // add the choice to the list of transitions.
+                    choices.push_back(Choice<ValueType>(actionIndex));
+
+                    // Now create the actual distribution.
+                    Choice<ValueType>& choice = choices.back();
+
+                    if (program.getModelType() == storm::prism::Program::ModelType::SMG) {
+                        storm::storage::PlayerIndex const& playerOfAction = actionIndexToPlayerIndexMap.at(actionIndex);
+                        STORM_LOG_THROW(
+                            playerOfAction != storm::storage::INVALID_PLAYER_INDEX
+                            , storm::exceptions::WrongFormatException
+                            , "Action " << program.getActionName(actionIndex) << " is not owned by any player but has at least one enabled, unlabeled (synchronized) command."
+                        );
+                        choice.setPlayerIndex(playerOfAction);
                     }
 
-                    storm::builder::jit::Distribution<StateType, ValueType> distribution;
-
-                    // As long as there is one feasible combination of commands, keep on expanding it.
-                    bool done = false;
-                    while (!done) {
-                        distribution.clear();
-                        generateSynchronizedDistribution(state, storm::utility::one<ValueType>(), 0, iteratorList, distribution, stateToIdCallback);
-                        distribution.compress();
-
-                        // At this point, we applied all commands of the current command combination and newTargetStates
-                        // contains all target states and their respective probabilities. That means we are now ready to
-                        // add the choice to the list of transitions.
-                        choices.push_back(Choice<ValueType>(actionIndex));
-
-                        // Now create the actual distribution.
-                        Choice<ValueType>& choice = choices.back();
-
-                        if (program.getModelType() == storm::prism::Program::ModelType::SMG) {
-                            storm::storage::PlayerIndex const& playerOfAction = actionIndexToPlayerIndexMap.at(actionIndex);
-                            STORM_LOG_THROW(
-                                playerOfAction != storm::storage::INVALID_PLAYER_INDEX
-                                , storm::exceptions::WrongFormatException
-                                , "Action " << program.getActionName(actionIndex) << " is not owned by any player but has at least one enabled, unlabeled (synchronized) command."
-                            );
-                            choice.setPlayerIndex(playerOfAction);
+                    // Remember the choice label and origins only if we were asked to.
+                    if (this->options.isBuildChoiceLabelsSet()) {
+                        choice.addLabel(program.getActionName(actionIndex));
+                    }
+                    if (this->options.isBuildChoiceOriginsSet()) {
+                        CommandSet commandIndices;
+                        for (uint_fast64_t i = 0; i < iteratorList.size(); ++i) {
+                            commandIndices.insert(iteratorList[i]->get().getGlobalIndex());
                         }
+                        choice.addOriginData(boost::any(std::move(commandIndices)));
+                    }
 
-                        // Remember the choice label and origins only if we were asked to.
-                        if (this->options.isBuildChoiceLabelsSet()) {
-                            choice.addLabel(program.getActionName(actionIndex));
-                        }
-                        if (this->options.isBuildChoiceOriginsSet()) {
-                            CommandSet commandIndices;
-                            for (uint_fast64_t i = 0; i < iteratorList.size(); ++i) {
-                                commandIndices.insert(iteratorList[i]->get().getGlobalIndex());
-                            }
-                            choice.addOriginData(boost::any(std::move(commandIndices)));
-                        }
-
-                        // Add the probabilities/rates to the newly created choice.
-                        ValueType probabilitySum = storm::utility::zero<ValueType>();
-                        choice.reserve(std::distance(distribution.begin(), distribution.end()));
-                        for (auto const& stateProbability : distribution) {
-                            choice.addProbability(stateProbability.getState(), stateProbability.getValue());
-                            if (this->options.isExplorationChecksSet()) {
-                                probabilitySum += stateProbability.getValue();
-                            }
-                        }
-
+                    // Add the probabilities/rates to the newly created choice.
+                    ValueType probabilitySum = storm::utility::zero<ValueType>();
+                    choice.reserve(std::distance(distribution.begin(), distribution.end()));
+                    for (auto const& stateProbability : distribution) {
+                        choice.addProbability(stateProbability.getState(), stateProbability.getValue());
                         if (this->options.isExplorationChecksSet()) {
-                            // Check that the resulting distribution is in fact a distribution.
-                            STORM_LOG_THROW(
-                                !program.isDiscreteTimeModel() || !this->comparator.isConstant(probabilitySum) || this->comparator.isOne(probabilitySum)
-                                , storm::exceptions::WrongFormatException
-                                , "Sum of update probabilities do not some to one for some command (actually sum to " << probabilitySum << ")."
-                            );
+                            probabilitySum += stateProbability.getValue();
                         }
+                    }
 
-                        // Create the state-action reward for the newly created choice.
-                        for (auto const& rewardModel : rewardModels) {
-                            ValueType stateActionRewardValue = storm::utility::zero<ValueType>();
-                            if (rewardModel.get().hasStateActionRewards()) {
-                                for (auto const& stateActionReward : rewardModel.get().getStateActionRewards()) {
-                                    if (stateActionReward.getActionIndex() == choice.getActionIndex() && this->evaluator->asBool(stateActionReward.getStatePredicateExpression())) {
-                                        stateActionRewardValue += ValueType(this->evaluator->asRational(stateActionReward.getRewardValueExpression()));
-                                    }
+                    if (this->options.isExplorationChecksSet()) {
+                        // Check that the resulting distribution is in fact a distribution.
+                        STORM_LOG_THROW(
+                            !program.isDiscreteTimeModel() || !this->comparator.isConstant(probabilitySum) || this->comparator.isOne(probabilitySum)
+                            , storm::exceptions::WrongFormatException
+                            , "Sum of update probabilities do not some to one for some command (actually sum to " << probabilitySum << ")."
+                        );
+                    }
+
+                    // Create the state-action reward for the newly created choice.
+                    for (auto const& rewardModel : rewardModels) {
+                        ValueType stateActionRewardValue = storm::utility::zero<ValueType>();
+                        if (rewardModel.get().hasStateActionRewards()) {
+                            for (auto const& stateActionReward : rewardModel.get().getStateActionRewards()) {
+                                if (stateActionReward.getActionIndex() == choice.getActionIndex() && this->evaluator->asBool(stateActionReward.getStatePredicateExpression())) {
+                                    stateActionRewardValue += ValueType(this->evaluator->asRational(stateActionReward.getRewardValueExpression()));
                                 }
                             }
-                            choice.addReward(stateActionRewardValue);
                         }
-
-                        // Now, check whether there is one more command combination to consider.
-                        bool movedIterator = false;
-                        for (int_fast64_t j = iteratorList.size() - 1; !movedIterator && j >= 0; --j) {
-                            ++iteratorList[j];
-                            if (iteratorList[j] != activeCommandList[j].end()) {
-                                movedIterator = true;
-                            } else {
-                                // Reset the iterator to the beginning of the list.
-                                iteratorList[j] = activeCommandList[j].begin();
-                            }
-                        }
-
-                        done = !movedIterator;
+                        choice.addReward(stateActionRewardValue);
                     }
+
+                    // Now, check whether there is one more command combination to consider.
+                    bool movedIterator = false;
+                    for (int_fast64_t j = iteratorList.size() - 1; !movedIterator && j >= 0; --j) {
+                        ++iteratorList[j];
+                        if (iteratorList[j] != activeCommandList[j].end()) {
+                            movedIterator = true;
+                        } else {
+                            // Reset the iterator to the beginning of the list.
+                            iteratorList[j] = activeCommandList[j].begin();
+                        }
+                    }
+
+                    done = !movedIterator;
                 }
             }
         }
-
+        /**
+         * 
+         * */
         template<typename ValueType, typename StateType>
         std::map<std::string, storm::storage::PlayerIndex> InfCTMCNextStateGenerator<ValueType, StateType>::getPlayerNameToIndexMap() const {
             return program.getPlayerNameToIndexMapping();

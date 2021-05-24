@@ -344,8 +344,16 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
     }
 
     // Create a callback for the next-state generator to enable it to request the index of states.
-    std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex, this, std::placeholders::_1);
-    std::function<StateType (CompressedState const&)> absorbingStateIndexFunc = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex, this, std::placeholders::_1);
+    std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
+        &InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex
+        , this
+        , std::placeholders::_1
+    );
+    std::function<StateType (CompressedState const&)> absorbingStateIndexFunc = std::bind(
+        &InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex
+        , this
+        , std::placeholders::_1
+    );
     // If the exploration order is something different from breadth-first, we need to keep track of the remapping
     // from state ids to row groups. For this, we actually store the reversed mapping of row groups to state-ids
     // and later reverse it.
@@ -382,7 +390,11 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
     // Let the generator create all initial states.
     this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
     stateMap.find(this->stateStorage.initialStateIndices[0])->second->setCurReachabilityProb(1);
-    STORM_LOG_THROW(!this->stateStorage.initialStateIndices.empty(), storm::exceptions::WrongFormatException, "The model does not have a single initial state.");
+    STORM_LOG_THROW(
+        !this->stateStorage.initialStateIndices.empty()
+        , storm::exceptions::WrongFormatException
+        , "The model does not have a single initial state."
+    );
 
     // Now explore the current state until there is no more reachable state.
 
@@ -414,12 +426,13 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
             generator->load(currentState);
 
             storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(
-                    stateToIdCallback);
+                stateToIdCallback
+            );
 
-                    for (auto &RewardModelBuilder : RewardModelBuilders) {
-                        if (RewardModelBuilder.hasStateRewards()) {
-                            RewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
-                        }
+            for (auto &RewardModelBuilder : RewardModelBuilders) {
+                if (RewardModelBuilder.hasStateRewards()) {
+                    RewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
+                }
 
             // If there is no behavior, we might have to introduce a self-loop.
             if (behavior.empty()) {
@@ -439,8 +452,11 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
                         transitionMatrixBuilder.newRowGroup(currentRow);
                     }
 
-                    transitionMatrixBuilder.addNextValue(currentRow, currentIndex,
-                                                            storm::utility::one<ValueType>());
+                    transitionMatrixBuilder.addNextValue(
+                        currentRow
+                        , currentIndex,
+                        storm::utility::one<ValueType>()
+                    );
 
                     for (auto &RewardModelBuilder : RewardModelBuilders) {
                         if (RewardModelBuilder.hasStateRewards()) {
