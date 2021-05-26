@@ -11,6 +11,9 @@
 #include <vector>
 #include <sstream>
 #include <bitset>
+#include <map> // for hashmaps
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "StaminaOptions.h"
 #include "InfCTMCModelGenerator.h"
@@ -58,6 +61,7 @@ private:
 
     void modifyExpression(storm::expressions::BaseExpression const& expr, bool isMin, storm::prism::Program const& modulesFile);
     bool terminateModelCheck(double minProb, double maxProb, double termParam);// throws PrismLangException;
+    void printTransitionActions(InfCTMCModelGenerator</* TODO: ValueType */, /* TODO: StateType*/> modelGen, std::string exportFileName);
     class Result {
     private:
 

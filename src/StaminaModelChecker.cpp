@@ -402,7 +402,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                 // Increment refiinement count
                 if (StaminaOptions::getExportPerimeterStates()) {
                     try {
-                        std::ofstream outf(StaminaOptions::getExportPerimeterFilename(), , std::ofstream::trunc);
+                        std::ofstream outf(StaminaOptions::getExportPerimeterFilename(), std::ofstream::trunc);
                         std::vector<std::string> values = infModelGen->getPerimeterStatesVector();
                         outf << "Iteration: " << numRefineIteration << "\r\n";
                         for (int i = 0; i < infModelGen->getNumVars(); ++i) {
@@ -440,8 +440,6 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
 
 
     return res_min_max[0];
-
-
 
     /* auto formulae = storm::api::extractFormulasFromProperties(propertiesVector);
 
@@ -575,4 +573,49 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
 
     //}
     */
+}
+
+/**
+ * Prints all transition actions taken by the InfCTMCModelGenerator to a file.
+ * @param modelGen The model generator we're using.
+ * @param exportFileName The file we're exporting to.
+ */
+// TODO: Remove all autos and replace them with proper typing
+void StaminaModelChecker::printTransitionActions(InfCTMCModelGenerator</* TODO: ValueType */, /* TODO: StateType*/> * modelGen, std::string exportFileName) {
+    std::map</* TODO: StateType */, /* TODO: ProbState */ > globalStateSet = modelGen->getGlobalStateSet(); // getGlobalStateSet() not yet implemented
+    boost::property_tree::ptree sortedStates; // TODO: sort keys from globalStateSet
+
+    if (modelGen->finalModelHasAbsorbing()) {
+        sortedStates.add(modelGen->getAbsorbingState());
+    }
+
+    std::map</* TODO: StateType */, int> stateIndex;
+    int spot = 0;
+    for (auto sortState : sortedStates) {
+        stateIndex.put(sortState, spot);
+        spot++;
+    }
+
+    try {
+        std::ofstream out(exportFileName, std::ofstream::trunc);
+        for (auto exploredState : sortedStates) {
+            modelGen->exploreState(exploredState);
+            // Look at each outgoing choice from the state
+            int nc = modelGen->getNumChoices();
+            boost::property_tree::ptree sortedTrans; // TODO: sort the sortedStates
+
+            for (int i = 0; i < nc; i++) {
+                int nt = modelGen->getNumTransitions(i);
+                for (int j = 0; j < nt; j++) {
+                    auto stateNew = modelGen->computeTransitionTarget(i, j); // computeTransitionTarget is not implemented either
+                }
+            }
+
+        }
+        out.close();
+    }
+    catch(const std::exception& e) {
+        std::cerr << "An error occured in creating the transition file: " << e.what() << '\n';
+    }
+    
 }
