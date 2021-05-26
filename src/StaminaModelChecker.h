@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <bitset>
 
 #include "StaminaOptions.h"
 #include "InfCTMCModelGenerator.h"
