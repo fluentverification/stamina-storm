@@ -110,6 +110,8 @@ private:
         void loadPRISMModel(storm::prism::Program modulesFile) {};
         storm::prism::Program parseModelFile(std::string const& fileName);
 
+        std::string getResultsString();
+
         std::vector<storm::jani::Property> parsePropertiesFile(
             storm::prism::Program const& modulesFile
             , std::string const& propertiesFileName

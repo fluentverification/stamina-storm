@@ -627,3 +627,11 @@ void StaminaModelChecker::printTransitionActions(InfCTMCModelGenerator<double> *
     }
     
 }
+/**
+ * Gets the results string for a Result
+ * 
+ * @return Results string
+ * */
+std::string StaminaModelChecker::Result::getResultsString() {
+    // TODO
+}

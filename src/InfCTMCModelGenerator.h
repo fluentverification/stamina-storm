@@ -3,6 +3,7 @@
 #ifndef STORM_BUILDER_INFCTMCGENERATOR_H
 #define STORM_BUILDER_INFCTMCGENERATOR_H
  
+ #include <map>
  #include <memory>
  #include <utility>
  #include <vector>
@@ -80,6 +81,12 @@ public:
     
     std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build(storm::generator::VariableInformation const& variableInformation);
     
+    std::map<StateType, ValueType> getGlobalStateSet() {
+        // return this->globalStateSet; 
+        // No global state set exists yet
+    }
+
+    StateType computeTransitionTarget(int index, int offset);
 private:
     storm::generator::VariableInformation variableInformation;
     std::unordered_map<int, ProbState*> stateMap;
@@ -107,6 +114,8 @@ private:
     std::deque<std::pair<CompressedState, StateType>> statesToExplore;
     
     boost::optional<std::vector<uint_fast64_t>> stateRemapping;
+
+    bool transitionListBuilt;
 
 };
 

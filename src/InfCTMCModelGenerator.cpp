@@ -783,11 +783,24 @@ storm::storage::sparse::ModelComponents<ValueType, RewardModelType> InfCTMCModel
     buildMatrices(transitionMatrixBuilder, RewardModelBuilders, ChoiceInformationBuilder, markovianStates);
 
     // Initialize the model components with the obtained information.
-    storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount()), buildStateLabeling(), std::unordered_map<std::string, RewardModelType>(), !generator->isDiscreteTimeModel(), std::move(markovianStates));
+    storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
+        transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount())
+        , buildStateLabeling()
+        , std::unordered_map<std::string, RewardModelType>()
+        , !generator->isDiscreteTimeModel()
+        , std::move(markovianStates)
+    );
 
     // Now finalize all reward models.
     for (auto& RewardModelBuilder : RewardModelBuilders) {
-        modelComponents.rewardModels.emplace(RewardModelBuilder.getName(), RewardModelBuilder.build(modelComponents.transitionMatrix.getRowCount(), modelComponents.transitionMatrix.getColumnCount(), modelComponents.transitionMatrix.getRowGroupCount()));
+        modelComponents.rewardModels.emplace(
+            RewardModelBuilder.getName()
+            , RewardModelBuilder.build(
+                modelComponents.transitionMatrix.getRowCount()
+                , modelComponents.transitionMatrix.getColumnCount()
+                , modelComponents.transitionMatrix.getRowGroupCount()
+            )
+            );
     }
     // Build the choice labeling
     modelComponents.choiceLabeling = ChoiceInformationBuilder.buildChoiceLabeling(modelComponents.transitionMatrix.getRowCount());
@@ -872,6 +885,7 @@ storm::storage::sparse::ModelComponents<ValueType, RewardModelType> InfCTMCModel
     }
     return modelComponents;
 }
+
 /**
  * brief buildStateLabeling - Builds a state space labelling for our state space.
  * 
@@ -880,6 +894,19 @@ storm::storage::sparse::ModelComponents<ValueType, RewardModelType> InfCTMCModel
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildStateLabeling() {
     return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
+}
+
+/**
+ * Computes the target state of a transition from the current state based on 
+ * the transition list. If state is absorbing, will always return a pointer to the
+ * current state.
+ * @param index The index of the choice.
+ * @param offset The offset from that index to compute the target state for.
+ * @return The state we will be travelling to.
+ */
+template <typename ValueType, typename RewardModelType, typename StateType>
+StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::computeTransitionTarget(int index, int offset) {
+    // TODO: implementation
 }
 
 // Explicitly instantiate the class.
