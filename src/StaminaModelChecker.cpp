@@ -189,7 +189,6 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     // flag to switch optimized CTMC analysis
     bool switchToCombinedCTMC = false;
 
-    // I don't like the "auto" keyword. >:(
     std::shared_ptr<storm::logic::Formula const> exprProp = prop.getRawFormula();
     //if(exprProp->isProbabilityPathFormula()) {
 
@@ -581,7 +580,8 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
  * @param exportFileName The file we're exporting to.
  */
 // TODO: Remove all autos and replace them with proper typing
-void StaminaModelChecker::printTransitionActions(InfCTMCModelGenerator</* TODO: ValueType */, /* TODO: StateType*/> * modelGen, std::string exportFileName) {
+// TODO: figure out how to dequeue and send to file.
+void StaminaModelChecker::printTransitionActions(InfCTMCModelGenerator<double> * modelGen, std::string exportFileName) {
     std::map</* TODO: StateType */, /* TODO: ProbState */ > globalStateSet = modelGen->getGlobalStateSet(); // getGlobalStateSet() not yet implemented
     boost::property_tree::ptree sortedStates; // TODO: sort keys from globalStateSet
 
@@ -603,18 +603,26 @@ void StaminaModelChecker::printTransitionActions(InfCTMCModelGenerator</* TODO: 
             // Look at each outgoing choice from the state
             int nc = modelGen->getNumChoices();
             boost::property_tree::ptree sortedTrans; // TODO: sort the sortedStates
-
+            // Sort the transitions
             for (int i = 0; i < nc; i++) {
                 int nt = modelGen->getNumTransitions(i);
                 for (int j = 0; j < nt; j++) {
                     auto stateNew = modelGen->computeTransitionTarget(i, j); // computeTransitionTarget is not implemented either
+                    int indecies[2] = {i, j};
+                    sortedTrans.put(stateNew, indecies);
                 }
+            }
+
+            // While we still have transitions to export
+            while (!sortedTrans.empty()) {
+                auto mapping = sortedTrans.pop_front(); // Not sure if this is what's needed
+                // auto stateNew = mapping.getKey()
             }
 
         }
         out.close();
     }
-    catch(const std::exception& e) {
+    catch (const std::exception& e) {
         std::cerr << "An error occured in creating the transition file: " << e.what() << '\n';
     }
     

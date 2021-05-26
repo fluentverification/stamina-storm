@@ -61,7 +61,7 @@ private:
 
     void modifyExpression(storm::expressions::BaseExpression const& expr, bool isMin, storm::prism::Program const& modulesFile);
     bool terminateModelCheck(double minProb, double maxProb, double termParam);// throws PrismLangException;
-    void printTransitionActions(InfCTMCModelGenerator</* TODO: ValueType */, /* TODO: StateType*/> modelGen, std::string exportFileName);
+    void printTransitionActions(InfCTMCModelGenerator<double> modelGen, std::string exportFileName);
     class Result {
     private:
 
