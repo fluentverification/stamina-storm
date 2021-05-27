@@ -5,6 +5,8 @@
 #ifndef STAMINA_STAMINAOPTIONS_H
 #define STAMINA_STAMINAOPTIONS_H
 
+#include <string>
+
 class StaminaOptions {
 
     private:   
@@ -13,6 +15,9 @@ class StaminaOptions {
 
         // Kappa reduction factor
         static double kappaReductionFactor;
+
+        // Misprediction factor
+        static double mispredictionFactor;
 
         // max number of refinement count
         static int maxApproxCount;
@@ -25,6 +30,26 @@ class StaminaOptions {
 
         // Whether or not to use ranktransitions.
         static bool rankTransitions;
+
+        static std::string cuddMemoryLimit;
+
+        // Saving variables
+        static bool exportModel;
+
+        // Saving filenames
+        static std::string exportFileName;
+
+        static bool exportPerimeterStates;
+        static std::string exportPerimeterFilename;
+        // Import variables
+        static bool importModel;
+
+        // Import filenames
+        static std::string importFileName;
+
+        // Specific Property
+        static bool specificProperty;
+        static std::string property;
 
 
     public:

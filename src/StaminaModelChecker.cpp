@@ -364,7 +364,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     res_min_max[0]->setResultAndExplaination(ansMin, "minimum bound");
                     res_min_max[1]->setResultAndExplaination(ansMax, "maximum bound");
 
-                    std::cout <<"\nResult:" << res_min_max[0]->getResultsString() << std::endl; // TODO: no implementation exists for Results::getResultsString
+                    std::cout <<"\nResult:" << res_min_max[0]->getResultsString() << std::endl; // TODO: temporary implementation exists for Results::getResultsString
                     std::cout <<"\nResult:" << res_min_max[1]->getResultsString() << std::endl;
                 }
                 else {
@@ -633,5 +633,7 @@ void StaminaModelChecker::printTransitionActions(InfCTMCModelGenerator<double> *
  * @return Results string
  * */
 std::string StaminaModelChecker::Result::getResultsString() {
-    // TODO
+    std::string result = self->toString();
+    // TODO: not sure if we just want to use the toString Method?
+    return result;
 }

@@ -19,3 +19,25 @@ double StaminaOptions::probErrorWindow = 1.0e-3;
 bool StaminaOptions::noPropRefine = false;
 
 bool StaminaOptions::rankTransitions = false;
+
+double StaminaOptions::mispredictionFactor = 2;
+
+std::string StaminaOptions::cuddMemoryLimit = "1g";
+
+// Saving variables
+bool StaminaOptions::exportModel = false;
+
+// Saving filenames
+std::string StaminaOptions::exportFileName = nullptr;
+
+bool StaminaOptions::exportPerimeterStates = false;
+std::string StaminaOptions::exportPerimeterFilename = nullptr;
+// Import variables
+bool StaminaOptions::importModel = false;
+
+// Import filenames
+std::string StaminaOptions::importFileName = nullptr;
+
+// Specific Property
+bool StaminaOptions::specificProperty = false;
+std::string StaminaOptions::property = nullptr;
