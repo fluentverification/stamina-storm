@@ -77,6 +77,14 @@ class StaminaOptions {
         static double getKappaReductionFactor() {
             return kappaReductionFactor;
         }
+
+        static double getMispredictionFactor() {
+            return mispredictionFactor;
+        }
+
+        static void setMisPredictionFactor(double mp) {
+            mispredictionFactor = mp;
+        }
         /**
          * Sets the kappa reduction factor.
          * 

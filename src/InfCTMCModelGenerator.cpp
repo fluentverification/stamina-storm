@@ -908,7 +908,84 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::computeTransitionTarget(int index, int offset) {
     // TODO: implementation
 }
+/**
+ * Does reachability analysis.
+ * */
+template <typename ValueType, typename RewardModelType, typename StateType>
+void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::doReachabilityAnalysis() {
+    // TODO Implementation. Steps below:
+    // Load Model from modules file(s)
+    // If there are unbounded variables in the model
+        // Print a warning
+    // If the model is not CTMC
+        // Throw to STORM log that we only support CTMC
+    // Create datastructures to hold the states
+    std::map<ValueType, StateType> statesK; // TODO: Double check types here.
+    std::list<StateType> exploredK; // TODO: use the statesToExplore
+    // Get the initial state
+    StateType initialState; // Probably not StateType
+    // If the initial state is in the global state set
+        // our probInitState is that state from the global state set
+    // Else
+        // Create new probInitState based on our initial state
+        // Set its reachability probability to 1.0
+        // Add it to our global state set
+    // Add our state to our exploration queue and to our explored states
+    /* Begin the state exploration */
+    int prevStateCount; // = size of global state set
+    double perimReachability = 1.0; // Perimeter reachability
+    double minPerimReachability = StaminaOptions::getProbErrorWindow() / StaminaOptions::getMispredictionFactor();
+    // While our perimeter reachability is greater than the error window divided by the misprediction factor
+    while (perimReachability >= minPerimReachability) {
+        // Explore the current exploration queue
+        while (!exploredK.empty()) {
+            // Get first element from exploration queue
+            StateType curProbState = exploredK.pop_front();
+            // Explore curProbState
+            // If our property expression is not null
+            if (propertyExpression != nullptr) { // TODO: no propertyExpression. Don't know corresponding type in storm API
+                // Get tthe temporary property, of type expression temporal
+                bool b1, b2;
+                // Set b1 to be the tempProb's first operand evaluating with the constants and the current probability state
+                // Set b2 to be the same thing but with the second operand.
+                if (!(b1 && (!b2))) {
+                    // Set the current probability state to be absorbing
+                    // Add the current state to the perimeter states
+                    // Make the state not terminal
+                    continue;
+                }
+            }
 
+            // this->curStateReachability = the current reachability probability of the current state.
+            bool curStateIsTerminal; // = curProbState.isStateTerminal()
+            // Check to see if we are either 
+            if (!curStateIsTerminal || currentStateReachability >= this->reachabilityThreshold) {
+                // Check to see if the current state has no reachability
+                if (currentStateReachability == 0) {
+                    int nc; // nc = number of choices
+                    // Iterate through the choices
+                    for (int i = 0; i < nc; i++) {
+                        int nt; // nt = number of transitions
+                        // Iterate through the states
+                        for (int j = 0; j < nt; j++) {
+                            // Compute transition target
+                            StateType nxSt = this->computeTransitionTarget(i, j);
+                            bool stateExists; // = whether nxSt is in global state set
+                            if (stateExists) {
+                                // Get the next prob state
+                                // If that prob state is not already in statesK
+                                    // add it to exploration queue
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                
+            }
+        }
+    }
+}
 // Explicitly instantiate the class.
 template class InfCTMCModelGenerator<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 

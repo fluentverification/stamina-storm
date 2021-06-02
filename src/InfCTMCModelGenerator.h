@@ -7,6 +7,7 @@
  #include <memory>
  #include <utility>
  #include <vector>
+ #include <list>
  #include <deque>
  #include <cstdint>
  #include <boost/functional/hash.hpp>
@@ -87,10 +88,13 @@ public:
     }
 
     StateType computeTransitionTarget(int index, int offset);
+
+    void doReachabilityAnalysis();
 private:
     storm::generator::VariableInformation variableInformation;
     std::unordered_map<int, ProbState*> stateMap;
     double currentStateReachability;
+    double reachabilityThreshold;
     StateType getOrAddStateIndex(CompressedState const& state);
     StateType getAbsorbingStateIndex(CompressedState const& state);
 
