@@ -122,9 +122,7 @@ InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::InfCTMCModelGenera
  * @return Pointer to the model generated from components.
  * */
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build(
-    storm::generator::VariableInformation const& variableInformation
-) 
+std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::build(storm::generator::VariableInformation const& variableInformation) 
 {
     STORM_LOG_DEBUG("Exploration order is: " << options.explorationOrder);
     this->variableInformation = variableInformation;
@@ -222,16 +220,8 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
     }
 
     // Create a callback for the next-state generator to enable it to request the index of states.
-    std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
-        &InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex
-        , this
-        , std::placeholders::_1
-    );
-    std::function<StateType (CompressedState const&)> absorbingStateIndexFunc = std::bind(
-        &InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex
-        , this
-        , std::placeholders::_1
-    );
+    std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getOrAddStateIndex, this, std::placeholders::_1);
+    std::function<StateType (CompressedState const&)> absorbingStateIndexFunc = std::bind(&InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::getAbsorbingStateIndex, this, std::placeholders::_1);
     // If the exploration order is something different from breadth-first, we need to keep track of the remapping
     // from state ids to row groups. For this, we actually store the reversed mapping of row groups to state-ids
     // and later reverse it.
@@ -268,11 +258,7 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
     // Let the generator create all initial states.
     this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
     stateMap.find(this->stateStorage.initialStateIndices[0])->second->setCurReachabilityProb(1);
-    STORM_LOG_THROW(
-        !this->stateStorage.initialStateIndices.empty()
-        , storm::exceptions::WrongFormatException
-        , "The model does not have a single initial state."
-    );
+    STORM_LOG_THROW(!this->stateStorage.initialStateIndices.empty(), storm::exceptions::WrongFormatException, "The model does not have a single initial state.");
 
     // Now explore the current state until there is no more reachable state.
 
@@ -741,12 +727,7 @@ void InfCTMCModelGenerator<ValueType, RewardModelType, StateType>::buildMatrices
 
         // Fix (b).
         std::vector<StateType> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
-        std::transform(
-            this->stateStorage.initialStateIndices.begin()
-            , this->stateStorage.initialStateIndices.end()
-            , newInitialStateIndices.begin()
-            , [&remapping] (StateType const& state) { return remapping[state]; } 
-        );
+        std::transform(this->stateStorage.initialStateIndices.begin(), this->stateStorage.initialStateIndices.end(), newInitialStateIndices.begin(), [&remapping] (StateType const& state) { return remapping[state]; } );
         std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
         this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
 

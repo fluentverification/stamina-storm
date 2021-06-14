@@ -287,8 +287,7 @@ void StaminaCL::parseArguments(int argc, char* argv[]) {
                 maxLinearSolnIter = std::stoi(argv[++i]);
 
             }
-            else if (sw.compare("power") == 0 || sw.compare("jacobi") == 0 || 
-                sw.compare("gaussseidel") == 0 || sw.compare("bgaussseidel") == 0 ) {
+            else if (sw.compare("power") == 0 || sw.compare("jacobi") == 0 || sw.compare("gaussseidel") == 0 || sw.compare("bgaussseidel") == 0 ) {
 
                 solutionMethod = argv[++i];
 

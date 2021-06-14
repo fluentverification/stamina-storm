@@ -138,7 +138,9 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     , storm::jani::Property prop
     , storm::prism::Program const& modulesFile
 ) {
-    Result* res_min_max[2] = {new Result(), new Result()};
+
+std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile) {
+        Result* res_min_max[2] = {new Result(), new Result()};
 
     double reachTh = StaminaOptions::getReachabilityThreshold();
 
@@ -149,36 +151,26 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     infModelGen = new InfCTMCModelGenerator<double>(modulesFile);
     //super.loadModelGenerator(infModelGen);
 
-    // Instantiate and load model generator
-    // infModelGen = new InfCTMCNextStateGenerator<double>(modulesFile);
-    //super.loadModelGenerator(infModelGen);
+        // Instantiate and load model generator
+       // infModelGen = new InfCTMCNextStateGenerator<double>(modulesFile);
+        //super.loadModelGenerator(infModelGen);
 
     // Split property into 2 to find P_min and P_max
 
     std::string propName = prop.getName().empty() ? "Prob" : prop.getName();
 
-    // Get max and min properties
-    storm::jani::Property propMin(
-        propName + "_min"
-        , modifyExpression(
-            prop.getFilter().getFormula()->toExpression().getBaseExpression()
-            , true
-            , modulesFile
-        )
-        , prop.getUndefinedConstants()
-        , prop.getComment()
-    );
+    // storm::jani::Property prop_min = new storm::jani::Property(propName + "_min", modifyExpression(prop.getFilter().getFormula()->toExpression().getBaseExpression(), true, modulesFile), prop.getUndefinedConstants(), prop.getComment());
 
-    storm::jani::Property propMax(
-        propName + "_min"
-        , modifyExpression(
-            prop.getFilter().getFormula()->toExpression().getBaseExpression()
-            , false
-            , modulesFile
-        )
-        , prop.getUndefinedConstants()
-        , prop.getComment()   
-    );
+    //Old way to call modify expression
+    /*prop_min.setName(propName+"_min");
+    modifyExpression(prop_min.getExpression(), true);*/
+
+    //storm::jani::Property prop_max = new storm::jani::Property(propName + "_max", modifyExpression(prop.getFilter().getFormula()->toExpression().getBaseExpression(), false, modulesFile), prop.getUndefinedConstants(), prop.getComment());
+
+    //Old way to call modify expression
+    /*prop_max.setName(propName+"_max");
+        modifyExpression(prop_max.getExpression(), false);*/
+
 
     // timer
     long timer = 0;
@@ -189,16 +181,24 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     // flag to switch optimized CTMC analysis
     bool switchToCombinedCTMC = false;
 
+<<<<<<< HEAD
     std::shared_ptr<storm::logic::Formula const> exprProp = prop.getRawFormula();
+=======
+    auto exprProp = prop.getRawFormula();
+>>>>>>> parent of 092a837... Formatting (x2)
     //if(exprProp->isProbabilityPathFormula()) {
 
 
-    /* while(numRefineIteration==0 || 
-        ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) 
-        && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) { */
+    //while(numRefineIteration==0 || ((!terminateModelCheck(res_min_max[0]->getResult(), res_min_max[1]->getResult(), StaminaOptions::getProbErrorWindow())) && (numRefineIteration < StaminaOptions::getMaxApproxCount()))) {
 
+
+<<<<<<< HEAD
     // std::shared_ptr<storm::logic::Formula const> expr = exprProp;
     // std::shared_ptr<storm::logic::Formula const> exprTemp = expr;
+=======
+    auto expr = exprProp;
+    auto exprTemp = expr;
+>>>>>>> parent of 092a837... Formatting (x2)
 
     if(exprTemp->isPathFormula() && (exprTemp->isUntilFormula()) && (!StaminaOptions::getNoPropRefine())) {
         //infModelGen->setPropertyExpression(exprTemp);
@@ -231,6 +231,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     switchToCombinedCTMC = true;
                 }
 
+<<<<<<< HEAD
                 if (StaminaOptions::getNoPropRefine()) {
                     switchToCombinedCTMC = false;
                 }
@@ -333,6 +334,14 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     std::cout << "Verifying " << propName << " ....." << std::endl;
 
                     timer = std::chrono::system_clock::now();
+=======
+    //////////////////////////Approximation Step///////////////////////////
+    std::cout << std::endl;
+    std::cout << "========================================================================" << std::endl;
+    std::cout << "Approximation<" << (numRefineIteration+1) << "> : kappa = " << reachTh << std::endl;
+    std::cout << "========================================================================" << std::endl;
+    //infModelGen->setReachabilityThreshold(reachTh);
+>>>>>>> parent of 092a837... Formatting (x2)
 
                     // TODO: run transient analysis
 
@@ -455,6 +464,7 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     auto result = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));   // should return pMin? or maaaaybe pMax
     auto quantRes = result->asExplicitQuantitativeCheckResult<double>();
     std::cout << "Quantitative Result: " << quantRes << std::endl;
+<<<<<<< HEAD
     return result; */
     // if(result->isExplicitQuantitativeCheckResult()) {
     //     retu
@@ -510,68 +520,118 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     } else {
         uTime = -1;
     }
+=======
+    return result;
+                    // if(result->isExplicitQuantitativeCheckResult()) {
+                    //     retu
+                    // } else {
+                    //     return null;
+                    // }
 
-    if(lTime>0.0);//need stuff here for exceptions //throw new stormException("Currently only supports [0,t] time bound.");
-
-    // verification step
-    std::cout << std::endl;
-    std::cout << "---------------------------------------------------------------------" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Verifying " << propName << " ....." << std::endl;
-
-    auto timer = std::chrono::system_clock::now();
-
-    // run transient analysis
-    storm::Environment env;
-    //auto probsExpl = storm::modelchecker::helper::SparseCtmcCslHelper::computeAllTransientProbabilities(
-        env, model->getTransitionMatrix()
-        , model->getInitialStates()
-        , b1.get()->getTruthValuesVector()
-        , b2.get()->getTruthValuesVector()
-        , model->getExitRateVector()
-        , uTime
-    );
+                    //return quantRes;
+                    // Eventually replace this^^ line with transient check (including absorbing state)
+/*
 
 
-    double ans_min = 0.0;
+                    // model check operands first for all states
+                     //TODO: Make model checker based on model
+                    /*auto b1 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getLeftSubformula(), true));.getBitSet();
+                    auto b2 = mcCTMC->check(storm::modelchecker::CheckTask<>(exprTemp->asUntilFormula().getRightSubformula(), true));.getBitSet();
 
-    for(int i=0; i<model.getNumberOfStates(); ++i) {
+                    std::shared_ptr<storm::modelchecker::CheckResult> minStatesNeg = b1.get()->clone();
+                    minStatesNeg.andNot(b2); //TODO: I need to figure out how to do this in storm
 
-        // if(!minStatesNeg.get()->) ans_min += (double) probsExpl[i]; //TODO: this line needs to be fixed
+                    // lower bound is 0 if not specified
+                    // (i.e. if until is of form U<=t)
+                    auto timeExpr = &exprTemp->asBoundedUntilFormula().getLowerBound();
+                    if (timeExpr != NULL) {
+                        auto tempValuation = new storm::expressions::SimpleValuation(timeExpr->getManager().getSharedPointer());
+                        lTime = timeExpr->evaluateAsDouble(tempValuation);
+                        delete tempValuation;
+                        if (lTime < 0) {
+                            //throw new PrismException("Invalid lower bound " + lTime + " in time-bounded until formula");
+                            //need to add correct exception throwing here
+                        }
+                    } else {
+                        lTime = 0;
+                    }
+                    // upper bound is -1 if not specified
+                    // (i.e. if until is of form U>=t)
+                    timeExpr = &exprTemp->asBoundedUntilFormula().getUpperBound();
+                    if (timeExpr != NULL) {
+                        auto tempValuation = new storm::expressions::SimpleValuation(timeExpr->getManager().getSharedPointer());
+                        uTime = timeExpr->evaluateAsDouble(tempValuation);
+                        delete tempValuation;
+                        if (uTime < 0 || (uTime == 0 && exprTemp->asBoundedUntilFormula().isUpperBoundStrict())) {
+                            std::stringstream boundStream;
+                            boundStream << (exprTemp->asBoundedUntilFormula().isUpperBoundStrict() ? "<" : "<=") << uTime;
+                            std::string bound = boundStream.str();
+                            //throw new PrismException("Invalid upper bound " + bound + " in time-bounded until formula");
+                            //need to add correct exception throwing here
+                        }
+                        if (uTime < lTime) {
+                            //throw new PrismException("Upper bound must exceed lower bound in time-bounded until formula");
+                            //need to add correct exception throwing here
+                        }
+                    } else {
+                        uTime = -1;
+                    }
+>>>>>>> parent of 092a837... Formatting (x2)
 
-    }
+                    if(lTime>0.0);//need stuff here for exceptions //throw new stormException("Currently only supports [0,t] time bound.");
 
-    // TODO: need the index of absorbing state
-    //double ans_max =  ans_min + (double) probsExpl[0];
+                    // verification step
+                    std::cout << std::endl;
+                    std::cout << "---------------------------------------------------------------------" << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "Verifying " << propName << " ....." << std::endl;
 
-    auto timeElapsed = std::chrono::system_clock::now() - timer;
-    timeElapsed /= 1000.0;
-    std::cout << "\nTime for model checking: " << (timeElapsed.count()) << " seconds." << std::endl;
+                    auto timer = std::chrono::system_clock::now();
 
-    // set results
-    res_min_max[0]->setResultAndExplanation(ans_min, "minimum bound");
-
-
-    // Print result to log
-    std::cout << "\nResult: " << res_min_max[0]->toString() << std::endl;
-
-    //res_min_max[1]->setResultAndExplanation(ans_max, "maximum bound");
-
-    // Print result to log
-    std::cout << "\nResult: " << res_min_max[1]->toString() << std::endl;
+                    // run transient analysis
+                    storm::Environment env;
+                    //auto probsExpl = storm::modelchecker::helper::SparseCtmcCslHelper::computeAllTransientProbabilities(env, model->getTransitionMatrix(), model->getInitialStates(), b1.get()->getTruthValuesVector(), b2.get()->getTruthValuesVector(), model->getExitRateVector(), uTime);
 
 
+                    double ans_min = 0.0;
 
-    // Reduce kappa for refinement
-    reachTh /= StaminaOptions::getKappaReductionFactor();
+                    for(int i=0; i<model.getNumberOfStates(); ++i) {
 
-    // increment refinement count
-    ++numRefineIteration;
+                       // if(!minStatesNeg.get()->) ans_min += (double) probsExpl[i]; //TODO: this line needs to be fixed
+
+                    }
+
+                    // TODO: need the index of absorbing state
+                    //double ans_max =  ans_min + (double) probsExpl[0];
+
+                    auto timeElapsed = std::chrono::system_clock::now() - timer;
+                    timeElapsed /= 1000.0;
+                    std::cout << "\nTime for model checking: " << (timeElapsed.count()) << " seconds." << std::endl;
+
+                    // set results
+                    res_min_max[0]->setResultAndExplanation(ans_min, "minimum bound");
+
+
+                    // Print result to log
+                    std::cout << "\nResult: " << res_min_max[0]->toString() << std::endl;
+
+                    //res_min_max[1]->setResultAndExplanation(ans_max, "maximum bound");
+
+                    // Print result to log
+                    std::cout << "\nResult: " << res_min_max[1]->toString() << std::endl;
+
+
+
+                // Reduce kappa for refinement
+                reachTh /= StaminaOptions::getKappaReductionFactor();
+
+                // increment refinement count
+                ++numRefineIteration;
+
+        //}
 
     //}
-
-    //}
-    */
+*/
 }
 
 /**
