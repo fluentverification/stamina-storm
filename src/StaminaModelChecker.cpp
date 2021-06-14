@@ -231,117 +231,12 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
                     switchToCombinedCTMC = true;
                 }
 
-<<<<<<< HEAD
-                if (StaminaOptions::getNoPropRefine()) {
-                    switchToCombinedCTMC = false;
-                }
-
-                /* ============ Approximation Step ============ */
-                std::cout << std::endl;
-                std::cout << "========================================================================" << std::endl;
-                std::cout << "Approximation<" << (numRefineIteration + 1) << "> : kappa = " << reachTh << std::endl;
-                std::cout << "========================================================================" << std::endl;
-                infModelGen->setReachabilityThreshold(reachTh);
-                if (switchToCombinedCTMC) {
-
-                    // Invoke model build explicitly
-                    if (StaminaOptions::getImportModel()) {
-                        // Base filename
-                        std::string filename = StaminaOptions::getImportFileName();
-                        // States file
-                        FILE * sf = nullptr;
-                        std::string statesFile = filename + ".sta";
-                        // Labels file
-                        FILE * lf = nullptr;
-                        std::string labelsFile = filename + ".lab";
-                        // State rewards file
-                        FILE * srf = nullptr;
-                        std::string stateRewardsFile = filename + ".srew";
-                        // Transitions file
-                        FILE * mf = nullptr;
-                        std::string transFile = filename + ".tra";
-                        try {
-                            // TODO: loadModelFromExplicitFiles(). Currently the C++ version doesn't have a superclass
-                        }
-                        catch(const std::exception& e) {
-                            std::cerr << e.what() << std::endl;
-                        }
-                    }
-                    // TODO: buildModel(). The Java version invoked this from the superclass.
-
-                    // Export if necessary
-                    if (StaminaOptions::getExportModel()) {
-                        // Base filename
-                        std::string filename = StaminaOptions::getExportFileName();
-                        // States file
-                        FILE * sf = nullptr;
-                        std::string statesFile = filename + ".sta";
-                        // Labels file
-                        FILE * lf = nullptr;
-                        std::string labelsFile = filename + ".lab";
-                        // State rewards file
-                        FILE * srf = nullptr;
-                        std::string stateRewardsFile = filename + ".srew";
-                        // Transitions file
-                        FILE * mf = nullptr;
-                        std::string transFile = filename + ".tra";
-                        try {
-                            // TODO: Export everything. Currently the C++ version doesn't have a superclass, which the Java version invoked
-                            // to do this part.
-                        }
-                        catch(const std::exception& e) {
-                            std::cerr << e.what() << std::endl;
-                        }
-                    }
-
-                    // Model check operands first for all states.
-                    // TODO: get mcCTMC. Also, find out what size the bitset should be.
-                    std::bitset<8> b2 = // mcCTMC::checkExpression;
-
-                    // Lower bound is set to 0 unless specified (U<=t)
-                    // TODO: get timeExpr. storm::jani::formula has no getLowerBound() method.
-                    auto timeExpr = nullptr; // Also, change this from auto to whatever the storm equivalent of Expression is
-                    
-                    if (timeExpr != nullptr) {
-                        // TODO: get lower bound from exprTemp and mcCTMC
-                        // Throw an error if < 0
-                        STORM_LOG_THROW(timeExpr < 0, storm::exceptions::OutOfRangeException, "Lower bound must be greater than 0");
-                    }
-                    else {
-                        lTime = 0;
-                    }
-
-                    // Default upper bound is -1
-                    // TODO: get upper bound from exprTemp
-                    if (timeExpr != nullptr) {
-                        // TODO: get upper bound from exprTemp and mcCTMC
-                        // Throw error if uTime < 0 or if it is zero and the upper bound is strict
-                        STORM_LOG_THROW(
-                            uTime < 0 // || (uTime == 0 && exprTemp.upperBoundIsStrict())
-                            , storm::exceptions::OutOfRangeException
-                            , "Invalid upper bound in time bounded until formula"
-                        );
-                        STORM_LOG_THROW(uTime < lTime, storm::exceptions::OutOfRangeException, "Upper bound must exceed lower bound");
-                    }
-                    else {
-                        uTime = -1;
-                    }
-
-                    STORM_LOG_THROW(lTime > 0.0, storm::exceptions::OutOfRangeException, "This version of STAMINA only supports causal [0,t] time bounds");
-                    
-                    // Verification
-                    std::cout << "\n\n---------------------------------------------------------------------\n\n";
-                    std::cout << "Verifying " << propName << " ....." << std::endl;
-
-                    timer = std::chrono::system_clock::now();
-=======
     //////////////////////////Approximation Step///////////////////////////
     std::cout << std::endl;
     std::cout << "========================================================================" << std::endl;
     std::cout << "Approximation<" << (numRefineIteration+1) << "> : kappa = " << reachTh << std::endl;
     std::cout << "========================================================================" << std::endl;
     //infModelGen->setReachabilityThreshold(reachTh);
->>>>>>> parent of 092a837... Formatting (x2)
 
                     // TODO: run transient analysis
 
