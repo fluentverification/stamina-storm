@@ -14,6 +14,7 @@
 #include "StaminaOptions.h"
 #include "InfCTMCModelGenerator.h"
 #include "InfCTMCNextStateGenerator.h"
+#include "StaminaExplicitModelBuilder.h"
 
 #include "storm/api/storm.h"
 #include "storm-parsers/parser/PrismParser.h"

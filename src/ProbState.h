@@ -4,11 +4,11 @@
 
 #ifndef STAMINA_PROBSTATE_H
 #define STAMINA_PROBSTATE_H
-#include "storm/storage/BitVector.h"
+#include "storm/storage/BitVector.h" // /storm/generator/CompressedState.h
 #include <string>
 #include <utility>
 #include <unordered_map>
-typedef storm::storage::BitVector CompressedState;
+typedef storm::storage::BitVector CompressedState; // <-- Get rid of this (defined in CompressedState.h). Then use unpackStateIntoValuation() to get Values
 
 class ProbState {
 public:

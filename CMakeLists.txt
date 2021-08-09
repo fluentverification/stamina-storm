@@ -11,12 +11,13 @@ set(CMAKE_BUILD_TYPE Debug)
 #         src/StaminaCL.h src/StaminaModelChecker.cpp src/StaminaModelChecker.h src/StaminaOptions.cpp src/StaminaOptions.h)
 set(SOURCE_DIR src)
 set(SOURCE_FILES src/InfCTMCNextStateGenerator.h src/InfCTMCNextStateGenerator.cpp src/main.cpp src/ProbState.h src/StaminaCL.cpp
-        src/StaminaCL.h src/StaminaModelChecker.cpp src/StaminaModelChecker.h src/StaminaOptions.cpp src/StaminaOptions.h)
+        src/StaminaCL.h src/StaminaModelChecker.cpp src/StaminaModelChecker.h src/StaminaOptions.cpp src/StaminaOptions.h 
+        src/StaminaExplicitModelBuilder.h src/StaminaExplicitModelBuilder.cpp)
 
 # set(STORM_PATH /home/awilliams/stamina/storm)
-set(STORM_PATH /home/awilliams/stamina/storm/src)
+set(STORM_PATH /home/josh/Documents/Work/Research/stamina/cpp/stamina-cplusplus/storm)
 set(LOCAL_PATH /usr/lib)
-set(LIB_PATH /home/awilliams/stamina/storm/lib)
+set(LIB_PATH /home/josh/Documents/Work/Research/stamina/cpp/stamina-cplusplus/storm/lib)
 set(CUDD_PATH ${STORM_PATH}/storm/resources/3rdparty/cudd-3.0.0/cplusplus)
 # storm/resources/3rdparty/cudd-3.0.0/cplusplus/cuddObj.hh  
 

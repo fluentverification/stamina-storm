@@ -1,6 +1,8 @@
 #ifndef STORM_GENERATOR_INFCTMCNEXTSTATEGENERATOR_H_
 #define STORM_GENERATOR_INFCTMCNEXTSTATEGENERATOR_H_
 
+#define DEBUG_PRINTS
+
 #include "storm/generator/NextStateGenerator.h"
 #include "storm/generator/PrismNextStateGenerator.h"
 #include "ProbState.h"
@@ -9,6 +11,8 @@
 
 #include "storm/storage/prism/Program.h"
 #include "storm/storage/BoostTypes.h"
+
+
 
 namespace storm {
     namespace builder {
@@ -23,6 +27,7 @@ namespace storm {
         template<typename ValueType, typename StateType = uint32_t>
         class InfCTMCNextStateGenerator : public NextStateGenerator<ValueType, StateType> {
         public:
+            // typedef std::shared_ptr<CompressedState> CompressedStatePointer;
             typedef typename NextStateGenerator<ValueType, StateType>::StateToIdCallback StateToIdCallback;
             typedef storm::storage::FlatSet<uint_fast64_t> CommandSet;
             

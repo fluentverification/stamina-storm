@@ -167,6 +167,9 @@ namespace storm {
         template<typename ValueType, typename StateType>
         std::vector<StateType> InfCTMCNextStateGenerator<ValueType, StateType>::getInitialStates(StateToIdCallback const& stateToIdCallback) {
             doReachabilityAnalysis();
+#ifdef DEBUG_PRINTS
+            std::cout << "In getInitialStates " << std::endl;
+#endif
             std::vector<StateType> initialStateIndices = generator->getInitialStates(stateToIdCallback);
 
             return initialStateIndices;
@@ -174,7 +177,13 @@ namespace storm {
 
         template<typename ValueType, typename StateType>
         StateType InfCTMCNextStateGenerator<ValueType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+#ifdef DEBUG_PRINTS
+            std::cout << "std::bind dereferenced correctly to getOrAddStateIndex." << std::endl;
+#endif
             StateType actualIndex = static_cast<StateType>(state.getAsInt(0, 64));  // get 64 bits starting at bit 0
+#ifdef DEBUG_PRINTS
+            std::cout << "Got actualIndex: " << actualIndex << " (in getOrAddStateIndex)" << std::endl;
+#endif
 	    // Consider doing something similar to this with the stateMap
             // StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 
@@ -264,7 +273,7 @@ namespace storm {
                 bool exploreState = (!curProbState.isStateTerminal() || curStateReachability >= reachabilityThreshold);
                 if(exploreState) {
                     storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
-#if 0		    // Debug statements that print the variable values in each state		    
+#ifdef DEBUG_PRINTS		    // Debug statements that print the variable values in each state		    
 		    std::cout << curProbState.stateId << ": " << this->stateToString(curProbState.state) << std::endl;
 		    auto valuation = unpackStateIntoValuation(curProbState.state, this->variableInformation, program.getManager());
 		    std::cout << "valuation: " << valuation.toString() << std::endl;
@@ -548,7 +557,9 @@ namespace storm {
 
             // Check that we processed all assignments.
             STORM_LOG_ASSERT(assignmentIt == assignmentIte, "Not all assignments were consumed.");
-
+#ifdef DEBUG_PRINTS
+            std::cout << "Returning new state: " << newState << std::endl;
+#endif
             return newState;
         }
 
@@ -688,7 +699,20 @@ namespace storm {
                         if (probability != storm::utility::zero<ValueType>()) {
                             // Obtain target state index and add it to the list of known states. If it has not yet been
                             // seen, we also add it to the set of states that have yet to be explored.
-                            StateType stateIndex = stateToIdCallback(applyUpdate(state, update));
+                            storm::generator::CompressedState updatedState = applyUpdate(state, update);
+                            // StateType stateIndex = this->getOrAddStateIndex(updatedState); 
+                            StateType stateIndex = stateToIdCallback(updatedState);
+#ifdef DEBUG_PRINTS
+                            std::cout << "Got State Index " << stateIndex << std::endl;
+                            if (stateToIdCallback == nullptr) {
+                                std::cout << "stateToIdCallback is nullptr." << std::endl;
+                            }
+                            else {
+                                // stateToIdCallback = std::bind(&InfCTMCNextStateGenerator<ValueType, StateType>::getOrAddStateIndex, this, std::placeholders::_1);
+                                std::cout << "stateToIdCallback is NOT nullptr." << std::endl;
+                            }
+                            // std::cout << "stateToIdCallback is " << stateToIdCallback.target() << std::endl;
+#endif
 
                             // Update the choice by adding the probability/target state to it.
                             choice.addProbability(stateIndex, probability);
