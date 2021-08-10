@@ -85,20 +85,55 @@ public:
 		return nextReachabilityProb;
 	}
 
-	void setNextReachabilityProbToCurrent() {
-		curReachabilityProb = nextReachabilityProb;
-	}
+		/**
+		* This maps stores transition rate for each outgoing transition.
+		*/
+		std::unordered_map<int, double> predecessorPropMap;
 
-	/*void computeNextReachabilityProb() {
-
-		nextReachabilityProb = 0.0;
-
-		for(auto element : predecessorPropMap) {
-			nextReachabilityProb += element.first.getCurReachabilityProb() * element.second;
+		/**
+		 * Wheter or not this state is terminal.
+		 * 
+		 * @return If the state is terminal or not.
+		 * */
+		bool isStateTerminal(){
+			return stateIsTerminal;
+		}
+		/**
+		 * Sets the state as either terminal or not depending on the flag.
+		 * 
+		 * @param flag bool Whether or not the state is to be terminal.
+		 * */
+		void setStateTerminal(bool flag) {
+			stateIsTerminal = flag;
+		}
+		/**
+		 * Wheter or not this state is absorbing.
+		 * 
+		 * @return If the state is absorbing or not.
+		 * */
+		bool isStateAbsorbing(){
+			return stateIsAbsorbing;
+		}
+		/**
+		 * Sets the state as either absorbing or not depending on the flag.
+		 * 
+		 * @param flag bool Whether or not the state is to be absorbing.
+		 * */
+		void setStateAbsorbing(bool flag) {
+			stateIsAbsorbing = flag;
 		}
 
-		if (nextReachabilityProb > 1.0) {
-			//throw new stormException("Path Probability greater than 1.0");
+
+		/* Probabilistic search */
+		/**
+		 * Gets the current reachability probability.
+		 * 
+		 * @return The current reachability probability.
+		 * */
+		double getCurReachabilityProb() const {
+
+			return curReachabilityProb;
+
 		}
 	}*/
 

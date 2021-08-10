@@ -54,7 +54,11 @@ namespace storm {
             virtual storm::builder::RewardModelInformation getRewardModelInformation(uint64_t const& index) const override;
             virtual std::map<std::string, storm::storage::PlayerIndex> getPlayerNameToIndexMap() const override;
 
-            virtual storm::models::sparse::StateLabeling label(storm::storage::sparse::StateStorage<StateType> const& stateStorage, std::vector<StateType> const& initialStateIndices = {}, std::vector<StateType> const& deadlockStateIndices = {}) override;
+            virtual storm::models::sparse::StateLabeling label(
+                storm::storage::sparse::StateStorage<StateType> const& stateStorage
+                , std::vector<StateType> const& initialStateIndices = {}
+                , std::vector<StateType> const& deadlockStateIndices = {}
+            ) override;
 
             virtual std::shared_ptr<storm::storage::sparse::ChoiceOrigins> generateChoiceOrigins(std::vector<boost::any>& dataForChoiceOrigins) const override;
 
@@ -104,7 +108,10 @@ namespace storm {
              * @param actionIndex The index of the action label to select.
              * @return A list of lists of active commands or nothing.
              */
-            boost::optional<std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>>> getActiveCommandsByActionIndex(uint_fast64_t const& actionIndex, CommandFilter const& commandFilter = CommandFilter::All);
+            boost::optional<std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>>> getActiveCommandsByActionIndex(
+                uint_fast64_t const& actionIndex
+                , CommandFilter const& commandFilter = CommandFilter::All
+            );
             
             /*!
              * Retrieves all unlabeled choices possible from the given state.
@@ -112,7 +119,11 @@ namespace storm {
              * @param state The state for which to retrieve the unlabeled choices.
              * @return The unlabeled choices of the state.
              */
-            std::vector<Choice<ValueType>> getUnlabeledChoices(CompressedState const& state, StateToIdCallback stateToIdCallback, CommandFilter const& commandFilter = CommandFilter::All);
+            std::vector<Choice<ValueType>> getUnlabeledChoices(
+                CompressedState const& state
+                , StateToIdCallback stateToIdCallback
+                , CommandFilter const& commandFilter = CommandFilter::All
+            );
             
             /*!
              * Retrieves all labeled choices possible from the given state.
@@ -121,7 +132,12 @@ namespace storm {
              * @param state The state for which to retrieve the unlabeled choices.
              * @return The labeled choices of the state.
              */
-            void addLabeledChoices(std::vector<Choice<ValueType>>& choices, CompressedState const& state, StateToIdCallback stateToIdCallback, CommandFilter const& commandFilter = CommandFilter::All);
+            void addLabeledChoices(
+                std::vector<Choice<ValueType>>& choices
+                , CompressedState const& state
+                , StateToIdCallback stateToIdCallback
+                , CommandFilter const& commandFilter = CommandFilter::All
+            );
 
 
             /*!
@@ -132,7 +148,14 @@ namespace storm {
             /*!
              * A recursive helper function to generate a synchronziing distribution.
              */
-            void generateSynchronizedDistribution(storm::storage::BitVector const& state, ValueType const& probability, uint64_t position, std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> const& iteratorList, storm::builder::jit::Distribution<StateType, ValueType>& distribution, StateToIdCallback stateToIdCallback);
+            void generateSynchronizedDistribution(
+                storm::storage::BitVector const& state
+                , ValueType const& probability
+                , uint64_t position
+                , std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> const& iteratorList
+                , storm::builder::jit::Distribution<StateType, ValueType>& distribution
+                , StateToIdCallback stateToIdCallback
+            );
 
             // The program used for the generation of next states.
             storm::prism::Program program;
