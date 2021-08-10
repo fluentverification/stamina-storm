@@ -10,15 +10,10 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include <bitset>
-#include <map> // for hashmaps
-
-#include <boost/property_tree/ptree.hpp>
 
 #include "StaminaOptions.h"
 #include "InfCTMCModelGenerator.h"
 #include "InfCTMCNextStateGenerator.h"
-#include "StaminaExplicitModelBuilder.h"
 
 #include "storm/api/storm.h"
 #include "storm-parsers/parser/PrismParser.h"
@@ -62,66 +57,58 @@ private:
 
     void modifyExpression(storm::expressions::BaseExpression const& expr, bool isMin, storm::prism::Program const& modulesFile);
     bool terminateModelCheck(double minProb, double maxProb, double termParam);// throws PrismLangException;
-    void printTransitionActions(InfCTMCModelGenerator<double> modelGen, std::string exportFileName);
     class Result {
     private:
-
-        InfCTMCModelGenerator<double>* infModelGen;
-
-        void modifyExpression(storm::expressions::BaseExpression const& expr, bool isMin, storm::prism::Program const& modulesFile);
-        bool terminateModelCheck(double minProb, double maxProb, double termParam);// throws PrismLangException;
-        class Result {
-            private:
-                double result;
-                std::string explanation;
-
-            public:
-                Result() = default;
-                void setResultAndExplanation(double newResult, std::string newExplanation) {
-                    result = newResult;
-                    explanation = newExplanation;
-                }
-
-                double getResult() {
-                    return result;
-                }
-
-                std::string getExplanation() {
-                        return explanation;
-                }
-
-                std::string toString() {
-                    if (explanation.empty()) {
-                        return std::to_string(result);
-                    }
-                    else {
-                        std::stringstream returnString;
-                        returnString << result << " (" << explanation << ")";
-                        return returnString.str();
-                    }
-                }
-        };
+        double result;
+        std::string explanation;
 
     public:
-        StaminaModelChecker() {}/*: CtmcModelChecker(model)*/;
+        Result() = default;
+        void setResultAndExplanation(double newResult, std::string newExplanation) {
+            result = newResult;
+            explanation = newExplanation;
+        }
 
-        void initialize();
-        void setEngine();
-        void setMaxIters(int maxIters) {};
-        void loadPRISMModel(storm::prism::Program modulesFile) {};
-        storm::prism::Program parseModelFile(std::string const& fileName);
+        double getResult() {
+            return result;
+        }
 
-        std::string getResultsString();
+        std::string getExplanation() {
+                return explanation;
+        }
 
-        std::vector<storm::jani::Property> parsePropertiesFile(
-            storm::prism::Program const& modulesFile
-            , std::string const& propertiesFileName
-        );
-        std::unique_ptr<storm::modelchecker::CheckResult> modelCheckStamina(
-            std::vector<storm::jani::Property> propertiesVector
-            , storm::jani::Property prop
-            , storm::prism::Program const& modulesFile
-        ); 
+        std::string toString() {
+            if (explanation.empty()) {
+                return std::to_string(result);
+            }
+            else {
+                std::stringstream returnString;
+                returnString << result << " (" << explanation << ")";
+                return returnString.str();
+            }
+        }
+
+    };
+
+public:
+    StaminaModelChecker() {}/*: CtmcModelChecker(model)*/;
+
+
+
+    void initialize();
+    void setEngine();
+    void setMaxIters(int maxIters) {};
+    void loadPRISMModel(storm::prism::Program modulesFile) {};
+    storm::prism::Program parseModelFile(std::string const& fileName);
+
+
+
+    std::vector<storm::jani::Property> parsePropertiesFile(storm::prism::Program const& modulesFile, std::string const& propertiesFileName);
+
+
+    std::unique_ptr<storm::modelchecker::CheckResult> modelCheckStamina(std::vector<storm::jani::Property> propertiesVector, storm::jani::Property prop, storm::prism::Program const& modulesFile); /*throws PrismException*/
+
+
 
 };
 

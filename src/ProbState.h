@@ -28,40 +28,7 @@ public:
 		stateIsTerminal(true),
 		stateIsAbsorbing(false)
 	{}
-	
 
-	/**
-	* This maps stores transition rate for each outgoing transition.
-	*/
-	std::unordered_map<uint32_t, double> predecessorPropMap;
-	
-  uint32_t stateId;
-	CompressedState state;
-
-
-	bool isStateTerminal(){
-		return stateIsTerminal;
-	}
-
-	void setStateTerminal(bool flag) {
-		stateIsTerminal = flag;
-	}
-
-	bool isStateAbsorbing(){
-		return stateIsAbsorbing;
-	}
-
-	void setStateAbsorbing(bool flag) {
-		stateIsAbsorbing = flag;
-	}
-
-
-	/* Probabilistic search */
-	double getCurReachabilityProb() const {
-
-		return curReachabilityProb;
-
-	}
 
 	void setCurReachabilityProb(double reachProb) {
 		curReachabilityProb = reachProb;
@@ -84,7 +51,8 @@ public:
 	double getNextReachabilityProb() const {
 		return nextReachabilityProb;
 	}
-
+  	uint32_t stateId;
+	CompressedState state;
 		/**
 		* This maps stores transition rate for each outgoing transition.
 		*/
@@ -135,7 +103,6 @@ public:
 			return curReachabilityProb;
 
 		}
-	}*/
 
 	void updatePredecessorProbMap(uint32_t index, double tranProb) {
 		predecessorPropMap.insert(std::make_pair(index, tranProb));

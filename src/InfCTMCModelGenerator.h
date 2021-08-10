@@ -76,7 +76,7 @@ public:
 
     InfCTMCModelGenerator(
         storm::jani::Model const& model
-        , storm::generator::NextStateGeneratorOptions const& generatorOptions = dstorm::generator::NextStateGeneratorOptions()
+        , storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
         , Options const& builderOptions = Options()
     );
     
@@ -123,6 +123,5 @@ private:
 
 };
 
-};
 
 #endif  /* STORM_BUILDER_INFCTMCGENERATOR_H */
