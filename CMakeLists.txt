@@ -10,9 +10,18 @@ set(CMAKE_BUILD_TYPE Debug)
 # set(SOURCE_FILES src/InfCTMCModelGenerator.cpp src/InfCTMCModelGenerator.h src/main.cpp src/ProbState.h src/StaminaCL.cpp
 #         src/StaminaCL.h src/StaminaModelChecker.cpp src/StaminaModelChecker.h src/StaminaOptions.cpp src/StaminaOptions.h)
 set(SOURCE_DIR src)
-set(SOURCE_FILES src/InfCTMCNextStateGenerator.h src/InfCTMCNextStateGenerator.cpp src/main.cpp src/ProbState.h src/StaminaCL.cpp
-        src/StaminaCL.h src/StaminaModelChecker.cpp src/StaminaModelChecker.h src/StaminaOptions.cpp src/StaminaOptions.h 
-        src/StaminaExplicitModelBuilder.h src/StaminaExplicitModelBuilder.cpp)
+set(SOURCE_FILES 
+    src/ANSIColors.h
+    src/main.cpp
+    src/Stamina.cpp
+    src/Stamina.h
+    src/StaminaArgParse.h
+    src/StaminaModelBuilder.h
+    src/StaminaModelBuilder.cpp
+)
+# set(SOURCE_FILES src/InfCTMCNextStateGenerator.h src/InfCTMCNextStateGenerator.cpp src/main.cpp src/ProbState.h src/StaminaCL.cpp
+#         src/StaminaCL.h src/StaminaModelChecker.cpp src/StaminaModelChecker.h src/StaminaOptions.cpp src/StaminaOptions.h 
+#         src/StaminaExplicitModelBuilder.h src/StaminaExplicitModelBuilder.cpp)
 
 # set(STORM_PATH /home/awilliams/stamina/storm)
 set(STORM_PATH /home/josh/Documents/Work/Research/stamina/cpp/stamina-cplusplus/storm)
