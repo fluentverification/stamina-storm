@@ -1,0 +1,120 @@
+/**
+ * Implementation for methods for StaminaModelChecker
+ * 
+ * Created by Josh Jeppson on 8/17/2021
+ * */
+#include "StaminaModelChecker.h"
+#include "ANSIColors.h"
+
+#include <sstream>
+#include <stdio.h>
+
+using namespace stamina;
+
+StaminaModelChecker::StaminaModelChecker(        
+    std::function<void(std::string)> err
+    , std::function<void(std::string)> warn
+    , std::function<void(std::string)> info
+    , std::function<void(std::string)> good
+    , Options * options
+) : err(err)
+    , warn(warn)
+    , info(info)
+    , good(good)
+    , options(options)
+{
+    // Intentionally left empty
+}
+
+std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckProperty(
+    storm::jani::Property prop
+    , storm::prism::Program const& modulesFile
+) {
+    // Instantiate lower and upper results
+    min_results = new Result();
+    max_results = new Result();
+
+    // Create number of refined iterations and rechability threshold
+    int numRefineIterations = 0;
+    double reachThreshold = options->kappa;
+
+    // Get the name of the property
+    std::string propName = prop.getName().empty() ? "Prob" : prop.getName();
+
+    // Lower and upper bound times
+    double lTime, uTime;
+
+    // Split property into 2 to find P_min and P_max
+    storm::jani::Property * prop_min = new storm::jani::Property(propName + "_min", prop.getRawFormula(), prop.getUndefinedConstants()); // todo: modify true
+    storm::jani::Property * prop_max = new storm::jani::Property(propName + "_max", prop.getRawFormula(), prop.getUndefinedConstants()); // todo: modify false
+
+    // Will we sitch to optimized CTMC analysis?
+    bool switchToCombinedCTMC = false;
+
+    auto propertyExpression = prop.getRawFormula();
+
+    if (propertyExpression->isProbabilityPathFormula()) {
+        warn("This property (" + propName + ") is a probability path formula.");
+    }
+
+    // While we should not terminate
+    while (numRefineIterations == 0
+        || (!terminateModelCheck() && numRefineIterations < options->max_approx_count)
+    ) {
+        // Print out our current refinement iteration
+        info("Approximation [Refine Iterations: " + std::to_string(numRefineIterations) + ", kappa = " + std::to_string(reachThreshold) + "]");
+        ++numRefineIterations;
+        // Reset the reachability threshold
+        reachThreshold = options->kappa;
+
+        // TODO: Set property expression in StaminaModelBuilder
+
+        switchToCombinedCTMC = switchToCombinedCTMC && !options->no_prop_refine;
+
+        // If we don't switch to a combined CTMC, just perform the model checking
+        if (!switchToCombinedCTMC) {
+            info("Verifying lower bound for " + prop_min->getName() + ".");
+            check(prop_min, min_results);
+            info("Verifying upper bound for " + prop_max->getName() + ".");
+            check(prop_max, max_results);
+            continue;
+        }
+        // Reduce kappa for refinement
+
+    }
+
+
+
+    // Print results
+    std::stringstream resultInfo;
+    resultInfo << "Finished checking property: " << propName << std::endl;
+    resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << *min_results << std::endl;
+    resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << *max_results << std::endl;
+    info(resultInfo.str());
+    
+    // Export transitions to file if desired
+    if (options->export_trans != "") {
+        info("Exporting transitions to file: " + options->export_trans);
+        // TODO: Export 
+        warn("This feature has not been implemented yet");
+        good("Export Complete!");
+    }
+
+    // Clean up memory
+    delete min_results;
+    delete max_results;
+    delete prop_min;
+    delete prop_max;
+    return nullptr; // TODO
+}
+
+void StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
+    warn("This method is not implemented yet!!");
+    double result = 0.0;
+    r->result = result;
+    r->explanation = "Property check for " + property->getName();
+}
+
+bool StaminaModelChecker::terminateModelCheck() {
+    return true; // TODO
+}
