@@ -22,7 +22,7 @@ Stamina::Stamina(struct arguments * arguments) {
         this->options = new Stamina::Options();
         this->options->setArgs(arguments);
     }
-    catch(const std::exception& e) {
+    catch (const std::exception& e) {
         errorAndExit("Failed to allocate Stamina::Stamina::options: " + std::string(e.what()));
     }
     info("Starting STAMINA with kappa = " + std::to_string(options->kappa) + " and reduction factor = " + std::to_string(options->reduce_kappa));
@@ -47,7 +47,7 @@ void Stamina::run() {
 #ifdef DEBUG_PRINTS
         debugPrint("Checking property in properties vector.");
 #endif
-        // auto result = 
+        auto result = modelChecker->modelCheckProperty(property, modulesFile);
     }
     // Finished!
     good("Finished running!");
@@ -57,7 +57,13 @@ void Stamina::run() {
 
 void Stamina::initialize() {
     info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
-    modelBuilder = new StaminaModelBuilder();
+    // Initialize with references to error, warning, info, and good message functions
+    modelChecker = new StaminaModelChecker(
+        std::bind(&Stamina::error, this, std::placeholders::_1, STAMINA_ERRORS::ERR_GENERAL)
+        , std::bind(&Stamina::warning, this, std::placeholders::_1)
+        , std::bind(&Stamina::info, this, std::placeholders::_1)
+        , std::bind(&Stamina::good, this, std::placeholders::_1)
+    );
     // Initialize loggers
     // storm::utility::setUp(); // TODO
     // Set some settings objects.
@@ -68,7 +74,7 @@ void Stamina::initialize() {
         modulesFile = storm::parser::PrismParser::parse(options->model_file, true);
         propertiesVector = storm::api::parsePropertiesForPrismProgram(options->properties_file, modulesFile);
     }
-    catch(const std::exception& e) {
+    catch (const std::exception& e) {
         // Uses stringstream because std::to_string(e) throws an error with storm's exceptions
         std::stringstream msg;
         msg << "Got error when reading modules or properties file:\n\t\t" << e.what();

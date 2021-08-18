@@ -41,6 +41,7 @@
 using namespace storm::builder;
 using namespace storm::utility::prism;
 using namespace storm::generator;
+
 namespace stamina {
     // template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
     class StaminaModelBuilder  {

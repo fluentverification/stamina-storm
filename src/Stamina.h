@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "StaminaArgParse.h"
-#include "StaminaModelBuilder.h"
+#include "StaminaModelChecker.h"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
@@ -47,7 +47,9 @@ namespace stamina {
          * Runs stamina
          * */
         void run();
-    private:
+        /**
+         * Options subclass
+         * */
         class Options {
         public:
             /**
@@ -98,6 +100,7 @@ namespace stamina {
             bool gauss_seidel;
             bool backward_gauss_seidel;
         };
+    private:
         /**
          * Initializes Stamina
          * */
@@ -130,7 +133,7 @@ namespace stamina {
 #endif
         /* Data Members */
         Stamina::Options * options;
-        StaminaModelBuilder * modelBuilder;
+        StaminaModelChecker * modelChecker;
         storm::prism::Program modulesFile;
         std::vector<storm::jani::Property> propertiesVector;
     };
