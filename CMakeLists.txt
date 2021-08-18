@@ -23,6 +23,8 @@ set(SOURCE_FILES
     src/StaminaModelBuilder.cpp
     src/StaminaModelChecker.h
     src/StaminaModelChecker.cpp
+    src/Options.h
+    src/Options.cpp
 )
 
 set(STORM_PATH /home/josh/Documents/Work/Research/stamina/cpp/stamina-cplusplus/storm)

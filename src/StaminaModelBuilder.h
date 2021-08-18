@@ -14,6 +14,8 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/variant.hpp>
 
+#include "Options.h"
+
 #include "storm/models/sparse/StandardRewardModel.h"
 
 #include "storm/storage/prism/Program.h"

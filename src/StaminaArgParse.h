@@ -44,14 +44,14 @@ static struct argp_option options[] = {
         "Import model to a (text) file"}
     , {"property", 'p', "propname", 0,
         "Specify a certain property to check in a model file that contains many"}
-    , {"const", 'c', "C1=VAL,C2=VAL,C3=VAL", 0,
+    , {"const", 'c', "\"C1=VAL,C2=VAL,C3=VAL\"", 0,
         "Comma separated values for constants"}
     , {"exportTrans", 't', "filename", 0,
         "Export the list of transitions and actions to a specified file name, or to trans.txt if no file name is specified.\nTransitions are exported in the format <Source State Index> <Destination State Index> <Action Label>"}
     /* Additional options. GNU argp shows args alphabetically */
     , {"rankTransitions", 'T', 0, 0,
         "Rank transitions before expanding (default: false)"}
-    , {"maxIterations", 'M', 0, 0,
+    , {"maxIterations", 'M', "int", 0,
         "Maximum iteration for solution (default: 10000)"}
     , {"power", 'P', 0, 0,
         "Use the \"Power Method\""}
@@ -82,7 +82,7 @@ struct arguments {
     std::string import_filename;
     std::string property;
     std::string consts;
-    std::string expor_trans;
+    std::string export_trans;
     bool rank_transitions;
     uint64_t max_iterations;
     bool power;
@@ -148,7 +148,7 @@ static error_t parse_opt(int key, char * arg, struct argp_state * state) {
             break;
         // export transitions
         case 't':
-            arguments->expor_trans = std::string(arg);
+            arguments->export_trans = std::string(arg);
             break;
         // use rank transitions before expanding
         case 'T':

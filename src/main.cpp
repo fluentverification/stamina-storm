@@ -12,7 +12,7 @@ void set_default_values(struct arguments * arguments) {
     arguments->max_approx_count = 10;
     arguments->no_prop_refine = false;
     arguments->cudd_max_mem = "1g";
-    arguments->expor_trans = "trans.txt";
+    arguments->export_trans = "trans.txt";
     arguments->rank_transitions = false;
     arguments->max_iterations = 10000;
     arguments->power = false;
