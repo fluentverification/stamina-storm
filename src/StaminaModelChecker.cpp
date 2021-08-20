@@ -68,8 +68,8 @@ StaminaModelChecker::modelCheckProperty(
         reachThreshold = options->kappa;
 
         // Check if we are using an until formula and a path formula
-        std::shared_ptr<storm::logic::Formula> formula = prop.getFilter().getFormula();
-        if (formula.isPathFormula() && formula.isUntilFormula()) {
+        std::shared_ptr<const storm::logic::Formula> formula = prop.getFilter().getFormula();
+        if (formula->isPathFormula() && formula->isUntilFormula()) {
             // TODO: Set this property for our model generator
             // Update switchToCombinedCTMC
             switchToCombinedCTMC = switchToCombinedCTMC || !options->no_prop_refine;
@@ -86,6 +86,8 @@ StaminaModelChecker::modelCheckProperty(
             ++numRefineIterations;
             continue;
         }
+
+        // Explicitly invoke model build
 
         // Reduce kappa for refinement
         double percentOff = max_results->result - min_results->result;
@@ -117,17 +119,16 @@ StaminaModelChecker::modelCheckProperty(
     // Export transitions to file if desired
     if (options->export_trans != "") {
         info("Exporting transitions to file: " + options->export_trans);
-        // TODO: Export 
-        warn("This feature has not been implemented yet");
+        printTransitionActions(options->export_trans);
         good("Export Complete!");
     }
 
     // Clean up memory
+    delete min_results;
     delete max_results;
     delete prop_min;
     delete prop_max;
-    // min_results is returned so stamina::Stamina should delete this when done.
-    return min_results;
+    return nullptr;
 }
 
 void 
@@ -156,4 +157,9 @@ StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
         ss << "Got error while trying to export perimeter states: " << e.what();
         err(ss.str());
     }
+}
+
+void 
+StaminaModelChecker::printTransitionActions(std::string filename) {
+    warn("This feature has not been implemented yet");
 }

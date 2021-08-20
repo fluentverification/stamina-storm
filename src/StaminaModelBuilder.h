@@ -35,6 +35,8 @@
 #include "storm/generator/NextStateGenerator.h"
 #include "storm/generator/CompressedState.h"
 #include "storm/generator/VariableInformation.h"
+#include "storm/generator/JaniNextStateGenerator.h"
+#include "storm/generator/PrismNextStateGenerator.h"
 
 #include "storm/builder/ExplicitModelBuilder.h"
 
@@ -49,60 +51,60 @@ namespace stamina {
         /**
          * Constructs a StaminaModelBuilder with a given storm::generator::NextStateGenerator
          * 
-         * @param generator The generator we are going to use.
          * @param options A pointer to the main stamina::Options
          * @param err Lambda to error function
          * @param warm Lambda to warning function
          * @param info Lambda to info function
          * @param good Lambda to good function
+         * @param generator The generator we are going to use.
          * */
         StaminaModelBuilder(
-            std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> const& generator
-            , Options * options
+            Options * options
             , std::function<void(std::string)> err
             , std::function<void(std::string)> warn
             , std::function<void(std::string)> info
             , std::function<void(std::string)> good
+            , std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> const& generator
         );
         /**
          * Constructs a StaminaModelBuilder with a PRISM program and generatorOptions
          * 
-         * @param program The PRISM program we are going to use to build the model with.
-         * @param generatorOptions Options for the storm::generator::NextStateGenerator we are going to use.
          * @param options A pointer to the main stamina::Options
          * @param err Lambda to error function
          * @param warm Lambda to warning function
          * @param info Lambda to info function
          * @param good Lambda to good function
+         * @param program The PRISM program we are going to use to build the model with.
+         * @param generatorOptions Options for the storm::generator::NextStateGenerator we are going to use.
          * */
         StaminaModelBuilder(
-            storm::prism::Program const& program
-            , storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
-            , Options * options
+            Options * options
             , std::function<void(std::string)> err
             , std::function<void(std::string)> warn
             , std::function<void(std::string)> info
             , std::function<void(std::string)> good
+            , storm::prism::Program const& program
+            , storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
         );
         /**
          * Constructs a StaminaModelBuilder with a JANI model.
          * 
-         * @param model The JANI model we're going to use.
-         * @param generatorOptions Options for the storm::generator::NextStateGenerator we are going to use.
          * @param options A pointer to the main stamina::Options
          * @param err Lambda to error function
          * @param warm Lambda to warning function
          * @param info Lambda to info function
          * @param good Lambda to good function
+         * @param model The JANI model we're going to use.
+         * @param generatorOptions Options for the storm::generator::NextStateGenerator we are going to use.
          * */
         StaminaModelBuilder(
-            storm::jani::Model const& model
-            , storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
-            , Options * options
+            Options * options
             , std::function<void(std::string)> err
             , std::function<void(std::string)> warn
             , std::function<void(std::string)> info
             , std::function<void(std::string)> good
+            , storm::jani::Model const& model
+            , storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
         );
         /**
          * Creates a model with a truncated state space for the program provided during construction. State space
@@ -122,6 +124,7 @@ namespace stamina {
         std::function<void(std::string)> good;
         Options * options;
         storm::storage::sparse::StateStorage<StateType> stateStorage;
+        std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> generator;
 
     };
 }
