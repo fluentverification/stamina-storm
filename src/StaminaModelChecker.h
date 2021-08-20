@@ -103,6 +103,9 @@ namespace stamina {
         };
         /**
          * Explicitly invokes a model check from a property
+         * 
+         * @param property Property to invoke model checker for
+         * @param r Pointer to result
          * */
         void check(storm::jani::Property * property, Result * r);
         /**
@@ -111,6 +114,10 @@ namespace stamina {
          * @return Terminate?
          * */
         bool terminateModelCheck();
+        /**
+         * Writes perimeter states to a specified file.
+         * */
+        void writePerimeterStates(int numRefineIteration);
         /* Data Members */
         std::function<void(std::string)> err;
         std::function<void(std::string)> warn;

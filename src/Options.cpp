@@ -34,7 +34,8 @@ Options::Options(struct arguments * arguments) :
     // Intentionally left empty
 }
 
-bool Options::checkOptions(std::function<void(std::string, uint8_t)> err, std::function<void(std::string)> warn) {
+bool 
+Options::checkOptions(std::function<void(std::string, uint8_t)> err, std::function<void(std::string)> warn) {
     bool good = true;
     // Check if we are passing in the right type of file
     if (model_file == "") {
@@ -70,7 +71,8 @@ bool Options::checkOptions(std::function<void(std::string, uint8_t)> err, std::f
     return good;
 }
 
-void Options::setArgs(struct arguments * arguments) {
+void 
+Options::setArgs(struct arguments * arguments) {
     this->model_file = arguments->model_file;
     this->properties_file = arguments->properties_file;
     this->kappa = arguments->kappa;

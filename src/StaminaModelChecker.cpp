@@ -26,7 +26,8 @@ StaminaModelChecker::StaminaModelChecker(
     // Intentionally left empty
 }
 
-std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelCheckProperty(
+std::unique_ptr<storm::modelchecker::CheckResult> 
+StaminaModelChecker::modelCheckProperty(
     storm::jani::Property prop
     , storm::prism::Program const& modulesFile
 ) {
@@ -63,12 +64,16 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     ) {
         // Print out our current refinement iteration
         info("Approximation [Refine Iterations: " + std::to_string(numRefineIterations) + ", kappa = " + std::to_string(reachThreshold) + "]");
-        ++numRefineIterations;
         // Reset the reachability threshold
         reachThreshold = options->kappa;
 
-        // TODO: Set property expression in StaminaModelBuilder
-
+        // Check if we are using an until formula and a path formula
+        std::shared_ptr<storm::logic::Formula> formula = prop.getFilter().getFormula();
+        if (formula.isPathFormula() && formula.isUntilFormula()) {
+            // TODO: Set this property for our model generator
+            // Update switchToCombinedCTMC
+            switchToCombinedCTMC = switchToCombinedCTMC || !options->no_prop_refine;
+        }
         switchToCombinedCTMC = switchToCombinedCTMC && !options->no_prop_refine;
 
         // If we don't switch to a combined CTMC, just perform the model checking
@@ -77,10 +82,27 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
             check(prop_min, min_results);
             info("Verifying upper bound for " + prop_max->getName() + ".");
             check(prop_max, max_results);
+            // Update here since we continue to the next loop iteration
+            ++numRefineIterations;
             continue;
         }
-        // Reduce kappa for refinement
 
+        // Reduce kappa for refinement
+        double percentOff = max_results->result - min_results->result;
+        percentOff *= (double) 4.0 / options->prob_win;
+        if (percentOff > 1.0) {
+            // info("percentOff is equal to: " + std::to_string(percentOff));
+            percentOff = 1.0;
+        }
+        options->approx_factor *= percentOff;
+
+        // Increment the refinement count
+        if (options->export_perimeter_states != "") {
+            writePerimeterStates(numRefineIterations);    
+        }
+
+        // Increment number of refine iterations
+        ++numRefineIterations;
     }
 
 
@@ -101,20 +123,37 @@ std::unique_ptr<storm::modelchecker::CheckResult> StaminaModelChecker::modelChec
     }
 
     // Clean up memory
-    delete min_results;
     delete max_results;
     delete prop_min;
     delete prop_max;
-    return nullptr; // TODO
+    // min_results is returned so stamina::Stamina should delete this when done.
+    return min_results;
 }
 
-void StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
+void 
+StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
     warn("This method is not implemented yet!!");
     double result = 0.0;
     r->result = result;
     r->explanation = "Property check for " + property->getName();
 }
 
-bool StaminaModelChecker::terminateModelCheck() {
-    return true; // TODO
+bool 
+StaminaModelChecker::terminateModelCheck() {
+    // If our max result minus our min result is less than our maximum window
+    return (max_results->result - min_results->result) <= options->prob_win;
+
+}
+
+void 
+StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
+    try {
+        // Refer to line 450 in StaminaModelChecker.java
+        warn("writePerimeterStates(int numRefineIteration) has not been implemented yet!");
+    }
+    catch(const std::exception& e) {
+        std::stringstream ss;
+        ss << "Got error while trying to export perimeter states: " << e.what();
+        err(ss.str());
+    }
 }

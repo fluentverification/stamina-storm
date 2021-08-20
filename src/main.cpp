@@ -4,7 +4,8 @@
 /**
  * Sets our default values
  * */
-void set_default_values(struct arguments * arguments) {
+void 
+set_default_values(struct arguments * arguments) {
     arguments->kappa = 1.0;
     arguments->reduce_kappa = 2.0;
     arguments->approx_factor = 2.0;
@@ -24,7 +25,8 @@ void set_default_values(struct arguments * arguments) {
 /**
  * Main function
  * */
-int main(int argc, char ** argv) {
+int 
+main(int argc, char ** argv) {
     struct arguments arguments;
     // Sets all default values
     set_default_values(&arguments);

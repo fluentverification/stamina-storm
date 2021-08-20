@@ -72,7 +72,7 @@ struct arguments {
     std::string properties_file;
     double kappa;
     double reduce_kappa;
-    double approx_factor;
+    double approx_factor; // Analagous to "misprediction factor" in the Java version
     double prob_win;
     uint64_t max_approx_count;
     bool no_prop_refine;
@@ -94,7 +94,8 @@ struct arguments {
 /**
  * Parse a single option
  * */
-static error_t parse_opt(int key, char * arg, struct argp_state * state) {
+static error_t 
+parse_opt(int key, char * arg, struct argp_state * state) {
     
     struct arguments * arguments = static_cast<struct arguments*>(state->input);
     switch (key) {

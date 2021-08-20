@@ -40,7 +40,8 @@ Stamina::~Stamina() {
     delete this->options;
 }
 
-void Stamina::run() {
+void 
+Stamina::run() {
     initialize();
     // Check each property in turn
     for (auto property : propertiesVector) {
@@ -55,7 +56,8 @@ void Stamina::run() {
 
 // PRIVATE METHODS
 
-void Stamina::initialize() {
+void 
+Stamina::initialize() {
     info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
     // Initialize with references to error, warning, info, and good message functions
     modelChecker = new StaminaModelChecker(
@@ -84,28 +86,33 @@ void Stamina::initialize() {
     
 }
 
-void Stamina::errorAndExit(std::string err, uint8_t err_num) {
+void 
+Stamina::errorAndExit(std::string err, uint8_t err_num) {
     std::cerr << BOLD(FRED("[ERROR]: "));
     std::cerr << BOLD("STAMINA encountered the following error and will now exit: ") << std::endl;
     std::cerr << '\t' << err << std::endl;
     exit(err_num);
 }
 
-void Stamina::error(std::string err, uint8_t err_num) {
+void 
+Stamina::error(std::string err, uint8_t err_num) {
     std::cerr << BOLD(FRED("[ERROR]: "));
     std::cerr << BOLD("STAMINA encountered the following (possibly recoverable) error: ") << std::endl;
     std::cerr << '\t' << err << std::endl;
 }
 
-void Stamina::warning(std::string warn) {
+void 
+Stamina::warning(std::string warn) {
     std::cerr << BOLD(FYEL("[WARNING]: ")) << warn << std::endl;
 }
 
-void Stamina::info(std::string info) {
+void 
+Stamina::info(std::string info) {
     std::cerr << BOLD(FBLU("[INFO]: ")) << info << std::endl;
 }
 
-void Stamina::good(std::string good) {
+void 
+Stamina::good(std::string good) {
     std::cerr << BOLD(FGRN("[MESSAGE]: ")) << good << std::endl;
 }
 
