@@ -27,9 +27,8 @@ set(SOURCE_FILES
     src/Options.cpp
 )
 
-set(STORM_PATH /home/josh/Documents/Work/Research/stamina/cpp/stamina-cplusplus/storm)
 set(LOCAL_PATH /usr/lib)
-set(LIB_PATH /home/josh/Documents/Work/Research/stamina/cpp/stamina-cplusplus/storm/lib)
+set(LIB_PATH ${STORM_PATH}/lib)
 set(CUDD_PATH ${STORM_PATH}/storm/resources/3rdparty/cudd-3.0.0/cplusplus)
  
 # Use BOOST for STORM (and also in some cases in STAMINA)
