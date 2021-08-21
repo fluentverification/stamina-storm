@@ -16,6 +16,11 @@
 
 #include "Options.h"
 
+#include <boost/functional/hash.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/variant.hpp>
+
+#include "storm/builder/ExplicitModelBuilder.h"
 #include "storm/models/sparse/StandardRewardModel.h"
 
 #include "storm/storage/prism/Program.h"
@@ -37,10 +42,6 @@
 #include "storm/generator/NextStateGenerator.h"
 #include "storm/generator/CompressedState.h"
 #include "storm/generator/VariableInformation.h"
-#include "storm/generator/JaniNextStateGenerator.h"
-#include "storm/generator/PrismNextStateGenerator.h"
-
-#include "storm/builder/ExplicitModelBuilder.h"
 
 
 namespace stamina {

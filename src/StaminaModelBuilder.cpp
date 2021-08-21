@@ -5,6 +5,37 @@
  * */
 #include "StaminaModelBuilder.h"
 
+#include "storm/builder/RewardModelBuilder.h"
+#include "storm/builder/ChoiceInformationBuilder.h"
+
+#include "storm/exceptions/AbortException.h"
+#include "storm/exceptions/WrongFormatException.h"
+#include "storm/exceptions/IllegalArgumentException.h"
+
+#include "storm/generator/PrismNextStateGenerator.h"
+#include "storm/generator/JaniNextStateGenerator.h"
+
+#include "storm/models/sparse/Dtmc.h"
+#include "storm/models/sparse/Ctmc.h"
+#include "storm/models/sparse/Mdp.h"
+#include "storm/models/sparse/MarkovAutomaton.h"
+#include "storm/models/sparse/StandardRewardModel.h"
+
+#include "storm/settings/modules/BuildSettings.h"
+
+#include "storm/storage/expressions/ExpressionManager.h"
+#include "storm/storage/jani/Model.h"
+#include "storm/storage/jani/Automaton.h"
+#include "storm/storage/jani/AutomatonComposition.h"
+#include "storm/storage/jani/ParallelComposition.h"
+
+#include "storm/utility/builder.h"
+#include "storm/utility/constants.h"
+#include "storm/utility/prism.h"
+#include "storm/utility/macros.h"
+#include "storm/utility/ConstantsComparator.h"
+#include "storm/utility/SignalHandler.h"
+
 using namespace stamina;
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -106,7 +137,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
-    
+
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
