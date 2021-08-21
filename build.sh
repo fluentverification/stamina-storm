@@ -11,6 +11,7 @@
 echo "[MESSAGE] Checking if STORM exists in the STAMINA root directory"
 
 STAMINA_ROOT=pwd
+NPROC="$(nproc --all)"
 
 if [! -d "storm" ]
 then
@@ -22,7 +23,7 @@ then
 	mkdir build
 	cd build
 	cmake ..
-	make
+	make -j$NPROC
 	echo "[MESSAGE] Finished building STORM"
 	cd ..
 	STORM_PATH=pwd
@@ -35,6 +36,6 @@ cd $STAMINA_ROOT
 echo "[MESSAGE] Building STAMINA"
 
 cmake . -DSTORM_PATH=$STORM_PATH
-make
+make -j$NPROC
 
 echo "[MESSAGE] Finished building STAMINA"
