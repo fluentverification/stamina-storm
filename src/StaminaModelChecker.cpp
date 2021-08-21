@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <stdio.h>
+#include <fstream>
 
 using namespace stamina;
 
@@ -23,7 +24,55 @@ StaminaModelChecker::StaminaModelChecker(
     , good(good)
     , options(options)
 {
-    // Intentionally left empty
+    // Explicitly invoke model build
+    std::string iFilename = options->import_filename; 
+    if (iFilename != "") {
+        try {
+            std::string transFile = iFilename + ".tra";
+            std::string stateRewardsFile = iFilename + "srew";
+            std::string transRewardsFile = iFilename + ".trew";
+            std::string statesFile = iFilename + ".sta";
+            std::string labelsFile = iFilename + ".lab";
+            // TODO: load model from explicit files
+            warn("Importing model from explicit files not implemented yet!");
+        }
+        catch (const std::exception& e) {
+            std::stringstream ss;
+            ss << "Cannot import file: " << iFilename << '\n';
+            ss << BOLD("\tGot Error:") << e.what();
+            err(ss.str());
+        }  
+    }
+    //
+}
+
+StaminaModelChecker::~StaminaModelChecker() {
+    // Explicitly invoke model export
+    std::string oFilename = options->export_trans; 
+    if (oFilename != "") {
+        try {
+            std::string transFile = oFilename + ".tra";
+            std::string stateRewardsFile = oFilename + "srew";
+            std::string transRewardsFile = oFilename + ".trew";
+            std::string statesFile = oFilename + ".sta";
+            std::string labelsFile = oFilename + ".lab";
+            // TODO: export model to explicit files
+            warn("Exporting model to explicit files not implemented yet!");
+        }
+        catch (const std::exception& e) {
+            std::stringstream ss;
+            ss << "Cannot export file: " << oFilename << '\n';
+            ss << BOLD("\tGot Error:") << e.what();
+            err(ss.str());
+        }  
+    }
+}
+
+void
+StaminaModelChecker::initialize(
+    std::vector<storm::jani::Property> propertiesVector
+) {
+
 }
 
 std::unique_ptr<storm::modelchecker::CheckResult> 
@@ -49,14 +98,22 @@ StaminaModelChecker::modelCheckProperty(
     storm::jani::Property * prop_min = new storm::jani::Property(propName + "_min", prop.getRawFormula(), prop.getUndefinedConstants()); // todo: modify true
     storm::jani::Property * prop_max = new storm::jani::Property(propName + "_max", prop.getRawFormula(), prop.getUndefinedConstants()); // todo: modify false
 
-    // Will we sitch to optimized CTMC analysis?
-    bool switchToCombinedCTMC = false;
-
     auto propertyExpression = prop.getRawFormula();
 
     if (propertyExpression->isProbabilityPathFormula()) {
         warn("This property (" + propName + ") is a probability path formula.");
     }
+
+    // Will we sitch to optimized CTMC analysis?
+    bool switchToCombinedCTMC = false;
+    // Check if we are using an until formula and a path formula
+    std::shared_ptr<const storm::logic::Formula> formula = prop.getFilter().getFormula();
+    if (formula->isPathFormula() && formula->isUntilFormula()) {
+        // TODO: Set this property for our model generator
+        // Update switchToCombinedCTMC
+        switchToCombinedCTMC = switchToCombinedCTMC || !options->no_prop_refine;
+    }
+    switchToCombinedCTMC = switchToCombinedCTMC && !options->no_prop_refine;
 
     // While we should not terminate
     while (numRefineIterations == 0
@@ -67,14 +124,6 @@ StaminaModelChecker::modelCheckProperty(
         // Reset the reachability threshold
         reachThreshold = options->kappa;
 
-        // Check if we are using an until formula and a path formula
-        std::shared_ptr<const storm::logic::Formula> formula = prop.getFilter().getFormula();
-        if (formula->isPathFormula() && formula->isUntilFormula()) {
-            // TODO: Set this property for our model generator
-            // Update switchToCombinedCTMC
-            switchToCombinedCTMC = switchToCombinedCTMC || !options->no_prop_refine;
-        }
-        switchToCombinedCTMC = switchToCombinedCTMC && !options->no_prop_refine;
 
         // If we don't switch to a combined CTMC, just perform the model checking
         if (!switchToCombinedCTMC) {
@@ -82,18 +131,18 @@ StaminaModelChecker::modelCheckProperty(
             check(prop_min, min_results);
             info("Verifying upper bound for " + prop_max->getName() + ".");
             check(prop_max, max_results);
+            // Write to output file
+
             // Update here since we continue to the next loop iteration
             ++numRefineIterations;
             continue;
         }
 
-        // Explicitly invoke model build
-
         // Reduce kappa for refinement
         double percentOff = max_results->result - min_results->result;
         percentOff *= (double) 4.0 / options->prob_win;
+        // max percent off at 100%
         if (percentOff > 1.0) {
-            // info("percentOff is equal to: " + std::to_string(percentOff));
             percentOff = 1.0;
         }
         options->approx_factor *= percentOff;
@@ -162,4 +211,21 @@ StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
 void 
 StaminaModelChecker::printTransitionActions(std::string filename) {
     warn("This feature has not been implemented yet");
+}
+
+void
+StaminaModelChecker::writeToOutput(std::string filename) {
+    if (!min_results || !max_results) {
+        err("A results pointer is a nullptr");
+        return;
+    }
+    std::ofstream outfile;
+    outfile.open(filename);
+    if (!outfile) {
+        err("Output file could not be opened");
+        return;
+    }
+    outfile << min_results << "\r\n";
+    outfile << max_results << "\r\n";
+    outfile.close();
 }

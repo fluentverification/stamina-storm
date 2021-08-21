@@ -53,7 +53,15 @@ namespace stamina {
             , std::function<void(std::string)> good
             , Options * options
         );
-
+        /**
+         * Standard destructor
+         * */
+        ~StaminaModelChecker();
+        /**
+         * Initializes the StaminaModelChecker class
+         * 
+         * @param propertiesVector A vector to the list of JANI properties
+         * */
         void initialize(
             std::vector<storm::jani::Property> propertiesVector
         );
@@ -122,6 +130,12 @@ namespace stamina {
          * Prints all of the transition actions to a file.
          * */
         void printTransitionActions(std::string filename);
+        /**
+         * Writes the min and max results to a file
+         * 
+         * @param filename The filename to append to
+         * */
+        void writeToOutput(std::string filename);
         /* Data Members */
         std::function<void(std::string)> err;
         std::function<void(std::string)> warn;
