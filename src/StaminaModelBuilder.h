@@ -1,6 +1,8 @@
 /**
  * Stamina Model Builder Class
  * Created by Josh Jeppson on 8/17/2021
+ * 
+ * If you look closely, you'll see this is fairly similar to storm::builder::ExplicitModelBuilder
  * */
 #ifndef STAMINAMODELBUILDER_H
 #define STAMINAMODELBUILDER_H
@@ -40,11 +42,13 @@
 
 #include "storm/builder/ExplicitModelBuilder.h"
 
-using namespace storm::builder;
-using namespace storm::utility::prism;
-using namespace storm::generator;
 
 namespace stamina {
+
+    using namespace storm::builder;
+    using namespace storm::utility::prism;
+    using namespace storm::generator;
+
     template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
     class StaminaModelBuilder  {
     public:
@@ -115,7 +119,41 @@ namespace stamina {
          * */
         std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build();
     protected:
-
+        /**
+         * Gets the state ID of a current state, or adds it to the internal state storage.
+         * 
+         * @param state Pointer to the state we are looking it
+         * @return A pair with the state id and whether or not it was already discovered
+         * */
+        StateType getOrAddStateIndex(CompressedState const& state);
+        /**
+         * Builds transition matrix of truncated state space for the given program.
+         *
+         * @param transitionMatrixBuilder The builder of the transition matrix.
+         * @param rewardModelBuilders The builders for the selected reward models.
+         * @param choiceInformationBuilder The builder for the requested information of the choices
+         * @param markovianChoices is set to a bit vector storing whether a choice is Markovian (is only set if the model type requires this information).
+         * @param stateValuationsBuilder if not boost::none, we insert valuations for the corresponding states
+         * */
+        void buildMatrices(
+            storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+            , std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
+            , ChoiceInformationBuilder& choiceInformationBuilder
+            , boost::optional<storm::storage::BitVector>& markovianChoices
+            , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+        );
+        /**
+         * Explores state space and truncates the model
+         * 
+         * @return The components of the truncated model
+         * */
+        storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents();
+        /**
+         * Builds state labeling for our program
+         * 
+         * @return State labeling for our program
+         * */
+        storm::models::sparse::StateLabeling buildStateLabeling();
     private:
         /* Data Members */
         std::function<void(std::string)> err;
@@ -125,7 +163,8 @@ namespace stamina {
         Options * options;
         storm::storage::sparse::StateStorage<StateType> stateStorage;
         std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> generator;
-
+        std::deque<std::pair<CompressedState, StateType>> statesToExplore;
+        boost::optional<std::vector<uint_fast64_t>> stateRemapping;
     };
 }
 #endif // STAMINAMODELBUILDER_H

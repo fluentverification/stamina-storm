@@ -74,9 +74,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
     switch (generator->getModelType()) {
         // Only supports CTMC models.
         case storm::generator::ModelType::CTMC:
-            // TODO: truncate state space and return model
-            err("Model building has not been implemented yet");
-            break;
+            return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
         case storm::generator::ModelType::DTMC:
         case storm::generator::ModelType::MDP:
         case storm::generator::ModelType::POMDP:
@@ -85,6 +83,36 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
             err("This model type is not supported!");
     }
     return nullptr;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+StateType 
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void 
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
+    storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+    , std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
+    , ChoiceInformationBuilder& choiceInformationBuilder
+    , boost::optional<storm::storage::BitVector>& markovianChoices
+    , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+) {
+
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
+    
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+storm::models::sparse::StateLabeling
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
+
 }
 
 
