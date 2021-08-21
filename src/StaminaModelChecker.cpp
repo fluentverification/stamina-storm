@@ -9,6 +9,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <fstream>
+#include <chrono>
 
 using namespace stamina;
 
@@ -80,6 +81,7 @@ StaminaModelChecker::modelCheckProperty(
     storm::jani::Property prop
     , storm::prism::Program const& modulesFile
 ) {
+    auto startTime = std::chrono::high_resolution_clock::now();
     // Instantiate lower and upper results
     min_results = new Result();
     max_results = new Result();
@@ -156,7 +158,11 @@ StaminaModelChecker::modelCheckProperty(
         ++numRefineIterations;
     }
 
-
+    auto endTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> timeTaken = endTime - startTime;
+    std::stringstream ss;
+    ss << "Taken total time: " << timeTaken.count() << " s\n";
+    info(ss.str());
 
     // Print results
     std::stringstream resultInfo;
