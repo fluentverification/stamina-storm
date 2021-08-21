@@ -16,6 +16,7 @@ if [! -d "storm" ]
 then
 	echo "[MESSAGE] STORM does not appear to be downloaded. Getting STORM"
 	git clone https://github.com/moves-rwth/storm
+	git checkout stable
 	cd storm
 	echo "[MESSAGE] Building STORM"
 	mkdir build
