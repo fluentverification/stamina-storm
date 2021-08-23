@@ -121,8 +121,8 @@ namespace stamina {
 /* Overrite hashing with stateId */
 namespace std {
     template<> 
-    struct hash<ProbState> {
-        std::size_t operator()(ProbState const& p) const noexcept {
+    struct hash<stamina::ProbState> {
+        std::size_t operator()(stamina::ProbState const& p) const noexcept {
             std::size_t h = std::hash<uint32_t>{}(p.stateId);
             return h;
         }
