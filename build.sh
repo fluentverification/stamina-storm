@@ -1,6 +1,6 @@
 ############################################
 #
-# Bash script to compile stamina with storm
+# Bash script to compile stamina with storm on UNIX-like OSs
 #
 # Created by Josh Jeppson on 8/20/2021
 #
