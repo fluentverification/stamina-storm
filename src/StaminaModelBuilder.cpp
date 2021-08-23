@@ -246,7 +246,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
         std::exit(1);
     }
     // Add each state in our initial states to our states to explore
-    for (auto & state : initialStates) {
+    for (auto & state : stateStorage.initialStateIndices) {
         
     }
 
@@ -256,7 +256,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
     while (perimReachability >= targetPerimReachability) {
         // Breadth first search
         while (!exploredStates.empty()) {
-            ProbState currentProbState = exploredStates.pop_front();
+            ProbState currentProbState = exploredStates.front();
+            exploredStates.pop_front();
             CompressedState currentState = currentProbState.state;
             // Load state for next state generator
             generator->load(currentState);
@@ -264,7 +265,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
             // TODO: evaluate property expression and if so set state terminal and absorbing and continue
             // Determine if we need to explore state and if so, explore it.
             // Only explore if the state is not terminal or if the reachability is greater than the threshold
-            if (!currentProbState.isStateTerminal() || curStateReachability >= reachabilityThreshold) {
+            if (!currentProbState.isStateTerminal() || currentStateReachability >= reachabilityThreshold) {
                 storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
                 // If state has a reachability of 0, don't perform calculation
                 if (currentStateReachability == 0.0) {
@@ -322,7 +323,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 
                                 // Add state to states and explored if new state
                                 if(statesK.emplace(*nextProbState).second) {
-                                    exploredK.push_back(*nextProbState);
+                                    exploredStates.push_back(*nextProbState);
                                 }
                             }
                             else {
@@ -331,7 +332,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
                                 nextProbState.addToReachability(leavingProb);
                                 stateMap.emplace(nextState, nextProbState);
                                 statesK.emplace(nextProbState);
-                                exploredK.push_back(nextProbState);
+                                exploredStates.push_back(nextProbState);
                             }
                         }
                     }
@@ -345,7 +346,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
         exploredStates.clear();
         statesK.clear();
         // Add initial states back to our 
-        for (auto & state : initialStates) {
+        for (auto & state : stateStorage.initialStateIndices) {
 
         }
         // Recalculate perimeter reachability
