@@ -25,6 +25,8 @@ set(SOURCE_FILES
     src/StaminaModelChecker.cpp
     src/Options.h
     src/Options.cpp
+    src/ProbState.h
+    src/ProbState.cpp
 )
 
 set(LOCAL_PATH /usr/lib)
