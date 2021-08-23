@@ -15,6 +15,7 @@
 #include <functional>
 
 #include "Options.h"
+#include "ProbState.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -155,6 +156,16 @@ namespace stamina {
          * @return State labeling for our program
          * */
         storm::models::sparse::StateLabeling buildStateLabeling();
+        /**
+         * 
+         * */
+        void doReachabilityAnalysis();
+        /**
+         * Sets our reachability threshold
+         * 
+         * @param threshold The new reachability threshold
+         * */
+        void setReachabilityThreshold(double threshold);
     private:
         /* Data Members */
         std::function<void(std::string)> err;
@@ -166,6 +177,8 @@ namespace stamina {
         std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> generator;
         std::deque<std::pair<CompressedState, StateType>> statesToExplore;
         boost::optional<std::vector<uint_fast64_t>> stateRemapping;
+        std::unordered_map<StateType, ProbState> stateMap;
+        double reachabilityThreshold;
     };
 }
 #endif // STAMINAMODELBUILDER_H
