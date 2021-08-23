@@ -43,7 +43,7 @@ namespace stamina {
         std::string properties_file;
         double kappa;
         double reduce_kappa;
-        double approx_factor;
+        double approx_factor; // Misprediction factor
         double prob_win;
         uint64_t max_approx_count;
         bool no_prop_refine;
