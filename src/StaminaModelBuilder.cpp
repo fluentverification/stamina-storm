@@ -5,6 +5,9 @@
  * */
 #include "StaminaModelBuilder.h"
 
+#include <functional>
+#include <sstream>
+
 #include "storm/builder/RewardModelBuilder.h"
 #include "storm/builder/ChoiceInformationBuilder.h"
 
@@ -131,19 +134,132 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
     , boost::optional<storm::storage::BitVector>& markovianChoices
     , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
+    auto startTime = std::chrono::high_resolution_clock::now();
+    // TODO: set up
+
+    // Create explored states vector and map of all states
+    std::deque<ProbState> exploredStates;
+    // std::map<key, CompressedState> statesK;
+
+    // Create a callback to our getOrAddStateIndex so that our PrismNextStateGenerator can access it
+    std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
+        &StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
+        , this
+        , std::placeholders::_1
+    );
+
+    // Let the PrismNextStateGenerator get the initial states
+    stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+    if (stateStorage.initialStateIndecies.empty()) {
+        err("The initial states for this model are undefined!");
+        std::exit(1);
+    }
+            
+
+    double perimReachability = 1.0;
+    // State search
+    while (perimReachability >= options->prob_win / options->approx_factor) {
+        // Breadth first search
+        while (!exploredStates.empty()) {
+            ProbState currentProbState = exploredStates.pop_front();
+            CompressedState currentState = currentProbState.state;
+            // Explore state
+            generator->load(currentState);
+
+        }
+    }
+
+    // Tell us how much time has elapsed
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto timeDiff = endTime - startTime;
+    std::stringstream ss;
+    ss << "Finished exploration of state space and state truncation (with permReachability " << perimReachability;
+    ss <<") in " << timeDiff.count() << " seconds,";
+    good(ss.str());
 
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
+    // Is this model deterministic? (I.e., is there only one choice per state?)
+    bool deterministic = generator->isDeterministicModel();
 
+    // Component builders
+    storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(0, 0, 0, false, !deterministic, 0);
+    std::vector<RewardModelBuilder<typename RewardModelType::ValueType>> rewardModelBuilders;
+    // Iterate through the reward models and add them to the rewardmodelbuilders
+    for (uint64_t i = 0; i < generator->getNumberOfRewardModels(); ++i) {
+        rewardModelBuilders.emplace_back(generator->getRewardModelInformation(i));
+    }
+
+    // Build choice information and markovian states
+    storm::builder::ChoiceInformationBuilder choiceInformationBuilder;
+    boost::optional<storm::storage::BitVector> markovianStates;
+
+    // Build state valuations if necessary. We may not need this since we operate only on CTMC
+    boost::optional<storm::storage::sparse::StateValuationsBuilder> stateValuationsBuilder;
+    if (generator->getOptions().isBuildStateValuationsSet()) {
+        stateValuationsBuilder = generator->initializeStateValuationsBuilder();
+    }
+
+    // Builds matrices and truncates state space
+    buildMatrices(
+        transitionMatrixBuilder
+        , rewardModelBuilders
+        , choiceInformationBuilder
+        , markovianStates
+        , stateValuationsBuilder
+    );
+
+    // Using the information from buildMatrices, initialize the model components
+    storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
+        transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount())
+        , buildStateLabeling()
+        , std::unordered_map<std::string, RewardModelType>()
+        , !generator->isDiscreteTimeModel()
+        , std::move(markovianStates)        
+    );
+
+    // Finalize the reward models
+    for (RewardModelBuilder<typename RewardModelType::ValueType> & rewardModelBuilder : rewardModelBuilders) {
+        modelComponents.rewardModels.emplace(
+            rewardModelBuilder.getName()
+            , rewardModelBuilder.build(
+                modelComponents.transitionMatrix.getRowCount()
+                , modelComponents.transitionMatrix.getColumnCount()
+                , modelComponents.transitionMatrix.getRowGroupCount()
+            )
+        );
+    }
+
+    // Build choice labeling
+    modelComponents.choiceLabeling = choiceInformationBuilder.buildChoiceLabeling(modelComponents.transitionMatrix.getRowCount());
+    if (generator->getOptions().isBuildChoiceOriginsSet()) {
+        auto originData = choiceInformationBuilder.buildDataOfChoiceOrigins(modelComponents.transitionMatrix.getRowCount());
+        modelComponents.choiceOrigins = generator->generateChoiceOrigins(originData);
+    }
+    if (generator->isPartiallyObservable()) {
+        std::vector<uint32_t> classes;
+        classes.resize(stateStorage.getNumberOfStates());
+        std::unordered_map<uint32_t, std::vector<std::pair<std::vector<std::string>, uint32_t>>> observationActions;
+        for (auto const& bitVectorIndexPair : stateStorage.stateToId) {
+            uint32_t varObservation = generator->observabilityClass(bitVectorIndexPair.first);
+            classes[bitVectorIndexPair.second] = varObservation;
+        }
+
+        modelComponents.observabilityClasses = classes;
+        if(generator->getOptions().isBuildObservationValuationsSet()) {
+            modelComponents.observationValuations = generator->makeObservationValuation();
+        }
+    }
+    return modelComponents;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
-
+    return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
 }
 
 
