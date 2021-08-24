@@ -63,3 +63,7 @@ The following options are allowed (these are *slightly* different than in the Ja
   -?, --help                 Give this help list
       --usage                Give a short usage message
 ```
+
+## GUI (Work in Progress)
+
+A (simple) GUI is also being developed in Python/PyQt5. Since I don't want to write PyBind bindings for Stamina, the GUI will just invoke the executable using the `os.system()` call and pipe output to the screen. It's essentially just a way to build a command to pass into the C++ executable.
