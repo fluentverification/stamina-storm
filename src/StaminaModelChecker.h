@@ -2,6 +2,7 @@
 #define STAMINA_MODEL_CHECKER_H
 
 #include "Options.h"
+#include "StaminaModelBuilder.h"
 
 #include <sstream>
 #include <string>
@@ -45,6 +46,8 @@ namespace stamina {
          * @param warm Lambda to warning function
          * @param info Lambda to info function
          * @param good Lambda to good function
+         * @param modulesFile Pointer to the Modules file
+         * @param propertiesVector Pointer to the Properties vector
          * */
         StaminaModelChecker(        
             std::function<void(std::string)> err
@@ -52,6 +55,8 @@ namespace stamina {
             , std::function<void(std::string)> info
             , std::function<void(std::string)> good
             , Options * options
+            , storm::prism::Program * modulesFile = nullptr
+            , std::vector<storm::jani::Property> * propertiesVector = nullptr
         );
         /**
          * Standard destructor
@@ -63,7 +68,8 @@ namespace stamina {
          * @param propertiesVector A vector to the list of JANI properties
          * */
         void initialize(
-            std::vector<storm::jani::Property> propertiesVector
+            storm::prism::Program * modulesFile = nullptr
+            , std::vector<storm::jani::Property> * propertiesVector = nullptr
         );
         /**
          * Model checks a specific property
@@ -144,6 +150,9 @@ namespace stamina {
         Options * options;
         StaminaModelChecker::Result * min_results;
         StaminaModelChecker::Result * max_results;
+        StaminaModelBuilder<double> * builder;
+        storm::prism::Program * modulesFile;
+        std::vector<storm::jani::Property> * propertiesVector;
     };
 
 }

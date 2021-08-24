@@ -19,11 +19,15 @@ StaminaModelChecker::StaminaModelChecker(
     , std::function<void(std::string)> info
     , std::function<void(std::string)> good
     , Options * options
+    , storm::prism::Program * modulesFile
+    , std::vector<storm::jani::Property> * propertiesVector
 ) : err(err)
     , warn(warn)
     , info(info)
     , good(good)
     , options(options)
+    , modulesFile(modulesFile)
+    , propertiesVector(propertiesVector)
 {
     // Explicitly invoke model build
     std::string iFilename = options->import_filename; 
@@ -44,7 +48,6 @@ StaminaModelChecker::StaminaModelChecker(
             err(ss.str());
         }  
     }
-    //
 }
 
 StaminaModelChecker::~StaminaModelChecker() {
@@ -67,13 +70,38 @@ StaminaModelChecker::~StaminaModelChecker() {
             err(ss.str());
         }  
     }
+    // Clean up memory
+    delete builder;
+    
 }
 
 void
 StaminaModelChecker::initialize(
-    std::vector<storm::jani::Property> propertiesVector
+    storm::prism::Program * modulesFile
+    , std::vector<storm::jani::Property> * propertiesVector
 ) {
-
+    // Don't pass in nullptr please
+    if (!modulesFile) {
+        err("Modules file cannot be null!");
+        std::exit(1);
+    }
+    else if (!propertiesVector) {
+        err("Properties vector cannot be null!");
+        std::exit(1);
+    }
+    this->modulesFile = modulesFile;
+    this->propertiesVector = propertiesVector;
+    // Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
+    auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(*modulesFile);
+    // Create StaminaModelBuilder
+    builder = new StaminaModelBuilder<double>(
+        options
+        , err
+        , warn
+        , info
+        , good
+        , generator
+    );
 }
 
 std::unique_ptr<storm::modelchecker::CheckResult> 
@@ -134,7 +162,7 @@ StaminaModelChecker::modelCheckProperty(
             info("Verifying upper bound for " + prop_max->getName() + ".");
             check(prop_max, max_results);
             // Write to output file
-
+            // TODO: write to output file
             // Update here since we continue to the next loop iteration
             ++numRefineIterations;
             continue;
