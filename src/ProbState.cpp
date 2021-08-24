@@ -14,11 +14,11 @@ ProbState::ProbState()
 }
 
 ProbState::ProbState(uint32_t id) 
-    : stateId(id),
-    , state(id),
-    , curReachabilityProb(0),
-    , nextReachabilityProb(0),
-    , stateIsTerminal(true),
+    : stateId(id)
+    , state(id)
+    , curReachabilityProb(0)
+    , nextReachabilityProb(0)
+    , stateIsTerminal(true)
     , stateIsAbsorbing(false)
 {
     // Intentionally left empty
