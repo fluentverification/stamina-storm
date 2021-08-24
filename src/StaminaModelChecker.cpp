@@ -154,6 +154,7 @@ StaminaModelChecker::modelCheckProperty(
         // Reset the reachability threshold
         reachThreshold = options->kappa;
 
+        auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
 
         // If we don't switch to a combined CTMC, just perform the model checking
         if (!switchToCombinedCTMC) {
@@ -167,6 +168,7 @@ StaminaModelChecker::modelCheckProperty(
             ++numRefineIterations;
             continue;
         }
+
 
         // Reduce kappa for refinement
         double percentOff = max_results->result - min_results->result;

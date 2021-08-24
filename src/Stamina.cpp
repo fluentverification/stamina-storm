@@ -37,7 +37,9 @@ Stamina::Stamina(struct arguments * arguments) {
 }
 
 Stamina::~Stamina() {
+    // Clean up all memory
     delete this->options;
+    delete this->modelChecker;
 }
 
 void 
@@ -59,14 +61,20 @@ Stamina::run() {
 void 
 Stamina::initialize() {
     info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
-    // Initialize with references to error, warning, info, and good message functions
-    modelChecker = new StaminaModelChecker(
-        std::bind(&Stamina::error, this, std::placeholders::_1, STAMINA_ERRORS::ERR_GENERAL)
-        , std::bind(&Stamina::warning, this, std::placeholders::_1)
-        , std::bind(&Stamina::info, this, std::placeholders::_1)
-        , std::bind(&Stamina::good, this, std::placeholders::_1)
-        , this->options
-    );
+    try {
+        // Initialize with references to error, warning, info, and good message functions
+        modelChecker = new StaminaModelChecker(
+            std::bind(&Stamina::error, this, std::placeholders::_1, STAMINA_ERRORS::ERR_GENERAL)
+            , std::bind(&Stamina::warning, this, std::placeholders::_1)
+            , std::bind(&Stamina::info, this, std::placeholders::_1)
+            , std::bind(&Stamina::good, this, std::placeholders::_1)
+            , this->options
+        );
+    }
+    catch(const std::exception& e) {
+        errorAndExit("Failed to allocate memory for StaminaModelChecker!");
+    }
+    
     // Initialize loggers
     // storm::utility::setUp(); // TODO
     // Set some settings objects.
@@ -76,6 +84,7 @@ Stamina::initialize() {
     try {
         modulesFile = storm::parser::PrismParser::parse(options->model_file, true);
         propertiesVector = storm::api::parsePropertiesForPrismProgram(options->properties_file, modulesFile);
+        modelChecker->initialize(&modulesFile, &propertiesVector);
     }
     catch (const std::exception& e) {
         // Uses stringstream because std::to_string(e) throws an error with storm's exceptions
