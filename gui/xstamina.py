@@ -46,11 +46,31 @@ class XStamina(QWidget):
         self.browseExport = QPushButton('...')
         self.addRowWithBrowse(self.export, self.browseExport, "Export file:")
 
-    def addRowWithBrowse(self, widget, browse, label):
+    def addRowWithBrowse(self, widget, browse, label, open=True):
         hbox = QHBoxLayout()
         hbox.addWidget(widget)
         hbox.addWidget(browse)
         self.leftLayout.addRow(QLabel(label), hbox)
+
+    def getImportFilePath(self, textbox, allowedExtensions):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        exs = self.createExtensionMask(allowedExtensions)
+        fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "",exs, options=options)
+        if fileName:
+            textbox.setText(fileName)
+
+    #
+    # Creates a file extension mask for QFileDialog
+    # 
+    def createExtensionMask(self, allowedExtensions, allFiles = True):
+        rstr = ""
+        for ex, desc in allowedExtensions.items():
+            rstr += desc + " (*." + ex + ");;"
+        if allFiles:
+            rstr += "All Files (*)"
+        else:
+            rstr = rstr[:len(rstr) - 2]
 
 
 
