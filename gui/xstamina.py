@@ -21,6 +21,7 @@ class XStamina(QWidget):
         right = QFrame(self)
         right.setFrameShape(QFrame.StyledPanel)
         self.output = QPlainTextEdit()
+        self.output.setReadOnly(True)
         self.leftLayout = QFormLayout()
         left.setLayout(self.leftLayout)
         rightLayout = QHBoxLayout()
@@ -36,27 +37,48 @@ class XStamina(QWidget):
     def addFormButtons(self):
         self.modFile = QLineEdit()
         self.browseModFile = QPushButton("...")
-        self.addRowWithBrowse(self.modFile, self.browseModFile, "Modules File: ")
+        self.addRowWithBrowse(self.modFile, self.browseModFile, "Modules File: ", True, {'prism':"Prism Files", 'sm':"Prism Files (Legacy)"})
         self.propFile = QLineEdit()
         self.browsePropFile = QPushButton("...")
-        self.addRowWithBrowse(self.propFile, self.browsePropFile, "Properties File: ")
+        self.addRowWithBrowse(self.propFile, self.browsePropFile, "Properties File: ", True, {'csl':"Prism Properties File"})
         self.consts = QLineEdit()
         self.leftLayout.addRow(QLabel("Constants: "), self.consts)
         self.export = QLineEdit()
         self.browseExport = QPushButton('...')
-        self.addRowWithBrowse(self.export, self.browseExport, "Export file:")
+        self.addRowWithBrowse(self.export, self.browseExport, "Export file:", False)
+        self.moreOptions = QPushButton("More Options...")
+        self.leftLayout.addRow(self.moreOptions)
+        self.start = QPushButton("Analyse Model")
+        self.leftLayout.addRow(self.start)
+        self.start.clicked.connect(self.run)
 
-    def addRowWithBrowse(self, widget, browse, label, open=True):
+    def addRowWithBrowse(self, widget, browse, label, open=True, allowedExts={"txt":"Text Files"}):
         hbox = QHBoxLayout()
         hbox.addWidget(widget)
         hbox.addWidget(browse)
         self.leftLayout.addRow(QLabel(label), hbox)
+        if open:
+            browse.clicked.connect(
+                lambda state, textbox=widget, allowedExtensions=allowedExts : self.getImportFilePath(textbox, allowedExtensions)
+            )
+        else:
+            browse.clicked.connect(
+                lambda state, textbox=widget, allowedExtensions=allowedExts : self.getExportFilePath(textbox, allowedExtensions)
+            )
 
     def getImportFilePath(self, textbox, allowedExtensions):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         exs = self.createExtensionMask(allowedExtensions)
         fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "",exs, options=options)
+        if fileName:
+            textbox.setText(fileName)
+
+    def getExportFilePath(self, textbox, allowedExtensions):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        exs = self.createExtensionMask(allowedExtensions)
+        fileName, _ = QFileDialog.getOpenFileName(self,"Export File", "",exs, options=options)
         if fileName:
             textbox.setText(fileName)
 
@@ -71,8 +93,11 @@ class XStamina(QWidget):
             rstr += "All Files (*)"
         else:
             rstr = rstr[:len(rstr) - 2]
+        return rstr
 
-
+    def run(self):
+        self.output.appendPlainText("[INFO] Creating STAMINA subprocess to stamina-cplusplus executable...\n")
+        self.output.appendPlainText("[ERROR] The GUI is not finished yet. Please use command line.\n")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
