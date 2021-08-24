@@ -157,7 +157,7 @@ namespace stamina {
          * */
         storm::models::sparse::StateLabeling buildStateLabeling();
         /**
-         * 
+         * Performs reachability analysis
          * */
         void doReachabilityAnalysis();
         /**

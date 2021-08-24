@@ -122,7 +122,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType 
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+    // Create new index just in case we need it
+    StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 
+    // Check if state is already registered
+    std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
+
+    StateType actualIndex = actualIndexPair.first;
+
+    // Determines if we need to insert the state
+    if (actualIndex == newIndex) {
+        // Always does breadth first search
+        statesToExplore.emplace_back(state, actualIndex);
+    }
+
+    return actualIndex;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -221,6 +235,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling()
     return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
 }
 
+/**
+ * This method needs to be rewritten without the use of ProbState
+ * */
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalysis() {
@@ -247,7 +264,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
     }
     // Add each state in our initial states to our states to explore
     for (auto & state : stateStorage.initialStateIndices) {
-        
+        // getOrAddStateIndex(state);
     }
 
     double perimReachability = 1.0;
@@ -345,9 +362,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
         }
         exploredStates.clear();
         statesK.clear();
-        // Add initial states back to our 
+        // Add initial states back to our explore queue
         for (auto & state : stateStorage.initialStateIndices) {
-
+            // getOrAddStateIndex(state);
         }
         // Recalculate perimeter reachability
         perimReachability = 0.0;
@@ -381,8 +398,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setReachabilityThres
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
-#ifdef STORM_HAVE_CARL
-template class StaminaModelBuilder<storm::RationalNumber, storm::models::sparse::StandardRewardModel<storm::RationalNumber>, uint32_t>;
-template class StaminaModelBuilder<storm::RationalFunction, storm::models::sparse::StandardRewardModel<storm::RationalFunction>, uint32_t>;
-template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<storm::Interval>, uint32_t>;
-#endif
+// STAMINA DOES NOT USE ANY OF THESE FORWARD DEFINITIONS
+// #ifdef STORM_HAVE_CARL
+// template class StaminaModelBuilder<storm::RationalNumber, storm::models::sparse::StandardRewardModel<storm::RationalNumber>, uint32_t>;
+// template class StaminaModelBuilder<storm::RationalFunction, storm::models::sparse::StandardRewardModel<storm::RationalFunction>, uint32_t>;
+// template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<storm::Interval>, uint32_t>;
+// #endif
