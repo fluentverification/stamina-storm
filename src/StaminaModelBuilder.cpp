@@ -105,18 +105,27 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> 
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
-    switch (generator->getModelType()) {
-        // Only supports CTMC models.
-        case storm::generator::ModelType::CTMC:
-            return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
-        case storm::generator::ModelType::DTMC:
-        case storm::generator::ModelType::MDP:
-        case storm::generator::ModelType::POMDP:
-        case storm::generator::ModelType::MA:
-        default:
-            err("This model type is not supported!");
+    try {
+        switch (generator->getModelType()) {
+            // Only supports CTMC models.
+            case storm::generator::ModelType::CTMC:
+                return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
+            case storm::generator::ModelType::DTMC:
+            case storm::generator::ModelType::MDP:
+            case storm::generator::ModelType::POMDP:
+            case storm::generator::ModelType::MA:
+            default:
+                err("This model type is not supported!");
+        }
+        return nullptr;
     }
-    return nullptr;
+    catch(const std::exception& e) {
+        std::stringstream ss;
+        ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
+        ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
+        err(ss.str());
+    }
+    
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

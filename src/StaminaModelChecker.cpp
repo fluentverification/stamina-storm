@@ -32,6 +32,7 @@ StaminaModelChecker::StaminaModelChecker(
     // Explicitly invoke model build
     std::string iFilename = options->import_filename; 
     if (iFilename != "") {
+        info("Trying to import files named like " + iFilename);
         try {
             std::string transFile = iFilename + ".tra";
             std::string stateRewardsFile = iFilename + "srew";
@@ -52,8 +53,9 @@ StaminaModelChecker::StaminaModelChecker(
 
 StaminaModelChecker::~StaminaModelChecker() {
     // Explicitly invoke model export
-    std::string oFilename = options->export_trans; 
+    std::string oFilename = options->export_filename; 
     if (oFilename != "") {
+        info("Attempting to export model to " + oFilename);
         try {
             std::string transFile = oFilename + ".tra";
             std::string stateRewardsFile = oFilename + "srew";
@@ -218,7 +220,7 @@ StaminaModelChecker::modelCheckProperty(
 
 void 
 StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
-    warn("This method is not implemented yet!!");
+    warn("This method (StaminaModelChecker::check()) is not implemented yet!!");
     double result = 0.0;
     r->result = result;
     r->explanation = "Property check for " + property->getName();
@@ -246,7 +248,7 @@ StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
 
 void 
 StaminaModelChecker::printTransitionActions(std::string filename) {
-    warn("This feature has not been implemented yet");
+    warn("This feature (StaminaModelChecker::printTransitionActions()) has not been implemented yet");
 }
 
 void
