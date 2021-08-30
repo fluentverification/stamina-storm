@@ -79,6 +79,11 @@ ProbState::getCurReachabilityProb() const {
 }
 
 void
-ProbState::updatePredecessorProbMap(uint32_t index, double tranProb) {
-    predecessorPropMap.insert(std::make_pair(index, tranProb));
+ProbState::updatePredecessorRate(uint32_t index, double rate) {
+    predecessorRates.insert(std::make_pair(index, rate));
+}
+
+double
+ProbState::getPredecessorRate(uint32_t index) {
+    return predecessorRates.at(index);
 }

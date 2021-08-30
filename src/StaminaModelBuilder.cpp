@@ -245,7 +245,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling()
 }
 
 /**
- * This method needs to be rewritten without the use of ProbState
+ * This method needs to be rewritten without the use of ProbabilityState
  * */
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
@@ -344,7 +344,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
                             auto nextStateFound = stateMap.find(nextState);
                             // If it doesn't exist
                             if(nextStateFound != stateMap.end()) {
-                                ProbState* nextProbState = &(nextStateFound->second);
+                                ProbState * nextProbState = &(nextStateFound->second);
                                 nextProbState->addToReachability(leavingProb);
 
                                 // Add state to states and explored if new state
@@ -363,7 +363,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
                         }
                     }
                 }
-                currentProbState.setCurReachabilityProb(0);
+                currentProbState.setCurReachabilityProb(0.0);
                 currentProbState.setStateTerminal(false);
             }
             // Show progress

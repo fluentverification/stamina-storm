@@ -7,12 +7,16 @@
 #define PROBSTATE_H
 
 #include "storm/storage/BitVector.h"
+#include "storm/generator/CompressedState.h"
+
 #include <string>
 #include <utility>
 #include <unordered_map>
-typedef storm::storage::BitVector CompressedState;
+
 
 namespace stamina {
+    typedef storm::storage::BitVector CompressedState;
+    
     class ProbState {
     public:
         /**
@@ -102,14 +106,24 @@ namespace stamina {
 		 * */
 		double getCurReachabilityProb() const;
         /**
+         * Updates the list of all outgoing transitions
          * 
+         * @param index The index of the state to update the transition rate for
+         * @param rate The new rate
          * */
-	    void updatePredecessorProbMap(uint32_t index, double tranProb);
+	    void updatePredecessorRate(uint32_t index, double rate);
+        /**
+         * Gets the outgoing rate of state at index
+         * 
+         * @param index Index to check
+         * @return Transition rate
+         * */
+        double getPredecessorRate(uint32_t index);
         /* Data members */
         uint32_t stateId;
 	    CompressedState state;
         // This maps stores transition rate for each outgoing transition.
-		std::unordered_map<int, double> predecessorPropMap;
+		std::unordered_map<uint32_t, double> predecessorRates;
     private:
         /* Data members */
         double curReachabilityProb;
