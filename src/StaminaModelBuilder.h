@@ -24,24 +24,33 @@
 #include "storm/builder/ExplicitModelBuilder.h"
 #include "storm/models/sparse/StandardRewardModel.h"
 
-#include "storm/storage/prism/Program.h"
-#include "storm/storage/expressions/ExpressionEvaluator.h"
-#include "storm/storage/BitVectorHashMap.h"
-#include "storm/logic/Formulas.h"
-#include "storm/models/sparse/Model.h"
-#include "storm/models/sparse/StateLabeling.h"
-#include "storm/models/sparse/ChoiceLabeling.h"
-#include "storm/storage/SparseMatrix.h"
-#include "storm/storage/sparse/ModelComponents.h"
-#include "storm/storage/sparse/StateStorage.h"
+#include "storm/api/storm.h"
+#include "storm-parsers/parser/PrismParser.h"
+#include "storm-parsers/api/storm-parsers.h"
+#include "storm/api/properties.h"
+#include "storm/storage/jani/Property.h"
+#include "storm/modelchecker/results/CheckResult.h"
+#include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
+#include "storm/utility/initialize.h"
+#include "storm-parsers/api/properties.h"
+#include "storm/models/sparse/Ctmc.h"
+#include "storm/modelchecker/csl/SparseCtmcCslModelChecker.h"
+#include "storm/modelchecker/csl/helper/SparseCtmcCslHelper.h"
+#include "storm/storage/expressions/Expression.h"
+#include "storm/storage/expressions/BaseExpression.h"
+#include "storm/storage/expressions/BinaryExpression.h"
+#include "storm/storage/expressions/BinaryRelationExpression.h"
+#include "storm/storage/expressions/VariableExpression.h"
+#include "storm/storage/expressions/ExpressionManager.h"
+#include "storm/storage/expressions/UnaryBooleanFunctionExpression.h"
+#include "storm/storage/expressions/BinaryBooleanFunctionExpression.h"
+#include "storm/logic/Formula.h"
+#include "storm/storage/prism/Constant.h"
 #include "storm/settings/SettingsManager.h"
-
-#include "storm/utility/prism.h"
-
-#include "storm/builder/ExplorationOrder.h"
-
-#include "storm/generator/NextStateGenerator.h"
-#include "storm/generator/CompressedState.h"
+#include "storm/storage/expressions/Valuation.h"
+#include "storm/environment/Environment.h"
+#include "storm/modelchecker/results/CheckResult.h"
+#include "storm/builder/BuilderOptions.h"
 #include "storm/generator/VariableInformation.h"
 
 
@@ -50,6 +59,9 @@ namespace stamina {
     using namespace storm::builder;
     using namespace storm::utility::prism;
     using namespace storm::generator;
+
+    typedef storm::models::sparse::Ctmc<double> Ctmc;
+    typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
     template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
     class StaminaModelBuilder  {

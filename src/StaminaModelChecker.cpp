@@ -116,6 +116,9 @@ StaminaModelChecker::modelCheckProperty(
     min_results = new Result();
     max_results = new Result();
 
+    // Get the formulae
+    auto formulae = storm::api::extractFormulasFromProperties(*propertiesVector);
+
     // Create number of refined iterations and rechability threshold
     int numRefineIterations = 0;
     double reachThreshold = options->kappa;
@@ -156,7 +159,6 @@ StaminaModelChecker::modelCheckProperty(
         // Reset the reachability threshold
         reachThreshold = options->kappa;
 
-        auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
 
         // If we don't switch to a combined CTMC, just perform the model checking
         if (!switchToCombinedCTMC) {
@@ -171,6 +173,9 @@ StaminaModelChecker::modelCheckProperty(
             continue;
         }
 
+        auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+        auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+        // return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true)); 
 
         // Reduce kappa for refinement
         double percentOff = max_results->result - min_results->result;
@@ -222,6 +227,10 @@ void
 StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
     warn("This method (StaminaModelChecker::check()) is not implemented yet!!");
     double result = 0.0;
+    // auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+    // auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+    // auto resultClass = mcCTMC->check(storm::modelchecker::CheckTask<>(*property, true));
+    // result = resultClass->asExplicitQuantitativeCheckResult<double>();
     r->result = result;
     r->explanation = "Property check for " + property->getName();
 }
