@@ -5,6 +5,9 @@
  * */
 #include "StaminaModelBuilder.h"
 
+#define DEBUG_PRINTS
+
+
 #include <functional>
 #include <sstream>
 
@@ -183,22 +186,28 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
     }
     // Add each state in our initial states to our states to explore
     for (auto & state : stateStorage.initialStateIndices) {
-        // getOrAddStateIndex(state);
-        // std::shared_ptr<ProbState> initState = std::make_shared<ProbState>(new ProbState(state));
         ProbState initState(state);
-        // generator->load(state);
+        initState.setCurReachabilityProb(1.0);
         exploredStates.push_back(initState);
         statesK.insert(initState);
+        stateMap.emplace(state, initState);
     }
 
     double perimReachability = 1.0;
     double targetPerimReachability = options->prob_win / options->approx_factor;
     // State search
     while (perimReachability >= targetPerimReachability) {
+        // Debug message
+#ifdef DEBUG_PRINTS
+        info("Looping");
+#endif
         // Breadth first search
         while (!exploredStates.empty()) {
             ProbState currentProbState = exploredStates.front();
             exploredStates.pop_front();
+#ifdef DEBUG_PRINTS
+            info("Popped from exploredStates");
+#endif
             CompressedState currentState = currentProbState.state;
             // Load state for next state generator
             generator->load(currentState);
@@ -217,6 +226,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
                     else {
                         // Iterate through each choice
                         for (auto const & choice : behavior) {
+                            // add the generated choice information
+                            if (choice.hasLabels()) {
+                                for (auto const& label : choice.getLabels()) {
+                                    choiceInformationBuilder.addLabel(label, currentRow);
+                                }
+                            }
+                            if (choice.hasOriginData()) {
+                                choiceInformationBuilder.addOriginData(choice.getOriginData(), currentRow);
+                            }
                             for (auto const & stateProbabilityPair : choice) {
                                 // See if our next ProbState is already in our stateMap
                                 auto nextStateFound = stateMap.find(stateProbabilityPair.first);
@@ -254,7 +272,17 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
                     }
                     // Iterate through our choices
                     for (auto const & choice : behavior) {
+                        // add the generated choice information
+                        if (choice.hasLabels()) {
+                            for (auto const& label : choice.getLabels()) {
+                                choiceInformationBuilder.addLabel(label, currentRow);
+                            }
+                        }
+                        if (choice.hasOriginData()) {
+                            choiceInformationBuilder.addOriginData(choice.getOriginData(), currentRow);
+                        }
                         for (auto const & stateProbabilityPair : choice) {
+                            transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
                             // Get next ProbState id and exit rate
                             StateType nextState = stateProbabilityPair.first;
                             ValueType tranRate = stateProbabilityPair.second;
@@ -300,7 +328,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
         statesK.clear();
         // Add initial states back to our explore queue
         for (auto & state : stateStorage.initialStateIndices) {
-            // getOrAddStateIndex(state);
+            ProbState initState(state);
+            initState.setCurReachabilityProb(1.0);
+            exploredStates.push_back(initState);
+            statesK.insert(initState);
+            stateMap.emplace(state, initState);
         }
         // Recalculate perimeter reachability
         perimReachability = 0.0;
@@ -319,8 +351,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
     auto timeDiff = endTime - startTime;
     std::stringstream ss;
     ss << "Finished exploration of state space and state truncation (with permReachability ";
-    ss << perimReachability << ") in " << timeDiff.count() << " seconds,\n";
-    ss << "\tExplored " << stateMap.size() << " states.";
+    ss << perimReachability << ") in " << timeDiff.count() / CLOCKS_PER_SEC << " seconds,\n";
+    ss << "\tExplored " << stateMap.size() << " states. Transition matrix has " << transitionMatrixBuilder.getCurrentRowGroupCount() << " rows.";
     good(ss.str());
 
 }

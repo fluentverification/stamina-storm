@@ -150,6 +150,11 @@ StaminaModelChecker::modelCheckProperty(
     }
     switchToCombinedCTMC = switchToCombinedCTMC && !options->no_prop_refine;
 
+    // Remove these three lines once StaminaModelBuilder is working
+    auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+    auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+    return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true)); 
+
     // While we should not terminate
     while (numRefineIterations == 0
         || (!terminateModelCheck() && numRefineIterations < options->max_approx_count)
@@ -173,8 +178,8 @@ StaminaModelChecker::modelCheckProperty(
             continue;
         }
 
-        auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-        auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+        // auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+        // auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
         // return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true)); 
 
         // Reduce kappa for refinement
