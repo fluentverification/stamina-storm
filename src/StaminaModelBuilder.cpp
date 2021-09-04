@@ -200,36 +200,38 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
         exploredStates.clear();
         // Perform a breadth first search
         while (!stateQueue.empty()) {
-            ProbState s = stateQueue.pop_front();
+            ProbState s = stateQueue.front();
+            stateQueue.pop_front();
             // If s not in T or \pi(s) \geq \kappa
             if (!tMap.contains(s) || s.getCurReachabilityProb() >= options->kappa) {
                 generator->load(s.state);
+                // Get next states. NOTE: getInitialStates() might not be how to do that
                 std::vector<StateType> nextStates = generator->getInitialStates(stateToIdCallback);
                 if (s.getCurReachabilityProb() == 0.0) {
                     // Get all next states and load them into the queue
                     for (StateType nextState : nextStates) {
-                        ProbState * sPrime = getOrAddProbStateToGlobalSet(nextState);
+                        ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
                         // Enqueue our new state
-                        stateQueue.push_back(*sPrime);
+                        stateQueue.push_back(sPrime);
                     }
                 }
                 else {
                     if (tMap.contains(s)) {
-                        tMap.remove(s);
+                        tMap.erase(s);
                     }
                     // Get all next states and load them into the queue
                     for (StateType nextState : nextStates) {
-                        ProbState * sPrime = getOrAddProbStateToGlobalSet(nextState);
+                        ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
                         double transitionProbability = 0.0; // TODO
-                        sPrime->addToReachability(s.getCurReachabilityProb() * transitionProbability);
+                        sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
                         // TODO: Change this check to what I have on my whiteboard which is far more elegant
-                        if ((stateMap.contains(sPrime->state) || !exploredStates.contains(*sPrime)) || (!stateMap.contains(s))) {
-                            exploredStates.insert(*sPrime);
+                        if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
+                            exploredStates.insert(sPrime);
                             // Enqueue our new state
-                            stateQueue.push_back(*sPrime);
-                            if (!stateMap.contains(*sPrime)) {
-                                tMap.insert(*sPrime);
-                                stateMap.insert(*sPrime);
+                            stateQueue.push_back(sPrime);
+                            if (!stateMap.contains(sPrime)) {
+                                tMap.insert(sPrime);
+                                stateMap.insert(sPrime);
                             }
                         }
                     }
@@ -356,10 +358,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setReachabilityThres
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-ProbState *
+ProbState
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddProbStateToGlobalSet(StateType nextState) {
     // Create new probstate or find existing
-    ProbState * sPrime = stateMap.find(nextState);
+    auto sPrime = stateMap.find(nextState);
     if (sPrime == stateMap.end()) {
         // Add our Probstate
         ProbState newState(nextState);
@@ -370,7 +372,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddProbStateToG
             err("Something happened in stateMap.insert()");
         }
     }
-    return sPrime;
+    return *sPrime;
 }
 
 

@@ -182,7 +182,7 @@ namespace stamina {
         /**
          * Gets or adds a new ProbState from our global state set
          * */
-        ProbState * getOrAddProbStateToGlobalSet(StateType nextState);
+        ProbState getOrAddProbStateToGlobalSet(StateType nextState);
         /* Data Members */
         std::function<void(std::string)> err;
         std::function<void(std::string)> warn;

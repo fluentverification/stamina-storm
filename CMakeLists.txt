@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.10)  # CMake version check
 project(stamina-cplusplus)               # Create project "stamina-cplusplus"
-set(CMAKE_CXX_STANDARD 14)            # Enable c++14 standard
+set(CMAKE_CXX_STANDARD 20)            # Enable c++20 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
 
