@@ -201,18 +201,26 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
         // Perform a breadth first search
         while (!stateQueue.empty()) {
             ProbState s = stateQueue.front();
+            info(std::to_string(s.stateId) + ": dequeued state");
             stateQueue.pop_front();
             // If s not in T or \pi(s) \geq \kappa
             if (!tMap.contains(s) || s.getCurReachabilityProb() >= options->kappa) {
                 generator->load(s.state);
-                // Get next states. NOTE: getInitialStates() might not be how to do that
-                std::vector<StateType> nextStates = generator->getInitialStates(stateToIdCallback);
+                // Get next states. Not quite sure if this is how to do it
+                /************************************************
+                 * TODO: this is NOT how to get all next states from current state. Ask the storm developers how to do it.
+                 * *************************************************/
+                storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
                 if (s.getCurReachabilityProb() == 0.0) {
                     // Get all next states and load them into the queue
-                    for (StateType nextState : nextStates) {
-                        ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
-                        // Enqueue our new state
-                        stateQueue.push_back(sPrime);
+                    for (auto const & choice : behavior) {
+                        for (auto const& stateProbabilityPair : choice) {
+                            StateType nextState = stateProbabilityPair.first;
+                            info(std::to_string(nextState) + " is our next state");
+                            ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
+                            // Enqueue our new state
+                            stateQueue.push_back(sPrime);
+                        }
                     }
                 }
                 else {
@@ -220,18 +228,23 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
                         tMap.erase(s);
                     }
                     // Get all next states and load them into the queue
-                    for (StateType nextState : nextStates) {
-                        ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
-                        double transitionProbability = 0.0; // TODO
-                        sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
-                        // TODO: Change this check to what I have on my whiteboard which is far more elegant
-                        if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
-                            exploredStates.insert(sPrime);
-                            // Enqueue our new state
-                            stateQueue.push_back(sPrime);
-                            if (!stateMap.contains(sPrime)) {
-                                tMap.insert(sPrime);
-                                stateMap.insert(sPrime);
+                    for (auto const & choice : behavior) {
+                        double transitionProbability = (double) choice.getTotalMass();
+                        for (auto const& stateProbabilityPair : choice) {
+                            StateType nextState = stateProbabilityPair.first;
+                            info(std::to_string(nextState) + " is our next state");
+                            info(std::to_string(stateProbabilityPair.second) + " is its transition probability");
+                            ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
+                            sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
+                            // TODO: Change this check to what I have on my whiteboard which is far more elegant
+                            if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
+                                exploredStates.insert(sPrime);
+                                // Enqueue our new state
+                                stateQueue.push_back(sPrime);
+                                if (!stateMap.contains(sPrime)) {
+                                    tMap.insert(sPrime);
+                                    stateMap.insert(sPrime);
+                                }
                             }
                         }
                     }
@@ -244,7 +257,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
         for (ProbState perimState : tMap) {
             perimReachability += perimState.getCurReachabilityProb();
         }
-        options->kappa /= options->reduce_kappa;
+        reachabilityThreshold /= options->reduce_kappa;
 
     }
     options->kappa = reachabilityThreshold;
