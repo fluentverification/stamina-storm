@@ -197,17 +197,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
     double targetPerimReachability = options->prob_win / options->approx_factor;
     // State search
     while (perimReachability >= targetPerimReachability) {
-        // Debug message
-#ifdef DEBUG_PRINTS
-        info("Looping");
-#endif
         // Breadth first search
         while (!exploredStates.empty()) {
             ProbState currentProbState = exploredStates.front();
             exploredStates.pop_front();
-#ifdef DEBUG_PRINTS
-            info("Popped from exploredStates");
-#endif
             CompressedState currentState = currentProbState.state;
             // Load state for next state generator
             generator->load(currentState);
