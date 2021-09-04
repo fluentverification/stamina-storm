@@ -179,6 +179,10 @@ namespace stamina {
          * */
         void setReachabilityThreshold(double threshold);
     private:
+        /**
+         * Gets or adds a new ProbState from our global state set
+         * */
+        ProbState * getOrAddProbStateToGlobalSet(StateType nextState);
         /* Data Members */
         std::function<void(std::string)> err;
         std::function<void(std::string)> warn;
@@ -189,7 +193,8 @@ namespace stamina {
         std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> generator;
         std::deque<std::pair<CompressedState, StateType>> statesToExplore;
         boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-        std::unordered_map<StateType, ProbState> stateMap;
+        std::unordered_set<ProbState> stateMap; // S in the QEST paper
+        std::unordered_set<ProbState> tMap; // T in the QEST paper
         double reachabilityThreshold;
     };
 }

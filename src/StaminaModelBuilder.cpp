@@ -164,8 +164,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
     // TODO: set up
 
     // Create explored states queue and map of all states
-    std::deque<ProbState> exploredStates;
-    std::unordered_set<ProbState> statesK;
+    std::deque<ProbState> stateQueue;
+    std::unordered_set<ProbState> exploredStates;
 
     // Create a callback to our getOrAddStateIndex so that our PrismNextStateGenerator can access it
     std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
@@ -184,159 +184,66 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
         err("The initial states for this model are undefined!");
         std::exit(1);
     }
-    // Add each state in our initial states to our states to explore
-    for (auto & state : stateStorage.initialStateIndices) {
-        ProbState initState(state);
-        initState.setCurReachabilityProb(1.0);
-        exploredStates.push_back(initState);
-        statesK.insert(initState);
-        stateMap.emplace(state, initState);
-    }
 
     double perimReachability = 1.0;
     double targetPerimReachability = options->prob_win / options->approx_factor;
     // State search
     while (perimReachability >= targetPerimReachability) {
-        // Breadth first search
-        while (!exploredStates.empty()) {
-            ProbState currentProbState = exploredStates.front();
-            exploredStates.pop_front();
-            CompressedState currentState = currentProbState.state;
-            // Load state for next state generator
-            generator->load(currentState);
-            double currentStateReachability = currentProbState.getCurReachabilityProb();
-            // TODO: evaluate property expression and if so set state terminal and absorbing and continue
-            // Determine if we need to explore state and if so, explore it.
-            // Only explore if the state is not terminal or if the reachability is greater than the threshold
-            if (!currentProbState.isStateTerminal() || currentStateReachability >= reachabilityThreshold) {
-                storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
-                // If state has a reachability of 0, don't perform calculation
-                if (currentStateReachability == 0.0) {
-                    // If no behavior, can't do much of anything
-                    if (behavior.empty()) {
-                        warn("State behavior is empty!");
-                    }
-                    else {
-                        // Iterate through each choice
-                        for (auto const & choice : behavior) {
-                            // add the generated choice information
-                            if (choice.hasLabels()) {
-                                for (auto const& label : choice.getLabels()) {
-                                    choiceInformationBuilder.addLabel(label, currentRow);
-                                }
-                            }
-                            if (choice.hasOriginData()) {
-                                choiceInformationBuilder.addOriginData(choice.getOriginData(), currentRow);
-                            }
-                            for (auto const & stateProbabilityPair : choice) {
-                                // See if our next ProbState is already in our stateMap
-                                auto nextStateFound = stateMap.find(stateProbabilityPair.first);
-                                // If it exists
-                                if (nextStateFound != stateMap.end()) {
-                                    ProbState nextProbState = nextStateFound->second;
-                                    // Add state and explore if new
-                                    if (statesK.emplace(nextProbState).second) {
-                                        exploredStates.push_back(nextProbState);
-                                    }
-                                }
-                            }
-                            // Add to matrix
-                            for (auto const& stateProbabilityPair : choice) {
-                                transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
-                            }
-                            ++currentRow;
-                        }
-                        ++currentRowGroup;
-                    }
-                }
-                else {
-                    auto totalNumberOfChoices = behavior.getNumberOfChoices();
-                    // Get our total exit rate
-                    ValueType totalExitRate;
-                    if (generator->isDiscreteTimeModel()) {
-                        totalExitRate = static_cast<ValueType>(totalNumberOfChoices);
-                    }
-                    else {
-                        totalExitRate = storm::utility::zero<ValueType>();
-                    }
-                    // Accumulate total mass of choices
-                    for (auto const & choice : behavior) {
-                        totalExitRate += choice.getTotalMass();
-                    }
-                    // Iterate through our choices
-                    for (auto const & choice : behavior) {
-                        // add the generated choice information
-                        if (choice.hasLabels()) {
-                            for (auto const& label : choice.getLabels()) {
-                                choiceInformationBuilder.addLabel(label, currentRow);
-                            }
-                        }
-                        if (choice.hasOriginData()) {
-                            choiceInformationBuilder.addOriginData(choice.getOriginData(), currentRow);
-                        }
-                        for (auto const & stateProbabilityPair : choice) {
-                            transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
-                            // Get next ProbState id and exit rate
-                            StateType nextState = stateProbabilityPair.first;
-                            ValueType tranRate = stateProbabilityPair.second;
-                            ValueType tranProb = tranRate / totalExitRate;
-                            ValueType leavingProb = tranProb * currentStateReachability;
-
-                            // Check if state exists
-                            auto nextStateFound = stateMap.find(nextState);
-                            // If it doesn't exist
-                            if(nextStateFound != stateMap.end()) {
-                                ProbState * nextProbState = &(nextStateFound->second);
-                                nextProbState->addToReachability(leavingProb);
-
-                                // Add state to states and explored if new state
-                                if(statesK.emplace(*nextProbState).second) {
-                                    exploredStates.push_back(*nextProbState);
-                                }
-                            }
-                            else {
-                                // Create state and add to state map
-                                ProbState nextProbState(nextState);                                    
-                                nextProbState.addToReachability(leavingProb);
-                                stateMap.emplace(nextState, nextProbState);
-                                statesK.emplace(nextProbState);
-                                exploredStates.push_back(nextProbState);
-                            }
-                        }
-                        // Add to matrix
-                        for (auto const& stateProbabilityPair : choice) {
-                            transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
-                        }
-                        ++currentRow;
-                    }
-                    ++currentRowGroup;
-                }
-                currentProbState.setCurReachabilityProb(0.0);
-                currentProbState.setStateTerminal(false);
-            }
-            // Show progress
-            info("Progress: " + std::to_string(stateMap.size()));
-        }
-        exploredStates.clear();
-        statesK.clear();
-        // Add initial states back to our explore queue
+        // Enqueue initial states
+        // Add each state in our initial states to our states to explore
         for (auto & state : stateStorage.initialStateIndices) {
             ProbState initState(state);
             initState.setCurReachabilityProb(1.0);
-            exploredStates.push_back(initState);
-            statesK.insert(initState);
-            stateMap.emplace(state, initState);
+            stateQueue.push_back(initState);
         }
-        // Recalculate perimeter reachability
-        perimReachability = 0.0;
-        // Iterate over our state map
-        for (auto & localState : stateMap) {
-            if (localState.second.isStateTerminal()) {
-                perimReachability += reachabilityThreshold;
+        // Clear Explored States
+        exploredStates.clear();
+        // Perform a breadth first search
+        while (!stateQueue.empty()) {
+            ProbState s = stateQueue.pop_front();
+            // If s not in T or \pi(s) \geq \kappa
+            if (!tMap.contains(s) || s.getCurReachabilityProb() >= options->kappa) {
+                generator->load(s.state);
+                std::vector<StateType> nextStates = generator->getInitialStates(stateToIdCallback);
+                if (s.getCurReachabilityProb() == 0.0) {
+                    // Get all next states and load them into the queue
+                    for (StateType nextState : nextStates) {
+                        ProbState * sPrime = getOrAddProbStateToGlobalSet(nextState);
+                        // Enqueue our new state
+                        stateQueue.push_back(*sPrime);
+                    }
+                }
+                else {
+                    if (tMap.contains(s)) {
+                        tMap.remove(s);
+                    }
+                    // Get all next states and load them into the queue
+                    for (StateType nextState : nextStates) {
+                        ProbState * sPrime = getOrAddProbStateToGlobalSet(nextState);
+                        double transitionProbability = 0.0; // TODO
+                        sPrime->addToReachability(s.getCurReachabilityProb() * transitionProbability);
+                        // TODO: Change this check to what I have on my whiteboard which is far more elegant
+                        if ((stateMap.contains(sPrime->state) || !exploredStates.contains(*sPrime)) || (!stateMap.contains(s))) {
+                            exploredStates.insert(*sPrime);
+                            // Enqueue our new state
+                            stateQueue.push_back(*sPrime);
+                            if (!stateMap.contains(*sPrime)) {
+                                tMap.insert(*sPrime);
+                                stateMap.insert(*sPrime);
+                            }
+                        }
+                    }
+                    // Set our reachability probability to zero
+                    s.setCurReachabilityProb(0.0);
+                }
             }
         }
-        // Reduce kappa again
-        reachabilityThreshold /= options->reduce_kappa;
+        perimReachability = 0.0;
+        for (ProbState perimState : tMap) {
+            perimReachability += perimState.getCurReachabilityProb();
+        }
+        options->kappa /= options->reduce_kappa;
+
     }
     options->kappa = reachabilityThreshold;
     // Tell us how much time has elapsed
@@ -446,6 +353,24 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::setReachabilityThreshold(double threshold) {
     reachabilityThreshold = threshold;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+ProbState *
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddProbStateToGlobalSet(StateType nextState) {
+    // Create new probstate or find existing
+    ProbState * sPrime = stateMap.find(nextState);
+    if (sPrime == stateMap.end()) {
+        // Add our Probstate
+        ProbState newState(nextState);
+        stateMap.insert(newState);
+        sPrime = stateMap.find(nextState);
+        // Sanity check
+        if (sPrime == stateMap.end()) {
+            err("Something happened in stateMap.insert()");
+        }
+    }
+    return sPrime;
 }
 
 
