@@ -13,7 +13,7 @@ echo "[MESSAGE] Checking if STORM exists in the STAMINA root directory"
 STAMINA_ROOT=pwd
 NPROC="$(nproc --all)"
 
-if [! -d "storm" ]
+if [! -d storm ]
 then
 	echo "[MESSAGE] STORM does not appear to be downloaded. Getting STORM"
 	git clone https://github.com/moves-rwth/storm
