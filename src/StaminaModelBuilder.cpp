@@ -207,9 +207,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
             if (!tMap.contains(s) || s.getCurReachabilityProb() >= options->kappa) {
                 generator->load(s.state);
                 // Get next states. Not quite sure if this is how to do it
-                /************************************************
-                 * TODO: this is NOT how to get all next states from current state. Ask the storm developers how to do it.
-                 * *************************************************/
                 storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
                 if (s.getCurReachabilityProb() == 0.0) {
                     // Get all next states and load them into the queue
@@ -228,16 +225,23 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
                         tMap.erase(s);
                     }
                     // Get all next states and load them into the queue
+                    uint16_t numChoicesTaken = 0;
+                    // For CTMC there is only one 
                     for (auto const & choice : behavior) {
-                        double transitionProbability = (double) choice.getTotalMass();
+                        numChoicesTaken++;
+                        if (numChoicesTaken > 1) {
+                            warn("CTMC should be deterministic! Somehow, got multiple choices for behavior!");
+                        }
                         for (auto const& stateProbabilityPair : choice) {
                             StateType nextState = stateProbabilityPair.first;
+                            double transitionProbability = (double) stateProbabilityPair.second;
                             info(std::to_string(nextState) + " is our next state");
                             info(std::to_string(stateProbabilityPair.second) + " is its transition probability");
                             ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
                             sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
                             // TODO: Change this check to what I have on my whiteboard which is far more elegant
-                            if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
+                            // if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
+                            if (!(stateMap.contains(sPrime.stateId) && exploredStates.contains(sPrime))) {
                                 exploredStates.insert(sPrime);
                                 // Enqueue our new state
                                 stateQueue.push_back(sPrime);
