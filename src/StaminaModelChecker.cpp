@@ -178,10 +178,10 @@ StaminaModelChecker::modelCheckProperty(
             continue;
         }
 
-        // auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-        // auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
-        // return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true)); 
-
+        auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+        auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+        
+        // TODO: instruct STORM to compute P_min and P_max
         // Reduce kappa for refinement
         double percentOff = max_results->result - min_results->result;
         percentOff *= (double) 4.0 / options->prob_win;
