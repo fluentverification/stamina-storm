@@ -160,119 +160,185 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
     , boost::optional<storm::storage::BitVector>& markovianChoices
     , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-    auto startTime = std::chrono::high_resolution_clock::now();
-    // TODO: set up
+    // Performs state-space truncation
+    doReachabilityAnalysis(
+        storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+        , std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
+        , ChoiceInformationBuilder& choiceInformationBuilder
+        , boost::optional<storm::storage::BitVector>& markovianChoices
+        , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+    );
 
-    // Create explored states queue and map of all states
-    std::deque<ProbState> stateQueue;
-    std::unordered_set<ProbState> exploredStates;
+    // Builds model
+    // Initialize building state valuations (if necessary)
+    if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
+        stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
+    }
 
-    // Create a callback to our getOrAddStateIndex so that our PrismNextStateGenerator can access it
+    // Create a callback for the next-state generator to enable it to request the index of states.
     std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
         &StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
         , this
         , std::placeholders::_1
     );
 
+    // Let the generator create all initial states.
+    this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+    if (!this->stateStorage.initialStateIndices.empty()) {
+        err("Initial states are empty!");
+    }
+
+    // Now explore the current state until there is no more reachable state.
     uint_fast64_t currentRowGroup = 0;
     uint_fast64_t currentRow = 0;
 
-    // Let the PrismNextStateGenerator get the initial states
-    stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
-    // If no initial states, we can't continue
-    if (stateStorage.initialStateIndices.empty()) {
-        err("The initial states for this model are undefined!");
-        std::exit(1);
-    }
+    auto timeOfStart = std::chrono::high_resolution_clock::now();
+    auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
+    uint64_t numberOfExploredStates = 0;
+    uint64_t numberOfExploredStatesSinceLastMessage = 0;
 
-    double perimReachability = 1.0;
-    double targetPerimReachability = options->prob_win / options->approx_factor;
-    // State search
-    while (perimReachability >= targetPerimReachability) {
-        // Enqueue initial states
-        // Add each state in our initial states to our states to explore
-        for (auto & state : stateStorage.initialStateIndices) {
-            ProbState initState(state);
-            initState.setCurReachabilityProb(1.0);
-            stateQueue.push_back(initState);
+    StateType currentIndex;
+
+    // Perform a search through the model.
+    while (!statesToExplore.empty() && !isInTMap(currentIndex)) {
+        // Get the first state in the queue.
+        CompressedState currentState = statesToExplore.front().first;
+        currentIndex = statesToExplore.front().second;
+        statesToExplore.pop_front();
+
+        if (currentIndex % 100000 == 0) {
+            info("Exploring state with id " + std::to_string(currentIndex) + ".");
         }
-        // Clear Explored States
-        exploredStates.clear();
-        // Perform a breadth first search
-        while (!stateQueue.empty()) {
-            ProbState s = stateQueue.front();
-            info(std::to_string(s.stateId) + ": dequeued state");
-            stateQueue.pop_front();
-            // If s not in T or \pi(s) \geq \kappa
-            if (!tMap.contains(s) || s.getCurReachabilityProb() >= options->kappa) {
-                generator->load(s.state);
-                // Get next states. Not quite sure if this is how to do it
-                storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
-                if (s.getCurReachabilityProb() == 0.0) {
-                    // Get all next states and load them into the queue
-                    for (auto const & choice : behavior) {
-                        for (auto const& stateProbabilityPair : choice) {
-                            StateType nextState = stateProbabilityPair.first;
-                            info(std::to_string(nextState) + " is our next state");
-                            ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
-                            // Enqueue our new state
-                            stateQueue.push_back(sPrime);
-                        }
+
+        generator->load(currentState);
+        if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
+            generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
+        }
+        storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+
+        // If there is no behavior, we might have to introduce a self-loop.
+        if (behavior.empty()) {
+            if (!storm::settings::getModule<storm::settings::modules::BuildSettings>().isDontFixDeadlocksSet() || !behavior.wasExpanded()) {
+                // If the behavior was actually expanded and yet there are no transitions, then we have a deadlock state.
+                if (behavior.wasExpanded()) {
+                    this->stateStorage.deadlockStateIndices.push_back(currentIndex);
+                }
+
+                if (!generator->isDeterministicModel()) {
+                    transitionMatrixBuilder.newRowGroup(currentRow);
+                }
+
+                transitionMatrixBuilder.addNextValue(currentRow, currentIndex, storm::utility::one<ValueType>());
+
+                for (auto& rewardModelBuilder : rewardModelBuilders) {
+                    if (rewardModelBuilder.hasStateRewards()) {
+                        rewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
+                    }
+
+                    if (rewardModelBuilder.hasStateActionRewards()) {
+                        rewardModelBuilder.addStateActionReward(storm::utility::zero<ValueType>());
                     }
                 }
-                else {
-                    if (tMap.contains(s)) {
-                        tMap.erase(s);
-                    }
-                    // Get all next states and load them into the queue
-                    uint16_t numChoicesTaken = 0;
-                    // For CTMC there is only one 
-                    for (auto const & choice : behavior) {
-                        numChoicesTaken++;
-                        if (numChoicesTaken > 1) {
-                            warn("CTMC should be deterministic! Somehow, got multiple choices for behavior!");
-                        }
-                        for (auto const& stateProbabilityPair : choice) {
-                            StateType nextState = stateProbabilityPair.first;
-                            double transitionProbability = (double) stateProbabilityPair.second;
-                            info(std::to_string(nextState) + " is our next state");
-                            info(std::to_string(stateProbabilityPair.second) + " is its transition probability");
-                            ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
-                            sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
-                            // TODO: Change this check to what I have on my whiteboard which is far more elegant
-                            // if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
-                            if (!(stateMap.contains(sPrime.stateId) && exploredStates.contains(sPrime))) {
-                                exploredStates.insert(sPrime);
-                                // Enqueue our new state
-                                stateQueue.push_back(sPrime);
-                                if (!stateMap.contains(sPrime)) {
-                                    tMap.insert(sPrime);
-                                    stateMap.insert(sPrime);
-                                }
-                            }
-                        }
-                    }
-                    // Set our reachability probability to zero
-                    s.setCurReachabilityProb(0.0);
+                
+                // This state shall be Markovian (to not introduce Zeno behavior)
+                if (stateAndChoiceInformationBuilder.isBuildMarkovianStates()) {
+                    stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
                 }
+                // Other state-based information does not need to be treated, in particular:
+                // * StateValuations have already been set above
+                // * The associated player shall be the "default" player, i.e. INVALID_PLAYER_INDEX
+
+                ++currentRow;
+                ++currentRowGroup;
+            } 
+            else {
+                err(
+                    "Error while creating sparse matrix from probabilistic program: found deadlock state (" 
+                    + generator->stateToString(currentState) 
+                    + "). For fixing these, please provide the appropriate option."
+                );
+            }
+        } 
+        else {
+            // Add the state rewards to the corresponding reward models.
+            auto stateRewardIt = behavior.getStateRewards().begin();
+            for (auto& rewardModelBuilder : rewardModelBuilders) {
+                if (rewardModelBuilder.hasStateRewards()) {
+                    rewardModelBuilder.addStateReward(*stateRewardIt);
+                }
+                ++stateRewardIt;
+            }
+
+            // If the model is nondeterministic, we need to open a row group.
+            if (!generator->isDeterministicModel()) {
+                transitionMatrixBuilder.newRowGroup(currentRow);
+            }
+
+            // Now add all choices.
+            bool firstChoiceOfState = true;
+            for (auto const& choice : behavior) {
+
+                // add the generated choice information
+                if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
+                    for (auto const& label : choice.getLabels()) {
+                        stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+                    }
+                }
+                if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
+                    stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+                }
+                if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
+                    // STORM_LOG_ASSERT(firstChoiceOfState || stateAndChoiceInformationBuilder.hasStatePlayerIndicationBeenSet(choice.getPlayerIndex(), currentRowGroup), "There is a state where different players have an enabled choice."); // Should have been detected in generator, already
+                    if (firstChoiceOfState) {
+                        stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
+                    }
+                }
+                if (stateAndChoiceInformationBuilder.isBuildMarkovianStates() &&  choice.isMarkovian()) {
+                    stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
+                }
+
+                // Add the probabilistic behavior to the matrix.
+                for (auto const& stateProbabilityPair : choice) {
+                    transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+                }
+
+                // Add the rewards to the reward models.
+                auto choiceRewardIt = choice.getRewards().begin();
+                for (auto& rewardModelBuilder : rewardModelBuilders) {
+                    if (rewardModelBuilder.hasStateActionRewards()) {
+                        rewardModelBuilder.addStateActionReward(*choiceRewardIt);
+                    }
+                    ++choiceRewardIt;
+                }
+                ++currentRow;
+                firstChoiceOfState = false;
+            }
+
+            ++currentRowGroup;
+        }
+
+        ++numberOfExploredStates;
+        if (generator->getOptions().isShowProgressSet()) {
+            ++numberOfExploredStatesSinceLastMessage;
+
+            auto now = std::chrono::high_resolution_clock::now();
+            auto durationSinceLastMessage = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfLastMessage).count();
+            if (static_cast<uint64_t>(durationSinceLastMessage) >= generator->getOptions().getShowProgressDelay()) {
+                auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
+                auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfStart).count();
+                std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart << " seconds (currently " << statesPerSecond << " states per second)." << std::endl;
+                timeOfLastMessage = std::chrono::high_resolution_clock::now();
+                numberOfExploredStatesSinceLastMessage = 0;
             }
         }
-        perimReachability = 0.0;
-        for (ProbState perimState : tMap) {
-            perimReachability += perimState.getCurReachabilityProb();
-        }
-        reachabilityThreshold /= options->reduce_kappa;
 
+        if (storm::utility::resources::isTerminate()) {
+            auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - timeOfStart).count();
+            std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart << " seconds before abort." << std::endl;
+            break;
+        }
     }
-    options->kappa = reachabilityThreshold;
-    // Tell us how much time has elapsed
-    auto endTime = std::chrono::high_resolution_clock::now();
-    auto timeDiff = endTime - startTime;
-    std::stringstream ss;
-    ss << "Finished exploration of state space and state truncation (with permReachability ";
-    ss << perimReachability << ") in " << timeDiff.count() / CLOCKS_PER_SEC << " seconds,\n";
-    ss << "\tExplored " << stateMap.size() << " states. Transition matrix has " << transitionMatrixBuilder.getCurrentRowGroupCount() << " rows.";
-    good(ss.str());
+
 
 }
 
@@ -392,6 +458,136 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddProbStateToG
     return *sPrime;
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalysis(
+    storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+    , std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
+    , ChoiceInformationBuilder& choiceInformationBuilder
+    , boost::optional<storm::storage::BitVector>& markovianChoices
+    , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+) {
+    auto startTime = std::chrono::high_resolution_clock::now();
+    // TODO: set up
+
+    // Create explored states queue and map of all states
+    std::deque<ProbState> stateQueue;
+    std::unordered_set<ProbState> exploredStates;
+
+    // Create a callback to our getOrAddStateIndex so that our PrismNextStateGenerator can access it
+    std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
+        &StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
+        , this
+        , std::placeholders::_1
+    );
+
+    uint_fast64_t currentRowGroup = 0;
+    uint_fast64_t currentRow = 0;
+
+    // Let the PrismNextStateGenerator get the initial states
+    stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+    // If no initial states, we can't continue
+    if (stateStorage.initialStateIndices.empty()) {
+        err("The initial states for this model are undefined!");
+        std::exit(1);
+    }
+
+    double perimReachability = 1.0;
+    double targetPerimReachability = options->prob_win / options->approx_factor;
+    // State search
+    while (perimReachability >= targetPerimReachability) {
+        // Enqueue initial states
+        // Add each state in our initial states to our states to explore
+        for (auto & state : stateStorage.initialStateIndices) {
+            ProbState initState(state);
+            initState.setCurReachabilityProb(1.0);
+            stateQueue.push_back(initState);
+        }
+        // Clear Explored States
+        exploredStates.clear();
+        // Perform a breadth first search
+        while (!stateQueue.empty()) {
+            ProbState s = stateQueue.front();
+            info(std::to_string(s.stateId) + ": dequeued state");
+            stateQueue.pop_front();
+            // If s not in T or \pi(s) \geq \kappa
+            if (!tMap.contains(s) || s.getCurReachabilityProb() >= options->kappa) {
+                generator->load(s.state);
+                // Get next states. Not quite sure if this is how to do it
+                storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+                if (s.getCurReachabilityProb() == 0.0) {
+                    // Get all next states and load them into the queue
+                    for (auto const & choice : behavior) {
+                        for (auto const& stateProbabilityPair : choice) {
+                            StateType nextState = stateProbabilityPair.first;
+                            info(std::to_string(nextState) + " is our next state");
+                            ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
+                            // Enqueue our new state
+                            stateQueue.push_back(sPrime);
+                        }
+                    }
+                }
+                else {
+                    if (tMap.contains(s)) {
+                        tMap.erase(s);
+                    }
+                    // Get all next states and load them into the queue
+                    uint16_t numChoicesTaken = 0;
+                    // For CTMC there is only one 
+                    for (auto const & choice : behavior) {
+                        numChoicesTaken++;
+                        if (numChoicesTaken > 1) {
+                            warn("CTMC should be deterministic! Somehow, got multiple choices for behavior!");
+                        }
+                        for (auto const& stateProbabilityPair : choice) {
+                            StateType nextState = stateProbabilityPair.first;
+                            double transitionProbability = (double) stateProbabilityPair.second;
+                            info(std::to_string(nextState) + " is our next state");
+                            info(std::to_string(stateProbabilityPair.second) + " is its transition probability");
+                            ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
+                            sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
+                            // TODO: Change this check to what I have on my whiteboard which is far more elegant
+                            // if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
+                            if (!(stateMap.contains(sPrime.stateId) && exploredStates.contains(sPrime))) {
+                                exploredStates.insert(sPrime);
+                                // Enqueue our new state
+                                stateQueue.push_back(sPrime);
+                                if (!stateMap.contains(sPrime)) {
+                                    tMap.insert(sPrime);
+                                    stateMap.insert(sPrime);
+                                }
+                            }
+                        }
+                    }
+                    // Set our reachability probability to zero
+                    s.setCurReachabilityProb(0.0);
+                }
+            }
+        }
+        perimReachability = 0.0;
+        for (ProbState perimState : tMap) {
+            perimReachability += perimState.getCurReachabilityProb();
+        }
+        reachabilityThreshold /= options->reduce_kappa;
+
+    }
+    options->kappa = reachabilityThreshold;
+    // Tell us how much time has elapsed
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto timeDiff = endTime - startTime;
+    std::stringstream ss;
+    ss << "Finished exploration of state space and state truncation (with permReachability ";
+    ss << perimReachability << ") in " << timeDiff.count() / CLOCKS_PER_SEC << " seconds,\n";
+    ss << "\tExplored " << stateMap.size() << " states. Transition matrix has " << transitionMatrixBuilder.getCurrentRowGroupCount() << " rows.";
+    good(ss.str());
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+bool
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::isInTMap(StateType s) {
+    ProbState p((uint32_t) s);
+    return tMap.contains(p);
+}
 
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

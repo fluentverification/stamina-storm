@@ -281,3 +281,7 @@ StaminaModelChecker::writeToOutput(std::string filename) {
     outfile << max_results << "\r\n";
     outfile.close();
 }
+
+void doReachabilityAnalysis() {
+    
+}
