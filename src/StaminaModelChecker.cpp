@@ -139,7 +139,7 @@ StaminaModelChecker::modelCheckProperty(
         warn("This property (" + propName + ") is a probability path formula.");
     }
 
-    // Will we sitch to optimized CTMC analysis?
+    // Will we sitch to optimized CTMC analysis? (I.e., will we perform the state-space truncation)
     bool switchToCombinedCTMC = false;
     // Check if we are using an until formula and a path formula
     std::shared_ptr<const storm::logic::Formula> formula = prop.getFilter().getFormula();
@@ -166,6 +166,7 @@ StaminaModelChecker::modelCheckProperty(
 
 
         // If we don't switch to a combined CTMC, just perform the model checking
+		// Without state space truncation
         if (!switchToCombinedCTMC) {
             info("Verifying lower bound for " + prop_min->getName() + ".");
             check(prop_min, min_results);
@@ -182,6 +183,9 @@ StaminaModelChecker::modelCheckProperty(
         auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
         
         // TODO: instruct STORM to compute P_min and P_max
+		// NOT SURE IF THIS IS THE RIGHT WAY TO DO IT
+		auto result_lower = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
+		auto result_upper = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[1]), true));
         // Reduce kappa for refinement
         double percentOff = max_results->result - min_results->result;
         percentOff *= (double) 4.0 / options->prob_win;
@@ -280,8 +284,4 @@ StaminaModelChecker::writeToOutput(std::string filename) {
     outfile << min_results << "\r\n";
     outfile << max_results << "\r\n";
     outfile.close();
-}
-
-void doReachabilityAnalysis() {
-    
 }
