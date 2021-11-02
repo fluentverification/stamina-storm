@@ -7,7 +7,7 @@ C++ version of `stamina` integrating with the `storm` probabilistic model checke
 ```
 git clone https://github.com/fluentverification/stamina-cplusplus
 cd bin
-cmake ..
+cmake .. -DSTORM_PATH=<PATH TO STORM DIRECTORY>
 make
 ```
 
