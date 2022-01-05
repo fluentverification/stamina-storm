@@ -12,7 +12,7 @@
 #include <sstream>
 
 #include "storm/builder/RewardModelBuilder.h"
-#include "storm/builder/ChoiceInformationBuilder.h"
+#include "storm/builder/StateAndChoiceInformationBuilder.h"
 
 #include "storm/exceptions/AbortException.h"
 #include "storm/exceptions/WrongFormatException.h"
@@ -106,7 +106,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> 
+std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 	try {
 		switch (generator->getModelType()) {
@@ -132,7 +132,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-StateType 
+StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	// Create new index just in case we need it
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
@@ -152,11 +152,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-void 
+void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 	, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-	, ChoiceInformationBuilder& choiceInformationBuilder
+	, StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
@@ -164,7 +164,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	doReachabilityAnalysis(
 		storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 		, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-		, ChoiceInformationBuilder& choiceInformationBuilder
+		, StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
 		, boost::optional<storm::storage::BitVector>& markovianChoices
 		, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 	);
@@ -235,9 +235,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						rewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
 					}
 
-					if (rewardModelBuilder.hasStateActionRewards()) {
-						rewardModelBuilder.addStateActionReward(storm::utility::zero<ValueType>());
-					}
+					//if (rewardModelBuilder.hasStateActionRewards()) {
+					//	rewardModelBuilder.addStateActionReward(storm::utility::zero<ValueType>());
+					//}
 				}
 
 				// This state shall be Markovian (to not introduce Zeno behavior)
@@ -269,11 +269,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				++stateRewardIt;
 			}
 
-			// If the model is nondeterministic, we need to open a row group.
-			if (!generator->isDeterministicModel()) {
-				transitionMatrixBuilder.newRowGroup(currentRow);
-			}
-
 			// Now add all choices.
 			bool firstChoiceOfState = true;
 			for (auto const& choice : behavior) {
@@ -292,23 +287,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
 					}
 				}
-				if (stateAndChoiceInformationBuilder.isBuildMarkovianStates() &&  choice.isMarkovian()) {
-					stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
-				}
+			//	if (stateAndChoiceInformationBuilder.isBuildMarkovianStates() &&  choice.isMarkovian()) {
+			//		stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
+			//	}
 
+				stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
 				// Add the probabilistic behavior to the matrix.
 				for (auto const& stateProbabilityPair : choice) {
 					transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
 				}
 
-				// Add the rewards to the reward models.
-				auto choiceRewardIt = choice.getRewards().begin();
-				for (auto& rewardModelBuilder : rewardModelBuilders) {
-					if (rewardModelBuilder.hasStateActionRewards()) {
-						rewardModelBuilder.addStateActionReward(*choiceRewardIt);
-					}
-					++choiceRewardIt;
-				}
 				++currentRow;
 				firstChoiceOfState = false;
 			}
@@ -356,7 +344,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	}
 
 	// Build choice information and markovian states
-	storm::builder::ChoiceInformationBuilder choiceInformationBuilder;
+	storm::builder::StateAndChoiceInformationBuilder stateAndChoiceInformationBuilder;
 	boost::optional<storm::storage::BitVector> markovianStates;
 
 	// Build state valuations if necessary. We may not need this since we operate only on CTMC
@@ -369,7 +357,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	buildMatrices(
 		transitionMatrixBuilder
 		, rewardModelBuilders
-		, choiceInformationBuilder
+		, stateAndChoiceInformationBuilder
 		, markovianStates
 		, stateValuationsBuilder
 	);
@@ -384,21 +372,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	);
 
 	// Finalize the reward models
-	for (RewardModelBuilder<typename RewardModelType::ValueType> & rewardModelBuilder : rewardModelBuilders) {
-		modelComponents.rewardModels.emplace(
-			rewardModelBuilder.getName()
-			, rewardModelBuilder.build(
-				modelComponents.transitionMatrix.getRowCount()
-				, modelComponents.transitionMatrix.getColumnCount()
-				, modelComponents.transitionMatrix.getRowGroupCount()
-			)
-		);
-	}
+	//for (RewardModelBuilder<typename RewardModelType::ValueType> & rewardModelBuilder : rewardModelBuilders) {
+	//	modelComponents.rewardModels.emplace(
+	//		rewardModelBuilder.getName()
+	//		, rewardModelBuilder.build(
+	//			modelComponents.transitionMatrix.getRowCount()
+	//			, modelComponents.transitionMatrix.getColumnCount()
+	//			, modelComponents.transitionMatrix.getRowGroupCount()
+	//		)
+	//	);
+	//}
 
 	// Build choice labeling
-	modelComponents.choiceLabeling = choiceInformationBuilder.buildChoiceLabeling(modelComponents.transitionMatrix.getRowCount());
+	modelComponents.choiceLabeling = stateAndChoiceInformationBuilder.buildChoiceLabeling(modelComponents.transitionMatrix.getRowCount());
 	if (generator->getOptions().isBuildChoiceOriginsSet()) {
-		auto originData = choiceInformationBuilder.buildDataOfChoiceOrigins(modelComponents.transitionMatrix.getRowCount());
+		auto originData = stateAndChoiceInformationBuilder.buildDataOfChoiceOrigins(modelComponents.transitionMatrix.getRowCount());
 		modelComponents.choiceOrigins = generator->generateChoiceOrigins(originData);
 	}
 	if (generator->isPartiallyObservable()) {
@@ -453,7 +441,7 @@ void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalysis(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 	, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-	, ChoiceInformationBuilder& choiceInformationBuilder
+	, StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {

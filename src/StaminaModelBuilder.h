@@ -1,7 +1,7 @@
 /**
  * Stamina Model Builder Class
  * Created by Josh Jeppson on 8/17/2021
- * 
+ *
  * If you look closely, you'll see this is fairly similar to storm::builder::ExplicitModelBuilder
  * */
 #ifndef STAMINAMODELBUILDER_H
@@ -68,7 +68,7 @@ namespace stamina {
     public:
         /**
          * Constructs a StaminaModelBuilder with a given storm::generator::NextStateGenerator
-         * 
+         *
          * @param options A pointer to the main stamina::Options
          * @param err Lambda to error function
          * @param warm Lambda to warning function
@@ -86,7 +86,7 @@ namespace stamina {
         );
         /**
          * Constructs a StaminaModelBuilder with a PRISM program and generatorOptions
-         * 
+         *
          * @param options A pointer to the main stamina::Options
          * @param err Lambda to error function
          * @param warm Lambda to warning function
@@ -106,7 +106,7 @@ namespace stamina {
         );
         /**
          * Constructs a StaminaModelBuilder with a JANI model.
-         * 
+         *
          * @param options A pointer to the main stamina::Options
          * @param err Lambda to error function
          * @param warm Lambda to warning function
@@ -128,14 +128,14 @@ namespace stamina {
          * Creates a model with a truncated state space for the program provided during construction. State space
          * is truncated during this method using the STAMINA II truncation method described by Riley Roberts and Zhen
          * Zhang, and corresponding to the same algorithm used in the Java version of STAMINA.
-         * 
+         *
          * @return The truncated model.
          * */
         std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build();
     protected:
         /**
          * Gets the state ID of a current state, or adds it to the internal state storage.
-         * 
+         *
          * @param state Pointer to the state we are looking it
          * @return A pair with the state id and whether or not it was already discovered
          * */
@@ -152,19 +152,19 @@ namespace stamina {
         void buildMatrices(
             storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
             , std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-            , ChoiceInformationBuilder& choiceInformationBuilder
+            , StateAndChoiceInformationBuilder& choiceInformationBuilder
             , boost::optional<storm::storage::BitVector>& markovianChoices
             , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
         );
         /**
          * Explores state space and truncates the model
-         * 
+         *
          * @return The components of the truncated model
          * */
         storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents();
         /**
          * Builds state labeling for our program
-         * 
+         *
          * @return State labeling for our program
          * */
         storm::models::sparse::StateLabeling buildStateLabeling();
@@ -174,7 +174,7 @@ namespace stamina {
         void doReachabilityAnalysis();
         /**
          * Sets our reachability threshold
-         * 
+         *
          * @param threshold The new reachability threshold
          * */
         void setReachabilityThreshold(double threshold);
@@ -189,7 +189,7 @@ namespace stamina {
         void doReachabilityAnalysis(
             storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
             , std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-            , ChoiceInformationBuilder& choiceInformationBuilder
+            , StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
             , boost::optional<storm::storage::BitVector>& markovianChoices
             , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
         );
