@@ -162,11 +162,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 ) {
 	// Performs state-space truncation
 	doReachabilityAnalysis(
-		storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-		, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-		, StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
-		, boost::optional<storm::storage::BitVector>& markovianChoices
-		, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+		transitionMatrixBuilder
+		, rewardModelBuilders
+		, stateAndChoiceInformationBuilder
+		, markovianChoices
+		, stateValuationsBuilder
 	);
 
 	// Builds model
