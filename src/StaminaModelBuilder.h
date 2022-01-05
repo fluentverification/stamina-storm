@@ -218,5 +218,8 @@ namespace stamina {
         std::unordered_set<ProbState> tMap; // T in the QEST paper
         double reachabilityThreshold;
     };
+
+	// Helper method to find in unordered_set
+	bool set_contains(std::unordered_set<ProbState> current_set, ProbState value);
 }
 #endif // STAMINAMODELBUILDER_H

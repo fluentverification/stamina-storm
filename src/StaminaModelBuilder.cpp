@@ -489,7 +489,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 			info(std::to_string(s.stateId) + ": dequeued state");
 			stateQueue.pop_front();
 			// If s not in T or \pi(s) >= \kappa
-			if (!tMap.contains(s) || s.getCurReachabilityProb() >= options->kappa) {
+			if (!set_contains(tMap, s) || s.getCurReachabilityProb() >= options->kappa) {
 				generator->load(s.state);
 				// Get next states.
 				storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
@@ -506,7 +506,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 					}
 				}
 				else {
-					if (tMap.contains(s)) {
+					if (set_contains(tMap, s)) {
 						tMap.erase(s);
 					}
 					// Get all next states and load them into the queue
@@ -527,11 +527,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 							// DONE: Change this check to what I have on my whiteboard which is far more elegant
 							// OLD version is in comment just in case we need to switch back.
 							// if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
-							if (!(stateMap.contains(sPrime.stateId) && exploredStates.contains(sPrime))) {
+							// TODO: Make sure this is the correct condition
+							if (!(set_contains(stateMap, sPrime.stateId) && set_contains(exploredStates, sPrime))) {
 								exploredStates.insert(sPrime);
 								// Enqueue our new state
 								stateQueue.push_back(sPrime);
-								if (!stateMap.contains(sPrime)) {
+								if (!set_contains(stateMap, sPrime)) {
 									tMap.insert(sPrime);
 									stateMap.insert(sPrime);
 								}
@@ -565,7 +566,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 bool
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::isInTMap(StateType s) {
 	ProbState p((uint32_t) s);
-	return tMap.contains(p);
+	return set_contains(tMap, p);
 }
 
 // Explicitly instantiate the class.
@@ -577,3 +578,9 @@ template class StaminaModelBuilder<double, storm::models::sparse::StandardReward
 // template class StaminaModelBuilder<storm::RationalFunction, storm::models::sparse::StandardRewardModel<storm::RationalFunction>, uint32_t>;
 // template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<storm::Interval>, uint32_t>;
 // #endif
+
+
+bool stamina::set_contains(std::unordered_set<ProbState> current_set, ProbState value) {
+	auto search = current_set.find(value);
+	return (search != current_set.end());
+}
