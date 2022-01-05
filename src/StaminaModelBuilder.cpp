@@ -234,10 +234,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					if (rewardModelBuilder.hasStateRewards()) {
 						rewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
 					}
-
-					//if (rewardModelBuilder.hasStateActionRewards()) {
-					//	rewardModelBuilder.addStateActionReward(storm::utility::zero<ValueType>());
-					//}
 				}
 
 				// This state shall be Markovian (to not introduce Zeno behavior)
@@ -287,9 +283,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
 					}
 				}
-			//	if (stateAndChoiceInformationBuilder.isBuildMarkovianStates() &&  choice.isMarkovian()) {
-			//		stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
-			//	}
 
 				stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
 				// Add the probabilistic behavior to the matrix.
@@ -370,18 +363,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 		, !generator->isDiscreteTimeModel()
 		, std::move(markovianStates)
 	);
-
-	// Finalize the reward models
-	//for (RewardModelBuilder<typename RewardModelType::ValueType> & rewardModelBuilder : rewardModelBuilders) {
-	//	modelComponents.rewardModels.emplace(
-	//		rewardModelBuilder.getName()
-	//		, rewardModelBuilder.build(
-	//			modelComponents.transitionMatrix.getRowCount()
-	//			, modelComponents.transitionMatrix.getColumnCount()
-	//			, modelComponents.transitionMatrix.getRowGroupCount()
-	//		)
-	//	);
-	//}
 
 	// Build choice labeling
 	modelComponents.choiceLabeling = stateAndChoiceInformationBuilder.buildChoiceLabeling(modelComponents.transitionMatrix.getRowCount());
@@ -524,9 +505,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 							info(std::to_string(stateProbabilityPair.second) + " is its transition probability");
 							ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
 							sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
-							// DONE: Change this check to what I have on my whiteboard which is far more elegant
-							// OLD version is in comment just in case we need to switch back.
-							// if ((stateMap.contains(sPrime.stateId) || !exploredStates.contains(sPrime)) || (!stateMap.contains(s))) {
 							// TODO: Make sure this is the correct condition
 							if (!(set_contains(stateMap, sPrime.stateId) && set_contains(exploredStates, sPrime))) {
 								exploredStates.insert(sPrime);
