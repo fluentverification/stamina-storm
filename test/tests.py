@@ -8,6 +8,17 @@ import sys
 This file automatically tests several things from stamina-cplusplus
 '''
 
+HEADER = '\033[95m'
+OKBLUE = '\033[94m'
+OKCYAN = '\033[96m'
+OKGREEN = '\033[92m'
+WARNING = '\033[93m'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
+
+
 files = {}
 
 EXECUTABLE_PATH = "../build/stamina-cplusplus"
@@ -24,15 +35,21 @@ def getFiles(argv1):
 class TestStaminaCpp: #(unittest.TestCase):
 	def test_exitSuccess(self):
 		print("Unit Test: Exit Success")
+		passes = 0
+		fails = 0
 		for model, prop in files.items():
 			cmd = f"{EXECUTABLE_PATH} {model} {prop}"
 			print(f"Running command:\n\t{cmd}")
 			exitCode = os.system(cmd)
 			if exitCode == 0:
-				print(f"[TEST::INFO] Successfull exit", file=sys.stderr)
+				print(f"{BOLD}{OKBLUE}{UNDERLINE}[TEST::INFO]{ENDC} Successfull exit", file=sys.stderr)
+				passes += 1
 			else:
-				print(f"[TEST::ERROR] Bad exit!\n\tCode: {exitCode}\n\tModel: {model}\n\tProperty: {prop}", file=sys.stderr)
+				print(f"{BOLD}{FAIL}{UNDERLINE}[TEST::ERROR]{ENDC} Bad exit!\n\tCode: {exitCode}\n\tModel: {model}\n\tProperty: {prop}", file=sys.stderr)
+				fails += 1
 			#self.assertEqual(exitCode, 0)
+		print(f"{BOLD}{UNDERLINE}{OKGREEN}[TEST::PASSED TESTS]{ENDC} Total number of passed tests {passes}")
+		print(f"{BOLD}{UNDERLINE}{FAIL}[TEST::FAILED TESTS]{ENDC} Total number of failed tests {fails}")
 
 if __name__=='__main__':
 	getFiles(sys.argv[1])
