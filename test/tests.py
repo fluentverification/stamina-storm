@@ -38,6 +38,8 @@ class TestStaminaCpp: #(unittest.TestCase):
 		passes = 0
 		fails = 0
 		for model, prop in files.items():
+			model = model.replace(' ', '\\ ')
+			prop = prop.replace(' ', '\\ ')
 			cmd = f"{EXECUTABLE_PATH} {model} {prop}"
 			print(f"Running command:\n\t{cmd}")
 			exitCode = os.system(cmd)
