@@ -284,7 +284,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 				}
 
-				stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
 				// Add the probabilistic behavior to the matrix.
 				for (auto const& stateProbabilityPair : choice) {
 					transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
