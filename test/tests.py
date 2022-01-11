@@ -54,6 +54,8 @@ class TestStaminaCpp: #(unittest.TestCase):
 		print(f"{BOLD}{UNDERLINE}{FAIL}[TEST::FAILED TESTS]{ENDC} Total number of failed tests {fails}")
 
 if __name__=='__main__':
+	if len(sys.argv) < 2:
+		print("Requires path to list of module and properties files (in CSV format)!", file=sys.stderr)
 	getFiles(sys.argv[1])
 	print("Starting unit tests")
 	#unittest.main()
