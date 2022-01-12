@@ -209,10 +209,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				}
 			}
 			// Set the reachability probablity of state to 0
+			piMap[actualIndex] = 0;
 		}
 	}
 	// Set the reachability probability of S to the sum of the reachability probabilities in T TODO: should this be a level outer (reference VMCAI paper)
-
+	for (auto const terminalState : tMap) {
+		piMap[actualIndex] += piMap[terminalState];
+	}
 	return actualIndex;
 }
 
