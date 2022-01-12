@@ -214,12 +214,13 @@ namespace stamina {
         std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> generator;
         std::deque<std::pair<CompressedState, StateType>> statesToExplore;
         boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-        std::unordered_set<ProbState> stateMap; // S in the QEST paper
-        std::unordered_set<ProbState> tMap; // T in the QEST paper
+        std::unordered_set<StateType> stateMap; // S in the QEST paper
+        std::unordered_set<StateType> tMap; // T in the QEST paper
+		std::unordered_map<StateType, float> piMap; // Maps reachability probabilities to their states
         double reachabilityThreshold;
     };
 
 	// Helper method to find in unordered_set
-	bool set_contains(std::unordered_set<ProbState> current_set, ProbState value);
+	bool set_contains(std::unordered_set<StateType> current_set, StateType value);
 }
 #endif // STAMINAMODELBUILDER_H

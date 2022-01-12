@@ -156,11 +156,27 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
 
 	// If state is not in T or its reachability probability is greater than kappa
+	if (!set_contains(tMap, actualIndex) || piMap[actualIndex]) {
 		// Load state into generator
+		generator->load(state);
 		// Expand generator into next states
+		storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 		// If its reachability probability is 0
+		if (piMap[actualIndex] == 0) {
 			// Enqueue all of its successors (for (auto choice : behavior) for (auto stateProbabilityPair : choice) stuff...)
+			for (auto const choice : behavior) {
+				for (auto const stateProbabilityPair : choice) {
+					statesToExplore.emplace_back(
+						stateProbabilityPair.first
+						, stateStorage.stateToId.findOrAddAndGetBucket(
+							stateProbabilityPair.first
+							, static_cast<StateType>(stateStorage.getNumberOfStates())
+						)
+				}
+			}
+		}
 		// Else it has a nonzero reachability probability
+		else {
 			// Remove state from T if it's in T
 			// For each next state called state_prime (assume that we only have one behavior as this model is/must be deterministic)
 				// Add the transition probability of going from state -> state_prime to state_prime's reachability probability
@@ -170,6 +186,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 					// If s_prime is not in the S set
 						// Add it to T and S
 			// Set the reachability probablity of state to 0
+		}
+	}
 	// Set the reachability probability of S to the sum of the reachability probabilities in T TODO: should this be a level outer (reference VMCAI paper)
 
 	return actualIndex;
@@ -414,30 +432,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setReachabilityThres
 	reachabilityThreshold = threshold;
 }
 
-template <typename ValueType, typename RewardModelType, typename StateType>
-ProbState
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddProbStateToGlobalSet(StateType nextState) {
-	// Create new probstate or find existing
-	auto sPrime = stateMap.find(nextState);
-	if (sPrime == stateMap.end()) {
-		// Add our Probstate
-		ProbState newState(nextState);
-		stateMap.insert(newState);
-		sPrime = stateMap.find(nextState);
-		// Sanity check
-		if (sPrime == stateMap.end()) {
-			err("Something happened in stateMap.insert()");
-		}
-	}
-	return *sPrime;
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-bool
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::isInTMap(StateType s) {
-	ProbState p((uint32_t) s);
-	return set_contains(tMap, p);
-}
 
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
@@ -450,7 +444,7 @@ template class StaminaModelBuilder<double, storm::models::sparse::StandardReward
 // #endif
 
 
-bool stamina::set_contains(std::unordered_set<ProbState> current_set, ProbState value) {
+bool stamina::set_contains(std::unordered_set<StateType> current_set, StateType value) {
 	auto search = current_set.find(value);
 	return (search != current_set.end());
 }
