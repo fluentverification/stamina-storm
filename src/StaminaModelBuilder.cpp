@@ -426,7 +426,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	auto startTime = std::chrono::high_resolution_clock::now();
-	// TODO: set up
 
 	// Create explored states queue and map of all states
 	std::deque<ProbState> stateQueue;
@@ -451,7 +450,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 	}
 
 	double perimReachability = 1.0;
-	double targetPerimReachability = options->prob_win / options->approx_factor;
+	double targetPerimReachability = options->prob_win / (double) options->approx_factor;
+#ifdef DEBUG_PRINTS
+	info("Target perimeter reachability is " + std::to_string(targetPerimReachability));
+#endif // DEBUG PRINTS
 	// State search
 	while (perimReachability >= targetPerimReachability) {
 		// Enqueue initial states
@@ -466,19 +468,35 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 		// Perform a breadth first search
 		while (!stateQueue.empty()) {
 			ProbState s = stateQueue.front();
+#ifdef DEBUG_PRINTS
 			info(std::to_string(s.stateId) + ": dequeued state");
+#endif // DEBUG_PRINTS
 			stateQueue.pop_front();
 			// If s not in T or \pi(s) >= \kappa
 			if (!set_contains(tMap, s) || s.getCurReachabilityProb() >= options->kappa) {
 				generator->load(s.state);
+				if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
+					generator->addStateValuation(s.getStateId(), stateAndChoiceInformationBuilder.stateValuationsBuilder());
+				}
 				// Get next states.
 				storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+#ifdef DEBUG_PRINTS
+				// If the behavior has size 0, we have an issue
+				if (behavior.size() == 0) {
+					err("Size of behavior is 0!");
+				}
+#endif // DEBUG_PRINTS
 				if (s.getCurReachabilityProb() == 0.0) {
 					// Get all next states and load them into the queue
 					for (auto const & choice : behavior) {
+#ifdef DEBUG_PRINTS
+						info("Length of next states for this choice: " + std::to_string(choice.size()));
+#endif // DEBUG_PRINTS
 						for (auto const& stateProbabilityPair : choice) {
 							StateType nextState = stateProbabilityPair.first;
+#ifdef DEBUG_PRINTS
 							info(std::to_string(nextState) + " is our next state");
+#endif // DEBUG_PRINTS
 							ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
 							// Enqueue our new state
 							stateQueue.push_back(sPrime);
@@ -497,11 +515,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 						if (numChoicesTaken > 1) {
 							warn("CTMC should be deterministic! Somehow, got multiple choices for behavior!");
 						}
+#ifdef DEBUG_PRINTS
+						info("Length of next states for this choice: " + std::to_string(choice.size()));
+#endif // DEBUG_PRINTS
 						for (auto const& stateProbabilityPair : choice) {
 							StateType nextState = stateProbabilityPair.first;
 							double transitionProbability = (double) stateProbabilityPair.second;
+#ifdef DEBUG_PRINTS
 							info(std::to_string(nextState) + " is our next state");
 							info(std::to_string(stateProbabilityPair.second) + " is its transition probability");
+#endif // DEBUG_PRINTS
 							ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
 							sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
 							// TODO: Make sure this is the correct condition
@@ -520,6 +543,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 					s.setCurReachabilityProb(0.0);
 				}
 			}
+#ifdef DEBUG_PRINTS
+			else {
+				warn("Dequeued without re-enqueuing state!");
+			}
+#endif // DEBUG_PRINTS
 		}
 		perimReachability = 0.0;
 		for (ProbState perimState : tMap) {

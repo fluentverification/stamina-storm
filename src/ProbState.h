@@ -29,6 +29,10 @@ namespace stamina {
          * @param id ID to set.
          * */
         ProbState(uint32_t id);
+		/**
+		 * Gets the current state ID
+		 * */
+		uint32_t getStateId();
         /**
          * Sets the current reachability probability of our state
          * 

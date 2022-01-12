@@ -24,6 +24,11 @@ ProbState::ProbState(uint32_t id)
     // Intentionally left empty
 }
 
+uint32_t
+ProbState::getStateId() {
+	return stateId;
+}
+
 
 void
 ProbState::setCurReachabilityProb(double reachProb) {
