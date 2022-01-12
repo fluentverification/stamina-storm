@@ -142,11 +142,35 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	StateType actualIndex = actualIndexPair.first;
 
-	// Determines if we need to insert the state
-	if (actualIndex == newIndex) {
-		// Always does breadth first search
-		statesToExplore.emplace_back(state, actualIndex);
-	}
+	// Keeping this until I implement what's below so I know how to emplace a state.
+// 	Determines if we need to insert the state
+// 	if (actualIndex == newIndex) {
+// 		Always does breadth first search
+// 		statesToExplore.emplace_back(state, actualIndex);
+// 	}
+
+	/* PSEUDOCODE FOR WHAT I PLAN TO DO */
+	// Check if the state exists within the unordered_map of reachability probabilities
+	// If it does not
+		// Add it with reachability probability 0.0
+		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
+
+	// If state is not in T or its reachability probability is greater than kappa
+		// Load state into generator
+		// Expand generator into next states
+		// If its reachability probability is 0
+			// Enqueue all of its successors (for (auto choice : behavior) for (auto stateProbabilityPair : choice) stuff...)
+		// Else it has a nonzero reachability probability
+			// Remove state from T if it's in T
+			// For each next state called state_prime (assume that we only have one behavior as this model is/must be deterministic)
+				// Add the transition probability of going from state -> state_prime to state_prime's reachability probability
+				// If NOT (state_prime in S (state set) and state_prime has been explored)
+					// Add state_prime to the explored states
+					// Enqueue it to the statesToExplore
+					// If s_prime is not in the S set
+						// Add it to T and S
+			// Set the reachability probablity of state to 0
+	// Set the reachability probability of S to the sum of the reachability probabilities in T TODO: should this be a level outer (reference VMCAI paper)
 
 	return actualIndex;
 }
@@ -160,14 +184,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-	// Performs state-space truncation
-	doReachabilityAnalysis(
-		transitionMatrixBuilder
-		, rewardModelBuilders
-		, stateAndChoiceInformationBuilder
-		, markovianChoices
-		, stateValuationsBuilder
-	);
 
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -199,8 +215,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	StateType currentIndex;
 
-	// Perform a search through the model. Terminates when states are in T map
-	while (!statesToExplore.empty() && !isInTMap(currentIndex)) {
+	// Perform a search through the model.
+	while (!statesToExplore.empty()) {
 		// Get the first state in the queue.
 		CompressedState currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
@@ -414,157 +430,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddProbStateToG
 		}
 	}
 	return *sPrime;
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalysis(
-	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-	, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-	, StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
-	, boost::optional<storm::storage::BitVector>& markovianChoices
-	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
-) {
-	auto startTime = std::chrono::high_resolution_clock::now();
-
-	// Create explored states queue and map of all states
-	std::deque<ProbState> stateQueue;
-	std::unordered_set<ProbState> exploredStates;
-
-	// Create a callback to our getOrAddStateIndex so that our PrismNextStateGenerator can access it
-	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
-		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
-		, this
-		, std::placeholders::_1
-	);
-
-	uint_fast64_t currentRowGroup = 0;
-	uint_fast64_t currentRow = 0;
-
-	// Let the PrismNextStateGenerator get the initial states
-	stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
-	// If no initial states, we can't continue
-	if (stateStorage.initialStateIndices.empty()) {
-		err("The initial states for this model are undefined!");
-		std::exit(1);
-	}
-
-	double perimReachability = 1.0;
-	double targetPerimReachability = options->prob_win / (double) options->approx_factor;
-#ifdef DEBUG_PRINTS
-	info("Target perimeter reachability is " + std::to_string(targetPerimReachability));
-#endif // DEBUG PRINTS
-	// State search
-	while (perimReachability >= targetPerimReachability) {
-		// Enqueue initial states
-		// Add each state in our initial states to our states to explore
-		for (auto & state : stateStorage.initialStateIndices) {
-			ProbState initState(state);
-			initState.setCurReachabilityProb(1.0);
-			stateQueue.push_back(initState);
-		}
-		// Clear Explored States
-		exploredStates.clear();
-		// Perform a breadth first search
-		while (!stateQueue.empty()) {
-			ProbState s = stateQueue.front();
-#ifdef DEBUG_PRINTS
-			info(std::to_string(s.stateId) + ": dequeued state");
-#endif // DEBUG_PRINTS
-			stateQueue.pop_front();
-			// If s not in T or \pi(s) >= \kappa
-			if (!set_contains(tMap, s) || s.getCurReachabilityProb() >= options->kappa) {
-				generator->load(s.state);
-				if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
-					generator->addStateValuation(s.getStateId(), stateAndChoiceInformationBuilder.stateValuationsBuilder());
-				}
-				// Get next states.
-				storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
-				if (behavior.empty()) {
-					// If the behavior has size 0, we have an issue
-#ifdef DEBUG_PRINTS
-					err("Size of behavior is 0! Introducing self-loop.");
-#endif // DEBUG_PRINTS
-				}
-				if (s.getCurReachabilityProb() == 0.0) {
-					// Get all next states and load them into the queue
-					for (auto const & choice : behavior) {
-#ifdef DEBUG_PRINTS
-						info("Length of next states for this choice: " + std::to_string(choice.size()));
-#endif // DEBUG_PRINTS
-						for (auto const& stateProbabilityPair : choice) {
-							StateType nextState = stateProbabilityPair.first;
-#ifdef DEBUG_PRINTS
-							info(std::to_string(nextState) + " is our next state");
-#endif // DEBUG_PRINTS
-							ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
-							// Enqueue our new state
-							stateQueue.push_back(sPrime);
-						}
-					}
-				}
-				else {
-					if (set_contains(tMap, s)) {
-						tMap.erase(s);
-					}
-					// Get all next states and load them into the queue
-					uint16_t numChoicesTaken = 0;
-					// For CTMC there is only one
-					for (auto const & choice : behavior) {
-						numChoicesTaken++;
-						if (numChoicesTaken > 1) {
-							warn("CTMC should be deterministic! Somehow, got multiple choices for behavior!");
-						}
-#ifdef DEBUG_PRINTS
-						info("Length of next states for this choice: " + std::to_string(choice.size()));
-#endif // DEBUG_PRINTS
-						for (auto const& stateProbabilityPair : choice) {
-							StateType nextState = stateProbabilityPair.first;
-							double transitionProbability = (double) stateProbabilityPair.second;
-#ifdef DEBUG_PRINTS
-							info(std::to_string(nextState) + " is our next state");
-							info(std::to_string(stateProbabilityPair.second) + " is its transition probability");
-#endif // DEBUG_PRINTS
-							ProbState sPrime = getOrAddProbStateToGlobalSet(nextState);
-							sPrime.addToReachability(s.getCurReachabilityProb() * transitionProbability);
-							// TODO: Make sure this is the correct condition
-							if (!(set_contains(stateMap, sPrime.stateId) && set_contains(exploredStates, sPrime))) {
-								exploredStates.insert(sPrime);
-								// Enqueue our new state
-								stateQueue.push_back(sPrime);
-								if (!set_contains(stateMap, sPrime)) {
-									tMap.insert(sPrime);
-									stateMap.insert(sPrime);
-								}
-							}
-						}
-					}
-					// Set our reachability probability to zero
-					s.setCurReachabilityProb(0.0);
-				}
-			}
-#ifdef DEBUG_PRINTS
-			else {
-				warn("Dequeued without re-enqueuing state!");
-			}
-#endif // DEBUG_PRINTS
-		}
-		perimReachability = 0.0;
-		for (ProbState perimState : tMap) {
-			perimReachability += perimState.getCurReachabilityProb();
-		}
-		reachabilityThreshold /= options->reduce_kappa;
-
-	}
-	options->kappa = reachabilityThreshold;
-	// Tell us how much time has elapsed
-	auto endTime = std::chrono::high_resolution_clock::now();
-	auto timeDiff = endTime - startTime;
-	std::stringstream ss;
-	ss << "Finished exploration of state space and state truncation (with permReachability ";
-	ss << perimReachability << ") in " << timeDiff.count() / CLOCKS_PER_SEC << " seconds,\n";
-	ss << "\tExplored " << stateMap.size() << " states. Transition matrix has " << transitionMatrixBuilder.getCurrentRowGroupCount() << " rows.";
-	good(ss.str());
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
