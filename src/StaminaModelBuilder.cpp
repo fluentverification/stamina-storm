@@ -178,13 +178,36 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Else it has a nonzero reachability probability
 		else {
 			// Remove state from T if it's in T
-			// For each next state called state_prime (assume that we only have one behavior as this model is/must be deterministic)
-				// Add the transition probability of going from state -> state_prime to state_prime's reachability probability
-				// If NOT (state_prime in S (state set) and state_prime has been explored)
-					// Add state_prime to the explored states
-					// Enqueue it to the statesToExplore
-					// If s_prime is not in the S set
-						// Add it to T and S
+			if (set_contains(tMap, actualIndex) {
+				tMap.remove(actualIndex);
+			}
+			// For each next state called statePrime (assume that we only have one behavior as this model is/must be deterministic)
+			for (auto const choice : behavior) {
+				for (auto const stateProbabilityPair : choice) {
+					CompressedState statePrime = stateProbabilityPair.first;
+					StateType statePrimeIndex = stateStorage.stateToId.findOrAddAndGetBucket(
+							statePrime
+							, static_cast<StateType>(stateStorage.getNumberOfStates())
+						);
+					// TODO: find out if float or double needed?
+					float probability = static_cast<float> stateProbabilityPair.second;
+					// Add the transition probability of going from state -> statePrime to statePrime's reachability probability
+					piMap[statePrimeIndex] += probability;
+					// If NOT (statePrime in S (state set) and statePrime has been explored)
+					if (!(set_contains(stateMap, statePrimeIndex) && set_contains(exploredStates, statePrimeIndex))) {
+						// Add statePrime to the explored states
+						exploredStates.insert(statePrimeIndex);
+						// Enqueue it to the statesToExplore
+						statesToExplore.emplace_back(statePrime, statePrimeIndex);
+						// If s_prime is not in the S set
+						if (!set_contains(stateMap, statePrimeIndex) {
+							// Add it to T and S
+							tMap.insert(statePrimeIndex);
+							stateMap.insert(statePrimeIndex);
+						}
+					}
+				}
+			}
 			// Set the reachability probablity of state to 0
 		}
 	}

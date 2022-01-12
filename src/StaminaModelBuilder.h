@@ -15,7 +15,6 @@
 #include <functional>
 
 #include "Options.h"
-#include "ProbState.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -194,16 +193,6 @@ namespace stamina {
             , boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
         );
     private:
-        /**
-         * Gets or adds a new ProbState from our global state set
-         * */
-        ProbState getOrAddProbStateToGlobalSet(StateType nextState);
-        /**
-         * Checks if a StateType is in the tMap
-         *
-         * @return If in T Map
-         * */
-        bool isInTMap(StateType s);
         /* Data Members */
         std::function<void(std::string)> err;
         std::function<void(std::string)> warn;
@@ -214,7 +203,8 @@ namespace stamina {
         std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> generator;
         std::deque<std::pair<CompressedState, StateType>> statesToExplore;
         boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-        std::unordered_set<StateType> stateMap; // S in the QEST paper
+		std::unordered_set<StateType> exploredStates; // States that we have explored
+		std::unordered_set<StateType> stateMap; // S in the QEST paper
         std::unordered_set<StateType> tMap; // T in the QEST paper
 		std::unordered_map<StateType, float> piMap; // Maps reachability probabilities to their states
         double reachabilityThreshold;
