@@ -480,14 +480,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::doReachabilityAnalys
 				}
 				// Get next states.
 				storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
-				if (behavior.empty()) {
 #ifdef DEBUG_PRINTS
+				if (behavior.empty()) {
 					// If the behavior has size 0, we have an issue
-					warn("Size of behavior is 0! Introducing self-loop.");
-#endif // DEBUG_PRINTS
-					// TODO: introduce a self-loop
-					stateQueue.push_back(s);
+					err("Size of behavior is 0! Introducing self-loop.");
 				}
+#endif // DEBUG_PRINTS
 				if (s.getCurReachabilityProb() == 0.0) {
 					// Get all next states and load them into the queue
 					for (auto const & choice : behavior) {
