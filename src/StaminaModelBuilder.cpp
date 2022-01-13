@@ -189,10 +189,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 							statePrime
 							, static_cast<StateType>(stateStorage.getNumberOfStates())
 						);
+					// Default to zero
+					if (!piMap.contains(statePrimeIndex)) {
+						piMap.insert(statePrimeIndex, 0);
+					}
 					// TODO: find out if float or double needed?
 					float probability = static_cast<float> stateProbabilityPair.second;
 					// Add the transition probability of going from state -> statePrime to statePrime's reachability probability
-					piMap[statePrimeIndex] += probability;
+					piMap[statePrimeIndex] += probability * piMap[actualIndex];
 					// If NOT (statePrime in S (state set) and statePrime has been explored)
 					if (!(set_contains(stateMap, statePrimeIndex) && set_contains(exploredStates, statePrimeIndex))) {
 						// Add statePrime to the explored states
@@ -209,7 +213,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				}
 			}
 			// Set the reachability probablity of state to 0
-			piMap[actualIndex] = 0;
+			piMap.insert_or_assign(actualIndex, 0);
 		}
 	}
 	// Set the reachability probability of S to the sum of the reachability probabilities in T TODO: should this be a level outer (reference VMCAI paper)
