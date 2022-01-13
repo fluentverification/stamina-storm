@@ -151,7 +151,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	// Check if the state exists within the unordered_map of reachability probabilities
 	// If it does not
-	if (!piMap.contains(actualIndex)) {
+	if (piMap.find(actualIndex) == piMap.end()) {
 		// Add it with reachability probability 0.0
 		piMap.insert({actualIndex, (float) 0.0});
 		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
@@ -180,13 +180,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			// Enqueue all of its successors (for (auto choice : behavior) for (auto stateProbabilityPair : choice) stuff...)
 			for (auto const choice : behavior) {
 				for (auto const stateProbabilityPair : choice) {
-					statesToExplore.emplace_back(
-						stateProbabilityPair.first
-						, stateStorage.stateToId.findOrAddAndGetBucket(
-							stateProbabilityPair.first
+					CompressedState statePrime = stateProbabilityPair.first;
+					StateType statePrimeIndex = stateStorage.stateToId.findOrAddAndGetBucket(
+							statePrime
 							, static_cast<StateType>(stateStorage.getNumberOfStates())
-						)
-					);
+						);
+					// Default to zero if we don't contain it
+					if (piMap.find(statePrimeIndex) == piMap.end()) {
+						piMap.insert({statePrimeIndex, (float) 0.0});
+					}
+					float probability = static_cast<float>(stateProbabilityPair.second);
+					// Enqueue it to the statesToExplore
+					statesToExplore.emplace_back(statePrime, statePrimeIndex);
 				}
 			}
 		}
@@ -205,11 +210,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 							, static_cast<StateType>(stateStorage.getNumberOfStates())
 						);
 					// Default to zero
-					if (!piMap.contains(statePrimeIndex)) {
+					if (piMap.find(statePrimeIndex) == piMap.end()) {
 						piMap.insert({statePrimeIndex, (float) 0.0});
 					}
 					// TODO: find out if float or double needed?
-					float probability = static_cast<float> stateProbabilityPair.second;
+					float probability = static_cast<float>(stateProbabilityPair.second);
 					// Add the transition probability of going from state -> statePrime to statePrime's reachability probability
 					piMap[statePrimeIndex] += probability * piMap[actualIndex];
 					// If NOT (statePrime in S (state set) and statePrime has been explored)

@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.10)  # CMake version check
 project(stamina-cplusplus)               # Create project "stamina-cplusplus"
-set(CMAKE_CXX_STANDARD 14)            # Enable c++14 standard
+set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -25,8 +25,6 @@ set(SOURCE_FILES
     src/StaminaModelChecker.cpp
     src/Options.h
     src/Options.cpp
-    src/ProbState.h
-    src/ProbState.cpp
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})
