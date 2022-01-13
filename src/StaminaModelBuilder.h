@@ -211,6 +211,7 @@ namespace stamina {
     };
 
 	// Helper method to find in unordered_set
+	template <typename StateType>
 	bool set_contains(std::unordered_set<StateType> current_set, StateType value);
 }
 #endif // STAMINAMODELBUILDER_H

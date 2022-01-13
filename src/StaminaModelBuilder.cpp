@@ -149,11 +149,25 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 // 		statesToExplore.emplace_back(state, actualIndex);
 // 	}
 
-	/* PSEUDOCODE FOR WHAT I PLAN TO DO */
 	// Check if the state exists within the unordered_map of reachability probabilities
 	// If it does not
+	if (!piMap.contains(actualIndex)) {
 		// Add it with reachability probability 0.0
+		piMap.insert({actualIndex, (float) 0.0});
 		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
+		err("Unexpected behavior! State with index " + std::to_string(actualIndex)
+			+ " should have already been in the probability map, but it was not! Inserting now."
+			+ "\nThis indicates that we have (somehow) reached a state that did not show up in "
+			+ "any previous states' next state list."
+		);
+	}
+
+	// Create a callback for the next-state generator to enable it to request the index of states.
+	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
+		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
+		, this
+		, std::placeholders::_1
+	);
 
 	// If state is not in T or its reachability probability is greater than kappa
 	if (!set_contains(tMap, actualIndex) || piMap[actualIndex]) {
@@ -172,13 +186,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 							stateProbabilityPair.first
 							, static_cast<StateType>(stateStorage.getNumberOfStates())
 						)
+					);
 				}
 			}
 		}
 		// Else it has a nonzero reachability probability
 		else {
 			// Remove state from T if it's in T
-			if (set_contains(tMap, actualIndex) {
+			if (set_contains(tMap, actualIndex)) {
 				tMap.remove(actualIndex);
 			}
 			// For each next state called statePrime (assume that we only have one behavior as this model is/must be deterministic)
@@ -191,7 +206,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 						);
 					// Default to zero
 					if (!piMap.contains(statePrimeIndex)) {
-						piMap.insert(statePrimeIndex, 0);
+						piMap.insert({statePrimeIndex, (float) 0.0});
 					}
 					// TODO: find out if float or double needed?
 					float probability = static_cast<float> stateProbabilityPair.second;
@@ -204,7 +219,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 						// Enqueue it to the statesToExplore
 						statesToExplore.emplace_back(statePrime, statePrimeIndex);
 						// If s_prime is not in the S set
-						if (!set_contains(stateMap, statePrimeIndex) {
+						if (!set_contains(stateMap, statePrimeIndex)) {
 							// Add it to T and S
 							tMap.insert(statePrimeIndex);
 							stateMap.insert(statePrimeIndex);
@@ -473,7 +488,7 @@ template class StaminaModelBuilder<double, storm::models::sparse::StandardReward
 // template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<storm::Interval>, uint32_t>;
 // #endif
 
-
+template <typename StateType>
 bool stamina::set_contains(std::unordered_set<StateType> current_set, StateType value) {
 	auto search = current_set.find(value);
 	return (search != current_set.end());
