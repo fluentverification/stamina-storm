@@ -78,7 +78,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, warn
 	, info
 	, good
-	, std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(program, generatorOptions)
+	, std::make_shared<storm::generator::StaminaNextStateGenerator<ValueType, StateType>>(program, generatorOptions)
 )
 {
 	// Intentionally left empty
@@ -256,6 +256,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
+	// Gives our next state generator a callback to know whether or not it should enqueue states
+	generator->setShouldEnqueue(
+		std::bind(
+			&StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue
+			, this
+			, std::placeholders::_1
+			, std::placeholders::_2
+		)
+	);
 
 	// Builds model
 	// Initialize building state valuations (if necessary)

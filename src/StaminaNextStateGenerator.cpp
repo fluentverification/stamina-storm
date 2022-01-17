@@ -239,15 +239,16 @@ StaminaNextStateGenerator<ValueType, StateType>::getAsynchronousChoices(
 					// seen, we also add it to the set of states that have yet to be explored.
 					CompressedState newState = applyUpdate(state, update);
 					StateType newStateIndex = newState.second;
-					// TODO: don't callback if we don't need to
-// 					if (
-					StateType stateIndex = stateToIdCallback(newState);
-
-					// Update the choice by adding the probability/target state to it.
-					choice.addProbability(stateIndex, probability);
-					if (this->options.isExplorationChecksSet()) {
-						probabilitySum += probability;
+					// Don't callback if we don't need to
+					if (shouldEnqueue(newStateIndex, state.second)) {
+						StateType stateIndex = stateToIdCallback(newState);
+						// Update the choice by adding the probability/target state to it.
+						choice.addProbability(stateIndex, probability);
+						if (this->options.isExplorationChecksSet()) {
+							probabilitySum += probability;
+						}
 					}
+
 				}
 			}
 
