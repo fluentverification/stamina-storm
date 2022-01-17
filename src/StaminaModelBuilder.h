@@ -52,6 +52,8 @@
 #include "storm/builder/BuilderOptions.h"
 #include "storm/generator/VariableInformation.h"
 
+#include "StaminaNextStateGenerator.h"
+
 
 namespace stamina {
 
