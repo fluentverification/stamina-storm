@@ -27,6 +27,25 @@
 using namespace stamina;
 
 template<typename ValueType, typename StateType>
+StaminaNextStateGenerator<ValueType, StateType>(
+	storm::prism::Program const& program
+	, NextStateGeneratorOptions const& options = NextStateGeneratorOptions()
+	, std::shared_ptr<ActionMask<ValueType,StateType>> const& = nullptr
+) : PrismNextStateGenerator(
+		program
+		, options
+		, nullptr // TODO: what the frick is the parameter that we're supposed to pass in
+	)
+{
+	this->shouldEnqueue = std::bind(
+		&StaminaNextStateGenerator<ValueType, StateType>::shouldEnqueueDefault
+		, this
+		, std::placeholders::_1
+		, std::placeholders::_2
+	);
+}
+
+template<typename ValueType, typename StateType>
 StateBehavior<ValueType, StateType>
 StaminaNextStateGenerator<ValueType, StateType>::expand(StateToIdCallback const& stateToIdCallback) {
 	// Result to return
@@ -57,7 +76,8 @@ StaminaNextStateGenerator<ValueType, StateType>::expand(StateToIdCallback const&
 			allChoices = getAsynchronousChoices(*this->state, stateToIdCallback, CommandFilter::Markovian);
 			addSynchronousChoices(allChoices, *this->state, stateToIdCallback, CommandFilter::Markovian);
 		}
-	} else {
+	}
+	else {
 		allChoices = getAsynchronousChoices(*this->state, stateToIdCallback);
 		addSynchronousChoices(allChoices, *this->state, stateToIdCallback);
 	}
@@ -155,6 +175,14 @@ StaminaNextStateGenerator<ValueType, StateType>::expand(StateToIdCallback const&
 }
 
 template<typename ValueType, typename StateType>
+void
+StaminaNextStateGenerator<ValueType, StateType>::setShouldEnqueue(
+	std::function<bool(StateType, StateType)> shouldEnqueue
+) {
+	this->shouldEnqueue = shouldEnqueue;
+}
+
+template<typename ValueType, typename StateType>
 std::vector<Choice<ValueType>>
 StaminaNextStateGenerator<ValueType, StateType>::getAsynchronousChoices(
 	CompressedState const& state
@@ -212,6 +240,7 @@ StaminaNextStateGenerator<ValueType, StateType>::getAsynchronousChoices(
 					CompressedState newState = applyUpdate(state, update);
 					StateType newStateIndex = newState.second;
 					// TODO: don't callback if we don't need to
+// 					if (
 					StateType stateIndex = stateToIdCallback(newState);
 
 					// Update the choice by adding the probability/target state to it.
@@ -438,4 +467,11 @@ StaminaNextStateGenerator<ValueType, StateType>::applyUpdate(
 	}
 
 	return newState;
+}
+
+template<typename ValueType, typename StateType>
+bool
+StaminaNextStateGenerator<ValueType, StateType>::shouldEnqueueDefault(StateType state, StateType previous) {
+	std::cout << "[WARNING] It appears that shouldEnqueue has not been set. Defaulting to always true" << std::endl;
+	return true;
 }

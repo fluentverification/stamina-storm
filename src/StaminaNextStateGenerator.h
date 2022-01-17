@@ -3,12 +3,22 @@
 
 #include "storm/generator/PrismNextStateGenerator.h"
 
+#include <functional>
+
 namespace stamina {
 	using namespace storm::generator;
 
 	template<typename ValueType, typename StateType = uint32_t>
 	class StaminaNextStateGenerator : public PrismNextStateGenerator<ValueType, StateType> {
 	public:
+		/**
+		 * Constructor
+		 * */
+		StaminaNextStateGenerator(
+			storm::prism::Program const& program
+			, NextStateGeneratorOptions const& options = NextStateGeneratorOptions()
+			, std::shared_ptr<ActionMask<ValueType,StateType>> const& = nullptr
+		);
 		/**
 		 * Overrides the expand() method in storm::generator::PrismNextStateGenerator.
 		 * Creates a StateBehavior for the currently loaded state
@@ -19,6 +29,9 @@ namespace stamina {
 		virtual StateBehavior<ValueType, StateType> expand(
 			StateToIdCallback const& stateToIdCallback
 		) override;
+		void setShouldEnqueue(
+			std::function<bool(StateType, StateType)> shouldEnqueue
+		);
 	private:
 		/**
 		 * Retrieves all choices that are definitely asynchronous, possible fromm the given state.
@@ -78,6 +91,13 @@ namespace stamina {
 			CompressedState const& state
 			, storm::prism::Update const& update
 		);
+		/**
+		 * Default shouldEnqueue function. Always returns true and prints a
+		 * warning that shouldEnqueue has not been set.
+		 * */
+		bool shouldEnqueueDefault(StateType state, StateType previous);
+		// Data members
+		std::function<bool(StateType, StateType)> shouldEnqueue;
 	};
 } // namespace stamina
 
