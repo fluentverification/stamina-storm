@@ -158,6 +158,25 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::updateReachabilityProbability(
+	StateType currentState
+	, StateType previousState
+	, float transitionProbability
+) {
+	// Optimization to prevent unnecessary multiply
+	if (piMap[previousState] == 0.0) {
+		return;
+	}
+	// If we haven't reached this state before, insert it into piMap
+	if (piMap.find(currentState) == piMap.end()) {
+		piMap.insert({currentState, (float) 0.0});
+	}
+	// Update the probability
+	piMap[currentState] += transitionProbability * piMap[previousState];
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	// Create new index just in case we need it

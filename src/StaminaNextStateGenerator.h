@@ -53,6 +53,31 @@ namespace stamina {
 			, StateToIdCallback stateToIdCallback
 			, CommandFilter const& commandFilter = CommandFilter::All
 		);
+		/**
+		 * Recursive helper function to get a synchronized distribution
+		 *
+		 * @param state
+		 * */
+		void generateSynchronizedDistribution(
+			storm::storage::BitVector const& state
+			, ValueType const& probability
+			, uint64_t position
+			, std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> const& iteratorList
+			, storm::builder::jit::Distribution<StateType, ValueType>& distribution
+			, StateToIdCallback stateToIdCallback
+		);
+		/**
+		 * Applies an update to the state currently loaded into the evaluator and applies the resulting values to
+		 * the given compressed state.
+		 *
+		 * @params state The state to which to apply the new values.
+		 * @params update The update to apply.
+		 * @return The resulting state.
+		 * */
+		CompressedState applyUpdate(
+			CompressedState const& state
+			, storm::prism::Update const& update
+		);
 	};
 } // namespace stamina
 

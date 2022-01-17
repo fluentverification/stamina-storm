@@ -1,5 +1,23 @@
 #include "StaminaNextStateGenerator.h"
 
+#include <boost/container/flat_map.hpp>
+#include <boost/any.hpp>
+
+#include "storm/models/sparse/StateLabeling.h"
+
+#include "storm/storage/expressions/SimpleValuation.h"
+#include "storm/storage/sparse/PrismChoiceOrigins.h"
+
+#include "storm/builder/jit/Distribution.h"
+
+#include "storm/solver/SmtSolver.h"
+
+#include "storm/utility/constants.h"
+#include "storm/utility/macros.h"
+#include "storm/exceptions/InvalidArgumentException.h"
+#include "storm/exceptions/WrongFormatException.h"
+#include "storm/exceptions/UnexpectedException.h"
+
 /*
  * Not super happy I have to include this. A lot of these methods are really similar to the PrismNextStateGenerator,
  * from which it inherits, but I can't call them because what we need to do is *slightly* different and there are
@@ -191,7 +209,10 @@ StaminaNextStateGenerator<ValueType, StateType>::getAsynchronousChoices(
 				if (probability != storm::utility::zero<ValueType>()) {
 					// Obtain target state index and add it to the list of known states. If it has not yet been
 					// seen, we also add it to the set of states that have yet to be explored.
-					StateType stateIndex = stateToIdCallback(applyUpdate(state, update));
+					CompressedState newState = applyUpdate(state, update);
+					StateType newStateIndex = newState.second;
+					// TODO: don't callback if we don't need to
+					StateType stateIndex = stateToIdCallback(newState);
 
 					// Update the choice by adding the probability/target state to it.
 					choice.addProbability(stateIndex, probability);
@@ -339,4 +360,82 @@ StaminaNextStateGenerator<ValueType, StateType>::addSynchronousChoices(
 			}
 		}
 	}
+}
+
+template<typename ValueType, typename StateType>
+void
+StaminaNextStateGenerator<ValueType, StateType>::generateSynchronizedDistribution(
+	storm::storage::BitVector const& state
+	, ValueType const& probability
+	, uint64_t position
+	, std::vector<std::vector<std::reference_wrapper<storm::prism::Command const>>::const_iterator> const& iteratorList
+	, storm::builder::jit::Distribution<StateType, ValueType>& distribution
+	, StateToIdCallback stateToIdCallback
+) {
+	if (storm::utility::isZero<ValueType>(probability)) {
+		return;
+	}
+
+	if (position >= iteratorList.size()) {
+		StateType id = stateToIdCallback(state);
+		distribution.add(id, probability);
+	} else {
+		storm::prism::Command const& command = *iteratorList[position];
+		for (uint_fast64_t j = 0; j < command.getNumberOfUpdates(); ++j) {
+			storm::prism::Update const& update = command.getUpdate(j);
+			generateSynchronizedDistribution(applyUpdate(state, update), probability * this->evaluator->asRational(update.getLikelihoodExpression()), position + 1, iteratorList, distribution, stateToIdCallback);
+		}
+	}
+}
+
+template<typename ValueType, typename StateType>
+CompressedState
+StaminaNextStateGenerator<ValueType, StateType>::applyUpdate(
+	CompressedState const& state
+	, storm::prism::Update const& update
+) {
+
+	auto assignmentIt = update.getAssignments().begin();
+	auto assignmentIte = update.getAssignments().end();
+
+	// Iterate over all boolean assignments and carry them out.
+	auto boolIt = this->variableInformation.booleanVariables.begin();
+	for (; assignmentIt != assignmentIte && assignmentIt->getExpression().hasBooleanType(); ++assignmentIt) {
+		while (assignmentIt->getVariable() != boolIt->variable) {
+			++boolIt;
+		}
+		newState.set(boolIt->bitOffset, this->evaluator->asBool(assignmentIt->getExpression()));
+	}
+
+	// Iterate over all integer assignments and carry them out.
+	auto integerIt = this->variableInformation.integerVariables.begin();
+	for (; assignmentIt != assignmentIte && assignmentIt->getExpression().hasIntegerType(); ++assignmentIt) {
+		while (assignmentIt->getVariable() != integerIt->variable) {
+			++integerIt;
+		}
+		int_fast64_t assignedValue = this->evaluator->asInt(assignmentIt->getExpression());
+		if (this->options.isAddOutOfBoundsStateSet()) {
+			if (assignedValue < integerIt->lowerBound || assignedValue > integerIt->upperBound) {
+				return this->outOfBoundsState;
+			}
+		} else if (integerIt->forceOutOfBoundsCheck || this->options.isExplorationChecksSet()) {
+			if (!(assignedValue >= integerIt->lowerBound)) {
+				throw storm::exceptions::WrongFormatException("The update " << update << " leads to an out-of-bounds value (" << assignedValue << ") for the variable '" << assignmentIt->getVariableName() << "'.");
+			}
+			if (!(assignedValue <= integerIt->upperBound)) {
+				throw storm::exceptions::WrongFormatException("The update " << update << " leads to an out-of-bounds value (" << assignedValue << ") for the variable '" << assignmentIt->getVariableName() << "'.");
+			}
+		}
+		newState.setFromInt(integerIt->bitOffset, integerIt->bitWidth, assignedValue - integerIt->lowerBound);
+		if (!(static_cast<int_fast64_t>(newState.getAsInt(integerIt->bitOffset, integerIt->bitWidth)) + integerIt->lowerBound == assignedValue)) {
+			std::cerr << "Writing to the bit vector bucket failed (read " << newState.getAsInt(integerIt->bitOffset, integerIt->bitWidth) << " but wrote " << assignedValue << ").";
+		}
+	}
+
+	// Check that we processed all assignments.
+	if (assignmentIt != assignmentIte) {
+		std::cerr << "Not all assignments were consumed." << std::endl;
+	}
+
+	return newState;
 }
