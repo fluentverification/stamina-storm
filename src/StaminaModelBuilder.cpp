@@ -4,6 +4,7 @@
 * Created by Josh Jeppson on 8/17/2021
 * */
 #include "StaminaModelBuilder.h"
+#include "StaminaNextStateGenerator.h"
 
 #define DEBUG_PRINTS
 
@@ -71,14 +72,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, std::function<void(std::string)> info
 	, std::function<void(std::string)> good
 	, storm::prism::Program const& program
-	, StaminaNextStateGeneratorOptions const& generatorOptions
+	, storm::generator::NextStateGeneratorOptions const& generatorOptions
 ) : StaminaModelBuilder( // Invoke other constructor
 	options
 	, err
 	, warn
 	, info
 	, good
-	, std::make_shared<storm::generator::StaminaNextStateGenerator<ValueType, StateType>>(program, generatorOptions)
+	, std::make_shared<StaminaNextStateGenerator<ValueType, StateType>>(program, generatorOptions)
 )
 {
 	// Intentionally left empty
@@ -92,7 +93,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, std::function<void(std::string)> info
 	, std::function<void(std::string)> good
 	, storm::jani::Model const& model
-	, StaminaNextStateGeneratorOptions const& generatorOptions
+	, storm::generator::NextStateGeneratorOptions const& generatorOptions
 ) : StaminaModelBuilder( // Invoke other constructor
 	options
 	, err
@@ -190,7 +191,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
 	if (actualIndex == newIndex) {
-		Always does breadth first search
+		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
 	}
 
@@ -211,7 +212,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		if (!piMap[actualIndex] == 0) {
 			// Remove state from T if it's in T
 			if (set_contains(tMap, actualIndex)) {
-				tMap.remove(actualIndex);
+				tMap.erase(actualIndex);
 			}
 			// For each next state called statePrime (assume that we only have one behavior as this model is/must be deterministic)
 			for (auto const choice : behavior) {

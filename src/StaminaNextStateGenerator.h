@@ -2,16 +2,20 @@
 #define STAMINA_NEXT_STATE_GENERATOR_H
 
 #include "storm/generator/PrismNextStateGenerator.h"
+#include "StaminaModelBuilder.h"
 
 #include <functional>
 
 namespace stamina {
 	using namespace storm::generator;
 
+
 	template<typename ValueType, typename StateType = uint32_t>
 	class StaminaNextStateGenerator : public PrismNextStateGenerator<ValueType, StateType> {
 	// Typedef for whether or not to enqueue
 	typedef std::function<bool(StateType, StateType)> ShouldEnqueueCallback;
+	enum class CommandFilter {All, Markovian, Probabilistic};
+	typedef typename NextStateGenerator<ValueType, StateType>::StateToIdCallback StateToIdCallback;
 	public:
 		/**
 		 * Constructor

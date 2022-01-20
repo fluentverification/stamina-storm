@@ -105,7 +105,7 @@ namespace stamina {
 			, std::function<void(std::string)> info
 			, std::function<void(std::string)> good
 			, storm::prism::Program const& program
-			, StaminaNextStateGeneratorOptions const& generatorOptions = StaminaNextStateGeneratorOptions()
+			, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 		);
 		/**
 		* Constructs a StaminaModelBuilder with a JANI model.
@@ -125,7 +125,7 @@ namespace stamina {
 			, std::function<void(std::string)> info
 			, std::function<void(std::string)> good
 			, storm::jani::Model const& model
-			, StaminaNextStateGeneratorOptions const& generatorOptions = StaminaNextStateGeneratorOptions()
+			, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 		);
 		/**
 		* Creates a model with a truncated state space for the program provided during construction. State space
