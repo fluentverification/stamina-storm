@@ -51,7 +51,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, std::function<void(std::string)> warn
 	, std::function<void(std::string)> info
 	, std::function<void(std::string)> good
-	, std::shared_ptr<storm::generator::NextStateGenerator<ValueType, StateType>> const& generator
+	, std::shared_ptr<StaminaNextStateGenerator<ValueType, StateType>> const& generator
 ) : generator(generator)
 	, stateStorage(generator->getStateSize())
 	, options(options)
@@ -71,7 +71,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, std::function<void(std::string)> info
 	, std::function<void(std::string)> good
 	, storm::prism::Program const& program
-	, storm::generator::NextStateGeneratorOptions const& generatorOptions
+	, StaminaNextStateGeneratorOptions const& generatorOptions
 ) : StaminaModelBuilder( // Invoke other constructor
 	options
 	, err
@@ -92,7 +92,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, std::function<void(std::string)> info
 	, std::function<void(std::string)> good
 	, storm::jani::Model const& model
-	, storm::generator::NextStateGeneratorOptions const& generatorOptions
+	, StaminaNextStateGeneratorOptions const& generatorOptions
 ) : StaminaModelBuilder( // Invoke other constructor
 	options
 	, err
