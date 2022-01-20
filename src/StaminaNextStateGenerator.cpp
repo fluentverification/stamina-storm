@@ -107,7 +107,8 @@ StaminaNextStateGenerator<ValueType, StateType>::expand(StateToIdCallback const&
 			for (auto const& stateProbabilityPair : choice) {
 				if (this->isDiscreteTimeModel()) {
 					globalChoice.addProbability(stateProbabilityPair.first, stateProbabilityPair.second / totalNumberOfChoices);
-				} else {
+				}
+				else {
 					globalChoice.addProbability(stateProbabilityPair.first, stateProbabilityPair.second);
 				}
 			}
@@ -177,7 +178,7 @@ StaminaNextStateGenerator<ValueType, StateType>::expand(StateToIdCallback const&
 template<typename ValueType, typename StateType>
 void
 StaminaNextStateGenerator<ValueType, StateType>::setShouldEnqueue(
-	std::function<bool(StateType, StateType)> shouldEnqueue
+	ShouldEnqueueCallback shouldEnqueue
 ) {
 	this->shouldEnqueue = shouldEnqueue;
 }

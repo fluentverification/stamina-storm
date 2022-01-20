@@ -10,6 +10,8 @@ namespace stamina {
 
 	template<typename ValueType, typename StateType = uint32_t>
 	class StaminaNextStateGenerator : public PrismNextStateGenerator<ValueType, StateType> {
+	// Typedef for whether or not to enqueue
+	typedef std::function<bool(StateType, StateType)> ShouldEnqueueCallback;
 	public:
 		/**
 		 * Constructor
@@ -29,8 +31,13 @@ namespace stamina {
 		virtual StateBehavior<ValueType, StateType> expand(
 			StateToIdCallback const& stateToIdCallback
 		) override;
+		/**
+		 * Sets the callback for whether or not we should enqueue
+		 *
+		 * @param shouldEnqueue A ShouldEnqueueCallback that returns whether or not we should enqueue
+		 * */
 		void setShouldEnqueue(
-			std::function<bool(StateType, StateType)> shouldEnqueue
+			ShouldEnqueueCallback shouldEnqueue
 		);
 	private:
 		/**
@@ -97,7 +104,7 @@ namespace stamina {
 		 * */
 		bool shouldEnqueueDefault(StateType state, StateType previous);
 		// Data members
-		std::function<bool(StateType, StateType)> shouldEnqueue;
+		ShouldEnqueueCallback shouldEnqueue;
 	};
 } // namespace stamina
 

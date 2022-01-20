@@ -66,6 +66,8 @@ namespace stamina {
 
 	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 	class StaminaModelBuilder  {
+	// Typedef for whether or not to enqueue
+	typedef std::function<bool(StateType, StateType)> ShouldEnqueueCallback;
 	public:
 		/**
 		* Constructs a StaminaModelBuilder with a given storm::generator::NextStateGenerator
