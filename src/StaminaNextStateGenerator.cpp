@@ -29,8 +29,8 @@ using namespace stamina;
 template<typename ValueType, typename StateType>
 StaminaNextStateGenerator<ValueType, StateType>(
 	storm::prism::Program const& program
-	, NextStateGeneratorOptions const& options = NextStateGeneratorOptions()
-	, std::shared_ptr<ActionMask<ValueType,StateType>> const& = nullptr
+	, NextStateGeneratorOptions const& options
+	, std::shared_ptr<ActionMask<ValueType,StateType>> const& actionMask
 ) : PrismNextStateGenerator(
 		program
 		, options

@@ -100,7 +100,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, warn
 	, info
 	, good
-	, std::make_shared<storm::generator::JaniNextStateGenerator<ValueType, StateType>>(model, generatorOptions)
+	, std::make_shared<StaminaNextStateGenerator<ValueType, StateType>>(model, generatorOptions)
 )
 {
 	// Intentionally left empty
