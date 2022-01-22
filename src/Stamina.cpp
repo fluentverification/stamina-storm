@@ -84,41 +84,7 @@ Stamina::initialize() {
 
 }
 
-void 
-Stamina::errorAndExit(std::string err, uint8_t err_num) {
-	std::cerr << BOLD(FRED("[ERROR]: "));
-	std::cerr << BOLD("STAMINA encountered the following error and will now exit: ") << std::endl;
-	std::cerr << '\t' << err << std::endl;
-	exit(err_num);
-}
 
-void 
-Stamina::error(std::string err, uint8_t err_num) {
-	std::cerr << BOLD(FRED("[ERROR]: "));
-	std::cerr << BOLD("STAMINA encountered the following (possibly recoverable) error: ") << std::endl;
-	std::cerr << '\t' << err << std::endl;
-}
-
-void 
-Stamina::warning(std::string warn) {
-	std::cerr << BOLD(FYEL("[WARNING]: ")) << warn << std::endl;
-}
-
-void 
-Stamina::info(std::string info) {
-	std::cerr << BOLD(FBLU("[INFO]: ")) << info << std::endl;
-}
-
-void 
-Stamina::good(std::string good) {
-	std::cerr << BOLD(FGRN("[MESSAGE]: ")) << good << std::endl;
-}
-
-#ifdef DEBUG_PRINTS
-void Stamina::debugPrint(std::string msg) {
-	std::cout << BOLD(FMAG("[DEBUG MESSAGE]: ")) << msg << std::endl;
-}
-#endif
 
 /* ===== IMPLEMENTATION FOR OTHER CLASSES IN THE `stamina` NAMESPACE ===== */
 
