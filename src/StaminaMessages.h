@@ -9,6 +9,7 @@ namespace stamina {
         , ERR_MEMORY_EXCEEDED = 137
     };
 	class StaminaMessages {
+	public:
 		/**
 		* Errors and exits program
 		* */

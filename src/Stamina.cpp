@@ -22,13 +22,13 @@ Stamina::Stamina(struct arguments * arguments) {
 		Options::setArgs(arguments);
 	}
 	catch (const std::exception& e) {
-		errorAndExit("Failed to allocate stamina::Options: " + std::string(e.what()));
+		StaminaMessages::errorAndExit("Failed to allocate stamina::Options: " + std::string(e.what()));
 	}
-	info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
+	StaminaMessages::info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
 	// Pass in a lambda (bound function) to the checkOptions method
 	bool good = Options::checkOptions();
 	if (!good) {
-		errorAndExit("One or more parameters passed in were invalid.");
+		StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");
 	}
 }
 
@@ -43,25 +43,25 @@ Stamina::run() {
 	// Check each property in turn
 	for (auto property : propertiesVector) {
 #ifdef DEBUG_PRINTS
-		debugPrint("Checking property in properties vector.");
+		StaminaMessages::debugPrint("Checking property in properties vector.");
 #endif
 		auto result = modelChecker->modelCheckProperty(property, modulesFile);
 	}
 	// Finished!
-	good("Finished running!");
+	StaminaMessages::good("Finished running!");
 }
 
 // PRIVATE METHODS
 
 void 
 Stamina::initialize() {
-	info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
+	StaminaMessages::info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
 	try {
 		// Initialize with references to error, warning, info, and good message functions
 		modelChecker = new StaminaModelChecker();
 	}
 	catch(const std::exception& e) {
-		errorAndExit("Failed to allocate memory for StaminaModelChecker!");
+		StaminaMessages::errorAndExit("Failed to allocate memory for StaminaModelChecker!");
 	}
 
 	// Initialize loggers
@@ -79,7 +79,7 @@ Stamina::initialize() {
 		// Uses stringstream because std::to_string(e) throws an error with storm's exceptions
 		std::stringstream msg;
 		msg << "Got error when reading modules or properties file:\n\t\t" << e.what();
-		errorAndExit(msg.str());
+		StaminaMessages::errorAndExit(msg.str());
 	}
 
 }
