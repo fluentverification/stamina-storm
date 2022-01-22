@@ -23,8 +23,7 @@ namespace stamina {
 		 * */
 		StaminaNextStateGenerator(
 			storm::prism::Program const& program
-			, NextStateGeneratorOptions const& options = NextStateGeneratorOptions()
-			, std::shared_ptr<ActionMask<ValueType,StateType>> const& actionMask = nullptr
+			, NextStateGeneratorOptions const& options
 		);
 		/**
 		 * Overrides the expand() method in storm::generator::PrismNextStateGenerator.

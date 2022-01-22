@@ -30,11 +30,9 @@ template<typename ValueType, typename StateType>
 StaminaNextStateGenerator<ValueType, StateType>(
 	storm::prism::Program const& program
 	, NextStateGeneratorOptions const& options
-	, std::shared_ptr<ActionMask<ValueType,StateType>> const& actionMask
 ) : PrismNextStateGenerator(
 		program
 		, options
-		, nullptr // TODO: what the frick is the parameter that we're supposed to pass in
 	)
 {
 	this->shouldEnqueue = std::bind(

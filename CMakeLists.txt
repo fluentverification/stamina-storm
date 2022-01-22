@@ -23,7 +23,9 @@ set(SOURCE_FILES
     src/StaminaModelBuilder.cpp
     src/StaminaModelChecker.h
     src/StaminaModelChecker.cpp
-    src/StaminaNextStateGenerator.h
+    src/StaminaMessages.h
+	src/StaminaMessages.cpp
+	src/StaminaNextStateGenerator.h
     src/StaminaNextStateGenerator.cpp
     src/Options.h
     src/Options.cpp
