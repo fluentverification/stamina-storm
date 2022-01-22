@@ -2,6 +2,12 @@
 #define STAMINA_MESSAGES_H
 
 namespace stamina {
+	/* ERRORS WE CAN GET */
+    enum STAMINA_ERRORS {
+        ERR_GENERAL = 1
+        , ERR_SEVERE = 2
+        , ERR_MEMORY_EXCEEDED = 137
+    };
 	class StaminaMessages {
 		/**
 		* Errors and exits program
