@@ -25,12 +25,7 @@
 // #include <storm/utility/initialize.h>
 
 namespace stamina {
-    /* ERRORS WE CAN GET */
-    enum STAMINA_ERRORS {
-        ERR_GENERAL = 1
-        , ERR_SEVERE = 2
-        , ERR_MEMORY_EXCEEDED = 137
-    };
+
     /* MAIN STAMINA CLASS */
     class Stamina {
     public:
