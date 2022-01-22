@@ -49,15 +49,7 @@ namespace stamina {
          * @param modulesFile Pointer to the Modules file
          * @param propertiesVector Pointer to the Properties vector
          * */
-        StaminaModelChecker(        
-            std::function<void(std::string)> err
-            , std::function<void(std::string)> warn
-            , std::function<void(std::string)> info
-            , std::function<void(std::string)> good
-            , Options * options
-            , storm::prism::Program * modulesFile = nullptr
-            , std::vector<storm::jani::Property> * propertiesVector = nullptr
-        );
+        StaminaModelChecker();
         /**
          * Standard destructor
          * */
@@ -143,11 +135,6 @@ namespace stamina {
          * */
         void writeToOutput(std::string filename);
         /* Data Members */
-        std::function<void(std::string)> err;
-        std::function<void(std::string)> warn;
-        std::function<void(std::string)> info;
-        std::function<void(std::string)> good;
-        Options * options;
         StaminaModelChecker::Result * min_results;
         StaminaModelChecker::Result * max_results;
         StaminaModelBuilder<double> * builder;

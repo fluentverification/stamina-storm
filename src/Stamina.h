@@ -49,8 +49,6 @@ namespace stamina {
          * */
         void run();
         /* Data Members */
-        Options * options;
-    private:
         /**
          * Initializes Stamina
          * */
@@ -58,28 +56,28 @@ namespace stamina {
         /**
          * Errors and exits program
          * */
-        void errorAndExit(std::string err, uint8_t err_num = STAMINA_ERRORS::ERR_GENERAL);
+        static void errorAndExit(std::string err, uint8_t err_num = STAMINA_ERRORS::ERR_GENERAL);
         /**
          * Errors without exiting
          * */
-        void error(std::string err, uint8_t err_num = STAMINA_ERRORS::ERR_GENERAL);
+        static void error(std::string err, uint8_t err_num = STAMINA_ERRORS::ERR_GENERAL);
         /**
          * Prints a warning
          * */
-        void warning(std::string warn);
+        static void warning(std::string warn);
         /**
          * Prints an info message
          * */
-        void info(std::string info);
+        static void info(std::string info);
         /**
          * Prints a (good) message (i.e., we finished)
          * */
-        void good(std::string good);
+        static void good(std::string good);
 #ifdef DEBUG_PRINTS
         /**
          * Prints a debugging message
          * */
-        void debugPrint(std::string msg);
+        static void debugPrint(std::string msg);
 #endif
         /* Data Members */
         StaminaModelChecker * modelChecker;

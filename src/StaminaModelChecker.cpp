@@ -14,26 +14,16 @@
 
 using namespace stamina;
 
-StaminaModelChecker::StaminaModelChecker(        
-    std::function<void(std::string)> err
-    , std::function<void(std::string)> warn
-    , std::function<void(std::string)> info
-    , std::function<void(std::string)> good
-    , Options * options
+StaminaModelChecker::StaminaModelChecker(
     , storm::prism::Program * modulesFile
     , std::vector<storm::jani::Property> * propertiesVector
-) : err(err)
-    , warn(warn)
-    , info(info)
-    , good(good)
-    , options(options)
-    , modulesFile(modulesFile)
+) : modulesFile(modulesFile)
     , propertiesVector(propertiesVector)
 {
     // Explicitly invoke model build
-    std::string iFilename = options->import_filename; 
+    std::string iFilename = Options::import_filename;
     if (iFilename != "") {
-        info("Trying to import files named like " + iFilename);
+        Stamina::info("Trying to import files named like " + iFilename);
         try {
             std::string transFile = iFilename + ".tra";
             std::string stateRewardsFile = iFilename + "srew";
@@ -41,22 +31,22 @@ StaminaModelChecker::StaminaModelChecker(
             std::string statesFile = iFilename + ".sta";
             std::string labelsFile = iFilename + ".lab";
             // TODO: load model from explicit files
-            warn("Importing model from explicit files not implemented yet!");
+            Stamina::warning("Importing model from explicit files not implemented yet!");
         }
         catch (const std::exception& e) {
             std::stringstream ss;
             ss << "Cannot import file: " << iFilename << '\n';
             ss << BOLD("\tGot Error:") << e.what();
-            err(ss.str());
+            Stamina::error(ss.str());
         }  
     }
 }
 
 StaminaModelChecker::~StaminaModelChecker() {
     // Explicitly invoke model export
-    std::string oFilename = options->export_filename; 
+    std::string oFilename = Options::export_filename;
     if (oFilename != "") {
-        info("Attempting to export model to " + oFilename);
+        Stamina::info("Attempting to export model to " + oFilename);
         try {
             std::string transFile = oFilename + ".tra";
             std::string stateRewardsFile = oFilename + "srew";
@@ -64,13 +54,13 @@ StaminaModelChecker::~StaminaModelChecker() {
             std::string statesFile = oFilename + ".sta";
             std::string labelsFile = oFilename + ".lab";
             // TODO: export model to explicit files
-            warn("Exporting model to explicit files not implemented yet!");
+            Stamina::warning("Exporting model to explicit files not implemented yet!");
         }
         catch (const std::exception& e) {
             std::stringstream ss;
             ss << "Cannot export file: " << oFilename << '\n';
             ss << BOLD("\tGot Error:") << e.what();
-            err(ss.str());
+            Stamina::error(ss.str());
         }  
     }
     // Clean up memory
@@ -85,27 +75,20 @@ StaminaModelChecker::initialize(
 ) {
     // Don't pass in nullptr please
     if (!modulesFile) {
-        err("Modules file cannot be null!");
+        Stamina::error("Modules file cannot be null!");
         std::exit(1);
     }
     else if (!propertiesVector) {
-        err("Properties vector cannot be null!");
+        Stamina::error("Properties vector cannot be null!");
         std::exit(1);
     }
     this->modulesFile = modulesFile;
     this->propertiesVector = propertiesVector;
     // Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	// TODO: Does std::make_shared allocate the stuff we need it to?
-    auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(*modulesFile);
+    auto generator = std::make_shared<StaminaNextStateGenerator<double, uint32_t>>(*modulesFile);
     // Create StaminaModelBuilder
-    builder = new StaminaModelBuilder<double>(
-        options
-        , err
-        , warn
-        , info
-        , good
-        , generator
-    );
+    builder = new StaminaModelBuilder<double>(generator);
 }
 
 std::unique_ptr<storm::modelchecker::CheckResult> 
@@ -123,7 +106,7 @@ StaminaModelChecker::modelCheckProperty(
 
     // Create number of refined iterations and rechability threshold
     int numRefineIterations = 0;
-    double reachThreshold = options->kappa;
+    double reachThreshold = Options::kappa;
 
     // Get the name of the property
     std::string propName = prop.getName().empty() ? "Prob" : prop.getName();
@@ -138,7 +121,7 @@ StaminaModelChecker::modelCheckProperty(
     auto propertyExpression = prop.getRawFormula();
 
     if (propertyExpression->isProbabilityPathFormula()) {
-        warn("This property (" + propName + ") is a probability path formula.");
+        Stamina::warning("This property (" + propName + ") is a probability path formula.");
     }
 
     // Will we sitch to optimized CTMC analysis? (I.e., will we perform the state-space truncation)
@@ -148,9 +131,9 @@ StaminaModelChecker::modelCheckProperty(
     if (formula->isPathFormula() && formula->isUntilFormula()) {
         // TODO: Set this property for our model generator
         // Update switchToCombinedCTMC
-        switchToCombinedCTMC = switchToCombinedCTMC || !options->no_prop_refine;
+        switchToCombinedCTMC = switchToCombinedCTMC || !Options::no_prop_refine;
     }
-    switchToCombinedCTMC = switchToCombinedCTMC && !options->no_prop_refine;
+    switchToCombinedCTMC = switchToCombinedCTMC && !Options::no_prop_refine;
 
     // Remove these three lines once StaminaModelBuilder is working
     auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
@@ -159,20 +142,20 @@ StaminaModelChecker::modelCheckProperty(
 
     // While we should not terminate
     while (numRefineIterations == 0
-        || (!terminateModelCheck() && numRefineIterations < options->max_approx_count)
+        || (!terminateModelCheck() && numRefineIterations < Options::max_approx_count)
     ) {
         // Print out our current refinement iteration
-        info("Approximation [Refine Iterations: " + std::to_string(numRefineIterations) + ", kappa = " + std::to_string(reachThreshold) + "]");
+        Stamina::info("Approximation [Refine Iterations: " + std::to_string(numRefineIterations) + ", kappa = " + std::to_string(reachThreshold) + "]");
         // Reset the reachability threshold
-        reachThreshold = options->kappa;
+        reachThreshold = Options::kappa;
 
 
         // If we don't switch to a combined CTMC, just perform the model checking
 		// Without state space truncation
         if (!switchToCombinedCTMC) {
-            info("Verifying lower bound for " + prop_min->getName() + ".");
+            Stamina::info("Verifying lower bound for " + prop_min->getName() + ".");
             check(prop_min, min_results);
-            info("Verifying upper bound for " + prop_max->getName() + ".");
+            Stamina::info("Verifying upper bound for " + prop_max->getName() + ".");
             check(prop_max, max_results);
             // Write to output file
             // TODO: write to output file
@@ -190,15 +173,15 @@ StaminaModelChecker::modelCheckProperty(
 		auto result_upper = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[1]), true));
         // Reduce kappa for refinement
         double percentOff = max_results->result - min_results->result;
-        percentOff *= (double) 4.0 / options->prob_win;
+        percentOff *= (double) 4.0 / Options::prob_win;
         // max percent off at 100%
         if (percentOff > 1.0) {
             percentOff = 1.0;
         }
-        options->approx_factor *= percentOff;
+        Options::approx_factor *= percentOff;
 
         // Increment the refinement count
-        if (options->export_perimeter_states != "") {
+        if (Options::export_perimeter_states != "") {
             writePerimeterStates(numRefineIterations);    
         }
 
@@ -210,20 +193,20 @@ StaminaModelChecker::modelCheckProperty(
     std::chrono::duration<double> timeTaken = endTime - startTime;
     std::stringstream ss;
     ss << "Taken total time: " << timeTaken.count() << " s\n";
-    info(ss.str());
+    Stamina::info(ss.str());
 
     // Print results
     std::stringstream resultInfo;
     resultInfo << "Finished checking property: " << propName << std::endl;
     resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << *min_results << std::endl;
     resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << *max_results << std::endl;
-    info(resultInfo.str());
+    Stamina::info(resultInfo.str());
     
     // Export transitions to file if desired
-    if (options->export_trans != "") {
-        info("Exporting transitions to file: " + options->export_trans);
-        printTransitionActions(options->export_trans);
-        good("Export Complete!");
+    if (Options::export_trans != "") {
+        Stamina::info("Exporting transitions to file: " + Options::export_trans);
+        printTransitionActions(Options::export_trans);
+        Stamina::good("Export Complete!");
     }
 
     // Clean up memory
@@ -236,7 +219,7 @@ StaminaModelChecker::modelCheckProperty(
 
 void 
 StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
-    warn("This method (StaminaModelChecker::check()) is not implemented yet!!");
+    Stamina::warning("This method (StaminaModelChecker::check()) is not implemented yet!!");
     double result = 0.0;
     // auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
     // auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
@@ -249,7 +232,7 @@ StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker
 bool 
 StaminaModelChecker::terminateModelCheck() {
     // If our max result minus our min result is less than our maximum window
-    return (max_results->result - min_results->result) <= options->prob_win;
+    return (max_results->result - min_results->result) <= Options::prob_win;
 
 }
 
@@ -257,30 +240,30 @@ void
 StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
     try {
         // Refer to line 450 in StaminaModelChecker.java
-        warn("writePerimeterStates(int numRefineIteration) has not been implemented yet!");
+        Stamina::warning("writePerimeterStates(int numRefineIteration) has not been implemented yet!");
     }
     catch(const std::exception& e) {
         std::stringstream ss;
         ss << "Got error while trying to export perimeter states: " << e.what();
-        err(ss.str());
+        Stamina::error(ss.str());
     }
 }
 
 void 
 StaminaModelChecker::printTransitionActions(std::string filename) {
-    warn("This feature (StaminaModelChecker::printTransitionActions()) has not been implemented yet");
+    Stamina::warning("This feature (StaminaModelChecker::printTransitionActions()) has not been implemented yet");
 }
 
 void
 StaminaModelChecker::writeToOutput(std::string filename) {
     if (!min_results || !max_results) {
-        err("A results pointer is a nullptr");
+        Stamina::error("A results pointer is a nullptr");
         return;
     }
     std::ofstream outfile;
     outfile.open(filename);
     if (!outfile) {
-        err("Output file could not be opened");
+        Stamina::error("Output file could not be opened");
         return;
     }
     outfile << min_results << "\r\n";

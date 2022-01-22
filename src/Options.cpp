@@ -4,34 +4,31 @@
 using namespace stamina;
 // IMPLEMENTATION FOR Stamina::Stamina::Options
 
-Options::Options() {
-    // Intentionally left empty
-}
 
-Options::Options(struct arguments * arguments) :
-   model_file(arguments->model_file)
-   , properties_file(arguments->properties_file)
-   , kappa(arguments->kappa)
-   , reduce_kappa(arguments->reduce_kappa)
-   , approx_factor(arguments->approx_factor)
-   , prob_win(arguments->prob_win)
-   , max_approx_count(arguments->max_approx_count)
-   , no_prop_refine(arguments->no_prop_refine)
-   , cudd_max_mem(arguments->cudd_max_mem)
-   , export_filename(arguments->export_filename)
-   , export_perimeter_states(arguments->export_perimeter_states)
-   , import_filename(arguments->import_filename)
-   , property(arguments->property)
-   , consts(arguments->consts)
-   , export_trans(arguments->export_trans)
-   , rank_transitions(arguments->rank_transitions)
-   , max_iterations(arguments->max_iterations)
-   , power(arguments->power)
-   , jacobi(arguments->jacobi)
-   , gauss_seidel(arguments->gauss_seidel)
-   , backward_gauss_seidel(arguments->backward_gauss_seidel)
+Options::createFromArguments(struct arguments * arguments)
 {
-    // Intentionally left empty
+
+Options::model_file = arguments->model_file;
+Options::properties_file = arguments->properties_file;
+Options::kappa = arguments->kappa;
+Options::reduce_kappa = arguments->reduce_kappa;
+Options::approx_factor = arguments->approx_factor;
+Options::prob_win = arguments->prob_win;
+Options::max_approx_count = arguments->max_approx_count;
+Options::no_prop_refine = arguments->no_prop_refine;
+Options::cudd_max_mem = arguments->cudd_max_mem;
+Options::export_filename = arguments->export_filename;
+Options::export_perimeter_states = arguments->export_perimeter_states;
+Options::import_filename = arguments->import_filename;
+Options::property = arguments->property;
+Options::consts = arguments->consts;
+Options::export_trans = arguments->export_trans;
+Options::rank_transitions = arguments->rank_transitions;
+Options::max_iterations = arguments->max_iterations;
+Options::power = arguments->power;
+Options::jacobi = arguments->jacobi;
+Options::gauss_seidel = arguments->gauss_seidel;
+Options::backward_gauss_seidel = arguments->backward_gauss_seidel;
 }
 
 bool 
@@ -73,25 +70,25 @@ Options::checkOptions(std::function<void(std::string, uint8_t)> err, std::functi
 
 void 
 Options::setArgs(struct arguments * arguments) {
-    this->model_file = arguments->model_file;
-    this->properties_file = arguments->properties_file;
-    this->kappa = arguments->kappa;
-    this->reduce_kappa = arguments->reduce_kappa;
-    this->approx_factor = arguments->approx_factor;
-    this->prob_win = arguments->prob_win;
-    this->max_approx_count = arguments->max_approx_count;
-    this->no_prop_refine = arguments->no_prop_refine;
-    this->cudd_max_mem = arguments->cudd_max_mem;
-    this->export_filename = arguments->export_filename;
-    this->export_perimeter_states = arguments->export_perimeter_states;
-    this->import_filename = arguments->import_filename;
-    this->property = arguments->property;
-    this->consts = arguments->consts;
-    this->export_trans = arguments->export_trans;
-    this->rank_transitions = arguments->rank_transitions;
-    this->max_iterations = arguments->max_iterations;
-    this->power = arguments->power;
-    this->jacobi = arguments->jacobi;
-    this->gauss_seidel = arguments->gauss_seidel;
-    this->backward_gauss_seidel = arguments->backward_gauss_seidel;
+    Options::model_file = arguments->model_file;
+    Options::properties_file = arguments->properties_file;
+    Options::kappa = arguments->kappa;
+    Options::reduce_kappa = arguments->reduce_kappa;
+    Options::approx_factor = arguments->approx_factor;
+    Options::prob_win = arguments->prob_win;
+    Options::max_approx_count = arguments->max_approx_count;
+    Options::no_prop_refine = arguments->no_prop_refine;
+    Options::cudd_max_mem = arguments->cudd_max_mem;
+    Options::export_filename = arguments->export_filename;
+    Options::export_perimeter_states = arguments->export_perimeter_states;
+    Options::import_filename = arguments->import_filename;
+    Options::property = arguments->property;
+    Options::consts = arguments->consts;
+    Options::export_trans = arguments->export_trans;
+    Options::rank_transitions = arguments->rank_transitions;
+    Options::max_iterations = arguments->max_iterations;
+    Options::power = arguments->power;
+    Options::jacobi = arguments->jacobi;
+    Options::gauss_seidel = arguments->gauss_seidel;
+    Options::backward_gauss_seidel = arguments->backward_gauss_seidel;
 }
