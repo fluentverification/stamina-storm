@@ -42,10 +42,6 @@ namespace stamina {
         /**
          * Constructor for StaminaModelChecker
          * 
-         * @param err Lambda to error function
-         * @param warm Lambda to warning function
-         * @param info Lambda to info function
-         * @param good Lambda to good function
          * @param modulesFile Pointer to the Modules file
          * @param propertiesVector Pointer to the Properties vector
          * */

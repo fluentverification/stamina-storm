@@ -3,6 +3,7 @@
 
 #include "storm/generator/PrismNextStateGenerator.h"
 #include "StaminaModelBuilder.h"
+#include "Stamina.h"
 
 #include <functional>
 

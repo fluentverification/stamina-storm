@@ -19,12 +19,12 @@ using namespace stamina;
 // PUBLIC METHODS
 Stamina::Stamina(struct arguments * arguments) {
 	try {
-		Options::->setArgs(arguments);
+		Options::setArgs(arguments);
 	}
 	catch (const std::exception& e) {
 		errorAndExit("Failed to allocate stamina::Options: " + std::string(e.what()));
 	}
-	info("Starting STAMINA with kappa = " + std::to_string(options->kappa) + " and reduction factor = " + std::to_string(options->reduce_kappa));
+	info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
 	// Pass in a lambda (bound function) to the checkOptions method
 	bool good = Options::checkOptions();
 	if (!good) {
@@ -71,8 +71,8 @@ Stamina::initialize() {
 
 	// Load modules file and properties file
 	try {
-		modulesFile = storm::parser::PrismParser::parse(options->model_file, true);
-		propertiesVector = storm::api::parsePropertiesForPrismProgram(options->properties_file, modulesFile);
+		modulesFile = storm::parser::PrismParser::parse(Options::model_file, true);
+		propertiesVector = storm::api::parsePropertiesForPrismProgram(Options::properties_file, modulesFile);
 		modelChecker->initialize(&modulesFile, &propertiesVector);
 	}
 	catch (const std::exception& e) {
