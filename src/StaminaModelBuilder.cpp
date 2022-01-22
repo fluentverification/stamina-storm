@@ -5,6 +5,7 @@
 * */
 #include "StaminaModelBuilder.h"
 #include "StaminaNextStateGenerator.h"
+#include "StaminaMessages.h"
 
 #define DEBUG_PRINTS
 
@@ -47,19 +48,9 @@ using namespace stamina;
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
-	Options * options
-	, std::function<void(std::string)> err
-	, std::function<void(std::string)> warn
-	, std::function<void(std::string)> info
-	, std::function<void(std::string)> good
-	, std::shared_ptr<StaminaNextStateGenerator<ValueType, StateType>> const& generator
+	std::shared_ptr<StaminaNextStateGenerator<ValueType, StateType>> const& generator
 ) : generator(generator)
 	, stateStorage(generator->getStateSize())
-	, options(options)
-	, Stamina::error(err)
-	, Stamina::warning(warn)
-	, Stamina::info(info)
-	, Stamina::good(good)
 {
 	// Intentionally left empty
 }
@@ -99,7 +90,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 			case storm::generator::ModelType::POMDP:
 			case storm::generator::ModelType::MA:
 			default:
-				Stamina::error("This model type is not supported!");
+				StaminaMessages::error("This model type is not supported!");
 		}
 		return nullptr;
 	}
@@ -107,7 +98,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 		std::stringstream ss;
 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-		Stamina::error(ss.str());
+		StaminaMessages::error(ss.str());
 	}
 
 }
@@ -119,7 +110,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap.find(previousState) == piMap.end()) {
 		piMap.insert({previousState, (float) 0.0});
 		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
-		Stamina::error("Unexpected behavior! State with index " + std::to_string(previousState)
+		StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(previousState)
 			+ " should have already been in the probability map, but it was not! Inserting now."
 			+ "\nThis indicates that we have (somehow) reached a state that did not show up in "
 			+ "any previous states' next state list."
@@ -263,7 +254,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Let the generator create all initial states.
 	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
 	if (!this->stateStorage.initialStateIndices.empty()) {
-		Stamina::error("Initial states are empty!");
+		StaminaMessages::error("Initial states are empty!");
 	}
 
 	// Now explore the current state until there is no more reachable state.
@@ -285,7 +276,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		statesToExplore.pop_front();
 
 		if (currentIndex % 100000 == 0) {
-			Stamina::info("Exploring state with id " + std::to_string(currentIndex) + ".");
+			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
 
 		generator->load(currentState);
@@ -326,7 +317,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				++currentRowGroup;
 			}
 			else {
-				Stamina::error(
+				StaminaMessages::error(
 					"Error while creating sparse matrix from probabilistic program: found deadlock state ("
 					+ generator->stateToString(currentState)
 					+ "). For fixing these, please provide the appropriate option."
