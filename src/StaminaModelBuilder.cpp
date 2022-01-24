@@ -174,7 +174,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	);
 
 	// If state is not in T or its reachability probability is greater than kappa
-	if (!set_contains(tMap, actualIndex) || piMap[actualIndex]) {
+	if (!set_contains(tMap, actualIndex) || piMap[actualIndex] >= Options::kappa) {
 		// Load state into generator
 		generator->load(state);
 		// Expand generator into next states--enqueues the states we need to
@@ -196,7 +196,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 					// TODO: find out if float or double needed?
 					float probability = static_cast<float>(stateProbabilityPair.second);
 					// Add the transition probability of going from state -> statePrime to statePrime's reachability probability
-					// piMap[statePrimeIndex] += probability * piMap[actualIndex]; // TODO: do this in nextstategenerator regardless of enqueue
+					piMap[statePrimeIndex] += probability * piMap[actualIndex]; // TODO: do this in nextstategenerator regardless of enqueue
 					// Add statePrime to the explored states
 					exploredStates.insert(statePrimeIndex);
 					// If s_prime is not in the S set
