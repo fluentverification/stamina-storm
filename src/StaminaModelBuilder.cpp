@@ -228,7 +228,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (setContains(tSet, currentIndex) && piMap[currentIndex] < Options::kappa) {
+		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
 			continue;
 		}
 
@@ -244,15 +244,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
-			StaminaMessages::errorExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
+			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 		else {
 			// Determine whether or not to enqueue all next states
 			bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
 
-			if (!shouldEnqueueAll && setContains(tMap, currentIndex)) {
+			if (!shouldEnqueueAll && set_contains(tMap, currentIndex)) {
 				// Remove currentIndex from T if it's in T
-				tMap.remove(currentIndex);
+				tMap.erase(currentIndex);
 			}
 
 			// Add the state rewards to the corresponding reward models.
@@ -293,7 +293,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 					// Update transition probability
 					piMap[sPrime] += piMap[currentIndex] * probability;
-					if (!(setContains(stateMap, sPrime) && setContains(exploredStates, sPrime))) {
+					if (!(set_contains(stateMap, sPrime) && set_contains(exploredStates, sPrime))) {
 						// Add s' to ExploredStates
 						exploredStates.insert(sPrime);
 						// Enqueue S is handled in stateToIdCallback
@@ -319,7 +319,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
 				auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfStart).count();
 				StaminaMessages::info(
-					"Explored " << numberOfExploredStates << " states in " << durationSinceStart << " seconds (currently " << statesPerSecond << " states per second)."
+					"Explored " + std::to_string(numberOfExploredStates) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
 				);
 				timeOfLastMessage = std::chrono::high_resolution_clock::now();
 				numberOfExploredStatesSinceLastMessage = 0;

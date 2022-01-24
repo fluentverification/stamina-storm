@@ -5,6 +5,7 @@
 * */
 #include "Stamina.h"
 #include "ANSIColors.h"
+#include "StaminaMessages.h"
 
 #include <stdlib.h>
 #include <iomanip>
@@ -37,7 +38,7 @@ Stamina::~Stamina() {
 	delete this->modelChecker;
 }
 
-void 
+void
 Stamina::run() {
 	initialize();
 	// Check each property in turn
@@ -53,7 +54,7 @@ Stamina::run() {
 
 // PRIVATE METHODS
 
-void 
+void
 Stamina::initialize() {
 	StaminaMessages::info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
 	try {

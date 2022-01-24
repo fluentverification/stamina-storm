@@ -75,23 +75,20 @@ StaminaModelChecker::initialize(
 ) {
 	// Don't pass in nullptr please
 	if (!modulesFile) {
-		StaminaMessages::error("Modules file cannot be null!");
-		std::exit(1);
+		StaminaMessages::errorAndExit("Modules file cannot be null!");
 	}
 	else if (!propertiesVector) {
-		StaminaMessages::error("Properties vector cannot be null!");
-		std::exit(1);
+		StaminaMessages::errorAndExit("Properties vector cannot be null!");
 	}
 	this->modulesFile = modulesFile;
 	this->propertiesVector = propertiesVector;
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
-	// TODO: Does std::make_shared allocate the stuff we need it to?
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(*modulesFile);
 	// Create StaminaModelBuilder
 	builder = new StaminaModelBuilder<double>(generator);
 }
 
-std::unique_ptr<storm::modelchecker::CheckResult> 
+std::unique_ptr<storm::modelchecker::CheckResult>
 StaminaModelChecker::modelCheckProperty(
 	storm::jani::Property prop
 	, storm::prism::Program const& modulesFile
@@ -217,7 +214,7 @@ StaminaModelChecker::modelCheckProperty(
 	return nullptr;
 }
 
-void 
+void
 StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
 	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet!!");
 	double result = 0.0;
@@ -229,14 +226,14 @@ StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker
 	r->explanation = "Property check for " + property->getName();
 }
 
-bool 
+bool
 StaminaModelChecker::terminateModelCheck() {
 	// If our max result minus our min result is less than our maximum window
 	return (max_results->result - min_results->result) <= Options::prob_win;
 
 }
 
-void 
+void
 StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
 	try {
 		// Refer to line 450 in StaminaModelChecker.java
@@ -249,7 +246,7 @@ StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
 	}
 }
 
-void 
+void
 StaminaModelChecker::printTransitionActions(std::string filename) {
 	StaminaMessages::warning("This feature (StaminaModelChecker::printTransitionActions()) has not been implemented yet");
 }
