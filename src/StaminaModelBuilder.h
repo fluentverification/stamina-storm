@@ -114,7 +114,7 @@ namespace stamina {
 		* @param previousState The state which we came from to get to currentState
 		* @return Whether or not to enqueue currentState to the statesToExplore through stateToIdCallback
 		* */
-		bool shouldEnqueue(StateType currentState, StateType previousState);
+		bool shouldEnqueue(StateType previousState);
 		/**
 		* Updates a state's reachability probability given a current state, previous state, and transition probability.
 		*
@@ -200,6 +200,7 @@ namespace stamina {
 		std::unordered_set<StateType> tMap; // T in the QEST paper
 		std::unordered_map<StateType, float> piMap; // Maps reachability probabilities to their states
 		double reachabilityThreshold;
+		StateType currentState;
 	};
 
 	// Helper method to find in unordered_set

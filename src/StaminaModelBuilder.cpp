@@ -105,7 +105,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType currentState, StateType previousState) {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType previousState) {
 	// If our previous state has not been encountered, we have unexpected behavior
 	if (piMap.find(previousState) == piMap.end()) {
 		piMap.insert({previousState, (float) 0.0});
@@ -161,61 +161,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
-	if (actualIndex == newIndex) {
+	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
 	}
 
-	// Create a callback for the next-state generator to enable it to request the index of states.
-	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
-		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
-		, this
-		, std::placeholders::_1
-	);
-
-	// If state is not in T or its reachability probability is greater than kappa
-	if (!set_contains(tMap, actualIndex) || piMap[actualIndex] >= Options::kappa) {
-		// Load state into generator
-		generator->load(state);
-		// Expand generator into next states--enqueues the states we need to
-		storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
-		// Only mess with T and S sets if the reachability probability is not zero.
-		if (!piMap[actualIndex] == 0) {
-			// Remove state from T if it's in T
-			if (set_contains(tMap, actualIndex)) {
-				tMap.erase(actualIndex);
-			}
-			// For each next state called statePrime (assume that we only have one behavior as this model is/must be deterministic)
-			for (auto const choice : behavior) {
-				for (auto const stateProbabilityPair : choice) {
-					StateType statePrimeIndex = stateProbabilityPair.first;
-					// Default to zero
-					if (piMap.find(statePrimeIndex) == piMap.end()) {
-						piMap.insert({statePrimeIndex, (float) 0.0});
-					}
-					// TODO: find out if float or double needed?
-					float probability = static_cast<float>(stateProbabilityPair.second);
-					// Add the transition probability of going from state -> statePrime to statePrime's reachability probability
-					piMap[statePrimeIndex] += probability * piMap[actualIndex]; // TODO: do this in nextstategenerator regardless of enqueue
-					// Add statePrime to the explored states
-					exploredStates.insert(statePrimeIndex);
-					// If s_prime is not in the S set
-					if (!set_contains(stateMap, statePrimeIndex)) {
-						// Add it to T and S
-						tMap.insert(statePrimeIndex);
-						stateMap.insert(statePrimeIndex);
-					}
-				}
-			}
-			// Set the reachability probablity of state to 0
-			piMap.insert_or_assign(actualIndex, 0);
-		}
-	}
-	// Set the reachability probability of S to the sum of the reachability probabilities in T
-	// TODO: should this be a level outer (reference VMCAI paper)?
-	for (auto const terminalState : tMap) {
-		piMap[actualIndex] += piMap[terminalState];
-	}
 	return actualIndex;
 }
 
@@ -228,15 +178,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-	ShouldEnqueueCallback shouldEnqueue = std::bind(
-		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue
-		, this
-		, std::placeholders::_1
-		, std::placeholders::_2
-	);
-
-	// Gives our next state generator a callback to know whether or not it should enqueue states
-	generator->setShouldEnqueue(shouldEnqueue);
 
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -273,6 +214,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Get the first state in the queue.
 		CompressedState currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
+		// Set our state variable in the class
+		// NOTE: this->currentState is not the same as CompressedState currentState
+		this->currentState = currentIndex;
 		statesToExplore.pop_front();
 
 		if (currentIndex % 100000 == 0) {
