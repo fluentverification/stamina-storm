@@ -223,52 +223,39 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
 
+		// Add state to piMap if it is not in there
+		if (piMap.find(currentIndex) == piMap.end()) {
+			piMap.insert({currentIndex, 0.0});
+		}
+
+		// Do not explore if state is terminal and its reachability probability is less than kappa
+		if (setContains(tSet, currentIndex) && piMap[currentIndex] < Options::kappa) {
+			continue;
+		}
+
+		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
+		// is greater than kappa
+
+		// Load state for us to use
 		generator->load(currentState);
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
 		storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 
-		// If there is no behavior, we might have to introduce a self-loop.
+		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
-			if (!storm::settings::getModule<storm::settings::modules::BuildSettings>().isDontFixDeadlocksSet() || !behavior.wasExpanded()) {
-				// If the behavior was actually expanded and yet there are no transitions, then we have a deadlock state.
-				if (behavior.wasExpanded()) {
-					this->stateStorage.deadlockStateIndices.push_back(currentIndex);
-				}
-
-				if (!generator->isDeterministicModel()) {
-					transitionMatrixBuilder.newRowGroup(currentRow);
-				}
-
-				transitionMatrixBuilder.addNextValue(currentRow, currentIndex, storm::utility::one<ValueType>());
-
-				for (auto& rewardModelBuilder : rewardModelBuilders) {
-					if (rewardModelBuilder.hasStateRewards()) {
-						rewardModelBuilder.addStateReward(storm::utility::zero<ValueType>());
-					}
-				}
-
-				// This state shall be Markovian (to not introduce Zeno behavior)
-				if (stateAndChoiceInformationBuilder.isBuildMarkovianStates()) {
-					stateAndChoiceInformationBuilder.addMarkovianState(currentRowGroup);
-				}
-				// Other state-based information does not need to be treated, in particular:
-				// * StateValuations have already been set above
-				// * The associated player shall be the "default" player, i.e. INVALID_PLAYER_INDEX
-
-				++currentRow;
-				++currentRowGroup;
-			}
-			else {
-				StaminaMessages::error(
-					"Error while creating sparse matrix from probabilistic program: found deadlock state ("
-					+ generator->stateToString(currentState)
-					+ "). For fixing these, please provide the appropriate option."
-				);
-			}
+			StaminaMessages::errorExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 		else {
+			// Determine whether or not to enqueue all next states
+			bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
+
+			if (!shouldEnqueueAll && setContains(tMap, currentIndex)) {
+				// Remove currentIndex from T if it's in T
+				tMap.remove(currentIndex);
+			}
+
 			// Add the state rewards to the corresponding reward models.
 			auto stateRewardIt = behavior.getStateRewards().begin();
 			for (auto& rewardModelBuilder : rewardModelBuilders) {
@@ -299,13 +286,27 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 				// Add the probabilistic behavior to the matrix.
 				for (auto const& stateProbabilityPair : choice) {
-					transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+					StateType sPrime = stateProbabilityPair.first;
+					float probability = stateProbabilityPair.second;
+					// Insert sPrime into piMap if not there already
+					if (piMap.find(sPrime) == piMap.end()) {
+						piMap.insert({sPrime, 0.0});
+					}
+					// Update transition probability
+					piMap[sPrime] += piMap[currentIndex] * probability;
+					if (!(setContains(stateMap, sPrime) && setContains(exploredStates, sPrime))) {
+						// Add s' to ExploredStates
+						exploredStates.insert(sPrime);
+						// Enqueue S is handled in stateToIdCallback
+					}
+					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
 
 				++currentRow;
 				firstChoiceOfState = false;
 			}
-
+			// Set our current state's reachability probability to 0
+			piMap[currentIndex] = 0;
 			++currentRowGroup;
 		}
 
@@ -318,20 +319,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			if (static_cast<uint64_t>(durationSinceLastMessage) >= generator->getOptions().getShowProgressDelay()) {
 				auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
 				auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfStart).count();
-				std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart << " seconds (currently " << statesPerSecond << " states per second)." << std::endl;
+				StaminaMessages::info(
+					"Explored " << numberOfExploredStates << " states in " << durationSinceStart << " seconds (currently " << statesPerSecond << " states per second)."
+				);
+				// std::cout << << std::endl;
 				timeOfLastMessage = std::chrono::high_resolution_clock::now();
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
 
-		if (storm::utility::resources::isTerminate()) {
-			auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - timeOfStart).count();
-			std::cout << "Explored " << numberOfExploredStates << " states in " << durationSinceStart << " seconds before abort." << std::endl;
-			break;
-		}
 	}
-
-
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
