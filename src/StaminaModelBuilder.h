@@ -52,9 +52,6 @@
 #include "storm/builder/BuilderOptions.h"
 #include "storm/generator/VariableInformation.h"
 
-#include "StaminaNextStateGenerator.h"
-
-
 namespace stamina {
 
 	using namespace storm::builder;
@@ -70,18 +67,18 @@ namespace stamina {
 	typedef std::function<bool(StateType, StateType)> ShouldEnqueueCallback;
 	public:
 		/**
-		* Constructs a StaminaModelBuilder with a given StaminaNextStateGenerator
+		* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
 		*
 		* @param generator The generator we are going to use.
 		* */
 		StaminaModelBuilder(
-			std::shared_ptr<StaminaNextStateGenerator<ValueType, StateType>> const& generator
+			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 		);
 		/**
 		* Constructs a StaminaModelBuilder with a PRISM program and generatorOptions
 		*
 		* @param program The PRISM program we are going to use to build the model with.
-		* @param generatorOptions Options for the StaminaNextStateGenerator we are going to use.
+		* @param generatorOptions Options for the storm::generator::PrismNextStateGenerator we are going to use.
 		* */
 		StaminaModelBuilder(
 			storm::prism::Program const& program
@@ -91,7 +88,7 @@ namespace stamina {
 		* Constructs a StaminaModelBuilder with a JANI model.
 		*
 		* @param model The JANI model we're going to use.
-		* @param generatorOptions Options for the StaminaNextStateGenerator we are going to use.
+		* @param generatorOptions Options for the storm::generator::PrismNextStateGenerator we are going to use.
 		* */
 		StaminaModelBuilder(
 			storm::jani::Model const& model
@@ -192,7 +189,7 @@ namespace stamina {
 	private:
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType> stateStorage;
-		std::shared_ptr<StaminaNextStateGenerator<ValueType, StateType>> generator;
+		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 		std::deque<std::pair<CompressedState, StateType>> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		std::unordered_set<StateType> exploredStates; // States that we have explored

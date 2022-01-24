@@ -47,7 +47,7 @@ using namespace stamina;
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
-	std::shared_ptr<StaminaNextStateGenerator<ValueType, StateType>> const& generator
+	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 ) : generator(generator)
 	, stateStorage(generator->getStateSize())
 {
@@ -59,7 +59,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	storm::prism::Program const& program
 	, storm::generator::NextStateGeneratorOptions const& generatorOptions
 ) : StaminaModelBuilder( // Invoke other constructor
-	std::make_shared<StaminaNextStateGenerator<ValueType, StateType>>(program, generatorOptions)
+	std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(program, generatorOptions)
 )
 {
 	// Intentionally left empty
@@ -70,7 +70,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	storm::jani::Model const& model
 	, storm::generator::NextStateGeneratorOptions const& generatorOptions
 ) : StaminaModelBuilder( // Invoke other constructor
-	std::make_shared<StaminaNextStateGenerator<ValueType, StateType>>(model, generatorOptions)
+	std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(model, generatorOptions)
 )
 {
 	// Intentionally left empty
