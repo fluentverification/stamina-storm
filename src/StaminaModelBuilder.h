@@ -83,16 +83,6 @@ namespace stamina {
 			, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 		);
 		/**
-		* Constructs a StaminaModelBuilder with a JANI model.
-		*
-		* @param model The JANI model we're going to use.
-		* @param generatorOptions Options for the storm::generator::PrismNextStateGenerator we are going to use.
-		* */
-		StaminaModelBuilder(
-			storm::jani::Model const& model
-			, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
-		);
-		/**
 		* Creates a model with a truncated state space for the program provided during construction. State space
 		* is truncated during this method using the STAMINA II truncation method described by Riley Roberts and Zhen
 		* Zhang, and corresponding to the same algorithm used in the Java version of STAMINA.

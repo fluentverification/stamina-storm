@@ -65,16 +65,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	// Intentionally left empty
 }
 
-template <typename ValueType, typename RewardModelType, typename StateType>
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
-	storm::jani::Model const& model
-	, storm::generator::NextStateGeneratorOptions const& generatorOptions
-) : StaminaModelBuilder( // Invoke other constructor
-	std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(model, generatorOptions)
-)
-{
-	// Intentionally left empty
-}
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>>
