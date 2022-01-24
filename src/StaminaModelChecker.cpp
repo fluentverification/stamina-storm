@@ -4,7 +4,6 @@
 * Created by Josh Jeppson on 8/17/2021
 * */
 #include "StaminaModelChecker.h"
-#include "StaminaNextStateGenerator.h"
 #include "ANSIColors.h"
 #include "StaminaMessages.h"
 
@@ -87,7 +86,7 @@ StaminaModelChecker::initialize(
 	this->propertiesVector = propertiesVector;
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	// TODO: Does std::make_shared allocate the stuff we need it to?
-	auto generator = std::make_shared<StaminaNextStateGenerator<double, uint32_t>>(*modulesFile);
+	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(*modulesFile);
 	// Create StaminaModelBuilder
 	builder = new StaminaModelBuilder<double>(generator);
 }

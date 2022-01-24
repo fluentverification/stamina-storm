@@ -4,7 +4,6 @@
 * Created by Josh Jeppson on 8/17/2021
 * */
 #include "StaminaModelBuilder.h"
-#include "StaminaNextStateGenerator.h"
 #include "StaminaMessages.h"
 
 #define DEBUG_PRINTS
@@ -322,7 +321,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				StaminaMessages::info(
 					"Explored " << numberOfExploredStates << " states in " << durationSinceStart << " seconds (currently " << statesPerSecond << " states per second)."
 				);
-				// std::cout << << std::endl;
 				timeOfLastMessage = std::chrono::high_resolution_clock::now();
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
