@@ -15,21 +15,15 @@ namespace stamina {
     public:
 
         /**
-         * Creates an Options struct with command line arguments
-         * 
-         * @param arguments Command-line arguments to pass in
-         * */
-        static void createFromArguments(struct arguments * arguments);
-        /**
          * Checks validity of options
-         * 
+         *
          * @param errFunc
          * @return Whether all options are good
          * */
         static bool checkOptions();
         /**
          * Sets the values of these options again
-         * 
+         *
          * @param arguments Command-line arguments to pass in
          * */
         static void setArgs(struct arguments * arguments);
@@ -57,7 +51,7 @@ namespace stamina {
     };
     /**
      * Tells us if a string ends with another
-     * 
+     *
      * @param full Full string to check
      * @param end Ending of the string
      * */

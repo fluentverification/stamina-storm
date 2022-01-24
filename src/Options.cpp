@@ -6,31 +6,6 @@
 using namespace stamina;
 // IMPLEMENTATION FOR Stamina::Stamina::Options
 
-void
-Options::createFromArguments(struct arguments * arguments) {
-	Options::model_file = arguments->model_file;
-	Options::properties_file = arguments->properties_file;
-	Options::kappa = arguments->kappa;
-	Options::reduce_kappa = arguments->reduce_kappa;
-	Options::approx_factor = arguments->approx_factor;
-	Options::prob_win = arguments->prob_win;
-	Options::max_approx_count = arguments->max_approx_count;
-	Options::no_prop_refine = arguments->no_prop_refine;
-	Options::cudd_max_mem = arguments->cudd_max_mem;
-	Options::export_filename = arguments->export_filename;
-	Options::export_perimeter_states = arguments->export_perimeter_states;
-	Options::import_filename = arguments->import_filename;
-	Options::property = arguments->property;
-	Options::consts = arguments->consts;
-	Options::export_trans = arguments->export_trans;
-	Options::rank_transitions = arguments->rank_transitions;
-	Options::max_iterations = arguments->max_iterations;
-	Options::power = arguments->power;
-	Options::jacobi = arguments->jacobi;
-	Options::gauss_seidel = arguments->gauss_seidel;
-	Options::backward_gauss_seidel = arguments->backward_gauss_seidel;
-}
-
 bool
 Options::checkOptions() {
     bool good = true;
