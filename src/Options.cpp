@@ -35,34 +35,34 @@ bool
 Options::checkOptions() {
     bool good = true;
     // Check if we are passing in the right type of file
-    if (model_file == "") {
+    if (Options::model_file == "") {
         StaminaMessages::error("Model file not provided.", STAMINA_ERRORS::ERR_GENERAL);
         return false; // Return since no recovering from this.
     }
-    else if (!endsWith(model_file, ".prism") && !endsWith(model_file, ".sm")) {
+    else if (!endsWith(Options::model_file, ".prism") && !endsWith(Options::model_file, ".sm")) {
         StaminaMessages::warning("Model file does not appear to have the proper extension (.sm or .prism)");
     }
     // Check if properties file is the right type of file
-    if (properties_file == "") {
+    if (Options::properties_file == "") {
         StaminaMessages::error("Properties file not provided.", STAMINA_ERRORS::ERR_GENERAL);
         return false; // Return since no recovering from this
     }
-    else if (!endsWith(properties_file, ".csl")) {
+    else if (!endsWith(Options::properties_file, ".csl")) {
         StaminaMessages::warning("Properties file does not appear to have the proper extension (.csl)");
     }
     // Check if kappa is greater than 0
-    if (kappa < 0) {
-        StaminaMessages::error("Kappa should be greater than or equal to 0.0. Got: " + std::to_string(kappa), STAMINA_ERRORS::ERR_GENERAL);
+    if (Options::kappa < 0) {
+        StaminaMessages::error("Kappa should be greater than or equal to 0.0. Got: " + std::to_string(Options::kappa), STAMINA_ERRORS::ERR_GENERAL);
         good = false;
     }
     // Check if kappa reduction factor is greater than 1.0
-    if (reduce_kappa < 1.0) {
-        StaminaMessages::error("Kappa reduction factorshould be greater than or equal to 1.0. Got: " + std::to_string(reduce_kappa), STAMINA_ERRORS::ERR_GENERAL);
+    if (Options::reduce_kappa < 1.0) {
+        StaminaMessages::error("Kappa reduction factorshould be greater than or equal to 1.0. Got: " + std::to_string(Options::reduce_kappa), STAMINA_ERRORS::ERR_GENERAL);
         good = false;
     }
     // Make sure max approx count factor is greater than zero
-    if (max_approx_count < 0) {
-        StaminaMessages::error("Max approx count should be greater than 0.0. Got: " + std::to_string(max_approx_count), STAMINA_ERRORS::ERR_GENERAL);
+    if (Options::max_approx_count < 0) {
+        StaminaMessages::error("Max approx count should be greater than 0.0. Got: " + std::to_string(Options::max_approx_count), STAMINA_ERRORS::ERR_GENERAL);
         good = false;
     }
     return good;
