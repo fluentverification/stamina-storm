@@ -15,7 +15,7 @@
 using namespace stamina;
 
 StaminaModelChecker::StaminaModelChecker(
-	, storm::prism::Program * modulesFile
+	storm::prism::Program * modulesFile
 	, std::vector<storm::jani::Property> * propertiesVector
 ) : modulesFile(modulesFile)
 	, propertiesVector(propertiesVector)

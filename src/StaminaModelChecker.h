@@ -41,18 +41,21 @@ namespace stamina {
     public:
         /**
          * Constructor for StaminaModelChecker
-         * 
+         *
          * @param modulesFile Pointer to the Modules file
          * @param propertiesVector Pointer to the Properties vector
          * */
-        StaminaModelChecker();
+        StaminaModelChecker(
+			storm::prism::Program * modulesFile = nullptr
+			, std::vector<storm::jani::Property> * propertiesVector = nullptr
+		);
         /**
          * Standard destructor
          * */
         ~StaminaModelChecker();
         /**
          * Initializes the StaminaModelChecker class
-         * 
+         *
          * @param propertiesVector A vector to the list of JANI properties
          * */
         void initialize(
@@ -61,7 +64,7 @@ namespace stamina {
         );
         /**
          * Model checks a specific property
-         * 
+         *
          * @param prop Property to check
          * @param modulesFile The modules file to work with
          * @return A pointer to the result of the model checking
@@ -86,7 +89,7 @@ namespace stamina {
             /**
              * Gets string representation
              * */
-            operator std::string() const { 
+            operator std::string() const {
                 std::stringstream str;
                 str << result << " (" << explanation << ")";
                 return str.str();
@@ -105,14 +108,14 @@ namespace stamina {
         };
         /**
          * Explicitly invokes a model check from a property
-         * 
+         *
          * @param property Property to invoke model checker for
          * @param r Pointer to result
          * */
         void check(storm::jani::Property * property, Result * r);
         /**
          * Whether or not to terminate model check
-         * 
+         *
          * @return Terminate?
          * */
         bool terminateModelCheck();
@@ -126,7 +129,7 @@ namespace stamina {
         void printTransitionActions(std::string filename);
         /**
          * Writes the min and max results to a file
-         * 
+         *
          * @param filename The filename to append to
          * */
         void writeToOutput(std::string filename);

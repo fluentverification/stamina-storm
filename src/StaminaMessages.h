@@ -1,6 +1,9 @@
 #ifndef STAMINA_MESSAGES_H
 #define STAMINA_MESSAGES_H
 
+#include <string>
+#include <stdint.h>
+
 namespace stamina {
 	/* ERRORS WE CAN GET */
     enum STAMINA_ERRORS {
