@@ -6,8 +6,8 @@
 #include "StaminaModelBuilder.h"
 #include "StaminaMessages.h"
 
-#define DEBUG_PRINTS
-
+// Frequency for info/debug messages in terms of number of states explored.
+#define MSG_FREQUENCY 100000
 
 #include <functional>
 #include <sstream>
@@ -226,7 +226,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		this->currentState = currentIndex;
 		statesToExplore.pop_front();
 
-		if (currentIndex % 100000 == 0) {
+		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 #ifdef DEBUG_PRINTS
 			StaminaMessages::debugPrint("Size of statesToExplore is " + std::to_string(statesToExplore.size()));
@@ -238,8 +238,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
 			continue;
+#ifdef DEBUG_PRINTS
+			StaminaMessages::debugPrint("Continuing");
+#endif
 		}
-
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 
