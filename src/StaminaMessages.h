@@ -4,6 +4,8 @@
 #include <string>
 #include <stdint.h>
 
+#define DEBUG_PRINTS
+
 namespace stamina {
 	/* ERRORS WE CAN GET */
     enum STAMINA_ERRORS {
