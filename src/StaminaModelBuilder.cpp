@@ -233,11 +233,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 #endif // DEBUG_PRINTS
 		}
 
-		// Add state to piMap if it is not in there
-		if (piMap.find(currentIndex) == piMap.end()) {
-			piMap.insert({currentIndex, 0.0});
-		}
-
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
 			continue;
@@ -257,76 +252,75 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (behavior.empty()) {
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
-		else {
-			// Determine whether or not to enqueue all next states
-			bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
 
-			if (!shouldEnqueueAll && set_contains(tMap, currentIndex)) {
-				// Remove currentIndex from T if it's in T
-				tMap.erase(currentIndex);
+		// Determine whether or not to enqueue all next states
+		bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
+
+		if (!shouldEnqueueAll && set_contains(tMap, currentIndex)) {
+			// Remove currentIndex from T if it's in T
+			tMap.erase(currentIndex);
+		}
+
+		// Add the state rewards to the corresponding reward models.
+		auto stateRewardIt = behavior.getStateRewards().begin();
+		for (auto& rewardModelBuilder : rewardModelBuilders) {
+			if (rewardModelBuilder.hasStateRewards()) {
+				rewardModelBuilder.addStateReward(*stateRewardIt);
+			}
+			++stateRewardIt;
+		}
+
+		// Now add all choices.
+		bool firstChoiceOfState = true;
+		for (auto const& choice : behavior) {
+
+			// add the generated choice information
+			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
+				for (auto const& label : choice.getLabels()) {
+					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+				}
+			}
+			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
+				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+			}
+			if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
+				if (firstChoiceOfState) {
+					stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
+				}
 			}
 
-			// Add the state rewards to the corresponding reward models.
-			auto stateRewardIt = behavior.getStateRewards().begin();
-			for (auto& rewardModelBuilder : rewardModelBuilders) {
-				if (rewardModelBuilder.hasStateRewards()) {
-					rewardModelBuilder.addStateReward(*stateRewardIt);
+			// Add the probabilistic behavior to the matrix.
+			for (auto const& stateProbabilityPair : choice) {
+				StateType sPrime = stateProbabilityPair.first;
+				float probability = stateProbabilityPair.second;
+				// Insert sPrime into piMap if not there already
+				if (piMap.find(sPrime) == piMap.end()) {
+					piMap.insert({sPrime, 0.0});
 				}
-				++stateRewardIt;
-			}
-
-			// Now add all choices.
-			bool firstChoiceOfState = true;
-			for (auto const& choice : behavior) {
-
-				// add the generated choice information
-				if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
-					for (auto const& label : choice.getLabels()) {
-						stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
-					}
-				}
-				if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
-					stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
-				}
-				if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
-					if (firstChoiceOfState) {
-						stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
-					}
-				}
-
-				// Add the probabilistic behavior to the matrix.
-				for (auto const& stateProbabilityPair : choice) {
-					StateType sPrime = stateProbabilityPair.first;
-					float probability = stateProbabilityPair.second;
-					// Insert sPrime into piMap if not there already
-					if (piMap.find(sPrime) == piMap.end()) {
-						piMap.insert({sPrime, 0.0});
-					}
-					// Enqueue S is handled in stateToIdCallback
-					// Update transition probability only if we should enqueue all
-					if (!shouldEnqueueAll) {
-						piMap[sPrime] += piMap[currentIndex] * probability;
-						if (set_contains(exploredStates, sPrime)) {
-							// Add s' to ExploredStates
-							exploredStates.insert(sPrime);
-							if (!set_contains(stateMap, sPrime)) {
-								stateMap.insert(sPrime);
-								tMap.insert(sPrime);
-							}
+				// Enqueue S is handled in stateToIdCallback
+				// Update transition probability only if we should enqueue all
+				if (!shouldEnqueueAll) {
+					piMap[sPrime] += piMap[currentIndex] * probability;
+					if (!set_contains(exploredStates, sPrime)) {
+						// Add s' to ExploredStates
+						exploredStates.insert(sPrime);
+						if (!set_contains(stateMap, sPrime)) {
+							stateMap.insert(sPrime);
+							tMap.insert(sPrime);
 						}
 					}
-					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
+				transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
+			}
 
-				++currentRow;
-				firstChoiceOfState = false;
-			}
-			// Set our current state's reachability probability to 0
-			if (!shouldEnqueueAll) {
-				piMap[currentIndex] = 0;
-			}
-			++currentRowGroup;
+			++currentRow;
+			firstChoiceOfState = false;
 		}
+		// Set our current state's reachability probability to 0
+		if (!shouldEnqueueAll) {
+			piMap[currentIndex] = 0;
+		}
+		++currentRowGroup;
 
 		++numberOfExploredStates;
 		if (generator->getOptions().isShowProgressSet()) {
