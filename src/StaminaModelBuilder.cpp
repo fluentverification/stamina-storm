@@ -87,7 +87,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 		std::stringstream ss;
 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-		StaminaMessages::error(ss.str());
+		StaminaMessages::errorAndExit(ss.str());
 	}
 
 }
@@ -99,12 +99,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap.find(previousState) == piMap.end()) {
 		piMap.insert({previousState, (float) 0.0});
 		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
-		/* StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(previousState)
-			+ " should have already been in the probability map, but it was not! Inserting now."
-			+ "\nThis indicates that we have (somehow) reached a state that did not show up in "
-			+ "any previous states' next state list."
-		); */
-		return false;
+		if (!isInit) {
+			StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(previousState)
+				+ " should have already been in the probability map, but it was not! Inserting now."
+				+ "\nThis indicates that we have (somehow) reached a state that did not show up in "
+				+ "any previous states' next state list."
+			);
+		}
+		return isInit;
 	}
 	// If we haven't reached this state before, insert it into piMap
 	if (piMap.find(currentState) == piMap.end()) {
@@ -125,13 +127,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::updateReachabilityPr
 	, StateType previousState
 	, float transitionProbability
 ) {
-	// Optimization to prevent unnecessary multiply
-	if (piMap[previousState] == 0.0) {
-		return;
-	}
 	// If we haven't reached this state before, insert it into piMap
 	if (piMap.find(currentState) == piMap.end()) {
 		piMap.insert({currentState, (float) 0.0});
+	}
+	// Optimization to prevent unnecessary multiply
+	if (piMap[previousState] == 0.0) {
+		return;
 	}
 	// Update the probability
 	piMap[currentState] += transitionProbability * piMap[previousState];
@@ -147,15 +149,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
 
 	StateType actualIndex = actualIndexPair.first;
-
+	if (piMap.find(actualIndex) == piMap.end()) {
+		piMap.insert({actualIndex, (float) 0.0});
+	}
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
 	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
-	}
-	if (piMap.find(actualIndex) == piMap.end()) {
-		piMap.insert({actualIndex, (float) 0.0});
 	}
 	return actualIndex;
 }
@@ -182,11 +183,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		, this
 		, std::placeholders::_1
 	);
-
+	isInit = true;
 	// Let the generator create all initial states.
 	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
 	if (this->stateStorage.initialStateIndices.empty()) {
 		StaminaMessages::errorAndExit("Initial states are empty!");
+	}
+	else {
+		for (StateType index : this->stateStorage.initialStateIndices) {
+			piMap.insert({index, (float) 0.0});
+		}
 	}
 
 	// Now explore the current state until there is no more reachable state.
@@ -200,6 +206,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	StateType currentIndex;
 
+#ifdef DEBUG_PRINTS
+	StaminaMessages::debugPrint("Size of statesToExplore is " + std::to_string(statesToExplore.size()));
+#endif
+	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		// Get the first state in the queue.

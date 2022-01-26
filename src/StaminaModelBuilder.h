@@ -186,6 +186,7 @@ namespace stamina {
 		std::unordered_map<StateType, float> piMap; // Maps reachability probabilities to their states
 		double reachabilityThreshold;
 		StateType currentState;
+		bool isInit;
 	};
 
 	// Helper method to find in unordered_set
