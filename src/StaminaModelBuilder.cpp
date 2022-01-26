@@ -196,7 +196,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	else {
 		for (StateType index : this->stateStorage.initialStateIndices) {
-			piMap.insert({index, (float) 0.0});
+			piMap.insert({index, (float) 1.0});
 		}
 	}
 
@@ -230,6 +230,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 #ifdef DEBUG_PRINTS
 			StaminaMessages::debugPrint("Size of statesToExplore is " + std::to_string(statesToExplore.size()));
+			StaminaMessages::debugPrint("We have explored " + std::to_string(numberOfExploredStates) + " states.");
+			StaminaMessages::debugPrint("If no more states are enqueued, we will explore at least " + std::to_string(numberOfExploredStates + statesToExplore.size()) + " states.");
 #endif // DEBUG_PRINTS
 		}
 
@@ -293,10 +295,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				float probability = stateProbabilityPair.second;
-				// Insert sPrime into piMap if not there already
-				if (piMap.find(sPrime) == piMap.end()) {
-					piMap.insert({sPrime, 0.0});
-				}
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				if (!shouldEnqueueAll) {
