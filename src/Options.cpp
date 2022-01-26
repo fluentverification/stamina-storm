@@ -1,5 +1,4 @@
 #include "Options.h"
-#include "Stamina.h"
 
 #include "StaminaMessages.h"
 

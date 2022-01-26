@@ -27,27 +27,27 @@ namespace stamina {
          * @param arguments Command-line arguments to pass in
          * */
         static void setArgs(struct arguments * arguments);
-        static std::string model_file;
-        static std::string properties_file;
-        static double kappa;
-        static double reduce_kappa;
-        static double approx_factor; // Misprediction factor
-        static double prob_win;
-        static uint64_t max_approx_count;
-        static bool no_prop_refine;
-        static std::string cudd_max_mem;
-        static std::string export_filename;
-        static std::string export_perimeter_states;
-        static std::string import_filename;
-        static std::string property;
-        static std::string consts;
-        static std::string export_trans;
-        static bool rank_transitions;
-        static uint64_t max_iterations;
-        static bool power;
-        static bool jacobi;
-        static bool gauss_seidel;
-        static bool backward_gauss_seidel;
+        inline static std::string model_file;
+        inline static std::string properties_file;
+        inline static double kappa;
+        inline static double reduce_kappa;
+        inline static double approx_factor; // Misprediction factor
+        inline static double prob_win;
+        inline static uint64_t max_approx_count;
+        inline static bool no_prop_refine;
+        inline static std::string cudd_max_mem;
+        inline static std::string export_filename;
+        inline static std::string export_perimeter_states;
+        inline static std::string import_filename;
+        inline static std::string property;
+        inline static std::string consts;
+        inline static std::string export_trans;
+        inline static bool rank_transitions;
+        inline static uint64_t max_iterations;
+        inline static bool power;
+        inline static bool jacobi;
+        inline static bool gauss_seidel;
+        inline static bool backward_gauss_seidel;
     };
     /**
      * Tells us if a string ends with another
