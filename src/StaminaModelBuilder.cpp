@@ -194,10 +194,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	if (this->stateStorage.initialStateIndices.empty()) {
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
-	else {
-		for (StateType index : this->stateStorage.initialStateIndices) {
-			piMap.insert({index, (float) 1.0});
-		}
+	for (StateType index : this->stateStorage.initialStateIndices) {
+		piMap.insert({index, (float) 1.0});
 	}
 
 	// Now explore the current state until there is no more reachable state.
@@ -229,18 +227,19 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 #ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint("Size of statesToExplore is " + std::to_string(statesToExplore.size()));
-			StaminaMessages::debugPrint("We have explored " + std::to_string(numberOfExploredStates) + " states.");
-			StaminaMessages::debugPrint("If no more states are enqueued, we will explore at least " + std::to_string(numberOfExploredStates + statesToExplore.size()) + " states.");
+			StaminaMessages::debugPrint(
+				"At this iteration:\n\t\tSize of statesToExplore is " +
+				std::to_string(statesToExplore.size()) + "\n\t\tWe have explored " +
+				std::to_string(numberOfExploredStates) +
+				" states. \n\t\tIf no more states are enqueued, we will explore at least " +
+				std::to_string(numberOfExploredStates + statesToExplore.size()) + " states."
+			);
 #endif // DEBUG_PRINTS
 		}
 
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
 			continue;
-#ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint("Continuing");
-#endif
 		}
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
