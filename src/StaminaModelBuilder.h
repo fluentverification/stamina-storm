@@ -150,30 +150,16 @@ namespace stamina {
 		* */
 		storm::models::sparse::StateLabeling buildStateLabeling();
 		/**
-		* Performs reachability analysis
-		* */
-		void doReachabilityAnalysis();
-		/**
 		* Sets our reachability threshold
 		*
 		* @param threshold The new reachability threshold
 		* */
 		void setReachabilityThreshold(double threshold);
+
 		/**
-		* Does reachability analysis
-		* @param transitionMatrixBuilder The builder of the transition matrix.
-		* @param rewardModelBuilders The builders for the selected reward models.
-		* @param choiceInformationBuilder The builder for the requested information of the choices
-		* @param markovianChoices is set to a bit vector storing whether a choice is Markovian (is only set if the model type requires this information).
-		* @param stateValuationsBuilder if not boost::none, we insert valuations for the corresponding states
-		* */
-		void doReachabilityAnalysis(
-			storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-			, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
-			, StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
-			, boost::optional<storm::storage::BitVector>& markovianChoices
-			, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
-		);
+		 * Accumulates all probabilities in T Map and returns
+		 * */
+		double accumulateProbabilities();
 	private:
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType> stateStorage;

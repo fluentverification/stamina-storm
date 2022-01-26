@@ -205,6 +205,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	uint64_t numberOfExploredStatesSinceLastMessage = 0;
 
 	StateType currentIndex;
+	CompressedState currentState;
 
 #ifdef DEBUG_PRINTS
 	StaminaMessages::debugPrint("Size of statesToExplore is " + std::to_string(statesToExplore.size()));
@@ -213,7 +214,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		// Get the first state in the queue.
-		CompressedState currentState = statesToExplore.front().first;
+		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
@@ -329,6 +330,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 	}
+	// Accumulate probabilities and reduce kappa
+	piMap[currentIndex] = accumulateProbabilities();
+	Options::kappa /= Options::reduce_kappa;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -406,6 +410,16 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::setReachabilityThreshold(double threshold) {
 	reachabilityThreshold = threshold;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+double
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
+	double totalProbability = 0.0;
+	for (const auto & tState : tMap) {
+		totalProbability += piMap[tState];
+	}
+	return totalProbability;
 }
 
 
