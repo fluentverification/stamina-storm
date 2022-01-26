@@ -99,11 +99,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap.find(previousState) == piMap.end()) {
 		piMap.insert({previousState, (float) 0.0});
 		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
-		StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(previousState)
+		/* StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(previousState)
 			+ " should have already been in the probability map, but it was not! Inserting now."
 			+ "\nThis indicates that we have (somehow) reached a state that did not show up in "
 			+ "any previous states' next state list."
-		);
+		); */
 		return false;
 	}
 	// If we haven't reached this state before, insert it into piMap
@@ -154,7 +154,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
 	}
-
+	if (piMap.find(actualIndex) == piMap.end()) {
+		piMap.insert({actualIndex, (float) 0.0});
+	}
 	return actualIndex;
 }
 
@@ -184,7 +186,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Let the generator create all initial states.
 	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
 	if (!this->stateStorage.initialStateIndices.empty()) {
-		StaminaMessages::error("Initial states are empty!");
+		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
 
 	// Now explore the current state until there is no more reachable state.
