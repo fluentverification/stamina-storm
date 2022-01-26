@@ -185,7 +185,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	// Let the generator create all initial states.
 	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
-	if (!this->stateStorage.initialStateIndices.empty()) {
+	if (this->stateStorage.initialStateIndices.empty()) {
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
 
