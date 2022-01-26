@@ -7,7 +7,8 @@
 #include "StaminaMessages.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-#define MSG_FREQUENCY 100000
+// #define MSG_FREQUENCY 100000
+#define MSG_FREQUENCY 500000
 
 #include <functional>
 #include <sstream>
@@ -215,7 +216,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 #endif
 	isInit = false;
 	// Perform a search through the model.
-	while (!statesToExplore.empty()) {
+	while (!statesToExplore.empty() && numberOfExploredStates <= Options::max_states) {
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
