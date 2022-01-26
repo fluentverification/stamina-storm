@@ -116,6 +116,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap[previousState] == 0.0) {
 		return true;
 	}
+#ifdef DEBUG_PRINTS
+	if (!(!(set_contains(stateMap, currentState) && set_contains(exploredStates, currentState)))) {
+		StaminaMessages::debugPrint("Not re-enqueuing for state: " + std::to_string(currentState));
+	}
+#endif // DEBUG_PRINTS
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	return !(set_contains(stateMap, currentState) && set_contains(exploredStates, currentState));
 }
@@ -223,6 +228,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 		if (currentIndex % 100000 == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
+#ifdef DEBUG_PRINTS
+			StaminaMessages::debugPrint("Size of statesToExplore is " + std::to_string(statesToExplore.size()));
+#endif // DEBUG_PRINTS
 		}
 
 		// Add state to piMap if it is not in there
@@ -294,12 +302,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					if (piMap.find(sPrime) == piMap.end()) {
 						piMap.insert({sPrime, 0.0});
 					}
-					// Update transition probability
-					piMap[sPrime] += piMap[currentIndex] * probability;
-					if (!(set_contains(stateMap, sPrime) && set_contains(exploredStates, sPrime))) {
-						// Add s' to ExploredStates
-						exploredStates.insert(sPrime);
-						// Enqueue S is handled in stateToIdCallback
+					// Enqueue S is handled in stateToIdCallback
+					// Update transition probability only if we should enqueue all
+					if (!shouldEnqueueAll) {
+						piMap[sPrime] += piMap[currentIndex] * probability;
+						if (set_contains(exploredStates, sPrime)) {
+							// Add s' to ExploredStates
+							exploredStates.insert(sPrime);
+							if (!set_contains(stateMap, sPrime)) {
+								stateMap.insert(sPrime);
+								tMap.insert(sPrime);
+							}
+						}
 					}
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
@@ -308,7 +322,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				firstChoiceOfState = false;
 			}
 			// Set our current state's reachability probability to 0
-			piMap[currentIndex] = 0;
+			if (!shouldEnqueueAll) {
+				piMap[currentIndex] = 0;
+			}
 			++currentRowGroup;
 		}
 
@@ -331,7 +347,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	}
 	// Accumulate probabilities and reduce kappa
-	piMap[currentIndex] = accumulateProbabilities();
+	piMap[currentIndex] = accumulateProbabilities(); // TODO: should be capital PI hat
 	Options::kappa /= Options::reduce_kappa;
 }
 
@@ -425,13 +441,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
-
-// STAMINA DOES NOT USE ANY OF THESE FORWARD DEFINITIONS
-// #ifdef STORM_HAVE_CARL
-// template class StaminaModelBuilder<storm::RationalNumber, storm::models::sparse::StandardRewardModel<storm::RationalNumber>, uint32_t>;
-// template class StaminaModelBuilder<storm::RationalFunction, storm::models::sparse::StandardRewardModel<storm::RationalFunction>, uint32_t>;
-// template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<storm::Interval>, uint32_t>;
-// #endif
 
 template <typename StateType>
 bool stamina::set_contains(std::unordered_set<StateType> current_set, StateType value) {
