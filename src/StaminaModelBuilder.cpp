@@ -186,6 +186,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
 		piMap[index] = 1.0;
+		tMap.insert(index);
+		stateMap.insert(index);
 // 		piMap.insert({index, (float) 1.0});
 #ifdef DEBUG_PRINTS_VERBOSE
 		StaminaMessages::debugPrint("Adding reachability of 1.0 for (initial) state " + std::to_string(index));
@@ -235,7 +237,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
 #ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint("Continuing without enqueuing successors to " + std::to_string(piMap[currentIndex]));
+			StaminaMessages::debugPrint("Continuing without enqueuing successors to terminal state with reachability probability " + std::to_string(piMap[currentIndex]));
 #endif // DEBUG_PRINTS
 			continue;
 		}
