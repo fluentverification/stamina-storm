@@ -1,8 +1,6 @@
 #ifndef STAMINA
 #define STAMINA
 
-#define DEBUG_PRINTS
-
 #include <iostream>
 #include <ostream>
 #include <functional>
