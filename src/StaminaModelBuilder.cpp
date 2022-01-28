@@ -195,9 +195,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
-		piMap.insert({index, (float) 1.0});
+		piMap[index] = 1.0;
+// 		piMap.insert({index, (float) 1.0});
 #ifdef DEBUG_PRINTS_VERBOSE
 		StaminaMessages::debugPrint("Adding reachability of 1.0 for (initial) state " + std::to_string(index));
+		StaminaMessages::debugPrint("Probability is now: " + std::to_string(piMap[index]));
 #endif // DEBUG_PRINTS_VERBOSE
 	}
 
