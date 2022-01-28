@@ -234,12 +234,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 #endif // DEBUG_PRINTS
 		}
 
+		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
+			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
+		}
+		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
 #ifdef DEBUG_PRINTS
 			StaminaMessages::debugPrint("Continuing without enqueuing successors to terminal state with reachability probability " + std::to_string(piMap[currentIndex]));
-			++numberOfExploredStates;
 #endif // DEBUG_PRINTS
+			++numberOfExploredStates;
+			++currentRow;
+			++currentRowGroup;
 			continue;
 		}
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
@@ -247,11 +253,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 		// Load state for us to use
 		generator->load(currentState);
-		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
-			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
-		}
 		storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 
+		auto stateRewardIt = behavior.getStateRewards().begin();
+		for (auto& rewardModelBuilder : rewardModelBuilders) {
+			if (rewardModelBuilder.hasStateRewards()) {
+				rewardModelBuilder.addStateReward(*stateRewardIt);
+			}
+			++stateRewardIt;
+		}
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
@@ -271,14 +281,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 #endif // DEBUG_PRINTS
 		}
 
-		// Add the state rewards to the corresponding reward models.
-		auto stateRewardIt = behavior.getStateRewards().begin();
-		for (auto& rewardModelBuilder : rewardModelBuilders) {
-			if (rewardModelBuilder.hasStateRewards()) {
-				rewardModelBuilder.addStateReward(*stateRewardIt);
-			}
-			++stateRewardIt;
-		}
 
 		// Now add all choices.
 		bool firstChoiceOfState = true;
@@ -332,7 +334,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						piMap.insert({sPrime, 0.0});
 					}
 				}
-				transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
+				if (shouldEnqueue(sPrime)) {
+					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
+				}
 			}
 
 			++currentRow;
@@ -362,7 +366,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 	}
-	StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " state in total.");
+	StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " states in total.");
 	// Accumulate probabilities and reduce kappa
 	piMap[currentIndex] = accumulateProbabilities(); // TODO: should be capital PI hat
 	Options::kappa /= Options::reduce_kappa;
