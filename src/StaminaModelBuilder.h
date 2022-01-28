@@ -96,10 +96,10 @@ namespace stamina {
 		* the NextStateGenerators when they expand() a current state.
 		*
 		* @param currentState The current state which we may or may not enqueue.
-		* @param previousState The state which we came from to get to currentState
+		* @param nextState The state which we came from to get to currentState
 		* @return Whether or not to enqueue currentState to the statesToExplore through stateToIdCallback
 		* */
-		bool shouldEnqueue(StateType previousState);
+		bool shouldEnqueue(StateType nextState);
 		/**
 		* Updates a state's reachability probability given a current state, previous state, and transition probability.
 		*

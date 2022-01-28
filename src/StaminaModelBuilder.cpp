@@ -95,13 +95,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType previousState) {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
 	// If our previous state has not been encountered, we have unexpected behavior
-	if (piMap.find(previousState) == piMap.end()) {
-		piMap.insert({previousState, (float) 0.0});
+	if (piMap.find(nextState) == piMap.end()) {
+		piMap.insert({nextState, (float) 0.0});
+#ifdef DEBUG_PRINTS_VERBOSE
+		StaminaMessages::debugPrint("Adding reachability of 0 for " + std::to_string(nextState));
+#endif // DEBUG_PRINTS_VERBOSE
 		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
 		if (!isInit) {
-			StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(previousState)
+			StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(nextState)
 				+ " should have already been in the probability map, but it was not! Inserting now."
 				+ "\nThis indicates that we have (somehow) reached a state that did not show up in "
 				+ "any previous states' next state list."
@@ -109,21 +112,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		}
 		return isInit;
 	}
-	// If we haven't reached this state before, insert it into piMap
-	if (piMap.find(currentState) == piMap.end()) {
-		piMap.insert({currentState, (float) 0.0});
-	}
 	// If the reachability probability of the previous state is 0, enqueue regardless
-	if (piMap[previousState] == 0.0) {
+	if (piMap[currentState] == 0.0) {
+#ifdef DEBUG_PRINTS_VERBOSE
+		StaminaMessages::debugPrint("(Verbose message): enqueuing because reachability of previous state was 0.");
+#endif
 		return true;
 	}
-#ifdef DEBUG_PRINTS
-	if (!(!(set_contains(stateMap, currentState) && set_contains(exploredStates, currentState)))) {
-		StaminaMessages::debugPrint("Not re-enqueuing for state: " + std::to_string(currentState));
-	}
-#endif // DEBUG_PRINTS
 	// Otherwise, we base it on whether the maps we keep track of contain them
-	return !(set_contains(stateMap, currentState) && set_contains(exploredStates, currentState));
+	return !(set_contains(stateMap, nextState) && set_contains(exploredStates, nextState));
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -133,10 +130,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::updateReachabilityPr
 	, StateType previousState
 	, float transitionProbability
 ) {
-	// If we haven't reached this state before, insert it into piMap
-	if (piMap.find(currentState) == piMap.end()) {
-		piMap.insert({currentState, (float) 0.0});
-	}
 	// Optimization to prevent unnecessary multiply
 	if (piMap[previousState] == 0.0) {
 		return;
@@ -157,13 +150,24 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	StateType actualIndex = actualIndexPair.first;
 	if (piMap.find(actualIndex) == piMap.end()) {
 		piMap.insert({actualIndex, (float) 0.0});
+#ifdef DEBUG_PRINTS_VERBOSE
+		StaminaMessages::debugPrint("Adding reachability of 0.0 for state " + std::to_string(actualIndex));
+#endif // DEBUG_PRINTS_VERBOSE
 	}
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
 	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
+#ifdef DEBUG_PRINTS_VERBOSE
+		StaminaMessages::debugPrint("Re-enqueuing for state: " + std::to_string(actualIndex));
+#endif // DEBUG_PRINTS_VERBOSE
 	}
+#ifdef DEBUG_PRINTS_VERBOSE
+	else {
+		StaminaMessages::debugPrint("Not re-enqueuing for state: " + std::to_string(actualIndex));
+	}
+#endif // DEBUG_PRINTS_VERBOSE
 	return actualIndex;
 }
 
@@ -197,6 +201,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
 		piMap.insert({index, (float) 1.0});
+#ifdef DEBUG_PRINTS_VERBOSE
+		StaminaMessages::debugPrint("Adding reachability of 1.0 for (initial) state " + std::to_string(index));
+#endif // DEBUG_PRINTS_VERBOSE
 	}
 
 	// Now explore the current state until there is no more reachable state.
@@ -240,6 +247,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
+#ifdef DEBUG_PRINTS
+			StaminaMessages::debugPrint("Continuing without enqueuing successors to " + std::to_string(piMap[currentIndex]));
+#endif // DEBUG_PRINTS
 			continue;
 		}
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
@@ -260,9 +270,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Determine whether or not to enqueue all next states
 		bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
 
+#ifdef DEBUG_PRINTS
+			StaminaMessages::debugPrint("Reachability probability of state " + std::to_string(currentIndex) + " is " + std::to_string(piMap[currentIndex]));
+#endif // DEBUG_PRINTS
 		if (!shouldEnqueueAll && set_contains(tMap, currentIndex)) {
 			// Remove currentIndex from T if it's in T
 			tMap.erase(currentIndex);
+#ifdef DEBUG_PRINTS
+			StaminaMessages::debugPrint("Removing state " + std::to_string(currentIndex) + " from terminal state set.");
+#endif // DEBUG_PRINTS
 		}
 
 		// Add the state rewards to the corresponding reward models.
@@ -307,6 +323,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						if (!set_contains(stateMap, sPrime)) {
 							stateMap.insert(sPrime);
 							tMap.insert(sPrime);
+#ifdef DEBUG_PRINTS
+							StaminaMessages::debugPrint("Setting state " + std::to_string(sPrime) + " as terminal.");
+#endif //DEBUG_PRINTS_VERBOSE
 						}
 					}
 				}
