@@ -238,6 +238,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
 #ifdef DEBUG_PRINTS
 			StaminaMessages::debugPrint("Continuing without enqueuing successors to terminal state with reachability probability " + std::to_string(piMap[currentIndex]));
+			++numberOfExploredStates;
 #endif // DEBUG_PRINTS
 			continue;
 		}
