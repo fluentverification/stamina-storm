@@ -122,7 +122,7 @@ StaminaModelChecker::modelCheckProperty(
 	}
 
 	// Will we sitch to optimized CTMC analysis? (I.e., will we perform the state-space truncation)
-	bool switchToCombinedCTMC = false;
+	bool switchToCombinedCTMC = true;
 	// Check if we are using an until formula and a path formula
 	std::shared_ptr<const storm::logic::Formula> formula = prop.getFilter().getFormula();
 	if (formula->isPathFormula() && formula->isUntilFormula()) {
@@ -133,9 +133,9 @@ StaminaModelChecker::modelCheckProperty(
 	switchToCombinedCTMC = switchToCombinedCTMC && !Options::no_prop_refine;
 
 	// Remove these three lines once StaminaModelBuilder is working
-	auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-	auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
-	return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
+// 	auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+// 	auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+// 	return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
 
 	// While we should not terminate
 	while (numRefineIterations == 0

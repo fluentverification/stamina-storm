@@ -88,7 +88,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 		std::stringstream ss;
 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-		StaminaMessages::errorAndExit(ss.str());
+		StaminaMessages::error(ss.str());
 	}
 
 }
@@ -102,16 +102,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 #ifdef DEBUG_PRINTS_VERBOSE
 		StaminaMessages::debugPrint("Adding reachability of 0 for " + std::to_string(nextState));
 #endif // DEBUG_PRINTS_VERBOSE
-		// Show ERROR that unexpected behavior has been encountered (we've reached a state we shouldn't have been able to)
-		if (!isInit) {
-			StaminaMessages::error("Unexpected behavior! State with index " + std::to_string(nextState)
-				+ " should have already been in the probability map, but it was not! Inserting now."
-				+ "\nThis indicates that we have (somehow) reached a state that did not show up in "
-				+ "any previous states' next state list."
-			);
-		}
-		else { return true; }
-// 		return isInit;
 	}
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
