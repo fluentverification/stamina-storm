@@ -110,7 +110,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 				+ "any previous states' next state list."
 			);
 		}
-		return isInit;
+		else { return true; }
+// 		return isInit;
 	}
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
@@ -148,12 +149,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
 
 	StateType actualIndex = actualIndexPair.first;
-	if (piMap.find(actualIndex) == piMap.end()) {
-		piMap.insert({actualIndex, (float) 0.0});
-#ifdef DEBUG_PRINTS_VERBOSE
-		StaminaMessages::debugPrint("Adding reachability of 0.0 for state " + std::to_string(actualIndex));
-#endif // DEBUG_PRINTS_VERBOSE
-	}
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
 	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
@@ -316,7 +311,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				if (!shouldEnqueueAll) {
-					piMap[sPrime] += piMap[currentIndex] * probability;
+					if (piMap.find(sPrime) == piMap.end()) {
+						piMap.insert({sPrime, piMap[currentIndex] * probability});
+					}
+					else {
+						piMap[sPrime] += piMap[currentIndex] * probability;
+					}
+#ifdef DEBUG_PRINTS_VERBOSE
+					StaminaMessages::debugPrint("Reachability probability for " + std::to_string(sPrime) + " updated to " + std::to_string(piMap[sPrime]));
+#endif
 					if (!set_contains(exploredStates, sPrime)) {
 						// Add s' to ExploredStates
 						exploredStates.insert(sPrime);
@@ -327,6 +330,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 							StaminaMessages::debugPrint("Setting state " + std::to_string(sPrime) + " as terminal.");
 #endif //DEBUG_PRINTS_VERBOSE
 						}
+					}
+				}
+				else {
+					if (piMap.find(sPrime) == piMap.end()) {
+						piMap.insert({sPrime, 0.0});
 					}
 				}
 				transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
@@ -359,6 +367,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 	}
+	StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " state in total.");
 	// Accumulate probabilities and reduce kappa
 	piMap[currentIndex] = accumulateProbabilities(); // TODO: should be capital PI hat
 	Options::kappa /= Options::reduce_kappa;
