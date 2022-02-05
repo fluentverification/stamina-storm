@@ -51,6 +51,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 ) : generator(generator)
 	, stateStorage(generator->getStateSize())
+	, absorbingWasSetUp(false)
 {
 	// Intentionally left empty
 }
@@ -165,6 +166,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
+	// Create absorbing state
+	setUpAbsorbingState(
+		transitionMatrixBuilder
+		, rewardModelBuilders
+		, stateAndChoiceInformationBuilder
+		, markovianChoices
+		, stateValuationsBuilder
+	);
 
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -237,6 +246,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
+		// Load state for us to use
+		generator->load(currentState);
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
@@ -246,13 +257,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
+			transitionMatrixBuilder.addNextValue(currentRow, 0, 1.0);
 			continue;
 		}
+
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
-
-		// Load state for us to use
-		generator->load(currentState);
+		// Expand (explore next states)
 		storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 
 		auto stateRewardIt = behavior.getStateRewards().begin();
@@ -335,6 +346,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 				}
 				if (shouldEnqueue(sPrime)) {
+					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
 			}
@@ -457,6 +469,30 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 		totalProbability += piMap[tState];
 	}
 	return totalProbability;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
+	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+	, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
+	, StateAndChoiceInformationBuilder& choiceInformationBuilder
+	, boost::optional<storm::storage::BitVector>& markovianChoices
+	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+) {
+	if (absorbingWasSetUp) {
+		return;
+	}
+	this->absorbingState = CompressedState();
+	// Check if state is already registered
+	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+
+	StateType actualIndex = actualIndexPair.first;
+	if (actualIndex != 0) {
+		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
+	}
+	absorbingWasSetUp = true;
+	transitionMatrixBuilder.addNextValue(0, 0, 0.0);
 }
 
 

@@ -112,6 +112,10 @@ namespace stamina {
 		 * Gets the state ID of a state known to already exist. This does NOT perform state-space truncation for future states
 		 * */
 		StateType getStateIndexIfKnown(CompressedState const& state);
+		/**
+		 * Accumulates all probabilities in T Map and returns
+		 * */
+		double accumulateProbabilities();
 	protected:
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
@@ -155,11 +159,16 @@ namespace stamina {
 		* @param threshold The new reachability threshold
 		* */
 		void setReachabilityThreshold(double threshold);
-
 		/**
-		 * Accumulates all probabilities in T Map and returns
+		 * Sets up the initial state in the transition matrix
 		 * */
-		double accumulateProbabilities();
+		void setUpAbsorbingState(
+			storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+			, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
+			, StateAndChoiceInformationBuilder& choiceInformationBuilder
+			, boost::optional<storm::storage::BitVector>& markovianChoices
+			, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+		);
 	private:
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType> stateStorage;
@@ -172,6 +181,8 @@ namespace stamina {
 		std::unordered_map<StateType, float> piMap; // Maps reachability probabilities to their states
 		double reachabilityThreshold;
 		StateType currentState;
+		CompressedState absorbingState;
+		bool absorbingWasSetUp;
 		bool isInit;
 	};
 
