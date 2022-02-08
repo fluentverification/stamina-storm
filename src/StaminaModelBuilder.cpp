@@ -166,14 +166,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-	// Create absorbing state
-	setUpAbsorbingState(
-		transitionMatrixBuilder
-		, rewardModelBuilders
-		, stateAndChoiceInformationBuilder
-		, markovianChoices
-		, stateValuationsBuilder
-	);
 
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -186,6 +178,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
 		, this
 		, std::placeholders::_1
+	);
+	// Create absorbing state
+	setUpAbsorbingState(
+		transitionMatrixBuilder
+		, rewardModelBuilders
+		, stateAndChoiceInformationBuilder
+		, markovianChoices
+		, stateValuationsBuilder
 	);
 	isInit = true;
 	// Let the generator create all initial states.
@@ -460,8 +460,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
-	// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
-	stateStorage.deadlockStateIndices.push_back(0);
 	return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
 }
 
@@ -494,15 +492,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		return;
 	}
 	this->absorbingState = CompressedState(64);
+	// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
+	stateStorage.deadlockStateIndices.push_back(0);
 	// Check if state is already registered
-// 	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
 
-// 	StateType actualIndex = actualIndexPair.first;
-// 	if (actualIndex != 0) {
-// 		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
-// 	}
+	StateType actualIndex = actualIndexPair.first;
+	if (actualIndex != 0) {
+		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
+	}
 	absorbingWasSetUp = true;
-	transitionMatrixBuilder.addNextValue(0, 0, 0.0);
+	transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
+	// This state shall be Markovian (to not introduce Zeno behavior)
+	if (choiceInformationBuilder.isBuildMarkovianStates()) {
+		choiceInformationBuilder.addMarkovianState(0);
+	}
 }
 
 
