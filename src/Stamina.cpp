@@ -46,7 +46,7 @@ Stamina::run() {
 #ifdef DEBUG_PRINTS
 		StaminaMessages::debugPrint("Checking property in properties vector.");
 #endif
-		auto result = modelChecker->modelCheckProperty(property, modulesFile);
+		auto result = modelChecker->modelCheckProperty(property, modelFile);
 	}
 	// Finished!
 	StaminaMessages::good("Finished running!");
@@ -70,16 +70,18 @@ Stamina::initialize() {
 	// Set some settings objects.
 	storm::settings::initializeAll("Stamina", "Stamina");
 
-	// Load modules file and properties file
+	// Load model file and properties file
 	try {
-		modulesFile = storm::parser::PrismParser::parse(Options::model_file, true);
-		propertiesVector = storm::api::parsePropertiesForPrismProgram(Options::properties_file, modulesFile);
-		modelChecker->initialize(&modulesFile, &propertiesVector);
+		modelFile = storm::parser::PrismParser::parse(Options::model_file, true);
+		propertiesVector = storm::api::parsePropertiesForPrismProgram(Options::properties_file, modelFile);
+		auto labels = modelFile.getLabels();
+		StaminaMessages::info("There are the following number of state labels: " + std::to_string(labels.size()));
+		modelChecker->initialize(&modelFile, &propertiesVector);
 	}
 	catch (const std::exception& e) {
 		// Uses stringstream because std::to_string(e) throws an error with storm's exceptions
 		std::stringstream msg;
-		msg << "Got error when reading modules or properties file:\n\t\t" << e.what();
+		msg << "Got error when reading model or properties file:\n\t\t" << e.what();
 		StaminaMessages::errorAndExit(msg.str());
 	}
 

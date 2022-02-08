@@ -301,6 +301,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
 					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+#ifdef DEBUG_PRINTS_VERBOSE
+					StaminaMessages::debugPrint("Adding label " + label + " to row " + std::to_string(currentRow));
+#endif
 				}
 			}
 			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
@@ -483,7 +486,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	if (absorbingWasSetUp) {
 		return;
 	}
-	this->absorbingState = CompressedState();
+	this->absorbingState = CompressedState(64);
 	// Check if state is already registered
 	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
 

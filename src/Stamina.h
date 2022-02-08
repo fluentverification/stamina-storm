@@ -29,7 +29,7 @@ namespace stamina {
     public:
         /**
          * Main construtor: creates an instance of the STAMINA class
-         * 
+         *
          * @param arguments Arguments struct from StaminaArgParse
          * */
         Stamina(struct arguments * arguments);
@@ -49,7 +49,7 @@ namespace stamina {
 
         /* Data Members */
         StaminaModelChecker * modelChecker;
-        storm::prism::Program modulesFile;
+        storm::prism::Program modelFile;
         std::vector<storm::jani::Property> propertiesVector;
     };
 }
