@@ -410,6 +410,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	if (generator->getOptions().isBuildStateValuationsSet()) {
 		stateValuationsBuilder = generator->initializeStateValuationsBuilder();
 	}
+	stateAndChoiceInformationBuilder.setBuildChoiceLabels(generator->getOptions().isBuildChoiceLabelsSet());
+	stateAndChoiceInformationBuilder.setBuildChoiceOrigins(generator->getOptions().isBuildChoiceOriginsSet());
+	stateAndChoiceInformationBuilder.setBuildStatePlayerIndications(generator->getModelType() == storm::generator::ModelType::SMG);
+	stateAndChoiceInformationBuilder.setBuildMarkovianStates(generator->getModelType() == storm::generator::ModelType::MA);
+	stateAndChoiceInformationBuilder.setBuildStateValuations(generator->getOptions().isBuildStateValuationsSet());
 
 	// Builds matrices and truncates state space
 	buildMatrices(
@@ -455,6 +460,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
+	// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
+	stateStorage.deadlockStateIndices.push_back(0);
 	return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
 }
 
@@ -488,12 +495,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	}
 	this->absorbingState = CompressedState(64);
 	// Check if state is already registered
-	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+// 	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
 
-	StateType actualIndex = actualIndexPair.first;
-	if (actualIndex != 0) {
-		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
-	}
+// 	StateType actualIndex = actualIndexPair.first;
+// 	if (actualIndex != 0) {
+// 		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
+// 	}
 	absorbingWasSetUp = true;
 	transitionMatrixBuilder.addNextValue(0, 0, 0.0);
 }
