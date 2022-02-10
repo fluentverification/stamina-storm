@@ -382,8 +382,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	}
 	StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " states in total.");
-	// Accumulate probabilities and reduce kappa
-	piMap[currentIndex] = accumulateProbabilities(); // TODO: should be capital PI hat
+	// Reduce kappa
 	Options::kappa /= Options::reduce_kappa;
 }
 

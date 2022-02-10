@@ -112,8 +112,8 @@ StaminaModelChecker::modelCheckProperty(
 	double lTime, uTime;
 
 	// Split property into 2 to find P_min and P_max
-	storm::jani::Property * prop_min = new storm::jani::Property(propName + "_min", prop.getRawFormula(), prop.getUndefinedConstants()); // todo: modify true
-	storm::jani::Property * prop_max = new storm::jani::Property(propName + "_max", prop.getRawFormula(), prop.getUndefinedConstants()); // todo: modify false
+	storm::jani::Property * prop_min = new storm::jani::Property(propName + "_min", prop.getRawFormula(), prop.getUndefinedConstants()); // TODO: modify so all terminal states have a reachability of 1.0
+	storm::jani::Property * prop_max = new storm::jani::Property(propName + "_max", prop.getRawFormula(), prop.getUndefinedConstants()); // TODO: modify so all terminal states have a reachability of 0.0
 
 	auto propertyExpression = prop.getRawFormula();
 
@@ -131,11 +131,6 @@ StaminaModelChecker::modelCheckProperty(
 		switchToCombinedCTMC = switchToCombinedCTMC || !Options::no_prop_refine;
 	}
 	switchToCombinedCTMC = switchToCombinedCTMC && !Options::no_prop_refine;
-
-	// Remove these three lines once StaminaModelBuilder is working
-// 	auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-// 	auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
-// 	return mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
 
 	// While we should not terminate
 	while (numRefineIterations == 0
@@ -160,12 +155,16 @@ StaminaModelChecker::modelCheckProperty(
 			++numRefineIterations;
 			continue;
 		}
+		double piHat = 1.0;
+		while (piHat > Options::prob_win / Options::approx_factor) {
 
-		auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-		auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
-
+			auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+			auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+			piHat = builder->accumulateProbabilities();
+			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
+		}
 		// TODO: instruct STORM to compute P_min and P_max
-		// NOT SURE IF THIS IS THE RIGHT WAY TO DO IT
+		// We will need to get info from the terminal states
 		auto result_lower = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
 		auto result_upper = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[1]), true));
 		// Reduce kappa for refinement
