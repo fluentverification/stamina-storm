@@ -52,6 +52,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 ) : generator(generator)
 	, stateStorage(generator->getStateSize())
 	, absorbingWasSetUp(false)
+	, fresh(true)
 {
 	// Intentionally left empty
 }
@@ -166,7 +167,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-
+	fresh = false;
 	// Builds model
 	// Initialize building state valuations (if necessary)
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
@@ -506,6 +507,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	if (choiceInformationBuilder.isBuildMarkovianStates()) {
 		choiceInformationBuilder.addMarkovianState(0);
 	}
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
+	if (fresh) {
+		return;
+	}
+	exploredStates.clear();
+	stateMap.clear();
+	tMap.clear();
+	piMap.clear();
+	stateStorage.clear();
+	statesToExplore.clear();
+	// TODO: stateRemapping and generator
 }
 
 

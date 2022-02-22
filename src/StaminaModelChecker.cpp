@@ -156,11 +156,18 @@ StaminaModelChecker::modelCheckProperty(
 			continue;
 		}
 		double piHat = 1.0;
+		std::shared_ptr<CtmcModelChecker> mcCTMC = nullptr;
 		while (piHat > Options::prob_win / Options::approx_factor) {
-
+			builder->reset();
 			auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-			auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+			mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+			// Rebuild the initial state labels
+			auto labeling = model->getStateLabeling();
+			labeling.addLabel("absorbing");
+			labeling.addLabelToState("absorbing", 0);
+			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
+			StaminaMessages::info("Terminal State Probabilities sum to " + std::to_string(piHat));
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 		}
 		// TODO: instruct STORM to compute P_min and P_max

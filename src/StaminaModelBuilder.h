@@ -116,6 +116,10 @@ namespace stamina {
 		 * Accumulates all probabilities in T Map and returns
 		 * */
 		double accumulateProbabilities();
+		/**
+		 * Resets stuff to "fresh" state.
+		 */
+		 void reset();
 	protected:
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
@@ -184,6 +188,7 @@ namespace stamina {
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
 		bool isInit;
+		bool fresh;
 	};
 
 	// Helper method to find in unordered_set
