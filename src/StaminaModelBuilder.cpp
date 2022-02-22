@@ -523,6 +523,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	// stateStorage.stateToId.clear();
 	// stateStorage.deadlockStateIndices.clear();
 	// stateStorage.initialStateIndices.clear();
+	absorbingWasSetUp = false;
 	statesToExplore.clear();
 	// TODO: stateRemapping
 }

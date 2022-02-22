@@ -168,7 +168,7 @@ StaminaModelChecker::modelCheckProperty(
 			labeling.addLabelToState("absorbing", 0);
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
-			StaminaMessages::info("Terminal State Probabilities sum to " + std::to_string(piHat));
+			// StaminaMessages::debugMessage("Terminal State Probabilities sum to " + std::to_string(piHat));
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);
@@ -178,7 +178,6 @@ StaminaModelChecker::modelCheckProperty(
 		// We will need to get info from the terminal states
 		auto result_lower = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
 		auto result_upper = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[1]), true));
-		// Reduce kappa for refinement
 		double percentOff = max_results->result - min_results->result;
 		percentOff *= (double) 4.0 / Options::prob_win;
 		// max percent off at 100%
