@@ -519,12 +519,19 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	stateMap.clear();
 	tMap.clear();
 	piMap.clear();
-	stateStorage.clear();
+	//stateStorage.clear();
 	statesToExplore.clear();
-	// TODO: stateRemapping and generator
+	// TODO: stateRemapping
 }
 
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerator(
+	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator
+) {
+	this->generator = generator;
+}
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 

@@ -82,10 +82,6 @@ StaminaModelChecker::initialize(
 	}
 	this->modulesFile = modulesFile;
 	this->propertiesVector = propertiesVector;
-	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
-	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(*modulesFile);
-	// Create StaminaModelBuilder
-	builder = new StaminaModelBuilder<double>(generator);
 }
 
 std::unique_ptr<storm::modelchecker::CheckResult>
@@ -93,6 +89,11 @@ StaminaModelChecker::modelCheckProperty(
 	storm::jani::Property prop
 	, storm::prism::Program const& modulesFile
 ) {
+	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
+	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);
+	// Create StaminaModelBuilder
+	builder = new StaminaModelBuilder<double>(generator);
+
 	auto startTime = std::chrono::high_resolution_clock::now();
 	// Instantiate lower and upper results
 	min_results = new Result();
@@ -169,6 +170,9 @@ StaminaModelChecker::modelCheckProperty(
 			piHat = builder->accumulateProbabilities();
 			StaminaMessages::info("Terminal State Probabilities sum to " + std::to_string(piHat));
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
+
+			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);
+			builder->setGenerator(generator);
 		}
 		// TODO: instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states

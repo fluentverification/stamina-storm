@@ -119,7 +119,14 @@ namespace stamina {
 		/**
 		 * Resets stuff to "fresh" state.
 		 */
-		 void reset();
+		void reset();
+		/**
+		 * Sets the generator while deleting the old one
+		 * @param generator The new generator
+		 */
+		void setGenerator(
+			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator
+		);
 	protected:
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
