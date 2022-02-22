@@ -50,7 +50,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 ) : generator(generator)
-	, stateStorage(generator->getStateSize())
+	, stateStorage(storm::storage::sparse::StateStorage(generator->getStateSize()))
 	, absorbingWasSetUp(false)
 	, fresh(true)
 {
@@ -519,7 +519,10 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	stateMap.clear();
 	tMap.clear();
 	piMap.clear();
-	//stateStorage.clear();
+	stateStorage = storm::storage::sparse::StateStorage(generator->getStateSize());
+	// stateStorage.stateToId.clear();
+	// stateStorage.deadlockStateIndices.clear();
+	// stateStorage.initialStateIndices.clear();
 	statesToExplore.clear();
 	// TODO: stateRemapping
 }

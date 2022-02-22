@@ -182,7 +182,7 @@ namespace stamina {
 		);
 	private:
 		/* Data Members */
-		storm::storage::sparse::StateStorage<StateType> stateStorage;
+		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 		std::deque<std::pair<CompressedState, StateType>> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
