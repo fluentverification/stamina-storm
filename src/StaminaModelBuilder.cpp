@@ -520,12 +520,8 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	tMap.clear();
 	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
-	// stateStorage.stateToId.clear();
-	// stateStorage.deadlockStateIndices.clear();
-	// stateStorage.initialStateIndices.clear();
 	absorbingWasSetUp = false;
 	statesToExplore.clear();
-	// TODO: stateRemapping
 }
 
 

@@ -157,11 +157,11 @@ StaminaModelChecker::modelCheckProperty(
 			continue;
 		}
 		double piHat = 1.0;
-		std::shared_ptr<CtmcModelChecker> mcCTMC = nullptr;
+		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		while (piHat > Options::prob_win / Options::approx_factor) {
 			builder->reset();
 			auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-			mcCTMC = std::make_shared<CtmcModelChecker>(*model);
+			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Rebuild the initial state labels
 			auto labeling = model->getStateLabeling();
 			labeling.addLabel("absorbing");
@@ -174,10 +174,15 @@ StaminaModelChecker::modelCheckProperty(
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);
 			builder->setGenerator(generator);
 		}
-		// TODO: instruct STORM to compute P_min and P_max
+		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
-		auto result_lower = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
-		auto result_upper = mcCTMC->check(storm::modelchecker::CheckTask<>(*(formulae[1]), true));
+		try {
+			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
+			// auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(formulae[1]), true));
+		}
+		catch (std::exception& e) {
+			StaminaMessages::errorAndExit(e.what());
+		}
 		double percentOff = max_results->result - min_results->result;
 		percentOff *= (double) 4.0 / Options::prob_win;
 		// max percent off at 100%
@@ -228,8 +233,8 @@ StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker
 	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet!!");
 	double result = 0.0;
 	// auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-	// auto mcCTMC = std::make_shared<CtmcModelChecker>(*model);
-	// auto resultClass = mcCTMC->check(storm::modelchecker::CheckTask<>(*property, true));
+	// auto checker = std::make_shared<CtmcModelChecker>(*model);
+	// auto resultClass = checker->check(storm::modelchecker::CheckTask<>(*property, true));
 	// result = resultClass->asExplicitQuantitativeCheckResult<double>();
 	r->result = result;
 	r->explanation = "Property check for " + property->getName();
