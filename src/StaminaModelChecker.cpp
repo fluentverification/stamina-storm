@@ -105,7 +105,7 @@ StaminaModelChecker::modelCheckProperty(
 	for (auto formula : formulaeAbs) {
 		formulae.insert(
 			formulae.end()
-			, std::static_cast<std::shared_ptr<storm::logic::PathFormula>>(formula)
+			, static_cast<std::shared_ptr<storm::logic::PathFormula>>(formula)
 		);
 	}
 	// Create number of refined iterations and rechability threshold
