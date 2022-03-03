@@ -168,7 +168,6 @@ StaminaModelChecker::modelCheckProperty(
 			labeling.addLabelToState("absorbing", 0);
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
-			// StaminaMessages::debugMessage("Terminal State Probabilities sum to " + std::to_string(piHat));
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);

@@ -11,6 +11,8 @@
 
 #include "../../src/StaminaModelBuilder.h"
 
+#include <cstdint>
+
 typedef storm::models::sparse::Ctmc<double> Ctmc;
 typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
@@ -24,9 +26,10 @@ bool check(std::string const& path_to_model, std::string const& property_string)
 
     // Now translate the prism program into a DTMC in the sparse format.
     // Use the formulae to add the correct labelling.
-	auto generator =
-    auto modelBuilder = stamina::StaminaModelBuilder(&generator);
-	auto model =
+	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double,uint32_t>>(program);
+    //stamina::StaminaModelBuilder<uint32_t> modelBuilder(generator);
+	stamina::StaminaModelBuilder<double> * modelBuilder = new stamina::StaminaModelBuilder<double>(generator);
+	auto model = modelBuilder->build()->as<storm::models::sparse::Ctmc<double>>();
 	// storm::api::buildSparseModel<double>(program, formulae)->template as<Ctmc>();
 
     // Create a model checker on top of the sparse engine.
