@@ -15,6 +15,8 @@ set(SOURCE_FILES
 	test.cpp
 	../../src/StaminaModelBuilder.cpp
 	../../src/StaminaModelBuilder.h
+	../../src/StaminaMessages.cpp
+	../../src/StaminaMessages.h
 )
 
 # set executable

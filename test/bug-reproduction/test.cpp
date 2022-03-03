@@ -10,6 +10,8 @@
 #include <storm/utility/initialize.h>
 
 #include "../../src/StaminaModelBuilder.h"
+#include "../../src/StaminaMessages.h"
+#include "../..//src/Options.h"
 
 #include <cstdint>
 
@@ -18,7 +20,7 @@ typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
 bool check(std::string const& path_to_model, std::string const& property_string) {
     // Assumes that the model is in the prism program language format and parses the program.
-    auto program = storm::parser::PrismParser::parse(path_to_model);
+    auto program = storm::parser::PrismParser::parse(path_to_model, true);
     // Then parse the properties, passing the program to give context to some potential variables.
     auto properties = storm::api::parsePropertiesForPrismProgram(property_string, program);
     // Translate properties into the more low-level formulae.
@@ -47,11 +49,12 @@ bool check(std::string const& path_to_model, std::string const& property_string)
 int main (int argc, char *argv[]) {
     if (argc != 3) {
         std::cout << "Needs exactly 2 arguments: model file and property" << std::endl;
-        return 1;
+//        return 1;
     }
-
-    // Init loggers
-    storm::utility::setUp();
+	stamina::Options::kappa = 0.25;
+	// stamina::Options::reduceKappa = 2;
+	// Init loggers
+//    storm::utility::setUp();
     // Set some settings objects.
     storm::settings::initializeAll("storm-starter-project", "storm-starter-project");
 

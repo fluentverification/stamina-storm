@@ -100,8 +100,14 @@ StaminaModelChecker::modelCheckProperty(
 	max_results = new Result();
 
 	// Get the formulae
-	auto formulae = storm::api::extractFormulasFromProperties(*propertiesVector);
-
+	auto formulaeAbs = storm::api::extractFormulasFromProperties(*propertiesVector);
+	std::vector<std::shared_ptr<storm::logic::PathFormula>> formulae;
+	for (auto formula : formulaeAbs) {
+		formulae.insert(
+			formulae.end()
+			, std::static_cast<std::shared_ptr<storm::logic::PathFormula>>(formula)
+		);
+	}
 	// Create number of refined iterations and rechability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
