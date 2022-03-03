@@ -349,7 +349,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						piMap.insert({sPrime, 0.0});
 					}
 				}
-				if (shouldEnqueue(sPrime) || shouldEnqueueAll) {
+				if (shouldEnqueue(sPrime)) {
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
