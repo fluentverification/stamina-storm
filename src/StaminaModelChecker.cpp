@@ -100,14 +100,8 @@ StaminaModelChecker::modelCheckProperty(
 	max_results = new Result();
 
 	// Get the formulae
-	auto formulaeAbs = storm::api::extractFormulasFromProperties(*propertiesVector);
-	std::vector<std::shared_ptr<storm::logic::PathFormula>> formulae;
-	for (auto formula : formulaeAbs) {
-		formulae.insert(
-			formulae.end()
-			, static_cast<std::shared_ptr<storm::logic::PathFormula>>(formula)
-		);
-	}
+	// auto formulae = storm::api::extractFormulasFromProperties(*propertiesVector);
+
 	// Create number of refined iterations and rechability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
@@ -182,8 +176,8 @@ StaminaModelChecker::modelCheckProperty(
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
-			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(formulae[0]), true));
-			// auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(formulae[1]), true));
+			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(prop_min->getRawFormula()), true));
+			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(prop_max->getRawFormula()), true));
 		}
 		catch (std::exception& e) {
 			StaminaMessages::errorAndExit(e.what());
