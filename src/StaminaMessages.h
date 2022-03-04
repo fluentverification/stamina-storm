@@ -4,8 +4,8 @@
 #include <string>
 #include <stdint.h>
 
-#define DEBUG_PRINTS
-// #define DEBUG_PRINTS_VERBOSE
+// #define DEBUG_PRINTS
+#define DEBUG_PRINTS_VERBOSE
 
 #ifdef DEBUG_PRINTS_VERBOSE
 	#define DEBUG_PRINTS

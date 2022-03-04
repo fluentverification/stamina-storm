@@ -230,7 +230,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
 		statesToExplore.pop_front();
-
+#ifdef DEBUG_PRINTS_VERBOSE
+		StaminaMessages::debugPrint("Dequeued state " + std::to_string(currentIndex));
+#endif // DEBUG_PRINTS_VERBOSE
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 #ifdef DEBUG_PRINTS
