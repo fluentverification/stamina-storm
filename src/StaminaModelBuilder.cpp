@@ -222,7 +222,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 #endif
 	isInit = false;
 	// Perform a search through the model.
-	while (!statesToExplore.empty() && numberOfExploredStates <= Options::max_states) {
+	while (!statesToExplore.empty()) {
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
