@@ -158,9 +158,10 @@ StaminaModelChecker::modelCheckProperty(
 		}
 		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
+		Ctmc model;
 		while (piHat > Options::prob_win / Options::approx_factor) {
 			builder->reset();
-			auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
+			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Rebuild the initial state labels
 			auto labeling = model->getStateLabeling();
