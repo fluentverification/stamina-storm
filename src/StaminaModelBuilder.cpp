@@ -304,7 +304,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
 					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
-#ifdef DEBUG_PRINTS_VERBOSE
+#ifdef DEBUG_PRINTS
 					StaminaMessages::debugPrint("Adding label " + label + " to row " + std::to_string(currentRow));
 #endif
 				}

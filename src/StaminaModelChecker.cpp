@@ -113,9 +113,10 @@ StaminaModelChecker::modelCheckProperty(
 	double lTime, uTime;
 
 	// Split property into 2 to find P_min and P_max
-	storm::jani::Property * prop_min = new storm::jani::Property(propName + "_min", prop.getRawFormula(), prop.getUndefinedConstants()); // TODO: modify so all terminal states have a reachability of 1.0
-	storm::jani::Property * prop_max = new storm::jani::Property(propName + "_max", prop.getRawFormula(), prop.getUndefinedConstants()); // TODO: modify so all terminal states have a reachability of 0.0
-
+	storm::jani::Property * prop_min = new storm::jani::Property(propName + "_min", prop.getRawFormula(), prop.getUndefinedConstants());
+	storm::jani::Property * prop_max = new storm::jani::Property(propName + "_max", prop.getRawFormula(), prop.getUndefinedConstants());
+	// TODO: Get string representation of formula and add
+	// For reachability just use the "absorbing" label for the upper bound and add the lower results--if only reachability formulas
 	auto propertyExpression = prop.getRawFormula();
 
 	if (propertyExpression->isProbabilityPathFormula()) {
@@ -158,7 +159,7 @@ StaminaModelChecker::modelCheckProperty(
 		}
 		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
-		Ctmc model;
+		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 		while (piHat > Options::prob_win / Options::approx_factor) {
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
