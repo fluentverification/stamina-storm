@@ -12,6 +12,12 @@
 #include <fstream>
 #include <chrono>
 
+// #define USE_STAMINA_TRUNCATION
+
+#ifndef USE_STAMINA_TRUNCATION
+	#include "ExplicitTruncatedModelBuilder.h"
+#endif // USE_STAMINA_TRUNCATION
+
 using namespace stamina;
 
 StaminaModelChecker::StaminaModelChecker(
@@ -160,6 +166,7 @@ StaminaModelChecker::modelCheckProperty(
 		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
+#ifdef USE_STAMINA_TRUNCATION
 		while (piHat > Options::prob_win / Options::approx_factor) {
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
@@ -175,6 +182,17 @@ StaminaModelChecker::modelCheckProperty(
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);
 			builder->setGenerator(generator);
 		}
+#endif // USE_STAMINA_TRUNCATION
+#ifndef USE_STAMINA_TRUNCATION
+		StaminaMessages::info("Using test truncation");
+		auto simpleBuilder = new ExplicitTruncatedModelBuilder<double>(generator);
+		model = simpleBuilder->build()->template as<storm::models::sparse::Ctmc<double>>();
+		auto labeling = model->getStateLabeling();
+		labeling.addLabel("unknown");
+		labeling.addLabelToState("unknown", 1361);
+		checker = std::make_shared<CtmcModelChecker>(*model);
+		delete simpleBuilder;
+#endif
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {

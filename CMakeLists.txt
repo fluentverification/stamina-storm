@@ -27,6 +27,8 @@ set(SOURCE_FILES
 	src/StaminaMessages.cpp
     src/Options.h
     src/Options.cpp
+	src/ExplicitTruncatedModelBuilder.h
+	src/ExplicitTruncatedModelBuilder.cpp
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})
