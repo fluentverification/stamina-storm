@@ -437,7 +437,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	);
 
 	// Build choice labeling
-	modelComponents.choiceLabeling = stateAndChoiceInformationBuilder.buildChoiceLabeling(modelComponents.transitionMatrix.getRowCount());
+	if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications()) {
+		modelComponents.choiceLabeling = stateAndChoiceInformationBuilder.buildChoiceLabeling(modelComponents.transitionMatrix.getRowCount());
+	}
 	if (generator->getOptions().isBuildChoiceOriginsSet()) {
 		auto originData = stateAndChoiceInformationBuilder.buildDataOfChoiceOrigins(modelComponents.transitionMatrix.getRowCount());
 		modelComponents.choiceOrigins = generator->generateChoiceOrigins(originData);

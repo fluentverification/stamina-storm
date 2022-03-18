@@ -12,7 +12,7 @@
 #include <fstream>
 #include <chrono>
 
-// #define USE_STAMINA_TRUNCATION
+#define USE_STAMINA_TRUNCATION
 
 #ifndef USE_STAMINA_TRUNCATION
 	#include "ExplicitTruncatedModelBuilder.h"
