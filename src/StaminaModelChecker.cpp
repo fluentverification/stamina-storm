@@ -7,6 +7,8 @@
 #include "ANSIColors.h"
 #include "StaminaMessages.h"
 
+#include "storm/builder/BuilderOptions.h"
+
 #include <sstream>
 #include <stdio.h>
 #include <fstream>
@@ -96,7 +98,8 @@ StaminaModelChecker::modelCheckProperty(
 	, storm::prism::Program const& modulesFile
 ) {
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
-	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);
+	auto options = BuilderOptions(*prop.getFilter().getFormula());
+	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	// Create StaminaModelBuilder
 	builder = new StaminaModelBuilder<double>(generator);
 
@@ -170,16 +173,19 @@ StaminaModelChecker::modelCheckProperty(
 		while (piHat > Options::prob_win / Options::approx_factor) {
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
-			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Rebuild the initial state labels
 			auto labeling = model->getStateLabeling();
 			labeling.addLabel("absorbing");
 			labeling.addLabelToState("absorbing", 0);
+#ifdef DEBUG_PRINTS
+			labeling.printLabelingInformationToStream();
+#endif
+			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
-			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile);
+			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 			builder->setGenerator(generator);
 		}
 #endif // USE_STAMINA_TRUNCATION
