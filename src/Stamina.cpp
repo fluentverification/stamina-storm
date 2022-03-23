@@ -34,19 +34,18 @@ Stamina::Stamina(struct arguments * arguments) {
 }
 
 Stamina::~Stamina() {
-	// Clean up all memory
-	delete this->modelChecker;
+	// Intentionally left empty
 }
 
 void
 Stamina::run() {
 	initialize();
 	// Check each property in turn
-	for (auto property : propertiesVector) {
+	for (auto property : *propertiesVector) {
 #ifdef DEBUG_PRINTS
 		StaminaMessages::debugPrint("Checking property in properties vector.");
 #endif
-		auto result = modelChecker->modelCheckProperty(property, modelFile);
+		auto result = modelChecker->modelCheckProperty(property, *modelFile);
 	}
 	// Finished!
 	StaminaMessages::good("Finished running!");
@@ -73,11 +72,11 @@ Stamina::initialize() {
 
 	// Load model file and properties file
 	try {
-		modelFile = storm::parser::PrismParser::parse(Options::model_file, true);
-		propertiesVector = storm::api::parsePropertiesForPrismProgram(Options::properties_file, modelFile);
-		auto labels = modelFile.getLabels();
+		modelFile = std::make_shared<storm::prism::Program>(storm::parser::PrismParser::parse(Options::model_file, true));
+		propertiesVector = std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(Options::properties_file, *modelFile));
+		auto labels = modelFile->getLabels();
 		StaminaMessages::info("There are the following number of state labels: " + std::to_string(labels.size()));
-		modelChecker->initialize(&modelFile, &propertiesVector);
+		modelChecker->initialize(modelFile, propertiesVector);
 	}
 	catch (const std::exception& e) {
 		// Uses stringstream because std::to_string(e) throws an error with storm's exceptions

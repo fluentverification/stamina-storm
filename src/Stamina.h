@@ -49,8 +49,8 @@ namespace stamina {
 
         /* Data Members */
         std::shared_ptr<StaminaModelChecker> modelChecker;
-        storm::prism::Program modelFile;
-        std::vector<storm::jani::Property> propertiesVector;
+        std::shared_ptr<storm::prism::Program> modelFile;
+        std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
     };
 }
 

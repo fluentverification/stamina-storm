@@ -251,7 +251,7 @@ StaminaModelChecker::modelCheckProperty(
 }
 
 void
-StaminaModelChecker::check(std::shared_ptr<storm::jani::Property> property, StaminaModelChecker::Result * r) {
+StaminaModelChecker::check(std::shared_ptr<storm::jani::Property> property, std::shared_ptr<StaminaModelChecker::Result> r) {
 	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet!!");
 	double result = 0.0;
 	// auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
