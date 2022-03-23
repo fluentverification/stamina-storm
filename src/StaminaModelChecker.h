@@ -37,109 +37,120 @@
 #include "storm/generator/VariableInformation.h"
 
 namespace stamina {
-    class StaminaModelChecker {
-    public:
-        /**
-         * Constructor for StaminaModelChecker
-         *
-         * @param modulesFile Pointer to the Modules file
-         * @param propertiesVector Pointer to the Properties vector
-         * */
-        StaminaModelChecker(
+	class StaminaModelChecker {
+	public:
+		/**
+		 * Constructor for StaminaModelChecker
+		 *
+		 * @param modulesFile Pointer to the Modules file
+		 * @param propertiesVector Pointer to the Properties vector
+		 * */
+		StaminaModelChecker(
 			storm::prism::Program * modulesFile = nullptr
 			, std::vector<storm::jani::Property> * propertiesVector = nullptr
 		);
-        /**
-         * Standard destructor
-         * */
-        ~StaminaModelChecker();
-        /**
-         * Initializes the StaminaModelChecker class
-         *
-         * @param propertiesVector A vector to the list of JANI properties
-         * */
-        void initialize(
-            storm::prism::Program * modulesFile = nullptr
-            , std::vector<storm::jani::Property> * propertiesVector = nullptr
-        );
-        /**
-         * Model checks a specific property
-         *
-         * @param prop Property to check
-         * @param modulesFile The modules file to work with
-         * @return A pointer to the result of the model checking
-         * */
-        std::unique_ptr<storm::modelchecker::CheckResult> modelCheckProperty(
-            storm::jani::Property prop
-            , storm::prism::Program const& modulesFile
-        );
-    private:
-        /**
-         * Result subclass (no private members since is a private subclass)
-         * */
-        class Result {
-        public:
-            /**
-             * Constructor. Defaults to 0.0 / ""
-             * */
-            Result() {
-                result = 0.0;
-                explanation = "";
-            }
-            /**
-             * Gets string representation
-             * */
-            operator std::string() const {
-                std::stringstream str;
-                str << result << " (" << explanation << ")";
-                return str.str();
-            }
-            /**
-             * Gets string representation
-             * */
-            friend std::ostream & operator<<(std::ostream & stream, StaminaModelChecker::Result const & r) {
-                stream << r.result << " (" << r.explanation << ")";
-                return stream;
-            }
+		/**
+		 * Standard destructor
+		 * */
+		~StaminaModelChecker();
+		/**
+		 * Initializes the StaminaModelChecker class
+		 *
+		 * @param propertiesVector A vector to the list of JANI properties
+		 * */
+		void initialize(
+			storm::prism::Program * modulesFile = nullptr
+			, std::vector<storm::jani::Property> * propertiesVector = nullptr
+		);
+		/**
+		 * Model checks a specific property
+		 *
+		 * @param prop Property to check
+		 * @param modulesFile The modules file to work with
+		 * @return A pointer to the result of the model checking
+		 * */
+		std::unique_ptr<storm::modelchecker::CheckResult> modelCheckProperty(
+			storm::jani::Property prop
+			, storm::prism::Program const& modulesFile
+		);
+	private:
+		/**
+		 * Result subclass (no private members since is a private subclass)
+		 * */
+		class Result {
+		public:
+			/**
+			 * Constructor. Defaults to 0.0 / ""
+			 * */
+			Result() {
+				result = 0.0;
+				explanation = "";
+			}
+			/**
+			 * Gets string representation
+			 * */
+			operator std::string() const {
+				std::stringstream str;
+				str << result << " (" << explanation << ")";
+				return str.str();
+			}
+			/**
+			 * Gets string representation
+			 * */
+			friend std::ostream & operator<<(std::ostream & stream, StaminaModelChecker::Result const & r) {
+				stream << r.result << " (" << r.explanation << ")";
+				return stream;
+			}
 
-            double result;
-            std::string explanation;
+			double result;
+			std::string explanation;
 
-        };
-        /**
-         * Explicitly invokes a model check from a property
-         *
-         * @param property Property to invoke model checker for
-         * @param r Pointer to result
-         * */
-        void check(storm::jani::Property * property, Result * r);
-        /**
-         * Whether or not to terminate model check
-         *
-         * @return Terminate?
-         * */
-        bool terminateModelCheck();
-        /**
-         * Writes perimeter states to a specified file.
-         * */
-        void writePerimeterStates(int numRefineIteration);
-        /**
-         * Prints all of the transition actions to a file.
-         * */
-        void printTransitionActions(std::string filename);
-        /**
-         * Writes the min and max results to a file
-         *
-         * @param filename The filename to append to
-         * */
-        void writeToOutput(std::string filename);
-        /* Data Members */
-        StaminaModelChecker::Result * min_results;
-        StaminaModelChecker::Result * max_results;
-        StaminaModelBuilder<double> * builder;
-        storm::prism::Program * modulesFile;
-        std::vector<storm::jani::Property> * propertiesVector;
-    };
+		};
+		/**
+		 * Explicitly invokes a model check from a property
+		 *
+		 * @param property Property to invoke model checker for
+		 * @param r Pointer to result
+		 * */
+		void check(storm::jani::Property * property, Result * r);
+		/**
+		 * Whether or not to terminate model check
+		 *
+		 * @return Terminate?
+		 * */
+		bool terminateModelCheck();
+		/**
+		 * Writes perimeter states to a specified file.
+		 * */
+		void writePerimeterStates(int numRefineIteration);
+		/**
+		 * Prints all of the transition actions to a file.
+		 * */
+		void printTransitionActions(std::string filename);
+		/**
+		 * Writes the min and max results to a file
+		 *
+		 * @param filename The filename to append to
+		 * */
+		void writeToOutput(std::string filename);
+		/**
+		 * Creates prop_min and prop_max
+		 *
+		 * @param baseProperty The property to base it on
+		 * @param isMax Whether is max
+		 * */
+		std::shared_ptr<storm::jani::Property>
+		createModifiedProperty(
+			std::shared_ptr<storm::jani::Property> baseProperty
+			, bool isMax
+		);
+		/* Data Members */
+		StaminaModelChecker::Result * min_results;
+		StaminaModelChecker::Result * max_results;
+		StaminaModelBuilder<double> * builder;
+		storm::prism::Program * modulesFile;
+		std::vector<storm::jani::Property> * propertiesVector;
+	};
 
 }
 

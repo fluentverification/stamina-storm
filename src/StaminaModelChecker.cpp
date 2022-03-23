@@ -128,6 +128,8 @@ StaminaModelChecker::modelCheckProperty(
 	// For reachability just use the "absorbing" label for the upper bound and add the lower results--if only reachability formulas
 	auto propertyExpression = prop.getRawFormula();
 
+	std::cout << propertyExpression->toString() << std::endl;
+
 	if (propertyExpression->isProbabilityPathFormula()) {
 		StaminaMessages::warning("This property (" + propName + ") is a probability path formula.");
 	}
@@ -305,4 +307,34 @@ StaminaModelChecker::writeToOutput(std::string filename) {
 	outfile << min_results << "\r\n";
 	outfile << max_results << "\r\n";
 	outfile.close();
+}
+
+std::shared_ptr<storm::jani::Property>
+StaminaModelChecker::createModifiedProperty(
+	std::shared_ptr<storm::jani::Property> baseProperty
+	, bool isMax
+) {
+	std::allocator<storm::jani::Property> allocator;
+	std::default_delete<storm::jani::Property> del;
+	// Get the name of the property
+	std::string propName = baseProperty->getName().empty() ? "UNNAMED_PROPERTY" : baseProperty->getName();
+	auto formula = baseProperty->getRawFormula();
+	std::string formulaString = formula->toString();
+	/*
+	 * Minimum formula is equal to (phi) and not (absorbing)
+	 */
+	if (!isMax) {
+// 		formulaString = // TODO
+	}
+	/*
+	 * Maximum formula is equal to (phi) or (absorbing)
+	 */
+	else {
+// 		formulaString = // TODO
+	}
+	auto prop = std::allocate_shared<storm::jani::Property> (
+		allocator
+		, storm::jani::Property(propName + "_min", formula, baseProperty->getUndefinedConstants())
+	);
+	return prop;
 }
