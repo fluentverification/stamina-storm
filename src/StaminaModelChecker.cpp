@@ -270,10 +270,15 @@ StaminaModelChecker::terminateModelCheck() {
 }
 
 void
-StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
+StaminaModelChecker::writePerimeterStates(int numRefineIteration, std::ostream out) {
 	try {
 		// Refer to line 450 in StaminaModelChecker.java
-		StaminaMessages::warning("writePerimeterStates(int numRefineIteration) has not been implemented yet!");
+		// StaminaMessages::warning("writePerimeterStates(int numRefineIteration) has not been implemented yet!");
+		auto perimeterStates = builder->getPerimeterStates();
+		for (auto state : perimeterStates) {
+			out << state << " ";
+		}
+		out << "\n";
 	}
 	catch(const std::exception& e) {
 		std::stringstream ss;

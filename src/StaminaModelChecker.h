@@ -122,7 +122,7 @@ namespace stamina {
 		/**
 		 * Writes perimeter states to a specified file.
 		 * */
-		void writePerimeterStates(int numRefineIteration);
+		void writePerimeterStates(int numRefineIteration, std::ostream out = std::cout);
 		/**
 		 * Prints all of the transition actions to a file.
 		 * */

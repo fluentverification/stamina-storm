@@ -127,6 +127,12 @@ namespace stamina {
 		void setGenerator(
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator
 		);
+		/**
+		 * Creates and returns a vector of all perimeter states
+		 *
+		 * @return a vector of all perimeter states
+		 */
+		 std::vector<StateType> getPerimeterStates();
 	protected:
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
