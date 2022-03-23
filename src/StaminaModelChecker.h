@@ -112,7 +112,7 @@ namespace stamina {
 		 * @param property Property to invoke model checker for
 		 * @param r Pointer to result
 		 * */
-		void check(storm::jani::Property * property, Result * r);
+		void check(std::shared_ptr<storm::jani::Property> property, Result * r);
 		/**
 		 * Whether or not to terminate model check
 		 *
@@ -141,7 +141,7 @@ namespace stamina {
 		 * */
 		std::shared_ptr<storm::jani::Property>
 		createModifiedProperty(
-			std::shared_ptr<storm::jani::Property> baseProperty
+			storm::jani::Property & baseProperty
 			, bool isMax
 		);
 		/* Data Members */

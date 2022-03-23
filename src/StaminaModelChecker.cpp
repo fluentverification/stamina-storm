@@ -122,8 +122,8 @@ StaminaModelChecker::modelCheckProperty(
 	double lTime, uTime;
 
 	// Split property into 2 to find P_min and P_max
-	storm::jani::Property * prop_min = new storm::jani::Property(propName + "_min", prop.getRawFormula(), prop.getUndefinedConstants());
-	storm::jani::Property * prop_max = new storm::jani::Property(propName + "_max", prop.getRawFormula(), prop.getUndefinedConstants());
+	auto prop_min = createModifiedProperty(prop, false);
+	auto prop_max = createModifiedProperty(prop, true);
 	// TODO: Get string representation of formula and add
 	// For reachability just use the "absorbing" label for the upper bound and add the lower results--if only reachability formulas
 	auto propertyExpression = prop.getRawFormula();
@@ -250,13 +250,11 @@ StaminaModelChecker::modelCheckProperty(
 	// Clean up memory
 	delete min_results;
 	delete max_results;
-	delete prop_min;
-	delete prop_max;
 	return nullptr;
 }
 
 void
-StaminaModelChecker::check(storm::jani::Property * property, StaminaModelChecker::Result * r) {
+StaminaModelChecker::check(std::shared_ptr<storm::jani::Property> property, StaminaModelChecker::Result * r) {
 	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet!!");
 	double result = 0.0;
 	// auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
@@ -311,30 +309,35 @@ StaminaModelChecker::writeToOutput(std::string filename) {
 
 std::shared_ptr<storm::jani::Property>
 StaminaModelChecker::createModifiedProperty(
-	std::shared_ptr<storm::jani::Property> baseProperty
+	storm::jani::Property & baseProperty
 	, bool isMax
 ) {
 	std::allocator<storm::jani::Property> allocator;
 	std::default_delete<storm::jani::Property> del;
 	// Get the name of the property
-	std::string propName = baseProperty->getName().empty() ? "UNNAMED_PROPERTY" : baseProperty->getName();
-	auto formula = baseProperty->getRawFormula();
+	std::string propName = baseProperty.getName().empty() ? "UNNAMED_PROPERTY" : baseProperty.getName();
+	auto formula = baseProperty.getRawFormula();
 	std::string formulaString = formula->toString();
+	auto phi = formula->toExpression();
+	storm::expressions::Expression absorbing; // TODO: create expression with having the "absorbing" label
+	std::string suffix;
 	/*
 	 * Minimum formula is equal to (phi) and not (absorbing)
 	 */
 	if (!isMax) {
-// 		formulaString = // TODO
+		auto newExpression = (phi) && !(absorbing);
+		suffix = "_min";
 	}
 	/*
 	 * Maximum formula is equal to (phi) or (absorbing)
 	 */
 	else {
-// 		formulaString = // TODO
+		auto newExpression = (phi) || (absorbing);
+		suffix = "_max";
 	}
 	auto prop = std::allocate_shared<storm::jani::Property> (
 		allocator
-		, storm::jani::Property(propName + "_min", formula, baseProperty->getUndefinedConstants())
+		, storm::jani::Property(propName + suffix, formula, baseProperty.getUndefinedConstants())
 	);
 	return prop;
 }
