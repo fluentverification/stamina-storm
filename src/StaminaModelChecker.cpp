@@ -274,6 +274,7 @@ StaminaModelChecker::writePerimeterStates(int numRefineIteration, std::ostream o
 	try {
 		// Refer to line 450 in StaminaModelChecker.java
 		// StaminaMessages::warning("writePerimeterStates(int numRefineIteration) has not been implemented yet!");
+		out << numRefineIteration << " Refinement Iterations: ";
 		auto perimeterStates = builder->getPerimeterStates();
 		for (auto state : perimeterStates) {
 			out << state << " ";
