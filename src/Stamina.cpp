@@ -58,8 +58,9 @@ void
 Stamina::initialize() {
 	StaminaMessages::info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
 	try {
-		// Initialize with references to error, warning, info, and good message functions
-		modelChecker = new StaminaModelChecker();
+		std::allocator<StaminaModelChecker> alloc;
+		// Initialize as shared pointer
+		modelChecker = std::allocate_shared<StaminaModelChecker>(alloc);
 	}
 	catch(const std::exception& e) {
 		StaminaMessages::errorAndExit("Failed to allocate memory for StaminaModelChecker!");

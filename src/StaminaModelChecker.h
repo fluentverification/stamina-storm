@@ -46,8 +46,8 @@ namespace stamina {
 		 * @param propertiesVector Pointer to the Properties vector
 		 * */
 		StaminaModelChecker(
-			storm::prism::Program * modulesFile = nullptr
-			, std::vector<storm::jani::Property> * propertiesVector = nullptr
+			std::shared_ptr<storm::prism::Program> modulesFile = nullptr
+			, std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector = nullptr
 		);
 		/**
 		 * Standard destructor
@@ -59,8 +59,8 @@ namespace stamina {
 		 * @param propertiesVector A vector to the list of JANI properties
 		 * */
 		void initialize(
-			storm::prism::Program * modulesFile = nullptr
-			, std::vector<storm::jani::Property> * propertiesVector = nullptr
+			std::shared_ptr<storm::prism::Program> modulesFile = nullptr
+			, std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector = nullptr
 		);
 		/**
 		 * Model checks a specific property
@@ -145,11 +145,11 @@ namespace stamina {
 			, bool isMax
 		);
 		/* Data Members */
-		StaminaModelChecker::Result * min_results;
-		StaminaModelChecker::Result * max_results;
-		StaminaModelBuilder<double> * builder;
-		storm::prism::Program * modulesFile;
-		std::vector<storm::jani::Property> * propertiesVector;
+		std::shared_ptr<StaminaModelChecker::Result> min_results;
+		std::shared_ptr<StaminaModelChecker::Result> max_results;
+		std::shared_ptr<StaminaModelBuilder<double>> builder;
+		std::shared_ptr<storm::prism::Program> modulesFile;
+		std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
 	};
 
 }

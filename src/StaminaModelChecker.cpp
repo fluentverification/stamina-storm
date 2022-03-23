@@ -23,8 +23,8 @@
 using namespace stamina;
 
 StaminaModelChecker::StaminaModelChecker(
-	storm::prism::Program * modulesFile
-	, std::vector<storm::jani::Property> * propertiesVector
+	std::shared_ptr<storm::prism::Program> modulesFile
+	, std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector
 ) : modulesFile(modulesFile)
 	, propertiesVector(propertiesVector)
 {
@@ -71,15 +71,12 @@ StaminaModelChecker::~StaminaModelChecker() {
 			StaminaMessages::error(ss.str());
 		}
 	}
-	// Clean up memory
-	delete builder;
-
 }
 
 void
 StaminaModelChecker::initialize(
-	storm::prism::Program * modulesFile
-	, std::vector<storm::jani::Property> * propertiesVector
+	std::shared_ptr<storm::prism::Program> modulesFile
+	, std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector
 ) {
 	// Don't pass in nullptr please
 	if (!modulesFile) {
@@ -97,16 +94,19 @@ StaminaModelChecker::modelCheckProperty(
 	storm::jani::Property prop
 	, storm::prism::Program const& modulesFile
 ) {
+	// Create allocators for shared pointers
+	std::allocator<Result> allocatorResult;
+	std::allocator<StaminaModelBuilder<double>> allocatorBuilder;
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto options = BuilderOptions(*prop.getFilter().getFormula());
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	// Create StaminaModelBuilder
-	builder = new StaminaModelBuilder<double>(generator);
+	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator);
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 	// Instantiate lower and upper results
-	min_results = new Result();
-	max_results = new Result();
+	min_results = std::allocate_shared<Result>(allocatorResult);
+	max_results = std::allocate_shared<Result>(allocatorResult);
 
 	// Get the formulae
 	// auto formulae = storm::api::extractFormulasFromProperties(*propertiesVector);
@@ -247,9 +247,6 @@ StaminaModelChecker::modelCheckProperty(
 		StaminaMessages::good("Export Complete!");
 	}
 
-	// Clean up memory
-	delete min_results;
-	delete max_results;
 	return nullptr;
 }
 
