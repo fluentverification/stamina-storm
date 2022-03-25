@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include "storm/api/storm.h"
 #include "storm-parsers/parser/PrismParser.h"
@@ -122,7 +123,7 @@ namespace stamina {
 		/**
 		 * Writes perimeter states to a specified file.
 		 * */
-		void writePerimeterStates(int numRefineIteration, std::ostream out = std::cout);
+		void writePerimeterStates(int numRefineIteration);
 		/**
 		 * Prints all of the transition actions to a file.
 		 * */
@@ -150,6 +151,7 @@ namespace stamina {
 		std::shared_ptr<StaminaModelBuilder<double>> builder;
 		std::shared_ptr<storm::prism::Program> modulesFile;
 		std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
+		storm::expressions::ExpressionManager expressionManager;
 	};
 
 }

@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <fstream>
 #include <chrono>
+#include <utility>
+#include <unordered_set>
 
 #define USE_STAMINA_TRUNCATION
 
@@ -108,9 +110,6 @@ StaminaModelChecker::modelCheckProperty(
 	min_results = std::allocate_shared<Result>(allocatorResult);
 	max_results = std::allocate_shared<Result>(allocatorResult);
 
-	// Get the formulae
-	// auto formulae = storm::api::extractFormulasFromProperties(*propertiesVector);
-
 	// Create number of refined iterations and rechability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
@@ -180,6 +179,7 @@ StaminaModelChecker::modelCheckProperty(
 			labeling.addLabel("absorbing");
 			labeling.addLabelToState("absorbing", 0);
 #ifdef DEBUG_PRINTS
+			StaminaMessages::debugPrint("The following is the labeling information for the built model:");
 			labeling.printLabelingInformationToStream();
 #endif
 			checker = std::make_shared<CtmcModelChecker>(*model);
@@ -192,12 +192,12 @@ StaminaModelChecker::modelCheckProperty(
 		}
 #endif // USE_STAMINA_TRUNCATION
 #ifndef USE_STAMINA_TRUNCATION
+		/* Naive truncation using JUST a breadth first search rather than truncating paths
+		based on reachability probability */
 		StaminaMessages::info("Using test truncation");
 		auto simpleBuilder = new ExplicitTruncatedModelBuilder<double>(generator);
 		model = simpleBuilder->build()->template as<storm::models::sparse::Ctmc<double>>();
 		auto labeling = model->getStateLabeling();
-		labeling.addLabel("unknown");
-		labeling.addLabelToState("unknown", 1361);
 		checker = std::make_shared<CtmcModelChecker>(*model);
 		delete simpleBuilder;
 #endif
@@ -252,7 +252,7 @@ StaminaModelChecker::modelCheckProperty(
 
 void
 StaminaModelChecker::check(std::shared_ptr<storm::jani::Property> property, std::shared_ptr<StaminaModelChecker::Result> r) {
-	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet!!");
+	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet! This method DOES NOT perform truncated model checking, rather, it builds the entire model.");
 	double result = 0.0;
 	// auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
 	// auto checker = std::make_shared<CtmcModelChecker>(*model);
@@ -270,16 +270,21 @@ StaminaModelChecker::terminateModelCheck() {
 }
 
 void
-StaminaModelChecker::writePerimeterStates(int numRefineIteration, std::ostream out) {
+StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
 	try {
 		// Refer to line 450 in StaminaModelChecker.java
 		// StaminaMessages::warning("writePerimeterStates(int numRefineIteration) has not been implemented yet!");
+		// Open the outfile
+		std::ofstream out;
+		out.open(Options::export_perimeter_states.c_str());
+		// Write to it:
 		out << numRefineIteration << " Refinement Iterations: ";
 		auto perimeterStates = builder->getPerimeterStates();
 		for (auto state : perimeterStates) {
 			out << state << " ";
 		}
 		out << "\n";
+		out.close();
 	}
 	catch(const std::exception& e) {
 		std::stringstream ss;
@@ -321,7 +326,7 @@ StaminaModelChecker::createModifiedProperty(
 	std::string propName = baseProperty.getName().empty() ? "UNNAMED_PROPERTY" : baseProperty.getName();
 	auto formula = baseProperty.getRawFormula();
 	std::string formulaString = formula->toString();
-	auto phi = formula->toExpression();
+	auto phi = formula->toExpression(expressionManager);
 	storm::expressions::Expression absorbing; // TODO: create expression with having the "absorbing" label
 	std::string suffix;
 	/*

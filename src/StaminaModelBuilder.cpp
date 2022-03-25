@@ -136,8 +136,8 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
 	std::vector<StateType> perimeterStates;
-	std::unorderd_set<StateType>::iterator itr;
-	for (itr = tMap.begin(); itr != tMap.end(); itr++) {
+	// std::unorderd_set<StateType>::iterator itr;
+	for (auto itr = tMap.begin(); itr != tMap.end(); itr++) {
 		perimeterStates.emplace_back(*itr - 1);
 	}
 	return perimeterStates;
