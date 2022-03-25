@@ -426,8 +426,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	}
 	stateAndChoiceInformationBuilder.setBuildChoiceLabels(generator->getOptions().isBuildChoiceLabelsSet());
 	stateAndChoiceInformationBuilder.setBuildChoiceOrigins(generator->getOptions().isBuildChoiceOriginsSet());
-	stateAndChoiceInformationBuilder.setBuildStatePlayerIndications(generator->getModelType() == storm::generator::ModelType::SMG);
-	stateAndChoiceInformationBuilder.setBuildMarkovianStates(generator->getModelType() == storm::generator::ModelType::MA);
+	stateAndChoiceInformationBuilder.setBuildStatePlayerIndications(false); // Only applies to SMGs
+	stateAndChoiceInformationBuilder.setBuildMarkovianStates(false); // Only applies to markov automata
 	stateAndChoiceInformationBuilder.setBuildStateValuations(generator->getOptions().isBuildStateValuationsSet());
 
 	// Builds matrices and truncates state space
