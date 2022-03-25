@@ -327,7 +327,13 @@ StaminaModelChecker::createModifiedProperty(
 	auto formula = baseProperty.getRawFormula();
 	std::string formulaString = formula->toString();
 	auto phi = formula->toExpression(expressionManager);
-	storm::expressions::Expression absorbing; // TODO: create expression with having the "absorbing" label
+	storm::expressions::BinaryRelationExpression absorbing(
+		expressionManager // The expression manager
+		, phi->getType() // The expression type
+		, // The first operand. TODO: should be state index
+		, absorbingStateIndex  	// The second operand (here, is 0 since that's the absorbing state index)
+		, Equal // The relation between the two operands
+	); // create expression with having the "absorbing" label (aka an index of 0)
 	std::string suffix;
 	/*
 	 * Minimum formula is equal to (phi) and not (absorbing)
@@ -343,6 +349,7 @@ StaminaModelChecker::createModifiedProperty(
 		auto newExpression = (phi) || (absorbing);
 		suffix = "_max";
 	}
+	// TODO: create new formula from modified expression
 	auto prop = std::allocate_shared<storm::jani::Property> (
 		allocator
 		, storm::jani::Property(propName + suffix, formula, baseProperty.getUndefinedConstants())

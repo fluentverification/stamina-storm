@@ -38,6 +38,7 @@
 #include "storm/generator/VariableInformation.h"
 
 namespace stamina {
+	const uint32_t absorbingStateIndex = 0;
 	class StaminaModelChecker {
 	public:
 		/**
