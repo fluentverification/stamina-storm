@@ -335,23 +335,27 @@ StaminaModelChecker::createModifiedProperty(
 		, BinaryRelationExpression::RelationType::Equal // The relation between the two operands
 	); // create expression with having the "absorbing" label (aka an index of 0)
 	std::string suffix;
+	auto newExpression = phi;
 	/*
 	 * Minimum formula is equal to (phi) and not (absorbing)
 	 */
 	if (!isMax) {
-		auto newExpression = (phi) && !(absorbing);
+		newExpression = (phi) && !(absorbing);
 		suffix = "_min";
 	}
 	/*
 	 * Maximum formula is equal to (phi) or (absorbing)
 	 */
 	else {
-		auto newExpression = (phi) || (absorbing);
+		newExpression = (phi) || (absorbing);
 		suffix = "_max";
 	}
 	// TODO: create new formula from modified expression
 	// std::function<storm::expressions::Expression(storm::expressions::Expression const&)> remapping;
-	auto remapping = [](storm::Expressions::Expression const& inputExpression) {
+	auto remapping = [](
+		storm::expressions::Expression const& inputExpression
+		, storm::expressions::Expression const & newExpression = newExpression
+	) {
 		return newExpression;
 	};
 	auto newFormula = formula->substitute(
