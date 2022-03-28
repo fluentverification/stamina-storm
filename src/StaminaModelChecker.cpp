@@ -204,8 +204,10 @@ StaminaModelChecker::modelCheckProperty(
 		try {
 			modifyState(true);
 			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
+			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			modifyState(false);
 			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
+			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 		}
 		catch (std::exception& e) {
 			StaminaMessages::errorAndExit(e.what());
@@ -236,8 +238,8 @@ StaminaModelChecker::modelCheckProperty(
 	// Print results
 	std::stringstream resultInfo;
 	resultInfo << "Finished checking property: " << propName << std::endl;
-	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << *min_results << std::endl;
-	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << *max_results << std::endl;
+	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
+	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
 	StaminaMessages::info(resultInfo.str());
 
 	// Export transitions to file if desired
