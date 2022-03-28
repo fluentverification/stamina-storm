@@ -121,9 +121,6 @@ StaminaModelChecker::modelCheckProperty(
 	// Lower and upper bound times
 	double lTime, uTime;
 
-	// Split property into 2 to find P_min and P_max
-	auto prop_min = createModifiedProperty(prop, false);
-	auto prop_max = createModifiedProperty(prop, true);
 	// TODO: Get string representation of formula and add
 	// For reachability just use the "absorbing" label for the upper bound and add the lower results--if only reachability formulas
 	auto propertyExpression = prop.getRawFormula();
@@ -157,7 +154,7 @@ StaminaModelChecker::modelCheckProperty(
 
 		// If we don't switch to a combined CTMC, just perform the model checking
 		// Without state space truncation
-		if (!switchToCombinedCTMC) {
+		/*if (!switchToCombinedCTMC) {
 			StaminaMessages::info("Verifying lower bound for " + prop_min->getName() + ".");
 			check(prop_min, min_results);
 			StaminaMessages::info("Verifying upper bound for " + prop_max->getName() + ".");
@@ -167,7 +164,7 @@ StaminaModelChecker::modelCheckProperty(
 			// Update here since we continue to the next loop iteration
 			++numRefineIterations;
 			continue;
-		}
+		}*/
 		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
@@ -176,9 +173,9 @@ StaminaModelChecker::modelCheckProperty(
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 			// Rebuild the initial state labels
-			auto labeling = model->getStateLabeling();
-			labeling.addLabel("absorbing");
-			labeling.addLabelToState("absorbing", 0);
+			labeling = &( model->getStateLabeling());
+			labeling->addLabel("absorbing");
+			labeling->addLabelToState("absorbing", 0);
 #ifdef DEBUG_PRINTS
 			StaminaMessages::debugPrint("The following is the labeling information for the built model:");
 			labeling.printLabelingInformationToStream();
@@ -205,8 +202,10 @@ StaminaModelChecker::modelCheckProperty(
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
-			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(prop_min->getRawFormula()), true));
-			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(prop_max->getRawFormula()), true));
+			modifyState(true);
+			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
+			modifyState(false);
+			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
 		}
 		catch (std::exception& e) {
 			StaminaMessages::errorAndExit(e.what());
@@ -316,66 +315,23 @@ StaminaModelChecker::writeToOutput(std::string filename) {
 	outfile.close();
 }
 
-std::shared_ptr<storm::jani::Property>
-StaminaModelChecker::createModifiedProperty(
-	storm::jani::Property & baseProperty
-	, bool isMax
-) {
-	std::allocator<storm::jani::Property> allocator;
-	std::default_delete<storm::jani::Property> del;
-	// Get the name of the property
-	std::string propName = baseProperty.getName().empty() ? "UNNAMED_PROPERTY" : baseProperty.getName();
-	auto formula = baseProperty.getRawFormula();
-	std::string formulaString = formula->toString();
-	auto phi = formula->toExpression(expressionManager);
-	storm::expressions::BinaryRelationExpression absorbing(
-		expressionManager // The expression manager
-		, phi.getType() // The expression type
-		, // The first operand. TODO: should be state index
-		, absorbingStateIndex  	// The second operand (here, is 0 since that's the absorbing state index)
-		, BinaryRelationExpression::RelationType::Equal // The relation between the two operands
-	); // create expression with having the "absorbing" label (aka an index of 0)
-	storm::expressions::Expression abs;
-	std::string suffix;
-	auto newExpression = phi;
-	/*
-	 * Minimum formula is equal to (phi) and not (absorbing)
-	 */
-	if (!isMax) {
-		newExpression = (phi) && !((storm::expressions::Expression) abs->toExpression());
-		suffix = "_min";
+
+void
+StaminaModelChecker::modifyState(bool isMin) {
+	StaminaMessages::warning("Currently STAMINA only supports \"true U\" formulas. Other formulas may return inaccurate results");
+	for (std::string label : labeling->getLabels() ) {
+		if (label == "absorbing" || label == "deadlock" || label == "init") { continue; }
+		//else if (label == /* TODO: label is "a" (the label before the until */) {
+		//	continue;
+		//}
+		else if (isMin && labeling->getStateHasLabel(label, absorbingStateIndex)) {
+			// Remove all labels except for, "deadlock", and "absorbing" from
+			// the absorbing state
+			labeling->removeLabelFromState(label, absorbingStateIndex);
+		}
+		else {
+
+			labeling->addLabelToState(label, absorbingStateIndex);
+		}
 	}
-	/*
-	 * Maximum formula is equal to (phi) or (absorbing)
-	 */
-	else {
-		newExpression = (phi) || ((storm::expressions::Expression) abs->toExpression());
-		suffix = "_max";
-	}
-	// Create new formula from modified expression
-	std::map<std::string, storm::expressions::Expression> remapping;
-	remapping.insert({"absorbing", newExpression });
-	auto newFormula = formula->substitute(
-		/*
-			This is the method I think we need to use. There are several different types of
-			parameters that it takes and I'm not sure which one is best.
-
-			1. Takes a std::map<storm::expression::Variable, storm::expressions::Expression>
-			which substitutes all variables within that map with the mapped expressions
-
-			2. Takes a std::function<storm::expressions::Expression(storm::expressions::Expression const&)>
-			(aka a function binding which takes an expression and returns a new expression)
-
-			3. Takes a std::map<std::string, storm::expressions::Expression> (substitutes labels for
-			expressions)
-
-			4. Takes a std::map<std::string, std::string> (substitutes labels for other labels)
-		*/
-		remapping
-	);
-	auto prop = std::allocate_shared<storm::jani::Property> (
-		allocator
-		, storm::jani::Property(propName + suffix, newFormula, baseProperty.getUndefinedConstants())
-	);
-	return prop;
 }

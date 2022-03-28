@@ -36,6 +36,7 @@
 #include "storm/modelchecker/results/CheckResult.h"
 #include "storm/builder/BuilderOptions.h"
 #include "storm/generator/VariableInformation.h"
+#include "storm/models/sparse/StateLabeling.h"
 
 namespace stamina {
 	const uint32_t absorbingStateIndex = 0;
@@ -136,16 +137,9 @@ namespace stamina {
 		 * */
 		void writeToOutput(std::string filename);
 		/**
-		 * Creates prop_min and prop_max
-		 *
-		 * @param baseProperty The property to base it on
-		 * @param isMax Whether is max
-		 * */
-		std::shared_ptr<storm::jani::Property>
-		createModifiedProperty(
-			storm::jani::Property & baseProperty
-			, bool isMax
-		);
+
+		*/
+		void modifyState(bool isMin);
 		/* Data Members */
 		std::shared_ptr<StaminaModelChecker::Result> min_results;
 		std::shared_ptr<StaminaModelChecker::Result> max_results;
@@ -153,6 +147,8 @@ namespace stamina {
 		std::shared_ptr<storm::prism::Program> modulesFile;
 		std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
 		storm::expressions::ExpressionManager expressionManager;
+		storm::models::sparse::StateLabeling * labeling;
+		std::string preUntilLabel;
 	};
 
 }
