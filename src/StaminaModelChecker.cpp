@@ -332,7 +332,7 @@ StaminaModelChecker::createModifiedProperty(
 		, phi->getType() // The expression type
 		, // The first operand. TODO: should be state index
 		, absorbingStateIndex  	// The second operand (here, is 0 since that's the absorbing state index)
-		, Equal // The relation between the two operands
+		, BinaryRelationExpression::RelationType::Equal // The relation between the two operands
 	); // create expression with having the "absorbing" label (aka an index of 0)
 	std::string suffix;
 	/*
@@ -350,6 +350,23 @@ StaminaModelChecker::createModifiedProperty(
 		suffix = "_max";
 	}
 	// TODO: create new formula from modified expression
+	auto newFormula = formula->substitute(
+		/*
+			This is the method I think we need to use. There are several different types of
+			parameters that it takes and I'm not sure which one is best.
+
+			1. Takes a std::map<storm::expression::Variable, storm::expressions::Expression>
+			which substitutes all variables within that map with the mapped expressions
+
+			2. Takes a std::function<storm::expressions::Expression(storm::expressions::Expression const%)>
+			(aka a function binding which takes an expression and returns a new expression)
+
+			3. Takes a std::map<std::string, storm::expressions::Expression> (substitutes labels for
+			expressions)
+
+			4. Takes a std::map<std::string, std::string> (substitutes labels for other labels)
+		*/
+	);
 	auto prop = std::allocate_shared<storm::jani::Property> (
 		allocator
 		, storm::jani::Property(propName + suffix, formula, baseProperty.getUndefinedConstants())
