@@ -203,9 +203,29 @@ StaminaModelChecker::modelCheckProperty(
 		// We will need to get info from the terminal states
 		try {
 			modifyState(true);
+			std::cout << "absorbing state labeling:" << std::endl;
+			// Print labels for absorbing state
+			for (auto label : labeling->getLabelsOfState(0)) {
+				std::cout << label << std::endl;
+			}
+			std::cout << "init state labeling:" << std::endl;
+			// Print labels for init state
+			for (auto label : labeling->getLabelsOfState(1)) {
+				std::cout << label << std::endl;
+			}
 			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
 			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			modifyState(false);
+			// Print labels for absorbing state
+			std::cout << "absorbing state labeling:" << std::endl;
+			for (auto label : labeling->getLabelsOfState(0)) {
+				std::cout << label << std::endl;
+			}
+			// Print labels for init state
+			std::cout << "init state labeling:" << std::endl;
+			for (auto label : labeling->getLabelsOfState(1)) {
+				std::cout << label << std::endl;
+			}
 			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 		}
@@ -331,7 +351,7 @@ StaminaModelChecker::modifyState(bool isMin) {
 			// the absorbing state
 			labeling->removeLabelFromState(label, absorbingStateIndex);
 		}
-		else {
+		else if (!isMin) {
 
 			labeling->addLabelToState(label, absorbingStateIndex);
 		}
