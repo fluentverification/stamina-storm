@@ -350,6 +350,10 @@ StaminaModelChecker::createModifiedProperty(
 		suffix = "_max";
 	}
 	// TODO: create new formula from modified expression
+	// std::function<storm::expressions::Expression(storm::expressions::Expression const&)> remapping;
+	auto remapping = [](storm::Expressions::Expression const& inputExpression) {
+		return newExpression;
+	};
 	auto newFormula = formula->substitute(
 		/*
 			This is the method I think we need to use. There are several different types of
@@ -358,7 +362,7 @@ StaminaModelChecker::createModifiedProperty(
 			1. Takes a std::map<storm::expression::Variable, storm::expressions::Expression>
 			which substitutes all variables within that map with the mapped expressions
 
-			2. Takes a std::function<storm::expressions::Expression(storm::expressions::Expression const%)>
+			2. Takes a std::function<storm::expressions::Expression(storm::expressions::Expression const&)>
 			(aka a function binding which takes an expression and returns a new expression)
 
 			3. Takes a std::map<std::string, storm::expressions::Expression> (substitutes labels for
@@ -366,10 +370,11 @@ StaminaModelChecker::createModifiedProperty(
 
 			4. Takes a std::map<std::string, std::string> (substitutes labels for other labels)
 		*/
+		remapping;
 	);
 	auto prop = std::allocate_shared<storm::jani::Property> (
 		allocator
-		, storm::jani::Property(propName + suffix, formula, baseProperty.getUndefinedConstants())
+		, storm::jani::Property(propName + suffix, newFormula, baseProperty.getUndefinedConstants())
 	);
 	return prop;
 }
