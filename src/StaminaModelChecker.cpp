@@ -8,6 +8,7 @@
 #include "StaminaMessages.h"
 
 #include "storm/builder/BuilderOptions.h"
+#include "storm/storage/expressions/BinaryRelationExpression.h"
 
 #include <sstream>
 #include <stdio.h>
