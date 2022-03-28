@@ -340,14 +340,14 @@ StaminaModelChecker::createModifiedProperty(
 	 * Minimum formula is equal to (phi) and not (absorbing)
 	 */
 	if (!isMax) {
-		newExpression = (phi) && !(absorbing);
+		newExpression = (phi) && !((storm::expressions::Expression) absorbing);
 		suffix = "_min";
 	}
 	/*
 	 * Maximum formula is equal to (phi) or (absorbing)
 	 */
 	else {
-		newExpression = (phi) || (absorbing);
+		newExpression = (phi) || ((storm::expressions::Expression) absorbing);
 		suffix = "_max";
 	}
 	// TODO: create new formula from modified expression
@@ -360,7 +360,10 @@ StaminaModelChecker::createModifiedProperty(
 	};
 	*/
 	std::map<storm::expressions::Variable, storm::expressions::Expression> remapping;
-	storm::expressions::Variable var(expressionManager, 0);
+	storm::expressions::Variable var(
+		std::make_shared<storm::expressions::ExpressionManager>(expressionManager)
+		, 0
+	);
 	remapping.insert({var , newExpression});
 	auto newFormula = formula->substitute(
 		/*
