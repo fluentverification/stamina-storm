@@ -335,37 +335,26 @@ StaminaModelChecker::createModifiedProperty(
 		, absorbingStateIndex  	// The second operand (here, is 0 since that's the absorbing state index)
 		, BinaryRelationExpression::RelationType::Equal // The relation between the two operands
 	); // create expression with having the "absorbing" label (aka an index of 0)
+	storm::expressions::Expression abs;
 	std::string suffix;
 	auto newExpression = phi;
 	/*
 	 * Minimum formula is equal to (phi) and not (absorbing)
 	 */
 	if (!isMax) {
-		newExpression = (phi) && !((storm::expressions::Expression) absorbing);
+		newExpression = (phi) && !((storm::expressions::Expression) abs->toExpression());
 		suffix = "_min";
 	}
 	/*
 	 * Maximum formula is equal to (phi) or (absorbing)
 	 */
 	else {
-		newExpression = (phi) || ((storm::expressions::Expression) absorbing);
+		newExpression = (phi) || ((storm::expressions::Expression) abs->toExpression());
 		suffix = "_max";
 	}
-	// TODO: create new formula from modified expression
-	/*
-	auto remapping = [](
-		storm::expressions::Expression const& inputExpression
-		, storm::expressions::Expression const & newExpression = newExpression
-	) {
-		return newExpression;
-	};
-	*/
-	std::map<storm::expressions::Variable, storm::expressions::Expression> remapping;
-	storm::expressions::Variable var(
-		std::make_shared<storm::expressions::ExpressionManager>(expressionManager)
-		, 0
-	);
-	remapping.insert({var , newExpression});
+	// Create new formula from modified expression
+	std::map<std::string, storm::expressions::Expression> remapping;
+	remapping.insert({"absorbing", newExpression });
 	auto newFormula = formula->substitute(
 		/*
 			This is the method I think we need to use. There are several different types of
