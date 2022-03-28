@@ -330,7 +330,7 @@ StaminaModelChecker::createModifiedProperty(
 	auto phi = formula->toExpression(expressionManager);
 	storm::expressions::BinaryRelationExpression absorbing(
 		expressionManager // The expression manager
-		, phi->getType() // The expression type
+		, phi.getType() // The expression type
 		, // The first operand. TODO: should be state index
 		, absorbingStateIndex  	// The second operand (here, is 0 since that's the absorbing state index)
 		, BinaryRelationExpression::RelationType::Equal // The relation between the two operands
