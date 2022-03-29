@@ -176,6 +176,13 @@ StaminaModelChecker::modelCheckProperty(
 			labeling = &( model->getStateLabeling());
 			labeling->addLabel("absorbing");
 			labeling->addLabelToState("absorbing", 0);
+			// DELETE THIS
+			auto lacIStates = labeling->getStates("(LacI < 20)");
+			auto tetRStates = labeling->getStates("(TetR > 40)");
+			std::cout << "LacI < 20 states: \n" << lacIStates << std::endl;
+			std::cout << "TetR > 40 states: \n" << tetRStates << std::endl;
+			// END DELETE THIS
+
 #ifdef DEBUG_PRINTS
 			StaminaMessages::debugPrint("The following is the labeling information for the built model:");
 			labeling.printLabelingInformationToStream();
