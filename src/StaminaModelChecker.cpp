@@ -169,7 +169,8 @@ StaminaModelChecker::modelCheckProperty(
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 #ifdef USE_STAMINA_TRUNCATION
-		while (piHat > Options::prob_win / Options::approx_factor) {
+		while (piHat >= Options::prob_win / Options::approx_factor) {
+			StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 			// Rebuild the initial state labels
@@ -177,11 +178,11 @@ StaminaModelChecker::modelCheckProperty(
 			labeling->addLabel("absorbing");
 			labeling->addLabelToState("absorbing", 0);
 			// DELETE THIS
-			auto lacIStates = labeling->getStates("(LacI < 20)");
-			auto tetRStates = labeling->getStates("(TetR > 40)");
-			std::cout << "LacI < 20 states: \n" << lacIStates << std::endl;
-			std::cout << "TetR > 40 states: \n" << tetRStates << std::endl;
-			// END DELETE THIS
+			/*auto lacIStates = labeling->getStates("(LacI < 59)");
+			auto tetRStates = labeling->getStates("(TetR > 10)");
+			std::cout << "LacI < 59 states: \n" << lacIStates << std::endl;
+			std::cout << "TetR > 10 states: \n" << tetRStates << std::endl;
+			*/// END DELETE THIS
 
 #ifdef DEBUG_PRINTS
 			StaminaMessages::debugPrint("The following is the labeling information for the built model:");

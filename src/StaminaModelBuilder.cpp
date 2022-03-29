@@ -330,10 +330,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
+			// For testing purposes
+			double exitRateSum = 0.0;
+
+			for (auto const stateProbabilityPair : choice) { exitRateSum += stateProbabilityPair.second; }
+
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				float probability = stateProbabilityPair.second;
+				float probability = stateProbabilityPair.second / exitRateSum;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				if (!shouldEnqueueAll) {
@@ -375,9 +380,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Set our current state's reachability probability to 0
 		if (!shouldEnqueueAll) {
 			piMap[currentIndex] = 0;
-			if (set_contains(tMap, currentIndex)) {
-				tMap.erase(currentIndex);
-			}
 		}
 		++currentRowGroup;
 
@@ -534,13 +536,13 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
+	statesToExplore.clear();
 	exploredStates.clear();
 	stateMap.clear();
 	tMap.clear();
 	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
-	statesToExplore.clear();
 }
 
 
