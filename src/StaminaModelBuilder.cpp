@@ -375,6 +375,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Set our current state's reachability probability to 0
 		if (!shouldEnqueueAll) {
 			piMap[currentIndex] = 0;
+			if (set_contains(tMap, currentIndex)) {
+				tMap.erase(currentIndex);
+			}
 		}
 		++currentRowGroup;
 
