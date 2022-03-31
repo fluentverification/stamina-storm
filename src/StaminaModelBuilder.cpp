@@ -155,20 +155,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
 
 	StateType actualIndex = actualIndexPair.first;
-	// If this method is getting called, we must enqueue the state
-	// Determines if we need to insert the state
-	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
-		// Always does breadth first search
-		statesToExplore.emplace_back(state, actualIndex);
-#ifdef DEBUG_PRINTS_VERBOSE
-		StaminaMessages::debugPrint("Re-enqueuing for state: " + std::to_string(actualIndex));
-#endif // DEBUG_PRINTS_VERBOSE
-	}
-#ifdef DEBUG_PRINTS_VERBOSE
-	else {
-		StaminaMessages::debugPrint("Not re-enqueuing for state: " + std::to_string(actualIndex));
-	}
-#endif // DEBUG_PRINTS_VERBOSE
 	return actualIndex;
 }
 
@@ -212,11 +198,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		piMap[index] = 1.0;
 		tMap.insert(index);
 		stateMap.insert(index);
-// 		piMap.insert({index, (float) 1.0});
-#ifdef DEBUG_PRINTS_VERBOSE
-		StaminaMessages::debugPrint("Adding reachability of 1.0 for (initial) state " + std::to_string(index));
-		StaminaMessages::debugPrint("Probability is now: " + std::to_string(piMap[index]));
-#endif // DEBUG_PRINTS_VERBOSE
 	}
 
 	// Now explore the current state until there is no more reachable state.
@@ -231,9 +212,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	StateType currentIndex;
 	CompressedState currentState;
 
-#ifdef DEBUG_PRINTS
-	StaminaMessages::debugPrint("Size of statesToExplore is " + std::to_string(statesToExplore.size()));
-#endif
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
@@ -244,20 +222,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
 		statesToExplore.pop_front();
-#ifdef DEBUG_PRINTS_VERBOSE
-		StaminaMessages::debugPrint("Dequeued state " + std::to_string(currentIndex));
-#endif // DEBUG_PRINTS_VERBOSE
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
-#ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint(
-				"At this iteration:\n\t\tSize of statesToExplore is " +
-				std::to_string(statesToExplore.size()) + "\n\t\tWe have explored " +
-				std::to_string(numberOfExploredStates) +
-				" states. \n\t\tIf no more states are enqueued, we will explore at least " +
-				std::to_string(numberOfExploredStates + statesToExplore.size()) + " states."
-			);
-#endif // DEBUG_PRINTS
 		}
 
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
@@ -268,9 +234,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
-#ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint("Continuing without enqueuing successors to terminal state with reachability probability " + std::to_string(piMap[currentIndex]));
-#endif // DEBUG_PRINTS
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -295,90 +258,97 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
-		// Determine whether or not to enqueue all next states
-		bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
+		// To save computation time, we add all successors here
+		if (piMap[currentIndex] == 0) {
+			for (auto const & choice : behavior) {
+				for (auto const & stateProbabilityPair : choice) {
+					StateType sPrime = stateProbabilityPair.first;
+					float probability = stateProbabilityPair.second;
+					if (set_contains(stateMap, sPrime) && !set_contains(stateMap, sPrime)) {
+						statesToExplore.emplace_back(
+					}
+				}
+			}
+		}
+		else {
 
-#ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint("Reachability probability of state " + std::to_string(currentIndex) + " is " + std::to_string(piMap[currentIndex]));
-#endif // DEBUG_PRINTS
+		}
+
 		if (!shouldEnqueueAll && set_contains(tMap, currentIndex)) {
 			// Remove currentIndex from T if it's in T
 			tMap.erase(currentIndex);
-#ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint("Removing state " + std::to_string(currentIndex) + " from terminal state set.");
-#endif // DEBUG_PRINTS
 		}
 
 
-		// Now add all choices.
-		bool firstChoiceOfState = true;
-		for (auto const& choice : behavior) {
-
-			// add the generated choice information
-			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
-				for (auto const& label : choice.getLabels()) {
-					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
-#ifdef DEBUG_PRINTS
-					StaminaMessages::debugPrint("Adding label " + label + " to row " + std::to_string(currentRow));
-#endif
-				}
-			}
-			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
-				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
-			}
-			if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
-				if (firstChoiceOfState) {
-					stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
-				}
-			}
-
-			// Add the probabilistic behavior to the matrix.
-			for (auto const& stateProbabilityPair : choice) {
-				StateType sPrime = stateProbabilityPair.first;
-				float probability = stateProbabilityPair.second;
-				// Enqueue S is handled in stateToIdCallback
-				// Update transition probability only if we should enqueue all
-				if (!shouldEnqueueAll) {
-					if (piMap.find(sPrime) == piMap.end()) {
-						piMap.insert({sPrime, piMap[currentIndex] * probability});
-					}
-					else {
-						piMap[sPrime] += piMap[currentIndex] * probability;
-					}
-#ifdef DEBUG_PRINTS_VERBOSE
-					StaminaMessages::debugPrint("Reachability probability for " + std::to_string(sPrime) + " updated to " + std::to_string(piMap[sPrime]));
-#endif
-					if (!set_contains(exploredStates, sPrime)) {
-						// Add s' to ExploredStates
-						exploredStates.insert(sPrime);
-						if (!set_contains(stateMap, sPrime)) {
-							stateMap.insert(sPrime);
-							tMap.insert(sPrime);
-#ifdef DEBUG_PRINTS
-							StaminaMessages::debugPrint("Setting state " + std::to_string(sPrime) + " as terminal.");
-#endif //DEBUG_PRINTS_VERBOSE
-						}
-					}
-				}
-				else {
-					if (piMap.find(sPrime) == piMap.end()) {
-						piMap.insert({sPrime, 0.0});
-					}
-				}
-				if (shouldEnqueue(sPrime)) {
-					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
-				}
-			}
-
-			++currentRow;
-			firstChoiceOfState = false;
-		}
-		// Set our current state's reachability probability to 0
-		if (!shouldEnqueueAll) {
-			piMap[currentIndex] = 0;
-			tMap.erase(currentIndex); // May not need this line
-		}
+// 		// Now add all choices.
+// 		bool firstChoiceOfState = true;
+// 		for (auto const& choice : behavior) {
+//
+// 			// add the generated choice information
+// 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
+// 				for (auto const& label : choice.getLabels()) {
+// 					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+// #ifdef DEBUG_PRINTS
+// 					StaminaMessages::debugPrint("Adding label " + label + " to row " + std::to_string(currentRow));
+// #endif
+// 				}
+// 			}
+// 			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
+// 				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+// 			}
+// 			if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
+// 				if (firstChoiceOfState) {
+// 					stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
+// 				}
+// 			}
+//
+// 			// Add the probabilistic behavior to the matrix.
+// 			for (auto const& stateProbabilityPair : choice) {
+// 				StateType sPrime = stateProbabilityPair.first;
+// 				float probability = stateProbabilityPair.second;
+// 				// Enqueue S is handled in stateToIdCallback
+// 				// Update transition probability only if we should enqueue all
+// 				if (!shouldEnqueueAll) {
+// 					if (piMap.find(sPrime) == piMap.end()) {
+// 						piMap.insert({sPrime, piMap[currentIndex] * probability});
+// 					}
+// 					else {
+// 						piMap[sPrime] += piMap[currentIndex] * probability;
+// 					}
+// #ifdef DEBUG_PRINTS_VERBOSE
+// 					StaminaMessages::debugPrint("Reachability probability for " + std::to_string(sPrime) + " updated to " + std::to_string(piMap[sPrime]));
+// #endif
+// 					if (!set_contains(exploredStates, sPrime)) {
+// 						// Add s' to ExploredStates
+// 						exploredStates.insert(sPrime);
+// 						if (!set_contains(stateMap, sPrime)) {
+// 							stateMap.insert(sPrime);
+// 							tMap.insert(sPrime);
+// #ifdef DEBUG_PRINTS
+// 							StaminaMessages::debugPrint("Setting state " + std::to_string(sPrime) + " as terminal.");
+// #endif //DEBUG_PRINTS_VERBOSE
+// 						}
+// 					}
+// 				}
+// 				else {
+// 					if (piMap.find(sPrime) == piMap.end()) {
+// 						piMap.insert({sPrime, 0.0});
+// 					}
+// 				}
+// 				if (shouldEnqueue(sPrime)) {
+// 					// row, column, value
+// 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
+// 				}
+// 			}
+//
+// 			++currentRow;
+// 			firstChoiceOfState = false;
+// 		}
+// 		// Set our current state's reachability probability to 0
+// 		if (!shouldEnqueueAll) {
+// 			piMap[currentIndex] = 0;
+// 			tMap.erase(currentIndex); // May not need this line
+// 		}
 		++currentRowGroup;
 
 		++numberOfExploredStates;
