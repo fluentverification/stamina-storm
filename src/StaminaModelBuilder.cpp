@@ -78,6 +78,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 			case storm::generator::ModelType::CTMC:
 				return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
 			case storm::generator::ModelType::DTMC:
+				StaminaMessages::warning("This model is a DTMC. If you are using this in the STAMINA program, currently, only CTMCs are supported. You may get an error in checking.");
+				return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, buildModelComponents());
 			case storm::generator::ModelType::MDP:
 			case storm::generator::ModelType::POMDP:
 			case storm::generator::ModelType::MA:
@@ -330,15 +332,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
-			// For testing purposes
-			double exitRateSum = 0.0;
-
-			for (auto const stateProbabilityPair : choice) { exitRateSum += stateProbabilityPair.second; }
-
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				float probability = stateProbabilityPair.second / exitRateSum;
+				float probability = stateProbabilityPair.second;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				if (!shouldEnqueueAll) {
@@ -380,6 +377,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Set our current state's reachability probability to 0
 		if (!shouldEnqueueAll) {
 			piMap[currentIndex] = 0;
+			tMap.erase(currentIndex); // May not need this line
 		}
 		++currentRowGroup;
 
