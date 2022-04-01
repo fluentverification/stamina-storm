@@ -154,6 +154,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
+		std::cout << "Enqueuing state " << actualIndex << std::endl;
 	}
 	return actualIndex;
 }
@@ -291,7 +292,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				float probability = stateProbabilityPair.second * 2; // Why do we need the x2???
+				float probability = stateProbabilityPair.second; // Why do we need the x2???
 
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
