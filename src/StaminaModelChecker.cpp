@@ -177,20 +177,12 @@ StaminaModelChecker::modelCheckProperty(
 			labeling = &( model->getStateLabeling());
 			labeling->addLabel("absorbing");
 			labeling->addLabelToState("absorbing", 0);
-			// DELETE THIS
-			/*auto lacIStates = labeling->getStates("(LacI < 59)");
-			auto tetRStates = labeling->getStates("(TetR > 10)");
-			std::cout << "LacI < 59 states: \n" << lacIStates << std::endl;
-			std::cout << "TetR > 10 states: \n" << tetRStates << std::endl;
-			*/// END DELETE THIS
 
-#ifdef DEBUG_PRINTS
-			StaminaMessages::debugPrint("The following is the labeling information for the built model:");
-			labeling.printLabelingInformationToStream();
-#endif
 			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
+
+			std::cout << "Perimeter probabilities are " << piHat << std::endl;
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
