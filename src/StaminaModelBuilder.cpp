@@ -154,7 +154,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
-		std::cout << "Enqueuing state " << actualIndex << std::endl;
+		// std::cout << "Enqueuing state " << actualIndex << std::endl;
 	}
 	return actualIndex;
 }
@@ -222,6 +222,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
+		// std::cout << "Dequeued state " << currentIndex << std::endl;
 
 		statesToExplore.pop_front();
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -308,7 +309,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						exploredStates.insert(sPrime);
 						if (!set_contains(stateMap, sPrime)) {
 							stateMap.insert(sPrime);
-	// 							tMap.insert(sPrime);
+	 							tMap.insert(sPrime);
 						}
 					}
 				}
