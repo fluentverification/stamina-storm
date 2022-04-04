@@ -8,7 +8,7 @@
 
 // Frequency for info/debug messages in terms of number of states explored.
 // #define MSG_FREQUENCY 100000
-#define MSG_FREQUENCY 500000
+#define MSG_FREQUENCY 4000
 
 #include <functional>
 #include <sstream>
@@ -489,7 +489,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	}
 	statesToExplore.clear();
 	exploredStates.clear();
-	stateMap.clear();
+	// stateMap.clear();
 	tMap.clear();
 	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
