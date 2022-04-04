@@ -104,12 +104,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap.find(nextState) == piMap.end()) {
 		piMap.insert({nextState, (float) 0.0});
 	}
+	// if (set_contains(tMap, currentState) || piMap[currentState] >= Options::kappa) {
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
 		return true;
 	}
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	return !(set_contains(stateMap, nextState) && set_contains(exploredStates, nextState));
+	// }
+	// return isInit;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -151,10 +154,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	StateType actualIndex = actualIndexPair.first;
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
-	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
-		// Always does breadth first search
+	if (isInit) {
 		statesToExplore.emplace_back(state, actualIndex);
-		// std::cout << "Enqueuing state " << actualIndex << std::endl;
+	}
+	if (actualIndex == newIndex) {
+		transitionMap.insert({actualIndex, state});
+		// Always does breadth first search
+		// statesToExplore.emplace_back(state, actualIndex);
+		// std::cout << "Enqueuing state " << actualIndex << " with previous index " << this->currentState  << std::endl;
 	}
 	return actualIndex;
 }
@@ -216,13 +223,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
+		transitionMap.clear();
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
+		std::cout << "Dequeued state " << currentIndex << std::endl;
 
 		statesToExplore.pop_front();
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -290,11 +298,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
+			double totalRate = 0.0;
+			for (auto const & stateProbabilityPair : choice) {
+				totalRate += stateProbabilityPair.second;
+			}
+
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				float probability = stateProbabilityPair.second; // Why do we need the x2???
-
+				float probability = stateProbabilityPair.second / totalRate; // Why do we need the x2???
+				// std::cout << "Transition probability for " << sPrime << " is " << probability << std::endl;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				if (!shouldEnqueueAll) {
@@ -307,13 +320,19 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					if (!set_contains(exploredStates, sPrime)) {
 						// Add s' to ExploredStates
 						exploredStates.insert(sPrime);
+						statesToExplore.emplace_back(transitionMap[sPrime], sPrime);
+						std::cout << "Enqueuing state " << sPrime << " with previous index " << this->currentState  << std::endl;
 						if (!set_contains(stateMap, sPrime)) {
 							stateMap.insert(sPrime);
 	 							tMap.insert(sPrime);
+
 						}
 					}
 				}
 				else {
+					statesToExplore.emplace_back(transitionMap[sPrime], sPrime);
+					 std::cout << "Enqueuing state " << sPrime << " with previous index " << this->currentState  << std::endl;
+
 					if (piMap.find(sPrime) == piMap.end()) {
 						piMap.insert({sPrime, 0.0});
 					}
@@ -328,10 +347,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			firstChoiceOfState = false;
 		}
 		// Set our current state's reachability probability to 0
-		if (!shouldEnqueueAll) {
-			piMap[currentIndex] = 0;
-			tMap.erase(currentIndex); // May not need this line
-		}
+		piMap[currentIndex] = 0;
 		++currentRowGroup;
 
 		++numberOfExploredStates;
@@ -487,8 +503,9 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
+	this->currentState = 1;
 	statesToExplore.clear();
-	exploredStates.clear();
+	exploredStates.clear(); // States explored in our current iteration
 	// stateMap.clear();
 	tMap.clear();
 	piMap.clear();
