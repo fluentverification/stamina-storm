@@ -53,6 +53,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(generator->getStateSize())))
 	, absorbingWasSetUp(false)
 	, fresh(true)
+	, firstIteration(true)
 {
 	// Intentionally left empty
 }
@@ -110,7 +111,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		return true;
 	}
 	// Otherwise, we base it on whether the maps we keep track of contain them
-	return !(set_contains(stateMap, nextState) && set_contains(exploredStates, nextState));
+	return !set_contains(exploredStates, nextState); // !(set_contains(stateMap, nextState) && set_contains(exploredStates, nextState));
 	// }
 	// return isInit;
 }
@@ -200,7 +201,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
 		piMap[index] = 1.0;
-		// tMap.insert(index);
+		if (firstIteration) {
+			tMap.insert(index);
+			firstIteration = false;
+		}
 		stateMap.insert(index);
 	}
 
@@ -496,8 +500,8 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	statesToExplore.clear();
 	exploredStates.clear(); // States explored in our current iteration
 	// stateMap.clear();
-	tMap.clear();
-	piMap.clear();
+	// tMap.clear();
+	// piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }

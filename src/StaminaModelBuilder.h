@@ -203,6 +203,7 @@ namespace stamina {
 		bool absorbingWasSetUp;
 		bool isInit;
 		bool fresh;
+		bool firstIteration;
 	};
 
 	// Helper method to find in unordered_set
