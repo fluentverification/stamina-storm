@@ -105,7 +105,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap.find(nextState) == piMap.end()) {
 		piMap.insert({nextState, (float) 0.0});
 	}
-	if (isInit) { return true; }
+	if (isInit) { enqueued.insert(nextState); return true; }
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
 		if ((set_contains(stateMap, nextState) && (!set_contains(exploredStates, nextState)))) {
