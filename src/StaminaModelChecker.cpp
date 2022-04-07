@@ -182,7 +182,7 @@ StaminaModelChecker::modelCheckProperty(
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
 
-			std::cout << "Perimeter probabilities are " << piHat << std::endl;
+// 			std::cout << "Perimeter probabilities are " << piHat << std::endl;
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
