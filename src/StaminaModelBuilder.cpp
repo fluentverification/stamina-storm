@@ -107,7 +107,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	}
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
-		if (set_contains(stateMap, nextState) || isInit) {
+		if ((set_contains(stateMap, nextState) && (!set_contains(exploredStates, nextState))) || isInit) {
 			enqueued.insert({nextState, true});
 			std::cout << "Enqueuing state " << nextState << " because pi[" << currentState << "]" << std::endl;
 			return true;
@@ -118,7 +118,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		}
 	}
 
-	bool enqueuedState = !set_contains(exploredStates, nextState);
+	bool enqueuedState = !set_contains(exploredStates, nextState); // && set_contains(stateMap, nextState);
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		std::cout << "Enqueuing " << nextState << std::endl;
@@ -322,6 +322,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				float probability = stateProbabilityPair.second / totalRate;
+				tMap.insert(sPrime);
 				// std::cout << "Transition probability for " << sPrime << " is " << probability << std::endl;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
@@ -337,7 +338,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						exploredStates.insert(sPrime);
 						if (!set_contains(stateMap, sPrime)) {
 							stateMap.insert(sPrime);
-	 							tMap.insert(sPrime);
+							exploredStates.insert(sPrime);
 						}
 					}
 				}
