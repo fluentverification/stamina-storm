@@ -54,6 +54,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
+	, localKappa(Options::kappa)
 {
 	// Intentionally left empty
 }
@@ -187,6 +188,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
+	std::cout << "At this iteration, kappa = " << localKappa << std::endl;
 	fresh = false;
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -260,9 +262,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
-// 			std::cout << "Continuing without enqueuing successors to " << currentIndex <<
-// 			"(since kappa = " << Options::kappa << ")" << std::endl;
+		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < localKappa) {
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -319,11 +319,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				float probability = stateProbabilityPair.second / totalRate;
-				// std::cout << "Transition probability for " << sPrime << " is " << probability << std::endl;
+				double probability = stateProbabilityPair.second / totalRate;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
-// 				exploredStates.insert(sPrime);
 				if (!shouldEnqueueAll) {
 					if (piMap.find(sPrime) == piMap.end()) {
 						piMap.insert({sPrime, piMap[currentIndex] * probability});
@@ -487,11 +485,16 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = 0.0;
+	std::cout << "At this iteration, the following states are terminal:";
+	int totalStates = 0;
 	for (const auto & tState : tMap) {
-		totalProbability += Options::kappa; // piMap[tState];
+// 		std::cout << tState << ", ";
+		totalStates++;
+		totalProbability += localKappa; // piMap[tState];
 	}
+	std::cout << totalStates << std::endl;
 	// Reduce kappa
-	Options::kappa /= Options::reduce_kappa;
+	localKappa /= Options::reduce_kappa;
 	return totalProbability;
 }
 
@@ -548,6 +551,12 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerato
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator
 ) {
 	this->generator = generator;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
+	Options::kappa = localKappa;
 }
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

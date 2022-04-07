@@ -170,6 +170,7 @@ StaminaModelChecker::modelCheckProperty(
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 #ifdef USE_STAMINA_TRUNCATION
 		while (piHat >= Options::prob_win / Options::approx_factor) {
+			std::cout << "piHat = " << piHat << " and w/approx = " << Options::prob_win / Options::approx_factor << std::endl;
 			StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
@@ -188,6 +189,7 @@ StaminaModelChecker::modelCheckProperty(
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 			builder->setGenerator(generator);
 		}
+		builder->setLocalKappaToGlobal();
 #endif // USE_STAMINA_TRUNCATION
 #ifndef USE_STAMINA_TRUNCATION
 		/* Naive truncation using JUST a breadth first search rather than truncating paths
