@@ -211,11 +211,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
 		if (firstIteration) {
-			piMap[index] = 1.0;
-			tMap.insert(index);
-			stateMap.insert(index);
 			firstIteration = false;
 		}
+		piMap[index] = 1.0;
+		tMap.insert(index);
+		stateMap.insert(index);
 		exploredStates.insert(index);
 	}
 
