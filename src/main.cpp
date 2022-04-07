@@ -7,7 +7,7 @@
 void 
 set_default_values(struct arguments * arguments) {
     arguments->kappa = 1.0;
-    arguments->reduce_kappa = 2.0;
+    arguments->reduce_kappa = 1.25; // 2.0;
     arguments->approx_factor = 2.0;
     arguments->prob_win = 1.0e-3;
     arguments->max_approx_count = 10;
