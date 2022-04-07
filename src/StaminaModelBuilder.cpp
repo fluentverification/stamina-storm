@@ -287,12 +287,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Determine whether or not to enqueue all next states
 		bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
 
-		if (!shouldEnqueueAll && set_contains(tMap, currentIndex)) {
-			// Remove currentIndex from T if it's in T
-			tMap.erase(currentIndex);
-		}
-
-
 		// Now add all choices.
 		bool firstChoiceOfState = true;
 		for (auto const& choice : behavior) {
@@ -356,6 +350,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 			++currentRow;
 			firstChoiceOfState = false;
+		}
+
+		if (set_contains(tMap, currentIndex)) {
+			// Remove currentIndex from T if it's in T
+			tMap.erase(currentIndex);
 		}
 		// Set our current state's reachability probability to 0
 		if (!shouldEnqueueAll) {
@@ -520,7 +519,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	statesToExplore.clear();
 	exploredStates.clear(); // States explored in our current iteration
 	// stateMap.clear();
-	// tMap.clear();
+	tMap.clear();
 	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
