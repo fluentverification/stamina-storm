@@ -211,10 +211,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
 		piMap[index] = 1.0;
-		//if (firstIteration) {
+		if (firstIteration) {
 			tMap.insert(index);
 			firstIteration = false;
-		//}
+		}
 		stateMap.insert(index);
 	}
 
@@ -251,8 +251,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
-		// Load state for us to use
-		generator->load(currentState);
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
@@ -264,6 +262,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			continue;
 		}
 
+		// Load state for us to use
+		generator->load(currentState);
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
@@ -312,7 +312,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				float probability = stateProbabilityPair.second / totalRate;
-				tMap.insert(sPrime);
+			//	tMap.insert(sPrime);
 				// std::cout << "Transition probability for " << sPrime << " is " << probability << std::endl;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
@@ -334,6 +334,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					else {
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
+						tMap.insert(sPrime);
 
 					}
 				}
@@ -519,7 +520,6 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	this->currentState = 1;
 	statesToExplore.clear();
 	exploredStates.clear(); // States explored in our current iteration
-	// stateMap.clear();
 	tMap.clear();
 	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
