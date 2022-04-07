@@ -118,7 +118,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		}
 	}
 
-	bool enqueuedState = !set_contains(exploredStates, nextState); // && set_contains(stateMap, nextState);
+	bool enqueuedState =
+		(set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) ||
+		(!set_contains(stateMap, nextState));
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		std::cout << "Enqueuing " << nextState << std::endl;
@@ -327,20 +329,22 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					else {
 						piMap[sPrime] += piMap[currentIndex] * probability;
 					}
-					if (!set_contains(exploredStates, sPrime)) {
+					if (set_contains(stateMap, sPrime)) {
 						// Add s' to ExploredStates
-						exploredStates.insert(sPrime);
-						if (!set_contains(stateMap, sPrime)) {
-							stateMap.insert(sPrime);
+						if (!set_contains(exploredStates, sPrime)) {
 							exploredStates.insert(sPrime);
 						}
+					}
+					else {
+						stateMap.insert(sPrime);
+						exploredStates.insert(sPrime);
 					}
 				}
 				else {
 					if (piMap.find(sPrime) == piMap.end()) {
 						piMap.insert({sPrime, 0.0});
 					}
-					exploredStates.insert(sPrime);
+					// exploredStates.insert(sPrime);
 				}
 				if (enqueued[sPrime]){ // (shouldEnqueue(sPrime)) {
 					// row, column, value
