@@ -109,7 +109,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap[currentState] == 0.0) {
 		if ((set_contains(stateMap, nextState) && (!set_contains(exploredStates, nextState))) || isInit) {
 			enqueued.insert({nextState, true});
-			std::cout << "Enqueuing state " << nextState << " because pi[" << currentState << "]" << std::endl;
 			return true;
 		}
 		else {
@@ -123,11 +122,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		(!set_contains(stateMap, nextState));
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
-		std::cout << "Enqueuing " << nextState << std::endl;
 		enqueued.insert({nextState, true});
-	}
-	else {
-		std::cout << "Not enqueuing " << nextState << std::endl;
 	}
 	return enqueuedState;
 }
@@ -174,7 +169,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
-		// std::cout << "Enqueuing state " << actualIndex << " with previous index " << this->currentState  << std::endl;
 	}
 	return actualIndex;
 }
@@ -243,6 +237,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
+		std::cout << "Reachability for " << currentIndex << " is " << piMap[currentIndex] << std::endl;
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
@@ -261,7 +256,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
-			std::cout << "Continuing without enqueuing successors to " << currentIndex << std::endl;
+			// std::cout << "Continuing without enqueuing successors to " << currentIndex << std::endl;
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -313,7 +308,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			for (auto const & stateProbabilityPair : choice) {
 				totalRate += stateProbabilityPair.second;
 			}
-
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
@@ -329,6 +323,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					else {
 						piMap[sPrime] += piMap[currentIndex] * probability;
 					}
+					// std::cout << "Reachability for " << sPrime << " is " << piMap[sPrime] << std::endl;
+					// if stateIsExisting
 					if (set_contains(stateMap, sPrime)) {
 						// Add s' to ExploredStates
 						if (!set_contains(exploredStates, sPrime)) {
@@ -338,6 +334,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					else {
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
+
 					}
 				}
 				else {
