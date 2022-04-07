@@ -254,8 +254,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
-		// Load state for us to use
-		generator->load(currentState);
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
@@ -267,6 +265,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			transitionMatrixBuilder.addNextValue(currentRow, 0, 1.0);
 			continue;
 		}
+		// Load state for us to use
+		generator->load(currentState);
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
