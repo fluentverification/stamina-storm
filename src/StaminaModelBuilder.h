@@ -196,7 +196,7 @@ namespace stamina {
 		std::unordered_set<StateType> stateMap; // S in the QEST paper
 		std::unordered_set<StateType> tMap; // T in the QEST paper
 		std::unordered_map<StateType, float> piMap; // Maps reachability probabilities to their states
-		std::unordered_map<StateType, CompressedState> transitionMap;
+		std::unordered_map<StateType, bool> enqueued;
 		double reachabilityThreshold;
 		StateType currentState;
 		CompressedState absorbingState;

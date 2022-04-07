@@ -105,15 +105,29 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap.find(nextState) == piMap.end()) {
 		piMap.insert({nextState, (float) 0.0});
 	}
-	// if (set_contains(tMap, currentState) || piMap[currentState] >= Options::kappa) {
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
-		return true;
+		if (set_contains(stateMap, nextState) || isInit) {
+			enqueued.insert({nextState, true});
+			std::cout << "Enqueuing state " << nextState << " because pi[" << currentState << "]" << std::endl;
+			return true;
+		}
+		else {
+			std::cout << "Not enqueuing state " << nextState << std::endl;
+			return false;
+		}
 	}
+
+	bool enqueuedState = !set_contains(exploredStates, nextState);
 	// Otherwise, we base it on whether the maps we keep track of contain them
-	return !set_contains(exploredStates, nextState); // !(set_contains(stateMap, nextState) && set_contains(exploredStates, nextState));
-	// }
-	// return isInit;
+	if (enqueuedState) {
+		std::cout << "Enqueuing " << nextState << std::endl;
+		enqueued.insert({nextState, true});
+	}
+	else {
+		std::cout << "Not enqueuing " << nextState << std::endl;
+	}
+	return enqueuedState;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -201,10 +215,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
 		piMap[index] = 1.0;
-		if (firstIteration) {
+		//if (firstIteration) {
 			tMap.insert(index);
 			firstIteration = false;
-		}
+		//}
 		stateMap.insert(index);
 	}
 
@@ -223,6 +237,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
+		enqueued.clear();
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
@@ -244,6 +259,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
+			std::cout << "Continuing without enqueuing successors to " << currentIndex << std::endl;
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -305,7 +321,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				float probability = stateProbabilityPair.second / totalRate; // Why do we need the x2???
+				float probability = stateProbabilityPair.second / totalRate;
 				// std::cout << "Transition probability for " << sPrime << " is " << probability << std::endl;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
@@ -329,8 +345,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					if (piMap.find(sPrime) == piMap.end()) {
 						piMap.insert({sPrime, 0.0});
 					}
+					exploredStates.insert(sPrime);
 				}
-				if (shouldEnqueue(sPrime)) {
+				if (enqueued[sPrime]){ // (shouldEnqueue(sPrime)) {
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
@@ -340,7 +357,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			firstChoiceOfState = false;
 		}
 		// Set our current state's reachability probability to 0
+		if (!shouldEnqueueAll) {
 			piMap[currentIndex] = 0;
+		}
 		++currentRowGroup;
 
 		++numberOfExploredStates;
@@ -501,7 +520,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	exploredStates.clear(); // States explored in our current iteration
 	// stateMap.clear();
 	// tMap.clear();
-	// piMap.clear();
+	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }
