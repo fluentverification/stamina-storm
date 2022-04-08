@@ -104,7 +104,7 @@ bool
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
 	// If our previous state has not been encountered, we have unexpected behavior
 	if (piMap.find(nextState) == piMap.end()) {
-		piMap.insert({nextState, (float) 0.0});
+		piMap.insert({nextState, (double) 0.0});
 	}
 	if (isInit) { enqueued.insert(nextState); return true; }
 	// If the reachability probability of the previous state is 0, enqueue regardless
@@ -126,6 +126,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (enqueuedState) {
 		enqueued.insert(nextState);
 	}
+	// else {
+	//	std::cout << "Not enqueuing state (alt) " << nextState << std::endl;
+	//}
 	return enqueuedState;
 }
 
@@ -367,7 +370,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 		if (set_contains(tMap, currentIndex)) {
 			// Remove currentIndex from T if it's in T
-// 			std::cout << "Setting state " << currentIndex << " to nonterminal" << std::endl;
 			tMap.erase(currentIndex);
 		}
 		// Set our current state's reachability probability to 0
