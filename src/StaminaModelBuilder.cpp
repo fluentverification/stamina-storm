@@ -194,7 +194,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-	std::cout << "At this iteration, kappa = " << localKappa << std::endl;
 	fresh = false;
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -252,11 +251,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
 		exploredStates.insert(currentIndex);
-// 		std::cout << "Reachability for " << currentIndex << " is " << piMap[currentIndex] << std::endl;
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
 
 		statesToExplore.pop_front();
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -346,9 +343,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 				}
 				else {
-					if (piMap.find(sPrime) == piMap.end()) {
-						piMap.insert({sPrime, 0.0});
-					}
 					if (set_contains(stateMap, sPrime)) {
 						// Add s' to ExploredStates
 						if (!set_contains(exploredStates, sPrime)) {

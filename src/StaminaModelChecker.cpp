@@ -151,20 +151,6 @@ StaminaModelChecker::modelCheckProperty(
 		// Reset the reachability threshold
 		reachThreshold = Options::kappa;
 
-
-		// If we don't switch to a combined CTMC, just perform the model checking
-		// Without state space truncation
-		/*if (!switchToCombinedCTMC) {
-			StaminaMessages::info("Verifying lower bound for " + prop_min->getName() + ".");
-			check(prop_min, min_results);
-			StaminaMessages::info("Verifying upper bound for " + prop_max->getName() + ".");
-			check(prop_max, max_results);
-			// Write to output file
-			// TODO: write to output file
-			// Update here since we continue to the next loop iteration
-			++numRefineIterations;
-			continue;
-		}*/
 		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
