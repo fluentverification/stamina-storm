@@ -114,17 +114,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			return true;
 		}
 		else {
-// 			std::cout << "Not enqueuing state " << nextState << std::endl;
 			return false;
 		}
 	}
 
 	bool enqueuedState =
+		// If the state has been explored in any iteration AND it is NOT in the set
+		// of states explored in our CURRENT iteration
 		(set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) ||
+		// OR if it's simply not in that map
 		(!set_contains(stateMap, nextState));
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		enqueued.insert(nextState);
+// 		std::cout << "Enqueuing " << nextState << std::endl;
 	}
 	// else {
 	//	std::cout << "Not enqueuing state (alt) " << nextState << std::endl;
@@ -326,13 +329,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				if (!shouldEnqueueAll) {
-					if (piMap.find(sPrime) == piMap.end()) {
-						piMap.insert({sPrime, piMap[currentIndex] * probability});
-					}
-					else {
-						piMap[sPrime] += piMap[currentIndex] * probability;
-					}
-					// std::cout << "Reachability for " << sPrime << " is " << piMap[sPrime] << std::endl;
+					piMap[sPrime] += piMap[currentIndex] * probability;
 					// if stateIsExisting
 					if (set_contains(stateMap, sPrime)) {
 						// Add s' to ExploredStates
@@ -341,6 +338,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						}
 					}
 					else {
+						// This is if the state hasn't been seen ever. All new states start as terminal
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
 						tMap.insert(sPrime);
@@ -358,7 +356,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						}
 					}
 				}
-				if (set_contains(enqueued, sPrime)) { // (shouldEnqueue(sPrime)) {
+				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
@@ -536,7 +534,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	this->currentState = 1;
+// 	this->currentState = 1;
 	statesToExplore.clear();
 	exploredStates.clear(); // States explored in our current iteration
 	// stateMap.clear();
