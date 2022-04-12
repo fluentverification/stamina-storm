@@ -322,11 +322,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				double probability = stateProbabilityPair.second / totalRate;
-				// Sanity check
-				if (probability == 0) {
-					std::cout << "Got a state with probability zero! " << sPrime << std::endl;
-					continue;
-				}
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				// These are next states where the previous state has a reachability
