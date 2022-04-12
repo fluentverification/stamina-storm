@@ -111,12 +111,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap[currentState] == 0.0) {
 		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
 			enqueued.insert(nextState);
-			std::cout << "Enqueuing " << nextState << std::endl;
+			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentState << std::endl;
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	bool stateIsExisting = set_contains(stateMap, nextState);
@@ -128,7 +126,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		(!stateIsExisting);
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
-		std::cout << "Enqueuing new state " << nextState << std::endl;
+		if (!stateIsExisting) {
+			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentState << std::endl;
+		}
+		else {
+			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentState << std::endl;
+		}
 		enqueued.insert(nextState);
 	}
 	return enqueuedState;
@@ -166,7 +169,9 @@ StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	// Create new index just in case we need it
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
+	// TODO: need to figure out what to do when this is called on the same index twice
 
+	// If we shouldn't enqueue our new index
 	if (!shouldEnqueue(newIndex)) {
 		return newIndex;
 	}
