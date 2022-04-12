@@ -56,9 +56,9 @@ namespace stamina {
 		* */
 		static void debugPrint(std::string msg);
 #endif
-		static void writeResults(ResultInformation resultInformation, std::ostream out = std::cout);
+		static void writeResults(ResultInformation resultInformation, std::ostream out);
 	protected:
-		const std::string horizontalSeparator =
+		static constexpr char * horizontalSeparator =
 			"========================================================================================";
 	};
 } // namespace stamina
