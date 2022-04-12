@@ -109,7 +109,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (isInit) { enqueued.insert(nextState); return true; }
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
-		if ((set_contains(stateMap, nextState) && (!set_contains(exploredStates, nextState)))) {
+		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
 			enqueued.insert(nextState);
 			return true;
 		}
@@ -127,11 +127,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		enqueued.insert(nextState);
-		std::cout << "Enqueuing " << nextState << std::endl;
 	}
-	// else {
-	//	std::cout << "Not enqueuing state (alt) " << nextState << std::endl;
-	//}
 	return enqueuedState;
 }
 
@@ -325,8 +321,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				double probability = stateProbabilityPair.second / totalRate;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
-				// These are next states where the previous state has a reachability greater than
-				// zero
+				// These are next states where the previous state has a reachability
+				// greater than zero
 				if (!shouldEnqueueAll) {
 					piMap[sPrime] += piMap[currentIndex] * probability;
 					// if stateIsExisting
@@ -341,6 +337,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
 						tMap.insert(sPrime);
+						std::cout << "Creating new probstate as terminal " << sPrime << std::endl;
 					}
 				}
 				else {
@@ -364,6 +361,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (set_contains(tMap, currentIndex)) {
 			// Remove currentIndex from T if it's in T
 			tMap.erase(currentIndex);
+			std::cout << "Setting state " << currentIndex << " as nonterminal" << std::endl;
 		}
 		// Set our current state's reachability probability to 0
 		if (!shouldEnqueueAll) {
