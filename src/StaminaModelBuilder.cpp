@@ -111,6 +111,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap[currentState] == 0.0) {
 		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
 			enqueued.insert(nextState);
+			std::cout << "Enqueuing " << nextState << std::endl;
 			return true;
 		}
 		else {
@@ -127,6 +128,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		(!stateIsExisting);
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
+		std::cout << "Enqueuing new state " << nextState << std::endl;
 		enqueued.insert(nextState);
 	}
 	return enqueuedState;
@@ -320,6 +322,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				double probability = stateProbabilityPair.second / totalRate;
+				// Sanity check
+				if (probability == 0) {
+					std::cout << "Got a state with probability zero! " << sPrime << std::endl;
+					continue;
+				}
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				// These are next states where the previous state has a reachability
@@ -338,7 +345,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
 						tMap.insert(sPrime);
-						std::cout << "Creating new probstate as terminal " << sPrime << std::endl;
 					}
 				}
 				else {
@@ -362,7 +368,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (set_contains(tMap, currentIndex)) {
 			// Remove currentIndex from T if it's in T
 			tMap.erase(currentIndex);
-			std::cout << "Setting state " << currentIndex << " as nonterminal" << std::endl;
 		}
 		// Set our current state's reachability probability to 0
 		if (!shouldEnqueueAll) {
@@ -529,6 +534,8 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	}
 	statesToExplore.clear();
 	exploredStates.clear(); // States explored in our current iteration
+	// API reset
+	if (stateRemapping) { stateRemapping->clear(); }
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }

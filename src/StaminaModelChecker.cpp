@@ -131,7 +131,7 @@ StaminaModelChecker::modelCheckProperty(
 		StaminaMessages::warning("This property (" + propName + ") is a probability path formula.");
 	}
 
-	// Will we sitch to optimized CTMC analysis? (I.e., will we perform the state-space truncation)
+	// Will we switch to optimized CTMC analysis? (I.e., will we perform the state-space truncation)
 	bool switchToCombinedCTMC = true;
 	// Check if we are using an until formula and a path formula
 	std::shared_ptr<const storm::logic::Formula> formula = prop.getFilter().getFormula();
