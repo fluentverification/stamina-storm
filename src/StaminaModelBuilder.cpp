@@ -127,7 +127,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		enqueued.insert(nextState);
-// 		std::cout << "Enqueuing " << nextState << std::endl;
+		std::cout << "Enqueuing " << nextState << std::endl;
 	}
 	// else {
 	//	std::cout << "Not enqueuing state (alt) " << nextState << std::endl;
@@ -178,7 +178,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	StateType actualIndex = actualIndexPair.first;
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
-	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
+	if (actualIndex == newIndex) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
 	}
@@ -325,6 +325,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				double probability = stateProbabilityPair.second / totalRate;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
+				// These are next states where the previous state has a reachability greater than
+				// zero
 				if (!shouldEnqueueAll) {
 					piMap[sPrime] += piMap[currentIndex] * probability;
 					// if stateIsExisting
@@ -339,7 +341,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
 						tMap.insert(sPrime);
-
 					}
 				}
 				else {
@@ -482,7 +483,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 	std::cout << "At this iteration, the following states are terminal:";
 	int totalStates = 0;
 	for (const auto & tState : tMap) {
-// 		std::cout << tState << ", ";
 		totalStates++;
 		totalProbability += localKappa; // piMap[tState];
 	}
@@ -528,12 +528,8 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-// 	this->currentState = 1;
 	statesToExplore.clear();
 	exploredStates.clear(); // States explored in our current iteration
-	// stateMap.clear();
-// 	tMap.clear();
-// 	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }
