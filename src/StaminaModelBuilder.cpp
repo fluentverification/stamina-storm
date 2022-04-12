@@ -102,6 +102,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
+	if (set_contains(enqueued, nextState)) { return false; }
 	// If our previous state has not been encountered, we have unexpected behavior
 	if (piMap.find(nextState) == piMap.end()) {
 		piMap.insert({nextState, (double) 0.0});
@@ -167,6 +168,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+// 	if (!stateStorage.stateToId.contains(state))
 	// Create new index just in case we need it
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	// TODO: need to figure out what to do when this is called on the same index twice
