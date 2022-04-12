@@ -118,12 +118,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		}
 	}
 
+	bool stateIsExisting = set_contains(stateMap, nextState);
 	bool enqueuedState =
 		// If the state has been explored in any iteration AND it is NOT in the set
 		// of states explored in our CURRENT iteration
-		(set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) ||
+		(stateIsExisting && !set_contains(exploredStates, nextState)) ||
 		// OR if it's simply not in that map
-		(!set_contains(stateMap, nextState));
+		(!stateIsExisting);
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		enqueued.insert(nextState);

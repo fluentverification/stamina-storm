@@ -3,6 +3,8 @@
 
 #include <string>
 #include <stdint.h>
+#include <fstream>
+#include <iostream>
 
 // #define DEBUG_PRINTS
 // #define DEBUG_PRINTS_VERBOSE
@@ -18,6 +20,14 @@ namespace stamina {
         , ERR_SEVERE = 2
         , ERR_MEMORY_EXCEEDED = 137
     };
+	/* All result information */
+	struct ResultInformation {
+		double pMin;
+		double pMax;
+		uint32_t numberStates;
+		uint8_t numberInitial;
+		std::string property;
+	};
 	class StaminaMessages {
 	public:
 		/**
@@ -46,6 +56,10 @@ namespace stamina {
 		* */
 		static void debugPrint(std::string msg);
 #endif
+		static void writeResults(ResultInformation resultInformation, std::ostream out = std::cout);
+	protected:
+		const std::string horizontalSeparator =
+			"========================================================================================";
 	};
 } // namespace stamina
 #endif // STAMINA_MESSAGES_H

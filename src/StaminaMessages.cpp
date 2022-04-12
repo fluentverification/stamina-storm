@@ -46,3 +46,15 @@ void StaminaMessages::debugPrint(std::string msg) {
 	std::cout << BOLD(FMAG("[DEBUG MESSAGE]: ")) << msg << std::endl;
 }
 #endif
+
+void
+StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream out) {
+	out << horizontalSeparator << std::endl;
+	out << "RESULTS" << std::endl << horizontalSeparator << std::endl;
+	out << "Property: " resultInformation.property << std::endl;
+	out << "Probability Minimum: " << resultInformation.pMin << std::endl;
+	out << "Probability Maximum: " << resultInformation.pMax << std::endl;
+	out << horizontalSeparator << std::endl;
+	out << "Model: " << resultInformation.numberStates << " states with " << resultInformation.numberInitial << " initial." << std::endl;
+	out << horizontalSeparator << std::endl;
+}
