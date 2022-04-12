@@ -102,7 +102,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
-	if (set_contains(enqueued, nextState)) { return false; }
+	// Optimization
+	if (set_contains(enqueued, nextState)) { return true; }
 	// If our previous state has not been encountered, we have unexpected behavior
 	if (piMap.find(nextState) == piMap.end()) {
 		piMap.insert({nextState, (double) 0.0});
@@ -171,7 +172,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	// Create new index just in case we need it
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	// TODO: need to figure out what to do when this is called on the same index twice
-
 	// If we shouldn't enqueue our new index
 	if (!shouldEnqueue(newIndex)) {
 		return newIndex;
@@ -327,6 +327,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
+				// If we get 0 from stateToIdCallback, it means we have already called
+				// it on a state and this is a duplicate
+				if (sPrime == 0) {
+					continue;
+				}
 				double probability = stateProbabilityPair.second / totalRate;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
