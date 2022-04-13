@@ -74,7 +74,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
-// 	try {
+	try {
 		switch (generator->getModelType()) {
 			// Only supports CTMC models.
 			case storm::generator::ModelType::CTMC:
@@ -89,13 +89,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 				StaminaMessages::error("This model type is not supported!");
 		}
 		return nullptr;
-// 	}
-// 	catch(const std::exception& e) {
-// 		std::stringstream ss;
-// 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
-// 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-// 		StaminaMessages::error(ss.str());
-// 	}
+	}
+	catch(const std::exception& e) {
+		std::stringstream ss;
+		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
+		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
+		StaminaMessages::error(ss.str());
+	}
 
 }
 
@@ -116,6 +116,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentState << std::endl;
 			return true;
 		}
+		else if (set_contains(exploredStates, nextState)) {
+			std::cout << "Not enqueuing state " << nextState << " because previous state was 0 but was already in exploredStates" << std::endl;
+		}
 		return false;
 	}
 
@@ -135,6 +138,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentState << std::endl;
 		}
 		enqueued.insert(nextState);
+	}
+	else {
+		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentState << std::endl;
 	}
 	return enqueuedState;
 }
