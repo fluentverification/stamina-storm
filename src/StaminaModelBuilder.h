@@ -133,6 +133,10 @@ namespace stamina {
 		 * @return a vector of all perimeter states
 		 */
 		 std::vector<StateType> getPerimeterStates();
+		 /**
+		  * Sets the value of &kappa; in Options to what we have stored locally here
+		  * */
+		void setLocalKappaToGlobal();
 	protected:
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
@@ -186,6 +190,7 @@ namespace stamina {
 			, boost::optional<storm::storage::BitVector>& markovianChoices
 			, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 		);
+
 	private:
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
@@ -195,8 +200,8 @@ namespace stamina {
 		std::unordered_set<StateType> exploredStates; // States that we have explored
 		std::unordered_set<StateType> stateMap; // S in the QEST paper
 		std::unordered_set<StateType> tMap; // T in the QEST paper
-		std::unordered_map<StateType, float> piMap; // Maps reachability probabilities to their states
-		std::unordered_map<StateType, bool> enqueued;
+		std::unordered_map<StateType, double> piMap; // Maps reachability probabilities to their states
+		std::unordered_set<StateType> enqueued;
 		double reachabilityThreshold;
 		StateType currentState;
 		CompressedState absorbingState;
@@ -204,6 +209,7 @@ namespace stamina {
 		bool isInit;
 		bool fresh;
 		bool firstIteration;
+		double localKappa;
 	};
 
 	// Helper method to find in unordered_set
