@@ -54,7 +54,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
-	, localKappa(Options::kappa)
 {
 	// Intentionally left empty
 }
@@ -102,39 +101,28 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
-	// Optimization
-	if (set_contains(enqueued, nextState)) { return true; }
 	// If our previous state has not been encountered, we have unexpected behavior
 	if (piMap.find(nextState) == piMap.end()) {
-		piMap.insert({nextState, (double) 0.0});
+		piMap.insert({nextState, (float) 0.0});
 	}
-	if (isInit) { enqueued.insert(nextState); return true; }
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
-		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
-			enqueued.insert(nextState);
-			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentState << std::endl;
+		if ((set_contains(stateMap, nextState) && (!set_contains(exploredStates, nextState))) || isInit) {
+			enqueued.insert({nextState, true});
 			return true;
 		}
-		return false;
+		else {
+			std::cout << "Not enqueuing state " << nextState << std::endl;
+			return false;
+		}
 	}
 
-	bool stateIsExisting = set_contains(stateMap, nextState);
 	bool enqueuedState =
-		// If the state has been explored in any iteration AND it is NOT in the set
-		// of states explored in our CURRENT iteration
-		(stateIsExisting && !set_contains(exploredStates, nextState)) ||
-		// OR if it's simply not in that map
-		(!stateIsExisting);
+		(set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) ||
+		(!set_contains(stateMap, nextState));
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
-		if (!stateIsExisting) {
-			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentState << std::endl;
-		}
-		else {
-			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentState << std::endl;
-		}
-		enqueued.insert(nextState);
+		enqueued.insert({nextState, true});
 	}
 	return enqueuedState;
 }
@@ -169,17 +157,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-	if (successorsThisIteration.find(state) != successorsThisIteration.end()) {
-		return successorsThisIteration[state];
-	}
 	// Create new index just in case we need it
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
-	// TODO: need to figure out what to do when this is called on the same index twice
-	// If we shouldn't enqueue our new index
-	if (!shouldEnqueue(newIndex)) {
-		successorsThisIteration.insert({state, newIndex});
-		return newIndex;
-	}
 
 	// Check if state is already registered
 	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
@@ -187,11 +166,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	StateType actualIndex = actualIndexPair.first;
 	// If this method is getting called, we must enqueue the state
 	// Determines if we need to insert the state
-	if (actualIndex == newIndex) {
+	if (actualIndex == newIndex && shouldEnqueue(actualIndex)) {
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
 	}
-	successorsThisIteration.insert({state, actualIndex});
 	return actualIndex;
 }
 
@@ -232,13 +210,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
-		if (firstIteration) {
-			piMap[index] = 1.0;
-			stateMap.insert(index);
+		piMap[index] = 1.0;
+		//if (firstIteration) {
 			tMap.insert(index);
 			firstIteration = false;
-		}
-		exploredStates.insert(index);
+		//}
+		stateMap.insert(index);
 	}
 
 	// Now explore the current state until there is no more reachable state.
@@ -257,14 +234,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		enqueued.clear();
-		successorsThisIteration.clear();
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
-		exploredStates.insert(currentIndex);
+		std::cout << "Reachability for " << currentIndex << " is " << piMap[currentIndex] << std::endl;
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
+		// std::cout << "Dequeued state " << currentIndex << std::endl;
 
 		statesToExplore.pop_front();
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -274,17 +251,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
+		// Load state for us to use
+		generator->load(currentState);
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < localKappa) {
+		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < Options::kappa) {
+			// std::cout << "Continuing without enqueuing successors to " << currentIndex << std::endl;
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
 			transitionMatrixBuilder.addNextValue(currentRow, 0, 1.0);
 			continue;
 		}
-		// Load state for us to use
-		generator->load(currentState);
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -333,18 +311,19 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				// If we get 0 from stateToIdCallback, it means we have already called
-				// it on a state and this is a duplicate
-				if (sPrime == 0) {
-					continue;
-				}
-				double probability = stateProbabilityPair.second / totalRate;
+				float probability = stateProbabilityPair.second / totalRate;
+				tMap.insert(sPrime);
+				// std::cout << "Transition probability for " << sPrime << " is " << probability << std::endl;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
-				// These are next states where the previous state has a reachability
-				// greater than zero
 				if (!shouldEnqueueAll) {
-					piMap[sPrime] += piMap[currentIndex] * probability;
+					if (piMap.find(sPrime) == piMap.end()) {
+						piMap.insert({sPrime, piMap[currentIndex] * probability});
+					}
+					else {
+						piMap[sPrime] += piMap[currentIndex] * probability;
+					}
+					// std::cout << "Reachability for " << sPrime << " is " << piMap[sPrime] << std::endl;
 					// if stateIsExisting
 					if (set_contains(stateMap, sPrime)) {
 						// Add s' to ExploredStates
@@ -353,21 +332,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						}
 					}
 					else {
-						// This is if the state hasn't been seen ever. All new states start as terminal
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
-						tMap.insert(sPrime);
+
 					}
 				}
 				else {
-					if (set_contains(stateMap, sPrime)) {
-						// Add s' to ExploredStates
-						if (!set_contains(exploredStates, sPrime)) {
-							exploredStates.insert(sPrime);
-						}
+					if (piMap.find(sPrime) == piMap.end()) {
+						piMap.insert({sPrime, 0.0});
 					}
+					// exploredStates.insert(sPrime);
 				}
-				if (set_contains(enqueued, sPrime)) {
+				if (enqueued[sPrime]){ // (shouldEnqueue(sPrime)) {
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
@@ -496,15 +472,11 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = 0.0;
-	std::cout << "At this iteration, the following states are terminal:";
-	int totalStates = 0;
 	for (const auto & tState : tMap) {
-		totalStates++;
-		totalProbability += localKappa; // piMap[tState];
+		totalProbability += Options::kappa; // piMap[tState];
 	}
-	std::cout << totalStates << std::endl;
 	// Reduce kappa
-	localKappa /= Options::reduce_kappa;
+	Options::kappa /= Options::reduce_kappa;
 	return totalProbability;
 }
 
@@ -520,7 +492,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	if (absorbingWasSetUp) {
 		return;
 	}
-	this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
+	this->absorbingState = CompressedState(64);
 	// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 	stateStorage.deadlockStateIndices.push_back(0);
 	// Check if state is already registered
@@ -544,10 +516,12 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
+	this->currentState = 1;
 	statesToExplore.clear();
 	exploredStates.clear(); // States explored in our current iteration
-	// API reset
-	if (stateRemapping) { stateRemapping->clear(); }
+	// stateMap.clear();
+	tMap.clear();
+	piMap.clear();
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }
@@ -559,12 +533,6 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerato
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator
 ) {
 	this->generator = generator;
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
-	Options::kappa = localKappa;
 }
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
