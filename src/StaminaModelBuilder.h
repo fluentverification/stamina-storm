@@ -202,6 +202,7 @@ namespace stamina {
 		std::unordered_set<StateType> tMap; // T in the QEST paper
 		std::unordered_map<StateType, double> piMap; // Maps reachability probabilities to their states
 		std::unordered_set<StateType> enqueued;
+		std::unordered_map<CompressedState, StateType> successorsThisIteration; // "Band-aid" fix to something happening in the API
 		double reachabilityThreshold;
 		StateType currentState;
 		CompressedState absorbingState;

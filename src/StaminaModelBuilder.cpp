@@ -169,11 +169,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+	if (successorsThisIteration.find(state) != successorsThisIteration.end()) {
+		return successorsThisIteration[state];
+	}
 	// Create new index just in case we need it
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	// TODO: need to figure out what to do when this is called on the same index twice
 	// If we shouldn't enqueue our new index
 	if (!shouldEnqueue(newIndex)) {
+		successorsThisIteration.insert({state, newIndex});
 		return newIndex;
 	}
 
@@ -187,6 +191,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Always does breadth first search
 		statesToExplore.emplace_back(state, actualIndex);
 	}
+	successorsThisIteration.insert({state, actualIndex});
 	return actualIndex;
 }
 
@@ -252,6 +257,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		enqueued.clear();
+		successorsThisIteration.clear();
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
