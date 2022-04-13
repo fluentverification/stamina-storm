@@ -74,7 +74,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
-	try {
+// 	try {
 		switch (generator->getModelType()) {
 			// Only supports CTMC models.
 			case storm::generator::ModelType::CTMC:
@@ -89,13 +89,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 				StaminaMessages::error("This model type is not supported!");
 		}
 		return nullptr;
-	}
-	catch(const std::exception& e) {
-		std::stringstream ss;
-		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
-		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-		StaminaMessages::error(ss.str());
-	}
+// 	}
+// 	catch(const std::exception& e) {
+// 		std::stringstream ss;
+// 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
+// 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
+// 		StaminaMessages::error(ss.str());
+// 	}
 
 }
 
@@ -169,22 +169,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-	// Create new index just in case we need it
+	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
-	// TODO: need to figure out what to do when this is called on the same index twice
-	// If we shouldn't enqueue our new index
-	if (!shouldEnqueue(newIndex)) {
-		return newIndex;
+	if (stateStorage.stateToId.contains(state)) {
+		actualIndex = stateStorage.stateToId.getValue(state);
 	}
-
-	// Check if state is already registered
-	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(state, newIndex);
-
-	StateType actualIndex = actualIndexPair.first;
-	// If this method is getting called, we must enqueue the state
-	// Determines if we need to insert the state
-	if (actualIndex == newIndex) {
-		// Always does breadth first search
+	else {
+		// Create new index just in case we need it
+		actualIndex = newIndex;
+	}
+	if (shouldEnqueue(actualIndex)) {
 		statesToExplore.emplace_back(state, actualIndex);
 	}
 	return actualIndex;
