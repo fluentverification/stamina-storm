@@ -180,6 +180,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	}
 	if (shouldEnqueue(actualIndex)) {
 		statesToExplore.emplace_back(state, actualIndex);
+		stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
 	return actualIndex;
 }
