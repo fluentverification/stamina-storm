@@ -499,6 +499,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 	}
 	std::cout << totalStates << std::endl;
 	// Reduce kappa
+	std::cout << "At this iteration, kappa is = " << localKappa << std::endl;
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;
 }

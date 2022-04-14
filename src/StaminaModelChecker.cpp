@@ -155,6 +155,7 @@ StaminaModelChecker::modelCheckProperty(
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 #ifdef USE_STAMINA_TRUNCATION
+		int innerLoopCount = 0;
 		while (piHat >= Options::prob_win / Options::approx_factor) {
 			std::cout << "piHat = " << piHat << " and w/approx = " << Options::prob_win / Options::approx_factor << std::endl;
 			StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
@@ -168,7 +169,8 @@ StaminaModelChecker::modelCheckProperty(
 			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
-
+			std::cout << "Innter loop count: " << innerLoopCount << std::endl;
+			innerLoopCount++;
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
