@@ -176,6 +176,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+	if (piMap[currentState] == 0 && !stateStorage.stateToId.contains(state)) {
+		return 0;
+	}
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {

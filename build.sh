@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ############################################
 #
 # Bash script to compile stamina with storm on UNIX-like OSs
@@ -6,7 +8,7 @@
 #
 ############################################
 
-#!/bin/bash
+set -e
 
 echo "[MESSAGE] Checking if STORM exists in the STAMINA root directory"
 
@@ -35,7 +37,9 @@ cd $STAMINA_ROOT
 
 echo "[MESSAGE] Building STAMINA"
 
-cmake . -DSTORM_PATH=$STORM_PATH
+mkdir build
+cd build
+cmake .. -DSTORM_PATH=$STORM_PATH
 make -j$NPROC
 
 echo "[MESSAGE] Finished building STAMINA"
