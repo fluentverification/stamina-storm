@@ -117,7 +117,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			return true;
 		}
 		else if (set_contains(exploredStates, nextState)) {
-			std::cout << "Not enqueuing state " << nextState << " because previous state was 0 but was already in exploredStates" << std::endl;
+			std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
+			// NOTE: statesK is the same as exploredStates in Java version
 		}
 		return false;
 	}
