@@ -112,6 +112,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
 		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
+			exploredStates.insert(nextState);
 			enqueued.insert(nextState);
 			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentState << std::endl;
 			return true;
@@ -136,6 +137,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentState << std::endl;
 		}
 		else {
+			exploredStates.insert(nextState);
 			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentState << std::endl;
 		}
 		enqueued.insert(nextState);
@@ -189,9 +191,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		statesToExplore.emplace_back(state, actualIndex);
 		stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
-	if (piMap[currentState] == 0 && !set_contains(stateMap, actualIndex)) {
-		std::cout << "Creating invisible state " << actualIndex << std::endl;
-	}
+	//if (piMap[currentState] == 0 && !set_contains(stateMap, actualIndex)) {
+	//	std::cout << "Creating invisible state " << actualIndex << std::endl;
+	//}
 	return actualIndex;
 }
 
