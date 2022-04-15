@@ -189,6 +189,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		statesToExplore.emplace_back(state, actualIndex);
 		stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
+	if (piMap[currentIndex] == 0 && !set_contains(stateMap, actualIndex)) {
+		std::cout << "Creating invisible state " << actualIndex << std::endl;
+	}
 	return actualIndex;
 }
 
