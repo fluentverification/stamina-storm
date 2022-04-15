@@ -102,6 +102,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
+	if (set_contains(invisible, nextState)) { return false; }
 	// Optimization
 	if (set_contains(enqueued, nextState)) { return true; }
 	// If our previous state has not been encountered, we have unexpected behavior
@@ -176,9 +177,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-	if (piMap[currentState] == 0 && !stateStorage.stateToId.contains(state)) {
-		return 0;
-	}
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
@@ -191,6 +189,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (shouldEnqueue(actualIndex)) {
 		statesToExplore.emplace_back(state, actualIndex);
 		stateStorage.stateToId.findOrAdd(state, actualIndex);
+	}
+	if (!isInit && piMap[currentState] == 0 && !set_contains(stateMap, actualIndex)) {
+		invisible.insert(actualIndex);
+		// return 0;
 	}
 	return actualIndex;
 }
