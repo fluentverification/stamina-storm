@@ -187,14 +187,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 	}
-	availableStates.insert({actualIndex, state});
-	if (isInit) {
+	if (shouldEnqueue(actualIndex)) {
 		statesToExplore.emplace_back(state, actualIndex);
 		stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
-	if (piMap.find(actualIndex) == piMap.end()) {
-		piMap.insert({actualIndex, (double) 0.0});
-	}
+	//if (piMap[currentState] == 0 && !set_contains(stateMap, actualIndex)) {
+	//	std::cout << "Creating invisible state " << actualIndex << std::endl;
+	//}
 	return actualIndex;
 }
 
@@ -259,7 +258,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		availableStates.clear();
 		enqueued.clear();
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
@@ -341,7 +339,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				if (sPrime == 0) {
 					continue;
 				}
-				CompressedState nextState = availableStates[sPrime];
 				double probability = stateProbabilityPair.second / totalRate;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
@@ -354,9 +351,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						// Add s' to ExploredStates
 						if (!set_contains(exploredStates, sPrime)) {
 							exploredStates.insert(sPrime);
-							statesToExplore.emplace_back(nextState, sPrime);
-							stateStorage.stateToId.findOrAdd(nextState, sPrime);
-							transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 						}
 					}
 					else {
@@ -364,9 +358,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						stateMap.insert(sPrime);
 						exploredStates.insert(sPrime);
 						tMap.insert(sPrime);
-						statesToExplore.emplace_back(nextState, sPrime);
-						stateStorage.stateToId.findOrAdd(nextState, sPrime);
-						transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 					}
 				}
 				else {
@@ -374,11 +365,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						// Add s' to ExploredStates
 						if (!set_contains(exploredStates, sPrime)) {
 							exploredStates.insert(sPrime);
-							statesToExplore.emplace_back(nextState, sPrime);
-							stateStorage.stateToId.findOrAdd(nextState, sPrime);
-							transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 						}
 					}
+				}
+				if (set_contains(enqueued, sPrime)) {
+					// row, column, value
+					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
 				}
 			}
 

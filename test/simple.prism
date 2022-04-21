@@ -1,0 +1,23 @@
+ctmc
+
+formula f_a = 10;
+formula f_b = 10;
+
+module First_def
+
+	First : int init 0;
+
+	[] First=0 -> f_a : (First'=First+20);
+
+	[] First>0 -> f_a : (First'=First+10) + f_a : (First'=First-1);
+
+endmodule
+
+module Second_def
+	
+	Second : int init 10;
+
+	[] Second=0 -> f_b : (Second'=Second+100);
+
+	[] Second>0 -> f_b : (Second'=Second-1) + f_b : (Second'=Second+10);
+endmodule
