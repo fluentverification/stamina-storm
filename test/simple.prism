@@ -1,7 +1,7 @@
 ctmc
 
-formula f_a = 10;
-formula f_b = 10;
+formula f_a = 1;
+formula f_b = 1;
 
 module First_def
 
@@ -15,7 +15,7 @@ endmodule
 
 module Second_def
 	
-	Second : int init 10;
+	Second : int init 20;
 
 	[] Second=0 -> f_b : (Second'=Second+100);
 
