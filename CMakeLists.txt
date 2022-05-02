@@ -29,6 +29,8 @@ set(SOURCE_FILES
     src/Options.cpp
 	src/ExplicitTruncatedModelBuilder.h
 	src/ExplicitTruncatedModelBuilder.cpp
+	src/StateSpaceInformation.cpp
+	src/StateSpaceInformation.h
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})
