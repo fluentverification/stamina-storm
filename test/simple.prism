@@ -1,13 +1,13 @@
 ctmc
 
-formula f_a = 1;
-formula f_b = 1;
+formula f_a = 1 / First;
+formula f_b = 1 / Second;
 
 module First_def
 
 	First : int init 0;
 
-	[] First=0 -> f_a : (First'=First+20);
+	[] First=0 -> f_a : (First'=First+10);
 
 	[] First>0 -> f_a : (First'=First+10) + f_a : (First'=First-1);
 
