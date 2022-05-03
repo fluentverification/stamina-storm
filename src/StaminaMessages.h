@@ -68,4 +68,11 @@ namespace stamina {
 			"========================================================================================";
 	};
 } // namespace stamina
+
+/* Logging and debugging messages */
+#ifdef DEBUG_PRINTS
+	#define STAMINA_DEBUG_LOG(x)
+#else
+
+#endif // DEBUG_PRINTS
 #endif // STAMINA_MESSAGES_H

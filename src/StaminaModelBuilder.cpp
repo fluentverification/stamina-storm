@@ -5,6 +5,7 @@
 * */
 #include "StaminaModelBuilder.h"
 #include "StaminaMessages.h"
+#include "StateSpaceInformation.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
 // #define MSG_FREQUENCY 100000
@@ -114,11 +115,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
 			exploredStates.insert(nextState);
 			enqueued.insert(nextState);
-			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentState << std::endl;
 			return true;
 		}
 		else if (set_contains(exploredStates, nextState)) {
-			std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
 			// NOTE: statesK is the same as exploredStates in Java version
 		}
 		return false;
@@ -134,16 +133,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		if (!stateIsExisting) {
-			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentState << std::endl;
 		}
 		else {
 			exploredStates.insert(nextState);
-			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentState << std::endl;
 		}
 		enqueued.insert(nextState);
-	}
-	else {
-		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentState << std::endl;
 	}
 	return enqueuedState;
 }
@@ -191,9 +185,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		statesToExplore.emplace_back(state, actualIndex);
 		stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
-	//if (piMap[currentState] == 0 && !set_contains(stateMap, actualIndex)) {
-	//	std::cout << "Creating invisible state " << actualIndex << std::endl;
-	//}
 	return actualIndex;
 }
 
@@ -263,6 +254,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
 		exploredStates.insert(currentIndex);
+		// Print out debugging information
+		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState) << std::endl;
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
@@ -438,6 +431,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	stateAndChoiceInformationBuilder.setBuildMarkovianStates(false); // Only applies to markov automata
 	stateAndChoiceInformationBuilder.setBuildStateValuations(generator->getOptions().isBuildStateValuationsSet());
 
+	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
+	StateSpaceInformation::printVariableNames();
 	// Builds matrices and truncates state space
 	buildMatrices(
 		transitionMatrixBuilder
@@ -497,15 +492,12 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = 0.0;
-	std::cout << "At this iteration, the following states are terminal:";
 	int totalStates = 0;
 	for (const auto & tState : tMap) {
 		totalStates++;
 		totalProbability += localKappa; // piMap[tState];
 	}
-	std::cout << totalStates << std::endl;
 	// Reduce kappa
-	std::cout << "At this iteration, kappa is = " << localKappa << std::endl;
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;
 }

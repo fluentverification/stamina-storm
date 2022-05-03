@@ -12,10 +12,13 @@ StateSpaceInformation::stateToString(CompressedState & state) {
 	/* Start with integer variables */
 	for (auto variable : integerVariables) {
 		// It is unknown how many bits this will be
-		uint_fast64_t lowerBound = variable.lowerBound;
-		uint_fast64_t upperBound = variable.upperBound;
+		uint_fast64_t bitOffset = variable.bitOffset;
 		// Get the value as an integer
-		uint_fast64_t variableValue = state.getAsInt(lowerBound, upperBound - lowerBound);
+		uint16_t bitWidth = variable.bitWidth;
+		if (bitWidth > 64) {
+			StaminaMessages::warning("Int size is " + std::to_string(bitWidth));
+		}
+		uint_fast64_t variableValue = state.getAsInt(bitOffset, bitWidth);
 		varString += std::to_string(variableValue);
 		varString += ",";
 	}
