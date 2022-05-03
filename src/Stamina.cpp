@@ -42,9 +42,6 @@ Stamina::run() {
 	initialize();
 	// Check each property in turn
 	for (auto property : *propertiesVector) {
-#ifdef DEBUG_PRINTS
-		StaminaMessages::debugPrint("Checking property in properties vector.");
-#endif
 		auto result = modelChecker->modelCheckProperty(property, *modelFile);
 	}
 	// Finished!

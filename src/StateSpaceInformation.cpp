@@ -18,7 +18,7 @@ StateSpaceInformation::stateToString(CompressedState & state) {
 		if (bitWidth > 64) {
 			StaminaMessages::warning("Int size is " + std::to_string(bitWidth));
 		}
-		uint_fast64_t variableValue = state.getAsInt(bitOffset, bitWidth);
+		uint_fast64_t variableValue = state.getAsInt(bitOffset + 1, bitWidth - 1);
 		varString += std::to_string(variableValue);
 		varString += ",";
 	}
