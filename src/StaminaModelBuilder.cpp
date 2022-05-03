@@ -110,15 +110,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		piMap.insert({nextState, (double) 0.0});
 	}
 	if (isInit) { enqueued.insert(nextState); return true; }
+	// std::string nextStateString = StateSpaceInformation::stateToString(availableStates[nextState]);
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
 		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
 			exploredStates.insert(nextState);
 			enqueued.insert(nextState);
+			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << std::endl;
 			return true;
 		}
 		else if (set_contains(exploredStates, nextState)) {
 			// NOTE: statesK is the same as exploredStates in Java version
+			std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
 		}
 		return false;
 	}
@@ -133,11 +136,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		if (!stateIsExisting) {
+			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString << std::endl;
 		}
 		else {
 			exploredStates.insert(nextState);
+			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentStateString << std::endl;
 		}
 		enqueued.insert(nextState);
+	}
+	else {
+		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentStateString << std::endl;
 	}
 	return enqueuedState;
 }
@@ -256,6 +264,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		exploredStates.insert(currentIndex);
 		// Print out debugging information
 		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState) << std::endl;
+		currentStateString = StateSpaceInformation::stateToString(currentState);
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
@@ -497,6 +506,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 		totalStates++;
 		totalProbability += localKappa; // piMap[tState];
 	}
+	std::cout << "At this iteration, the following states are terminal:" << totalStates << std::endl;
 	// Reduce kappa
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;

@@ -211,6 +211,7 @@ namespace stamina {
 		bool fresh;
 		bool firstIteration;
 		double localKappa;
+		std::string currentStateString;
 	};
 
 	// Helper method to find in unordered_set
