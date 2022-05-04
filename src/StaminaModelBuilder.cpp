@@ -116,7 +116,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
 			exploredStates.insert(nextState);
 			enqueued.insert(nextState);
-			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << std::endl;
+			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 			return true;
 		}
 		else if (set_contains(exploredStates, nextState)) {
@@ -136,16 +136,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// Otherwise, we base it on whether the maps we keep track of contain them
 	if (enqueuedState) {
 		if (!stateIsExisting) {
-			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString << std::endl;
+			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString  << " (index " << currentState << ")" << std::endl;
 		}
 		else {
 			exploredStates.insert(nextState);
-			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentStateString << std::endl;
+			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 		}
 		enqueued.insert(nextState);
 	}
 	else {
-		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentStateString << std::endl;
+		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 	}
 	return enqueuedState;
 }
@@ -263,7 +263,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentIndex = statesToExplore.front().second;
 		exploredStates.insert(currentIndex);
 		// Print out debugging information
-		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState) << std::endl;
+		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState) << " (index " << currentIndex << ")" << std::endl;
 		currentStateString = StateSpaceInformation::stateToString(currentState);
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
