@@ -111,22 +111,24 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	}
 	if (isInit) { enqueued.insert(nextState); return true; }
 	// std::string nextStateString = StateSpaceInformation::stateToString(availableStates[nextState]);
+	bool stateIsExisting = set_contains(stateMap, nextState);
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
-		if (set_contains(stateMap, nextState) && !set_contains(exploredStates, nextState)) {
-			exploredStates.insert(nextState);
-			enqueued.insert(nextState);
-			std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
-			return true;
-		}
-		else if (set_contains(exploredStates, nextState)) {
-			// NOTE: statesK is the same as exploredStates in Java version
-			std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
+		if (stateIsExisting) {
+			if (!set_contains(exploredStates, nextState)) {
+				exploredStates.insert(nextState);
+				enqueued.insert(nextState);
+				std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
+				return true;
+			}
+			else {
+				// NOTE: statesK is the same as exploredStates in Java version
+				std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
+			}
 		}
 		return false;
 	}
 
-	bool stateIsExisting = set_contains(stateMap, nextState);
 	bool enqueuedState =
 		// If the state has been explored in any iteration AND it is NOT in the set
 		// of states explored in our CURRENT iteration
