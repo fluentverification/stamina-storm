@@ -116,17 +116,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap[currentState] == 0.0) {
 		if (stateIsExisting) {
 			if (!set_contains(exploredStates, nextState)) {
-				// exploredStates.insert(nextState);
+				exploredStates.insert(nextState);
 				// enqueued.insert(nextState);
 				std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 				return true;
 			}
-			else {
-				// NOTE: statesK is the same as exploredStates in Java version
-				tMap.insert(nextState);
-				std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
-			}
+			// NOTE: statesK is the same as exploredStates in Java version
+			std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
+			return false;
 		}
+		tMap.insert(nextState);
 		return false;
 	}
 
