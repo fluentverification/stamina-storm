@@ -104,7 +104,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 bool
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
 	// Optimization
-	if (set_contains(enqueued, nextState)) { return true; }
+	// if (set_contains(enqueued, nextState)) { return true; }
 	// If our previous state has not been encountered, we have unexpected behavior
 	if (piMap.find(nextState) == piMap.end()) {
 		piMap.insert({nextState, (double) 0.0});
@@ -116,8 +116,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	if (piMap[currentState] == 0.0) {
 		if (stateIsExisting) {
 			if (!set_contains(exploredStates, nextState)) {
-				exploredStates.insert(nextState);
-				enqueued.insert(nextState);
+				// exploredStates.insert(nextState);
+				// enqueued.insert(nextState);
 				std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 				return true;
 			}
@@ -141,10 +141,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString  << " (index " << currentState << ")" << std::endl;
 		}
 		else {
-			exploredStates.insert(nextState);
+			// exploredStates.insert(nextState);
 			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 		}
-		enqueued.insert(nextState);
+		// enqueued.insert(nextState);
 	}
 	else {
 		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
@@ -351,27 +351,31 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				if (!shouldEnqueueAll) {
 					piMap[sPrime] += piMap[currentIndex] * probability;
 					// if stateIsExisting
-					if (set_contains(stateMap, sPrime)) {
-						// Add s' to ExploredStates
-						if (!set_contains(exploredStates, sPrime)) {
-							exploredStates.insert(sPrime);
-						}
-					}
-					else {
-						// This is if the state hasn't been seen ever. All new states start as terminal
-						stateMap.insert(sPrime);
-						exploredStates.insert(sPrime);
-						tMap.insert(sPrime);
-					}
+// 					if (set_contains(stateMap, sPrime)) {
+// 						// Add s' to ExploredStates
+// 						if (!set_contains(exploredStates, sPrime)) {
+// 							exploredStates.insert(sPrime);
+// 						}
+// 					}
+// 					else {
+// 						// This is if the state hasn't been seen ever. All new states start as terminal
+// 						stateMap.insert(sPrime);
+// 						exploredStates.insert(sPrime);
+// 						tMap.insert(sPrime);
+// 					}
 				}
-				else {
-					if (set_contains(stateMap, sPrime)) {
-						// Add s' to ExploredStates
-						if (!set_contains(exploredStates, sPrime)) {
-							exploredStates.insert(sPrime);
-						}
-					}
-				}
+// 				else {
+// 					if (set_contains(stateMap, sPrime)) {
+// 						// Add s' to ExploredStates
+// 						if (!set_contains(exploredStates, sPrime)) {
+// 							exploredStates.insert(sPrime);
+// 						}
+// 					}
+// 					else {
+// 						tMap.insert(sPrime);
+//
+// 					}
+// 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
