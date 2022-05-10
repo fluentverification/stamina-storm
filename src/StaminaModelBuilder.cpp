@@ -141,6 +141,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	}
 	std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString << std::endl;
 	tMap.insert(nextState);
+	stateMap.insert(nextState);
 	return true;
 }
 
