@@ -123,33 +123,23 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			}
 			else {
 				// NOTE: statesK is the same as exploredStates in Java version
+				tMap.insert(nextState);
 				std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
 			}
 		}
 		return false;
 	}
 
-	bool enqueuedState =
-		// If the state has been explored in any iteration AND it is NOT in the set
-		// of states explored in our CURRENT iteration
-		(stateIsExisting && !set_contains(exploredStates, nextState)) ||
-		// OR if it's simply not in that map
-		(!stateIsExisting);
-	// Otherwise, we base it on whether the maps we keep track of contain them
-	if (enqueuedState) {
-		if (!stateIsExisting) {
-			std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString  << " (index " << currentState << ")" << std::endl;
+	if (stateIsExisting) {
+		// Have we explored this state in this iteration of kappa
+		if (!set_contains(exploredStates, nextState)) {
+			exploredStates.insert(nextState);
+			return true; // Yes enqueue
 		}
-		else {
-			// exploredStates.insert(nextState);
-			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
-		}
-		// enqueued.insert(nextState);
+		return false;
 	}
-	else {
-		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
-	}
-	return enqueuedState;
+	tMap.insert(nextState);
+	return true;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -350,32 +340,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// greater than zero
 				if (!shouldEnqueueAll) {
 					piMap[sPrime] += piMap[currentIndex] * probability;
-					// if stateIsExisting
-// 					if (set_contains(stateMap, sPrime)) {
-// 						// Add s' to ExploredStates
-// 						if (!set_contains(exploredStates, sPrime)) {
-// 							exploredStates.insert(sPrime);
-// 						}
-// 					}
-// 					else {
-// 						// This is if the state hasn't been seen ever. All new states start as terminal
-// 						stateMap.insert(sPrime);
-// 						exploredStates.insert(sPrime);
-// 						tMap.insert(sPrime);
-// 					}
 				}
-// 				else {
-// 					if (set_contains(stateMap, sPrime)) {
-// 						// Add s' to ExploredStates
-// 						if (!set_contains(exploredStates, sPrime)) {
-// 							exploredStates.insert(sPrime);
-// 						}
-// 					}
-// 					else {
-// 						tMap.insert(sPrime);
-//
-// 					}
-// 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
