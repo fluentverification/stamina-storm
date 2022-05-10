@@ -322,12 +322,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			}
 
 			double totalRate = 0.0;
-			for (auto const & stateProbabilityPair : choice) {
-				if (stateProbabilityPair.first == 0) {
-					StaminaMessages::warning("Transition to absorbing state from API!!!");
-					continue;
+			if (!shouldEnqueueAll) {
+				for (auto const & stateProbabilityPair : choice) {
+					if (stateProbabilityPair.first == 0) {
+						StaminaMessages::warning("Transition to absorbing state from API!!!");
+						continue;
+					}
+					totalRate += stateProbabilityPair.second;
 				}
-				totalRate += stateProbabilityPair.second;
+				std::cout << "Dequeued state has a total rate of " << totalRate << std::endl;
 			}
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
@@ -337,13 +340,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				if (sPrime == 0) {
 					continue;
 				}
-				double probability = stateProbabilityPair.second / totalRate;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				// These are next states where the previous state has a reachability
 				// greater than zero
-				 if (!shouldEnqueueAll) {
+				if (!shouldEnqueueAll) {
+
+					double probability = stateProbabilityPair.second / totalRate;
 					piMap[sPrime] += piMap[currentIndex] * probability;
+					std::cout << "Transition probability to state " << sPrime << " is " << probability << std::endl;
 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
