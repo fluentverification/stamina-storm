@@ -4,7 +4,7 @@
 using namespace stamina;
 
 std::string
-StateSpaceInformation::stateToString(CompressedState & state) {
+StateSpaceInformation::stateToString(CompressedState & state, double pi) {
 	std::string varString = "(";
 	auto integerVariables  = variableInformation.integerVariables;
 	auto booleanVariables  = variableInformation.booleanVariables;
@@ -38,23 +38,24 @@ StateSpaceInformation::stateToString(CompressedState & state) {
 	for (auto variable : locationVariables) {
 		StaminaMessages::error("Location Variable printing not implemented yet!");
 	}
-	varString += "\b)";
+	varString += std::to_string(pi);
+	varString += ")";
 	return varString;
 }
 
 std::string
-StateSpaceInformation::stateToBase64String(CompressedState & state) {
-	std::string stateString = stateToString(state);
+StateSpaceInformation::stateToBase64String(CompressedState & state, double pi) {
+	std::string stateString = stateToString(state, pi);
 }
 
 void
-StateSpaceInformation::printStateAsString(CompressedState & state) {
-	std::cout << stateToString(state) << std::endl;
+StateSpaceInformation::printStateAsString(CompressedState & state, double pi) {
+	std::cout << stateToString(state, pi) << std::endl;
 }
 
 void
-StateSpaceInformation::printStateAsBase64String(CompressedState & state) {
-	std::cout << stateToBase64String(state) << std::endl;
+StateSpaceInformation::printStateAsBase64String(CompressedState & state, double pi) {
+	std::cout << stateToBase64String(state, pi) << std::endl;
 }
 
 

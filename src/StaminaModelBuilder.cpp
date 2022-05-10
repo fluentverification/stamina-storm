@@ -110,7 +110,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		piMap.insert({nextState, (double) 0.0});
 	}
 	if (isInit) { enqueued.insert(nextState); return true; }
-	// std::string nextStateString = StateSpaceInformation::stateToString(availableStates[nextState]);
 	bool stateIsExisting = set_contains(stateMap, nextState);
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
@@ -261,8 +260,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentIndex = statesToExplore.front().second;
 		exploredStates.insert(currentIndex);
 		// Print out debugging information
-		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState) << " (index " << currentIndex << ")" << std::endl;
-		currentStateString = StateSpaceInformation::stateToString(currentState);
+		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState, piMap[currentIndex]) << " (index " << currentIndex << ")" << std::endl;
+		currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
