@@ -352,7 +352,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentRow, sPrime, probability);
+					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
 				}
 			}
 
