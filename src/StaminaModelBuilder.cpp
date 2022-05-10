@@ -328,6 +328,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 			double totalRate = 0.0;
 			for (auto const & stateProbabilityPair : choice) {
+				if (stateProbabilityPair.first == 0) {
+					StaminaMessages::warning("Transition to absorbing state from API!!!");
+					continue;
+				}
 				totalRate += stateProbabilityPair.second;
 			}
 			// Add the probabilistic behavior to the matrix.
@@ -343,7 +347,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// Update transition probability only if we should enqueue all
 				// These are next states where the previous state has a reachability
 				// greater than zero
-				if (!shouldEnqueueAll) {
+				 if (!shouldEnqueueAll) {
 					piMap[sPrime] += piMap[currentIndex] * probability;
 				}
 				if (set_contains(enqueued, sPrime)) {
