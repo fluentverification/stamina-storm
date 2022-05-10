@@ -125,6 +125,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 			std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
 			return false;
 		}
+		// State is invisible and should not exist yet
+		stateMap.insert(nextState); // DELETE THIS LINE. THIS IS JUST FOR TESTING
 		tMap.insert(nextState);
 		return false;
 	}
