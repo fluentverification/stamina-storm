@@ -106,9 +106,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// Optimization
 	// if (set_contains(enqueued, nextState)) { return true; }
 	// If our previous state has not been encountered, we have unexpected behavior
-	if (piMap.find(nextState) == piMap.end()) {
-		piMap.insert({nextState, (double) 0.0});
-	}
+	// if (piMap.find(nextState) == piMap.end()) {
+	//	piMap.insert({nextState, (double) 0.0});
+	//}
 	if (isInit) { enqueued.insert(nextState); return true; }
 	bool stateIsExisting = set_contains(stateMap, nextState);
 	// If the reachability probability of the previous state is 0, enqueue regardless
@@ -126,6 +126,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		}
 		// State is invisible and should not exist yet
 		tMap.insert(nextState);
+		piMap.insert({nextState, 0.0});
 		return false;
 	}
 
@@ -140,6 +141,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		return false;
 	}
 	std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString << std::endl;
+	piMap.insert({nextState, 0.0});
 	tMap.insert(nextState);
 	stateMap.insert(nextState);
 	exploredStates.insert(nextState);
