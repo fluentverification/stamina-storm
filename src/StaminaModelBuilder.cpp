@@ -116,12 +116,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		if (stateIsExisting) {
 			if (!set_contains(exploredStates, nextState)) {
 				exploredStates.insert(nextState);
-				// enqueued.insert(nextState);
-				std::cout << "Enqueuing state after 0 prob " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 				return true;
 			}
-			// NOTE: statesK is the same as exploredStates in Java version
-			std::cout << "Not enqueuing state " << nextState << " because prevProb=0 but was already in statesK" << std::endl;
 			return false;
 		}
 		// State is invisible and should not exist yet
@@ -134,13 +130,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		// Have we explored this state in this iteration of kappa
 		if (!set_contains(exploredStates, nextState)) {
 			exploredStates.insert(nextState);
-			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 			return true; // Yes enqueue
 		}
-		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 		return false;
 	}
-	std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString << std::endl;
 	piMap.insert({nextState, 0.0});
 	tMap.insert(nextState);
 	stateMap.insert(nextState);
