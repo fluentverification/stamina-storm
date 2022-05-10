@@ -133,10 +133,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 		// Have we explored this state in this iteration of kappa
 		if (!set_contains(exploredStates, nextState)) {
 			exploredStates.insert(nextState);
+			std::cout << "Enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 			return true; // Yes enqueue
 		}
+		std::cout << "Not enqueuing re-explored state " << nextState << " with previous state " << currentStateString << " (index " << currentState << ")" << std::endl;
 		return false;
 	}
+	std::cout << "Enqueuing new state " << nextState << " with previous state " << currentStateString << std::endl;
 	tMap.insert(nextState);
 	return true;
 }
