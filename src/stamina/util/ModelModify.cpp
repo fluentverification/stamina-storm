@@ -50,9 +50,19 @@ ModelModify::createModifiedModel() {
 	modifiedModelStream.open(modifiedModel, 'a');
 	modifiedModelStream << std::endl << std::endl;
 	modifiedModelStream << "module Absorbing_Def_STAMINA\n\tAbsorbing : bool init false;\n\tendmodule" << std::endl;
+	modifiedModelStream.close();
 }
 
 std::shared_ptr<std::vector<storm::jani::Property>>
 ModelModify::createModifiedProperties() {
+	std::ifstream originalPropertiesStream;
+	std::ofstream modifiedPropertiesStream;
+	originalPropertiesStream.open(originalProperties, 'r');
+	modifiedPropertiesStram.open(modifiedProperties, 'w');
+	std::string line;
+	while (std::getline(originalPropertiesStream, line)) {
 
+	}
+	originalPropertiesStream.close();
+	modifiedPropertiesStream.close();
 }
