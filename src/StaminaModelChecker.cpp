@@ -202,7 +202,9 @@ StaminaModelChecker::modelCheckProperty(
 			for (auto label : labeling->getLabelsOfState(1)) {
 				std::cout << label << std::endl;
 			}
-			auto result_lower = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
+			auto result_lower = checker->check(
+				storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true)
+			);
 			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			modifyState(false);
 			// Print labels for absorbing state
@@ -217,6 +219,11 @@ StaminaModelChecker::modelCheckProperty(
 			}
 			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+				"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
+				"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
+				"This gives us a window of " + std::to_string(max_results->result - min_results->result)
+			);
 		}
 		catch (std::exception& e) {
 			StaminaMessages::errorAndExit(e.what());
