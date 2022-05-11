@@ -14,23 +14,23 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCE_DIR src)
 set(SOURCE_FILES
-    src/ANSIColors.h
-    src/main.cpp
-    src/Stamina.cpp
-    src/Stamina.h
-    src/StaminaArgParse.h
-    src/StaminaModelBuilder.h
-    src/StaminaModelBuilder.cpp
-    src/StaminaModelChecker.h
-    src/StaminaModelChecker.cpp
-    src/StaminaMessages.h
-	src/StaminaMessages.cpp
-    src/Options.h
-    src/Options.cpp
-	src/ExplicitTruncatedModelBuilder.h
-	src/ExplicitTruncatedModelBuilder.cpp
-	src/StateSpaceInformation.cpp
-	src/StateSpaceInformation.h
+    src/stamina/ANSIColors.h
+    src/stamina/main.cpp
+    src/stamina/Stamina.cpp
+    src/stamina/Stamina.h
+    src/stamina/StaminaArgParse.h
+    src/stamina/StaminaModelBuilder.h
+    src/stamina/StaminaModelBuilder.cpp
+    src/stamina/StaminaModelChecker.h
+    src/stamina/StaminaModelChecker.cpp
+    src/stamina/StaminaMessages.h
+	src/stamina/StaminaMessages.cpp
+    src/stamina/Options.h
+    src/stamina/Options.cpp
+	src/stamina/ExplicitTruncatedModelBuilder.h
+	src/stamina/ExplicitTruncatedModelBuilder.cpp
+	src/stamina/StateSpaceInformation.cpp
+	src/stamina/StateSpaceInformation.h
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})
