@@ -180,10 +180,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 	}
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
 	if (shouldEnqueue(actualIndex)) {
 		enqueued.insert(actualIndex);
 		statesToExplore.emplace_back(state, actualIndex);
-		stateStorage.stateToId.findOrAdd(state, actualIndex);
+		// stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
 	return actualIndex;
 }
@@ -532,7 +533,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
-	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
+	// stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }
 
