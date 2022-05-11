@@ -43,8 +43,14 @@ void
 Stamina::run() {
 	initialize();
 	// Check each property in turn
-	for (auto property : *propertiesVector) {
-		auto result = modelChecker->modelCheckProperty(property, *modelFile);
+	for (int i = 0; i + 1 < propertiesVector->size(); i++) {
+		auto propMin = *propertiesVector[i];
+		auto propMax = *propertiesVector[i + 1];
+		modelChecker->modelCheckProperty(
+			propMin
+			, propMax
+			, *modelFile
+		);
 	}
 	// Finished!
 	StaminaMessages::good("Finished running!");

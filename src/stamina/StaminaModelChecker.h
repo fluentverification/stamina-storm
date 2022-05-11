@@ -73,7 +73,8 @@ namespace stamina {
 		 * @return A pointer to the result of the model checking
 		 * */
 		std::unique_ptr<storm::modelchecker::CheckResult> modelCheckProperty(
-			storm::jani::Property prop
+			storm::jani::Property propMin
+			, storm::jani::Property propMax
 			, storm::prism::Program const& modulesFile
 		);
 	private:
