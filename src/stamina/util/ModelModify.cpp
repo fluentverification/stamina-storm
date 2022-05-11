@@ -58,10 +58,19 @@ ModelModify::createModifiedProperties() {
 	std::ifstream originalPropertiesStream;
 	std::ofstream modifiedPropertiesStream;
 	originalPropertiesStream.open(originalProperties, 'r');
-	modifiedPropertiesStram.open(modifiedProperties, 'w');
+	modifiedPropertiesStream.open(modifiedProperties, 'w');
 	std::string line;
 	while (std::getline(originalPropertiesStream, line)) {
-
+		// Remove whitespace
+		str.erase(remove(str.begin(),str.end(),' '),str.end());
+		if (str.find("P=?" , 0)) {
+			continue;
+		}
+		str.erase(str.end() - 1, 1);
+		std::string propMin = str + "&!(Absorbing)]";
+		std::string propMax = str + "||(Absorbing)";
+		modifiedPropertiesStream << propMin << std::endl;
+		modifiedPropertiesStream << propMax << std::endl;
 	}
 	originalPropertiesStream.close();
 	modifiedPropertiesStream.close();
