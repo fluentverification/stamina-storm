@@ -76,7 +76,7 @@ Stamina::initialize() {
 	storm::settings::initializeAll("Stamina", "Stamina");
 
 	// Load model file and properties file
-	try {
+	//try {
 		util::ModelModify modelModify(
 			Options::model_file
 			, Options::properties_file
@@ -88,13 +88,13 @@ Stamina::initialize() {
 		auto labels = modelFile->getLabels();
 		StaminaMessages::info("There are the following number of state labels: " + std::to_string(labels.size()));
 		modelChecker->initialize(modelFile, propertiesVector);
-	}
-	catch (const std::exception& e) {
+	//}
+	//catch (const std::exception& e) {
 		// Uses stringstream because std::to_string(e) throws an error with storm's exceptions
-		std::stringstream msg;
-		msg << "Got error when reading model or properties file:\n\t\t" << e.what();
-		StaminaMessages::errorAndExit(msg.str());
-	}
+	//	std::stringstream msg;
+	//	msg << "Got error when reading model or properties file:\n\t\t" << e.what();
+	//	StaminaMessages::errorAndExit(msg.str());
+	//}
 
 }
 

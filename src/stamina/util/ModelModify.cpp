@@ -1,3 +1,13 @@
+// Since we must work with the filesystem, we need the CWD
+#ifdef WINDOWS
+	#include <direct.h>
+	#define getcwd _getcwd
+	#define SLASH '\\'
+#else
+	#include <unistd.h>
+	#define SLASH '/'
+#endif // WINDOWS
+
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
@@ -46,8 +56,12 @@ ModelModify::~ModelModify() {
 
 std::shared_ptr<storm::prism::Program>
 ModelModify::createModifiedModel() {
+	char buff[100];
+	getcwd(buff, 100);
+	std::string cwd(buff);
+	remove((cwd + SLASH + modifiedModel).c_str());
 	// Copy the current model to the new file
-	std::filesystem::copy_file(originalModel, modifiedModel);
+	std::filesystem::copy_file(originalModel, cwd + SLASH + modifiedModel);
 
 	std::ofstream modifiedModelStream;
 	modifiedModelStream.open(modifiedModel, std::ios::app); // iostream append
