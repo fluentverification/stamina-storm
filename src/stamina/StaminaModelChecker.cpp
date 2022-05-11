@@ -196,7 +196,7 @@ StaminaModelChecker::modelCheckProperty(
 
 	// Print results
 	std::stringstream resultInfo;
-	resultInfo << "Finished checking property: " << propName << std::endl;
+	resultInfo << "Finished checking property: " << propMin.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
 	StaminaMessages::info(resultInfo.str());

@@ -3,6 +3,12 @@
 
 #include <vector>
 
+#include <storm/api/storm.h>
+#include <storm-parsers/api/storm-parsers.h>
+#include <storm-parsers/parser/PrismParser.h>
+#include <storm/storage/prism/Program.h>
+#include <storm/storage/jani/Property.h>
+
 #include "storm/storage/jani/Property.h"
 #include "storm/storage/prism/Program.h"
 
