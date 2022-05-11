@@ -14,7 +14,8 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCE_DIR src)
 set(SOURCE_FILES
-    src/stamina/ANSIColors.h
+    # Main source files for the `stamina` namespace
+	src/stamina/ANSIColors.h
     src/stamina/main.cpp
     src/stamina/Stamina.cpp
     src/stamina/Stamina.h
@@ -31,6 +32,9 @@ set(SOURCE_FILES
 	src/stamina/ExplicitTruncatedModelBuilder.cpp
 	src/stamina/StateSpaceInformation.cpp
 	src/stamina/StateSpaceInformation.h
+	# Files for `stamina::util` namespace
+	src/stamina/util/ModelModify.h
+	src/stamina/util/ModelModify.cpp
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})

@@ -1,5 +1,11 @@
 #ifndef MODELMODIFY_H
 #define MODELMODIFY_H
+
+#include <vector>
+
+#include "storm/storage/jani/Property.h"
+#include "storm/storage/prism/Program.h"
+
 namespace stamina {
 	namespace util {
 		class ModelModify {

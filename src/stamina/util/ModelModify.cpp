@@ -1,8 +1,9 @@
 #include <fstream>
 #include <filesystem>
+#include <algorithm>
 
 #include "ModelModify.h"
-#include "StaminaMessages.h"
+#include "../StaminaMessages.h"
 
 using namespace stamina;
 using namespace stamina::util;
@@ -47,7 +48,7 @@ ModelModify::createModifiedModel() {
 	std::filesystem::copy_file(originalModel, modifiedModel);
 
 	std::ofstream modifiedModelStream;
-	modifiedModelStream.open(modifiedModel, 'a');
+	modifiedModelStream.open(modifiedModel, "a");
 	modifiedModelStream << std::endl << std::endl;
 	modifiedModelStream << "module Absorbing_Def_STAMINA\n\tAbsorbing : bool init false;\n\tendmodule" << std::endl;
 	modifiedModelStream.close();
@@ -57,16 +58,16 @@ std::shared_ptr<std::vector<storm::jani::Property>>
 ModelModify::createModifiedProperties() {
 	std::ifstream originalPropertiesStream;
 	std::ofstream modifiedPropertiesStream;
-	originalPropertiesStream.open(originalProperties, 'r');
-	modifiedPropertiesStream.open(modifiedProperties, 'w');
-	std::string line;
-	while (std::getline(originalPropertiesStream, line)) {
+	originalPropertiesStream.open(originalProperties, "r");
+	modifiedPropertiesStream.open(modifiedProperties, "w");
+	std::string str;
+	while (std::getline(originalPropertiesStream, str)) {
 		// Remove whitespace
-		str.erase(remove(str.begin(),str.end(),' '),str.end());
+		str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
 		if (str.find("P=?" , 0)) {
 			continue;
 		}
-		str.erase(str.end() - 1, 1);
+		str.pop_back();
 		std::string propMin = str + "&!(Absorbing)]";
 		std::string propMax = str + "||(Absorbing)";
 		modifiedPropertiesStream << propMin << std::endl;
