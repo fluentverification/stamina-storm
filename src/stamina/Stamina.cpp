@@ -7,6 +7,8 @@
 #include "ANSIColors.h"
 #include "StaminaMessages.h"
 
+#include "util/ModelModify.h"
+
 #include <stdlib.h>
 #include <iomanip>
 #include <stdlib.h>
@@ -69,8 +71,14 @@ Stamina::initialize() {
 
 	// Load model file and properties file
 	try {
-		modelFile = std::make_shared<storm::prism::Program>(storm::parser::PrismParser::parse(Options::model_file, true));
-		propertiesVector = std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(Options::properties_file, *modelFile));
+		ModelModify modelModify(
+			Options::model_file
+			, Options::properties_file
+			, false
+			, false
+		);
+		modelFile = modelModify.createModifiedModel();
+		propertiesVector = modelModify.createModifiedProperties(modelFile);
 		auto labels = modelFile->getLabels();
 		StaminaMessages::info("There are the following number of state labels: " + std::to_string(labels.size()));
 		modelChecker->initialize(modelFile, propertiesVector);

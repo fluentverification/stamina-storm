@@ -40,7 +40,9 @@ namespace stamina {
 			/**
 			 * Creates the modified Properties
 			 * **/
-			std::shared_ptr<std::vector<storm::jani::Property>> createModifiedProperties();
+			std::shared_ptr<std::vector<storm::jani::Property>> createModifiedProperties(
+				std::shared_ptr<storm::prism::Program> modelFile
+			);
 		private:
 			std::string originalModel;
 			std::string modifiedModel;

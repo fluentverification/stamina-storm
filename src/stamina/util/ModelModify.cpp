@@ -54,10 +54,13 @@ ModelModify::createModifiedModel() {
 	modifiedModelStream << std::endl << std::endl;
 	modifiedModelStream << "module Absorbing_Def_STAMINA\n\tAbsorbing : bool init false;\n\tendmodule" << std::endl;
 	modifiedModelStream.close();
+	return std::make_shared<storm::prism::Program>(storm::parser::PrismParser::parse(modifiedModel, true));
 }
 
 std::shared_ptr<std::vector<storm::jani::Property>>
-ModelModify::createModifiedProperties() {
+ModelModify::createModifiedProperties(
+	std::shared_ptr<storm::prism::Program> modelFile
+) {
 	std::ifstream originalPropertiesStream;
 	std::ofstream modifiedPropertiesStream;
 	originalPropertiesStream.open(originalProperties, std::ios::in); // iostream read
@@ -77,4 +80,5 @@ ModelModify::createModifiedProperties() {
 	}
 	originalPropertiesStream.close();
 	modifiedPropertiesStream.close();
+	return std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(modifiedProperties, *modelFile));
 }
