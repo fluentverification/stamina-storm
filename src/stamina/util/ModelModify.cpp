@@ -2,13 +2,15 @@
 #include <filesystem>
 #include <algorithm>
 
+#include <stdio.h> // For remove()
+
 #include "ModelModify.h"
 #include "../StaminaMessages.h"
 
 using namespace stamina;
 using namespace stamina::util;
 
-ModelModifiy::ModelModify(
+ModelModify::ModelModify(
 	std::string originalModel
 	, std::string originalProperties
 	, bool saveModifiedModel
@@ -35,10 +37,10 @@ ModelModifiy::ModelModify(
 
 ModelModify::~ModelModify() {
 	if (!saveModifiedModel) {
-		std::filesystem::delete_file(modifiedModel);
+		remove(modifiedModel.c_str());
 	}
 	if (!saveModifiedProperties) {
-		std::filesystem::delete_file(modifiedProperties);
+		remove(modifiedProperties.c_str());
 	}
 }
 
@@ -48,7 +50,7 @@ ModelModify::createModifiedModel() {
 	std::filesystem::copy_file(originalModel, modifiedModel);
 
 	std::ofstream modifiedModelStream;
-	modifiedModelStream.open(modifiedModel, "a");
+	modifiedModelStream.open(modifiedModel, std::ios::app); // iostream append
 	modifiedModelStream << std::endl << std::endl;
 	modifiedModelStream << "module Absorbing_Def_STAMINA\n\tAbsorbing : bool init false;\n\tendmodule" << std::endl;
 	modifiedModelStream.close();
@@ -58,8 +60,8 @@ std::shared_ptr<std::vector<storm::jani::Property>>
 ModelModify::createModifiedProperties() {
 	std::ifstream originalPropertiesStream;
 	std::ofstream modifiedPropertiesStream;
-	originalPropertiesStream.open(originalProperties, "r");
-	modifiedPropertiesStream.open(modifiedProperties, "w");
+	originalPropertiesStream.open(originalProperties, std::ios::in); // iostream read
+	modifiedPropertiesStream.open(modifiedProperties, std::ios::out); // iostream write
 	std::string str;
 	while (std::getline(originalPropertiesStream, str)) {
 		// Remove whitespace
