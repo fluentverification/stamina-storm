@@ -14,6 +14,8 @@
 
 namespace stamina {
 	namespace util {
+		const std::string modelFileDefault = "stamina_modified_model_file.prism";
+		const std::string propFileDefault = "stamina_modified_prop_file.csl";
 		class ModelModify {
 		public:
 			/**
@@ -32,8 +34,8 @@ namespace stamina {
 				, std::string originalProperties
 				, bool saveModifiedModel = true
 				, bool saveModifiedProperties = true
-				, std::string modifiedModel = "modelified-model-stamina.prism"
-				, std::string modifiedProperties = "modified-properties-stamina.csl"
+				, std::string modifiedModel = modelFileDefault
+				, std::string modifiedProperties = propFileDefault
 			);
 			/**
 			 * The destructor for the model modifier
