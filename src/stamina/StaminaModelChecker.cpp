@@ -211,18 +211,6 @@ StaminaModelChecker::modelCheckProperty(
 	return nullptr;
 }
 
-void
-StaminaModelChecker::check(std::shared_ptr<storm::jani::Property> property, std::shared_ptr<StaminaModelChecker::Result> r) {
-	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet! This method DOES NOT perform truncated model checking, rather, it builds the entire model.");
-	double result = 0.0;
-	// auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-	// auto checker = std::make_shared<CtmcModelChecker>(*model);
-	// auto resultClass = checker->check(storm::modelchecker::CheckTask<>(*property, true));
-	// result = resultClass->asExplicitQuantitativeCheckResult<double>();
-	r->result = result;
-	r->explanation = "Property check for " + property->getName();
-}
-
 bool
 StaminaModelChecker::terminateModelCheck() {
 	// If our max result minus our min result is less than our maximum window

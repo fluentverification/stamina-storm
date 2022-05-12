@@ -53,14 +53,6 @@ static struct argp_option options[] = {
 		"Rank transitions before expanding (default: false)"}
 	, {"maxIterations", 'M', "int", 0,
 		"Maximum iteration for solution (default: 10000)"}
-	, {"power", 'P', 0, 0,
-		"Use the \"Power Method\""}
-	, {"jacobi", 'j', 0, 0,
-		"Use the \"Jacobi Method\""}
-	, {"gaussSeidel", 'g', 0, 0,
-		"Use the \"Gauss-Seidel Method\""}
-	, {"bGaussSeidel", 'G', 0, 0,
-		"Use the backwards \"Gauss-Seidel Method\""}
 	, {"maxStates", 'V', "integer", 0,
 		"The maximum number of states to explore in an iteration (default 2000000)"}
 	, { 0 }
@@ -97,7 +89,7 @@ struct arguments {
 /**
 * Parse a single option
 * */
-static error_t 
+static error_t
 parse_opt(int key, char * arg, struct argp_state * state) {
 
 	struct arguments * arguments = static_cast<struct arguments*>(state->input);
@@ -161,22 +153,6 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 		// max number of iterations
 		case 'M':
 			arguments->max_iterations = (uint64_t) atoi(arg);
-			break;
-		// use the power method
-		case 'P':
-			arguments->power = true;
-			break;
-		// use the jacobi method
-		case 'j':
-			arguments->jacobi = true;
-			break;
-		// use the gauss-seidel method
-		case 'g':
-			arguments->gauss_seidel = true;
-			break;
-		// backwards gauss seidel method
-		case 'G':
-			arguments->backward_gauss_seidel = true;
 			break;
 		case 'V':
 			arguments->max_states = (uint64_t) atoi(arg);

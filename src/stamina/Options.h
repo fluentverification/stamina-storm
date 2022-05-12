@@ -44,10 +44,6 @@ namespace stamina {
 		inline static std::string export_trans;
 		inline static bool rank_transitions;
 		inline static uint64_t max_iterations;
-		inline static bool power;
-		inline static bool jacobi;
-		inline static bool gauss_seidel;
-		inline static bool backward_gauss_seidel;
 		inline static uint64_t max_states;
 	};
 	/**

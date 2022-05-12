@@ -111,13 +111,6 @@ namespace stamina {
 
 		};
 		/**
-		 * Explicitly invokes a model check from a property
-		 *
-		 * @param property Property to invoke model checker for
-		 * @param r Pointer to result
-		 * */
-		void check(std::shared_ptr<storm::jani::Property> property, std::shared_ptr<Result> r);
-		/**
 		 * Whether or not to terminate model check
 		 *
 		 * @return Terminate?
