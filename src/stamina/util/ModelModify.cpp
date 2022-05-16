@@ -73,8 +73,8 @@ ModelModify::createModifiedModel() {
 	modifiedModelStream << "// All naturally generated reachable states are not our artificially created absorbing state" << std::endl;
 	modifiedModelStream << "// The value of the absorbing state (and the absorbing state itself) are modified in STAMINA" << std::endl;
 	modifiedModelStream << "module Absorbing_Def_STAMINA\n\n\tAbsorbing : [0..1] init 0;\n\n";
-	modifiedModelStream << "\t[] Absorbing=0 -> 1.0 : (Absorbing'=Absorbing); \n\n" << std::endl;
-	modifiedModelStream << "\t[] Absorbing=1 -> 1.0 : (Absorbing'=Absorbing); \n\nendmodule" << std::endl;
+	modifiedModelStream << "\t[] Absorbing=0 -> 1.0 : (Absorbing'=0); \n\n" << std::endl;
+	modifiedModelStream << "\t[] Absorbing=1 -> 1.0 : (Absorbing'=0); \n\nendmodule" << std::endl;
 	if (!saveModifiedModel) {
 		modifiedModelStream << "// NOTE: if you are seeing this file it means STAMINA did not close properly. This file may be safely deleted." << std::endl;
 	}
