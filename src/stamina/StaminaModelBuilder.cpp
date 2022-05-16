@@ -192,6 +192,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+StateType
+StaminaModelBuilder<ValueType, RewardModelType, StateType>>::getStateIndexOrAbsorbing(CompressedState const& state) {
+	if (stateStorage.stateToId.contains(state)) {
+		return stateStorage.stateToId.getValue(state);
+	}
+	// This state should not exist yet and should point to the absorbing state
+	return 0;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
@@ -285,10 +295,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < localKappa) {
+			connectTerminalStatesToAbsorbing(
+				transitionMatrixBuilder
+				, currentState
+				, currentRow
+			);
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
-			transitionMatrixBuilder.addNextValue(currentRow, 0, 1.0);
 			continue;
 		}
 		// Load state for us to use
@@ -579,6 +593,31 @@ void
 stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
 	Options::kappa = localKappa;
 }
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
+	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+	, CompressedState terminalState
+	, uint64_t currentRow
+) {
+	// Create a callback for the next-state generator to enable it to request the index of states.
+	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
+		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
+		, this
+		, std::placeholders::_1
+	);
+
+	generator->load(state);
+	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+	for (auto const& choice : behavior) {
+		for (auto const& stateProbabilityPair : choice) {
+			// row, column, value
+			transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+		}
+	}
+}
+
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 

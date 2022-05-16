@@ -156,6 +156,11 @@ StaminaModelChecker::modelCheckProperty(
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
+			StaminaMessages::info(
+				"Properties are as follows:\n\t"
+				+ propMin.getRawFormula()->toString() + "\n"
+				+ "\t" + propMax.getRawFormula()->toString()
+			);
 			auto result_lower = checker->check(
 				storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 			);

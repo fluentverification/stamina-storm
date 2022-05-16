@@ -147,6 +147,19 @@ namespace stamina {
 		* */
 		StateType getOrAddStateIndex(CompressedState const& state);
 		/**
+		 * Alterate state ID grabber. Returns state ID if exists. If it does not, returns the absorbing state
+		 * This is used as an alternative callback function for terminal (perimeter) states
+		 * */
+		StateType getStateIndexOrAbsorbing(CompressedState const& state);
+		/**
+		 * Connects all terminal states to the absorbing state
+		 * */
+		void connectTerminalStatesToAbsorbing(
+			storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+			, CompressedState terminalState
+			, uint64_t currentRow
+		);
+		/**
 		* Builds transition matrix of truncated state space for the given program.
 		*
 		* @param transitionMatrixBuilder The builder of the transition matrix.

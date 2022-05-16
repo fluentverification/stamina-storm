@@ -70,7 +70,7 @@ Stamina::initialize() {
 	}
 
 	// Initialize loggers
-	// storm::utility::setUp(); // TODO
+	storm::utility::setUp(); // TODO
 	// Set some settings objects.
 	storm::settings::initializeAll("Stamina", "Stamina");
 
