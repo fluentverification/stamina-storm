@@ -67,18 +67,19 @@ ModelModify::createModifiedModel() {
 	std::filesystem::copy_file(originalModel, cwd + SLASH + modifiedModel);
 
 	std::ofstream modifiedModelStream;
-	// modifiedModelStream.open(modifiedModel, std::ios::app); // iostream append
-	// modifiedModelStream << "\n\n// This module added automatically by STAMINA" << std::endl;
-	// modifiedModelStream << std::endl << std::endl;
-	// modifiedModelStream << "// All naturally generated reachable states are not our artificially created absorbing state" << std::endl;
-	// modifiedModelStream << "// The value of the absorbing state (and the absorbing state itself) are modified in STAMINA" << std::endl;
-	// modifiedModelStream << "module Absorbing_Def_STAMINA\n\n\tAbsorbing : [0..1] init 0;\n\n";
-	// modifiedModelStream << "\t[] Absorbing=0 -> 1.0 : (Absorbing'=0); \n\n" << std::endl;
-	// modifiedModelStream << "\t[] Absorbing=1 -> 1.0 : (Absorbing'=0); \n\nendmodule" << std::endl;
-	// if (!saveModifiedModel) {
-	// 	modifiedModelStream << "// NOTE: if you are seeing this file it means STAMINA did not close properly. This file may be safely deleted." << std::endl;
-	// }
-	// modifiedModelStream.close();
+	modifiedModelStream.open(modifiedModel, std::ios::app); // iostream append
+	modifiedModelStream << "\n\n// This module added automatically by STAMINA" << std::endl;
+	modifiedModelStream << std::endl << std::endl;
+	modifiedModelStream << "// All naturally generated reachable states are not our artificially created absorbing state" << std::endl;
+	modifiedModelStream << "// The value of the absorbing state (and the absorbing state itself) are modified in STAMINA" << std::endl;
+	modifiedModelStream << "module Absorbing_Def_STAMINA\n\n\tAbsorbing : [0..1] init 0;\n\n";
+	// modifiedModelStream << "\t[] Absorbing=0 -> 1.0 : (Absorbing'=0); \n" << std::endl;
+	// modifiedModelStream << "\t[] Absorbing=1 -> 1.0 : (Absorbing'=0); \n\n";
+	modifiedModelStream << "endmodule" << std::endl;
+	if (!saveModifiedModel) {
+		modifiedModelStream << "// NOTE: if you are seeing this file it means STAMINA did not close properly. This file may be safely deleted." << std::endl;
+	}
+	modifiedModelStream.close();
 	return std::make_shared<storm::prism::Program>(storm::parser::PrismParser::parse(modifiedModel, true));
 }
 
@@ -109,11 +110,11 @@ ModelModify::createModifiedProperties(
 			continue;
 		}
 		// Modify the property so that "absorbing is reflected
-		// str.pop_back();
-		// std::size_t firstParenPos = str.find("(");
-		// str.replace(firstParenPos, 1, "((");
-		std::string propMin = str + ';'; // + "& (Absorbing = 0)) ]; // Property for Pmin\n";
-		std::string propMax = str + ';'; // + "| (Absorbing = 1)) ]; // Property for Pmax\n";
+		str.pop_back();
+		std::size_t firstParenPos = str.find("(");
+		str.replace(firstParenPos, 1, "((");
+		std::string propMin = str + "& (Absorbing = 0)) ]; // Property for Pmin\n";
+		std::string propMax = str + "| (Absorbing = 1)) ]; // Property for Pmax\n";
 		modifiedPropertiesStream << propMin << std::endl;
 		modifiedPropertiesStream << propMax << std::endl;
 	}
