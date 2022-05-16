@@ -259,6 +259,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
+		for (auto variable : generator->getVariableInformation().integerVariables) {
+			if (variable.getName() == "Absorbing") {
+				if (currentState.getAsInt(variable.bitOffset, variable.bitWidth) == 1) {
+					StaminaMessages::error("State " + std::to_string(currentIndex) + " has an absorbing value it should not!");
+				}
+				break;
+			}
+		}
 		exploredStates.insert(currentIndex);
 		// Print out debugging information
 		currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
@@ -512,14 +520,19 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		return;
 	}
 	this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
+	bool gotVar = false;
 	for (auto variable : generator->getVariableInformation().integerVariables) {
 		if (variable.getName() == "Absorbing") {
 			this->absorbingState.setFromInt(variable.bitOffset, variable.bitWidth, 1);
 			if (this->absorbingState.getAsInt(variable.bitOffset, variable.bitWidth) != 1) {
 				StaminaMessages::errorAndExit("Absorbing state setup failed!");
 			}
-			continue;
+			gotVar = true;
+			break;
 		}
+	}
+	if (!gotVar) {
+		StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
 	}
 	// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 	stateStorage.deadlockStateIndices.push_back(0);
