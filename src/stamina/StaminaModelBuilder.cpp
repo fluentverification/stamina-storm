@@ -261,7 +261,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		for (auto variable : generator->getVariableInformation().integerVariables) {
 			if (variable.getName() == "Absorbing") {
-				if (currentState.getAsInt(variable.bitOffset, variable.bitWidth) == 1) {
+				if (currentState.getAsInt(variable.bitOffset + 1, variable.bitWidth) == 1) {
 					StaminaMessages::error("State " + std::to_string(currentIndex) + " has an absorbing value it should not!");
 				}
 				break;
@@ -523,8 +523,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	bool gotVar = false;
 	for (auto variable : generator->getVariableInformation().integerVariables) {
 		if (variable.getName() == "Absorbing") {
-			this->absorbingState.setFromInt(variable.bitOffset, variable.bitWidth, 1);
-			if (this->absorbingState.getAsInt(variable.bitOffset, variable.bitWidth) != 1) {
+			this->absorbingState.setFromInt(variable.bitOffset + 1, variable.bitWidth, 1);
+			if (this->absorbingState.getAsInt(variable.bitOffset + 1, variable.bitWidth) != 1) {
 				StaminaMessages::errorAndExit("Absorbing state setup failed!");
 			}
 			gotVar = true;
