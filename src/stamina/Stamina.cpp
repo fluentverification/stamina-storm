@@ -80,8 +80,8 @@ Stamina::initialize() {
 		util::ModelModify modelModify(
 			Options::model_file
 			, Options::properties_file
-			, false
-			, false
+			, true
+			, true
 		);
 		modelFile = modelModify.createModifiedModel();
 		propertiesVector = modelModify.createModifiedProperties(modelFile);
