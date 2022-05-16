@@ -79,8 +79,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 		switch (generator->getModelType()) {
 			// Only supports CTMC models.
 			case storm::generator::ModelType::CTMC:
+				isCtmc = true;
 				return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
 			case storm::generator::ModelType::DTMC:
+				isCtmc = false;
 				StaminaMessages::warning("This model is a DTMC. If you are using this in the STAMINA program, currently, only CTMCs are supported. You may get an error in checking.");
 				return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, buildModelComponents());
 			case storm::generator::ModelType::MDP:
@@ -325,7 +327,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			}
 
 			double totalRate = 0.0;
-			if (!shouldEnqueueAll) {
+			if (!shouldEnqueueAll && isCtmc) {
 				for (auto const & stateProbabilityPair : choice) {
 					if (stateProbabilityPair.first == 0) {
 						StaminaMessages::warning("Transition to absorbing state from API!!!");
@@ -347,8 +349,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// These are next states where the previous state has a reachability
 				// greater than zero
 				if (!shouldEnqueueAll) {
-
-					double probability = stateProbabilityPair.second / totalRate;
+					double probability;
+					if (isCtmc) {
+						probability = stateProbabilityPair.second / totalRate;
+					}
+					else {
+						probability = stateProbabilityPair.second;
+					}
 					piMap[sPrime] += piMap[currentIndex] * probability;
 				}
 				if (set_contains(enqueued, sPrime)) {

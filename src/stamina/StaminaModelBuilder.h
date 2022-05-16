@@ -212,6 +212,7 @@ namespace stamina {
 		bool firstIteration;
 		double localKappa;
 		std::string currentStateString;
+		bool isCtmc;
 	};
 
 	// Helper method to find in unordered_set
