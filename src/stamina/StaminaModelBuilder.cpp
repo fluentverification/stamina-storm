@@ -254,9 +254,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
+		if (currentIndex == 0) {
+			StaminaMessages::error("Dequeued artificial absorbing state!");
+		}
 		exploredStates.insert(currentIndex);
 		// Print out debugging information
-		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState, piMap[currentIndex]) << " (index " << currentIndex << ")" << std::endl;
 		currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
@@ -331,7 +333,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 					totalRate += stateProbabilityPair.second;
 				}
-				std::cout << "Dequeued state has a total rate of " << totalRate << std::endl;
 			}
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
@@ -349,7 +350,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 					double probability = stateProbabilityPair.second / totalRate;
 					piMap[sPrime] += piMap[currentIndex] * probability;
-					std::cout << "Transition probability to state " << sPrime << " is " << probability << std::endl;
 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
@@ -487,7 +487,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 		totalStates++;
 		totalProbability += localKappa; // piMap[tState];
 	}
-	std::cout << "At this iteration, the following states are terminal:" << totalStates << std::endl;
 	// Reduce kappa
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;
