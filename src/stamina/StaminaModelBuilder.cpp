@@ -193,7 +193,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-StaminaModelBuilder<ValueType, RewardModelType, StateType>>::getStateIndexOrAbsorbing(CompressedState const& state) {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing(CompressedState const& state) {
 	if (stateStorage.stateToId.contains(state)) {
 		return stateStorage.stateToId.getValue(state);
 	}
@@ -608,7 +608,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		, std::placeholders::_1
 	);
 
-	generator->load(state);
+	generator->load(terminalState);
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	for (auto const& choice : behavior) {
 		for (auto const& stateProbabilityPair : choice) {
