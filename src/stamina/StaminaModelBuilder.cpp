@@ -611,10 +611,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	generator->load(terminalState);
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	for (auto const& choice : behavior) {
+		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {
-			// row, column, value
-			transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+			if (stateProbabilityPair.first != 0) {
+				// row, column, value
+				transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+			}
+			else {
+				totalRateToAbsorbing += stateProbabilityPair.second;
+			}
 		}
+		// Absorbing state
+		transitionMatrixBuilder.addNextValue(currentRow, 0, totalRateToAbsorbing);
 	}
 }
 
