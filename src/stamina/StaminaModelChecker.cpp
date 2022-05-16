@@ -140,8 +140,8 @@ StaminaModelChecker::modelCheckProperty(
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 			// Rebuild the initial state labels
 			labeling = &( model->getStateLabeling());
-			labeling->addLabel("absorbing");
-			labeling->addLabelToState("absorbing", 0);
+			labeling->addLabel("(Absorbing = 1)");
+			labeling->addLabelToState("(Absorbing = 1)", 0);
 
 			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Accumulate probabilities
