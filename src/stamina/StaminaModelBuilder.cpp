@@ -79,8 +79,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 		switch (generator->getModelType()) {
 			// Only supports CTMC models.
 			case storm::generator::ModelType::CTMC:
+				isCtmc = true;
 				return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Ctmc, buildModelComponents());
 			case storm::generator::ModelType::DTMC:
+				isCtmc = false;
 				StaminaMessages::warning("This model is a DTMC. If you are using this in the STAMINA program, currently, only CTMCs are supported. You may get an error in checking.");
 				return storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, buildModelComponents());
 			case storm::generator::ModelType::MDP:
@@ -190,6 +192,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+StateType
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing(CompressedState const& state) {
+	if (stateStorage.stateToId.contains(state)) {
+		return stateStorage.stateToId.getValue(state);
+	}
+	// This state should not exist yet and should point to the absorbing state
+	return 0;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
@@ -211,6 +223,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		, this
 		, std::placeholders::_1
 	);
+
+	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
+	// register new states
+	std::function<StateType (CompressedState const&)> stateToIdCallback2 = std::bind(
+		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
+		, this
+		, std::placeholders::_1
+	);
+
 	// Create absorbing state
 	setUpAbsorbingState(
 		transitionMatrixBuilder
@@ -235,9 +256,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		exploredStates.insert(index);
 	}
 
-	// Now explore the current state until there is no more reachable state.
-	uint_fast64_t currentRowGroup = 0;
-	uint_fast64_t currentRow = 0;
+	uint_fast64_t currentRowGroup = 1;
+	uint_fast64_t currentRow = 1;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
@@ -254,9 +274,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
+		if (currentIndex == 0) {
+			StaminaMessages::error("Dequeued artificial absorbing state!");
+		}
+		// TODO: Remove this check for optimization
+		for (auto variable : generator->getVariableInformation().integerVariables) {
+			if (variable.getName() == "Absorbing") {
+				if (currentState.getAsInt(variable.bitOffset + 1, variable.bitWidth) == 1) {
+					StaminaMessages::error("State " + std::to_string(currentIndex) + " has an absorbing value it should not!");
+				}
+				break;
+			}
+		}
 		exploredStates.insert(currentIndex);
 		// Print out debugging information
-		std::cout << "Dequeued state " << StateSpaceInformation::stateToString(currentState, piMap[currentIndex]) << " (index " << currentIndex << ")" << std::endl;
 		currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
@@ -273,10 +304,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < localKappa) {
+			connectTerminalStatesToAbsorbing(
+				transitionMatrixBuilder
+				, currentState
+				, currentRow
+				, stateToIdCallback2
+			);
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
-			transitionMatrixBuilder.addNextValue(currentRow, 0, 1.0);
 			continue;
 		}
 		// Load state for us to use
@@ -305,7 +341,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Now add all choices.
 		bool firstChoiceOfState = true;
 		for (auto const& choice : behavior) {
-
+			if (!firstChoiceOfState) {
+				StaminaMessages::errorAndExit("Model was not deterministic!");
+			}
 			// add the generated choice information
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
@@ -323,7 +361,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			}
 
 			double totalRate = 0.0;
-			if (!shouldEnqueueAll) {
+			if (!shouldEnqueueAll && isCtmc) {
 				for (auto const & stateProbabilityPair : choice) {
 					if (stateProbabilityPair.first == 0) {
 						StaminaMessages::warning("Transition to absorbing state from API!!!");
@@ -331,7 +369,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 					totalRate += stateProbabilityPair.second;
 				}
-				std::cout << "Dequeued state has a total rate of " << totalRate << std::endl;
 			}
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
@@ -346,10 +383,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// These are next states where the previous state has a reachability
 				// greater than zero
 				if (!shouldEnqueueAll) {
-
-					double probability = stateProbabilityPair.second / totalRate;
+					double probability;
+					if (isCtmc) {
+						probability = stateProbabilityPair.second / totalRate;
+					}
+					else {
+						probability = stateProbabilityPair.second;
+					}
 					piMap[sPrime] += piMap[currentIndex] * probability;
-					std::cout << "Transition probability to state " << sPrime << " is " << probability << std::endl;
 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
@@ -487,7 +528,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 		totalStates++;
 		totalProbability += localKappa; // piMap[tState];
 	}
-	std::cout << "At this iteration, the following states are terminal:" << totalStates << std::endl;
 	// Reduce kappa
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;
@@ -506,6 +546,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		return;
 	}
 	this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
+	bool gotVar = false;
+	for (auto variable : generator->getVariableInformation().integerVariables) {
+		if (variable.getName() == "Absorbing") {
+			this->absorbingState.setFromInt(variable.bitOffset + 1, variable.bitWidth, 1);
+			if (this->absorbingState.getAsInt(variable.bitOffset + 1, variable.bitWidth) != 1) {
+				StaminaMessages::errorAndExit("Absorbing state setup failed!");
+			}
+			gotVar = true;
+			break;
+		}
+	}
+	if (!gotVar) {
+		StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
+	}
 	// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 	stateStorage.deadlockStateIndices.push_back(0);
 	// Check if state is already registered
@@ -551,6 +605,42 @@ void
 stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
 	Options::kappa = localKappa;
 }
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
+	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+	, CompressedState terminalState
+	, uint64_t currentRow
+	, std::function<StateType (CompressedState const&)> stateToIdCallback
+) {
+	bool addedValue = false;
+	generator->load(terminalState);
+	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+	// If there is no behavior, we have an error.
+	if (behavior.empty()) {
+		StaminaMessages::errorAndExit("Behavior for perimeter state was empty!");
+	}
+	for (auto const& choice : behavior) {
+		double totalRateToAbsorbing = 0;
+		for (auto const& stateProbabilityPair : choice) {
+			if (stateProbabilityPair.first != 0) {
+				// row, column, value
+				transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+			}
+			else {
+				totalRateToAbsorbing += stateProbabilityPair.second;
+			}
+		}
+		addedValue = true;
+		// Absorbing state
+		transitionMatrixBuilder.addNextValue(currentRow, 0, totalRateToAbsorbing);
+	}
+	if (!addedValue) {
+		StaminaMessages::errorAndExit("Did not add to transition matrix!");
+	}
+}
+
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 

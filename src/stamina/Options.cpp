@@ -61,9 +61,5 @@ Options::setArgs(struct arguments * arguments) {
 	export_trans = arguments->export_trans;
 	rank_transitions = arguments->rank_transitions;
 	max_iterations = arguments->max_iterations;
-	power = arguments->power;
-	jacobi = arguments->jacobi;
-	gauss_seidel = arguments->gauss_seidel;
-	backward_gauss_seidel = arguments->backward_gauss_seidel;
 	max_states = arguments->max_states;
 }

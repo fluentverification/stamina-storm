@@ -94,14 +94,15 @@ StaminaModelChecker::initialize(
 
 std::unique_ptr<storm::modelchecker::CheckResult>
 StaminaModelChecker::modelCheckProperty(
-	storm::jani::Property prop
+	storm::jani::Property propMin
+	, storm::jani::Property propMax
 	, storm::prism::Program const& modulesFile
 ) {
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
 	std::allocator<StaminaModelBuilder<double>> allocatorBuilder;
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
-	auto options = BuilderOptions(*prop.getFilter().getFormula());
+	auto options = BuilderOptions(*propMin.getFilter().getFormula());
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	// Create StaminaModelBuilder
 	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator);
@@ -116,31 +117,9 @@ StaminaModelChecker::modelCheckProperty(
 	double reachThreshold = Options::kappa;
 
 	// Get the name of the property
-	std::string propName = prop.getName().empty() ? "Prob" : prop.getName();
 
 	// Lower and upper bound times
 	double lTime, uTime;
-
-	// TODO: Get string representation of formula and add
-	// For reachability just use the "absorbing" label for the upper bound and add the lower results--if only reachability formulas
-	auto propertyExpression = prop.getRawFormula();
-
-	std::cout << propertyExpression->toString() << std::endl;
-
-	if (propertyExpression->isProbabilityPathFormula()) {
-		StaminaMessages::warning("This property (" + propName + ") is a probability path formula.");
-	}
-
-	// Will we switch to optimized CTMC analysis? (I.e., will we perform the state-space truncation)
-	bool switchToCombinedCTMC = true;
-	// Check if we are using an until formula and a path formula
-	std::shared_ptr<const storm::logic::Formula> formula = prop.getFilter().getFormula();
-	if (formula->isPathFormula() && formula->isUntilFormula()) {
-		// TODO: Set this property for our model generator
-		// Update switchToCombinedCTMC
-		switchToCombinedCTMC = switchToCombinedCTMC || !Options::no_prop_refine;
-	}
-	switchToCombinedCTMC = switchToCombinedCTMC && !Options::no_prop_refine;
 
 	// While we should not terminate
 	while (numRefineIterations == 0
@@ -154,22 +133,19 @@ StaminaModelChecker::modelCheckProperty(
 		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
-#ifdef USE_STAMINA_TRUNCATION
 		int innerLoopCount = 0;
 		while (piHat >= Options::prob_win / Options::approx_factor) {
-			std::cout << "piHat = " << piHat << " and w/approx = " << Options::prob_win / Options::approx_factor << std::endl;
 			StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 			// Rebuild the initial state labels
 			labeling = &( model->getStateLabeling());
-			labeling->addLabel("absorbing");
-			labeling->addLabelToState("absorbing", 0);
+			labeling->addLabel("(Absorbing = 1)");
+			labeling->addLabelToState("(Absorbing = 1)", 0);
 
 			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
-			std::cout << "Innter loop count: " << innerLoopCount << std::endl;
 			innerLoopCount++;
 			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
@@ -177,47 +153,19 @@ StaminaModelChecker::modelCheckProperty(
 			builder->setGenerator(generator);
 		}
 		builder->setLocalKappaToGlobal();
-#endif // USE_STAMINA_TRUNCATION
-#ifndef USE_STAMINA_TRUNCATION
-		/* Naive truncation using JUST a breadth first search rather than truncating paths
-		based on reachability probability */
-		StaminaMessages::info("Using test truncation");
-		auto simpleBuilder = new ExplicitTruncatedModelBuilder<double>(generator);
-		model = simpleBuilder->build()->template as<storm::models::sparse::Ctmc<double>>();
-		auto labeling = model->getStateLabeling();
-		checker = std::make_shared<CtmcModelChecker>(*model);
-		delete simpleBuilder;
-#endif
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
-			modifyState(true);
-			std::cout << "absorbing state labeling:" << std::endl;
-			// Print labels for absorbing state
-			for (auto label : labeling->getLabelsOfState(0)) {
-				std::cout << label << std::endl;
-			}
-			std::cout << "init state labeling:" << std::endl;
-			// Print labels for init state
-			for (auto label : labeling->getLabelsOfState(1)) {
-				std::cout << label << std::endl;
-			}
+			StaminaMessages::info(
+				"Properties are as follows:\n\t"
+				+ propMin.getRawFormula()->toString() + "\n"
+				+ "\t" + propMax.getRawFormula()->toString()
+			);
 			auto result_lower = checker->check(
-				storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true)
+				storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 			);
 			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
-			modifyState(false);
-			// Print labels for absorbing state
-			std::cout << "absorbing state labeling:" << std::endl;
-			for (auto label : labeling->getLabelsOfState(0)) {
-				std::cout << label << std::endl;
-			}
-			// Print labels for init state
-			std::cout << "init state labeling:" << std::endl;
-			for (auto label : labeling->getLabelsOfState(1)) {
-				std::cout << label << std::endl;
-			}
-			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(prop.getRawFormula()), true));
+			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true));
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
 				"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
@@ -253,7 +201,7 @@ StaminaModelChecker::modelCheckProperty(
 
 	// Print results
 	std::stringstream resultInfo;
-	resultInfo << "Finished checking property: " << propName << std::endl;
+	resultInfo << "Finished checking property: " << propMin.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
 	StaminaMessages::info(resultInfo.str());
@@ -266,18 +214,6 @@ StaminaModelChecker::modelCheckProperty(
 	}
 
 	return nullptr;
-}
-
-void
-StaminaModelChecker::check(std::shared_ptr<storm::jani::Property> property, std::shared_ptr<StaminaModelChecker::Result> r) {
-	StaminaMessages::warning("This method (StaminaModelChecker::check()) is not implemented yet! This method DOES NOT perform truncated model checking, rather, it builds the entire model.");
-	double result = 0.0;
-	// auto model = builder->build()->as<storm::models::sparse::Ctmc<double>>();
-	// auto checker = std::make_shared<CtmcModelChecker>(*model);
-	// auto resultClass = checker->check(storm::modelchecker::CheckTask<>(*property, true));
-	// result = resultClass->asExplicitQuantitativeCheckResult<double>();
-	r->result = result;
-	r->explanation = "Property check for " + property->getName();
 }
 
 bool

@@ -3,11 +3,19 @@
 
 #include <vector>
 
+#include <storm/api/storm.h>
+#include <storm-parsers/api/storm-parsers.h>
+#include <storm-parsers/parser/PrismParser.h>
+#include <storm/storage/prism/Program.h>
+#include <storm/storage/jani/Property.h>
+
 #include "storm/storage/jani/Property.h"
 #include "storm/storage/prism/Program.h"
 
 namespace stamina {
 	namespace util {
+		const std::string modelFileDefault = "stamina_modified_model_file.prism";
+		const std::string propFileDefault = "stamina_modified_prop_file.csl";
 		class ModelModify {
 		public:
 			/**
@@ -26,8 +34,8 @@ namespace stamina {
 				, std::string originalProperties
 				, bool saveModifiedModel = true
 				, bool saveModifiedProperties = true
-				, std::string modifiedModel = "modelified-model-stamina.prism"
-				, std::string modifiedProperties = "modified-properties-stamina.csl"
+				, std::string modifiedModel = modelFileDefault
+				, std::string modifiedProperties = propFileDefault
 			);
 			/**
 			 * The destructor for the model modifier
@@ -40,7 +48,9 @@ namespace stamina {
 			/**
 			 * Creates the modified Properties
 			 * **/
-			std::shared_ptr<std::vector<storm::jani::Property>> createModifiedProperties();
+			std::shared_ptr<std::vector<storm::jani::Property>> createModifiedProperties(
+				std::shared_ptr<storm::prism::Program> modelFile
+			);
 		private:
 			std::string originalModel;
 			std::string modifiedModel;
