@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="190.67737mm"
+   height="46.634995mm"
+   viewBox="0 0 190.67737 46.634995"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04, custom)"
+   sodipodi:docname="staminaLogo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="0.58641313"
+     inkscape:cx="503.05832"
+     inkscape:cy="417.79419"
+     inkscape:window-width="1118"
+     inkscape:window-height="1024"
+     inkscape:window-x="802"
+     inkscape:window-y="27"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient11626">
+      <stop
+         style="stop-color:#00a270;stop-opacity:1"
+         offset="0"
+         id="stop11622" />
+      <stop
+         style="stop-color:#86ffd8;stop-opacity:1"
+         offset="1"
+         id="stop11624" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient11626"
+       id="linearGradient11628"
+       x1="8.3196125"
+       y1="97.855576"
+       x2="39.915688"
+       y2="130.605"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.2599185,0,0,1.2599207,-11.75185,-26.774934)" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(4.2019188,-93.727994)">
+    <g
+       id="g12169"
+       transform="matrix(1,0,0,1.0000017,0,-1.5809602e-4)">
+      <text
+         xml:space="preserve"
+         style="font-size:23.086px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;stroke-width:0.578061;stroke-miterlimit:4;stroke-dasharray:none"
+         x="47.877949"
+         y="119.58896"
+         id="text1244"><tspan
+           sodipodi:role="line"
+           id="tspan1242"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans Bold';stroke:#000000;stroke-width:0.578061;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           x="47.877949"
+           y="119.58896"
+           dy="0">STAMINA</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:9.09326px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;stroke-width:0.22769;stroke-miterlimit:4;stroke-dasharray:none"
+         x="48.648922"
+         y="131.12529"
+         id="text10361"><tspan
+           sodipodi:role="line"
+           id="tspan10359"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans Bold';stroke:#000000;stroke-width:0.22769;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           x="48.648922"
+           y="131.12529">INFINITE MODEL TRUNCATION</tspan></text>
+    </g>
+    <path
+       id="rect10937"
+       style="fill:url(#linearGradient11628);fill-opacity:1;stroke:none;stroke-width:0.46365;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke"
+       d="m 6.26752,93.727994 c -5.80019225,0 -10.4694388,4.669857 -10.4694388,10.470056 v 25.69549 c 0,5.8002 4.66924655,10.46945 10.4694388,10.46945 h 23.912187 c 5.800192,0 10.470048,-4.66925 10.470048,-10.46945 v -25.69549 c 0,-5.800199 -4.669856,-10.470056 -10.470048,-10.470056 z m 12.6329,8.819856 c 1.474824,0 2.870357,0.17087 4.187166,0.51324 1.343144,0.34238 2.738673,0.82957 4.187166,1.46163 l -1.935214,4.66137 c -1.290475,-0.52672 -2.449683,-0.93453 -3.476796,-1.22423 -1.02711,-0.28969 -2.080271,-0.43453 -3.160055,-0.43453 -1.132456,0 -2.001405,0.263 -2.607137,0.78971 -0.605732,0.52673 -0.908715,1.21148 -0.908715,2.05423 0,1.00077 0.447808,1.79095 1.343237,2.37034 0.895431,0.5794 2.225519,1.29081 3.990045,2.13357 1.448489,0.68474 2.67253,1.39555 3.673305,2.13295 1.02711,0.73743 1.817286,1.60637 2.370347,2.60715 0.553059,1.00077 0.829985,2.23876 0.829985,3.71358 0,2.50194 -0.908945,4.50344 -2.72614,6.00461 -1.790861,1.47484 -4.345601,2.21228 -7.663961,2.21228 -2.975988,0 -5.635555,-0.56598 -7.9794753,-1.69841 v -5.5701 c 1.3431453,0.57942 2.7259523,1.11932 4.1481073,1.61971 1.44849,0.47405 2.883406,0.71098 4.30556,0.71098 1.474826,0 2.515266,-0.27693 3.120997,-0.82999 0.632068,-0.57941 0.948384,-1.30351 0.948384,-2.1726 0,-0.71109 -0.250264,-1.31644 -0.750653,-1.81684 -0.474051,-0.50039 -1.119401,-0.96153 -1.935822,-1.38291 -0.816423,-0.44772 -1.751423,-0.92157 -2.80487,-1.42196 -0.658405,-0.31605 -1.369808,-0.68507 -2.133556,-1.10646 -0.76375,-0.4477 -1.500596,-0.98761 -2.211673,-1.61969 -0.684741,-0.6584 -1.251317,-1.44857 -1.699034,-2.37036 -0.4477142,-0.92176 -0.6713126,-2.02765 -0.6713126,-3.31812 0,-2.52826 0.8556166,-4.49038 2.5674686,-5.88621 1.711852,-1.42216 4.042993,-2.13294 6.992646,-2.13294 z" />
+  </g>
+</svg>

@@ -1,4 +1,5 @@
-*If you want to see development progress, and an ETA on when this will be completed, please switch over to the `dev` branch. We're currently in the middle of some serious rebasing.*
+![stamina-logo](doc/staminaLogo.png)
+
 # STAMINA (C++ Version)
 
 C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm]. This version is different from the [https://github.com/fluentverification/stamina ]( Java version), and is **still under development**.
