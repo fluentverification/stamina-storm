@@ -102,7 +102,7 @@ class XStamina(QWidget):
 		return rstr
 
 	def runStamina(self):
-		command = f"{EXECUTABLE} {self.modFile.text()} {self.propFile.text()}"
+		command = f"{EXECUTABLE} {self.modFile.text()} {self.propFile.text()}".split(' ')
 		proc = subprocess.Popen(
 			command
 			, stdout = subprocess.PIPE
