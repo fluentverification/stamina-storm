@@ -30,10 +30,7 @@ The following options are allowed (these are *slightly* different than in the Ja
   -e, --export=filename      Export model to a (text) file
   -f, --approxFactor=double  Factor to estimate how far off our reachability
                              predictions will be (default: 2.0)
-  -g, --gaussSeidel          Use the "Gauss-Seidel Method"
-  -G, --bGaussSeidel         Use the backwards "Gauss-Seidel Method"
   -i, --import=filename      Import model to a (text) file
-  -j, --jacobi               Use the "Jacobi Method"
   -k, --kappa=double         Reachability threshold for the first iteration
                              (default: 1.0)
   -M, --maxIterations=int    Maximum iteration for solution (default: 10000)
@@ -41,7 +38,6 @@ The following options are allowed (these are *slightly* different than in the Ja
                              (default 10)
   -p, --property=propname    Specify a certain property to check in a model
                              file that contains many
-  -P, --power                Use the "Power Method"
   -r, --reduceKappa=double   Reduction factor for Reachability Threshold
                              (kappa) during the refinement step (default 2.0)
   -R, --noPropRefine         Do not use property based refinement. If given,
