@@ -257,7 +257,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	// Now explore the current state until there is no more reachable state.
 	uint_fast64_t currentRowGroup = 0;
-	uint_fast64_t currentRow = 0;
+	uint_fast64_t currentRow = 1;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
@@ -611,7 +611,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	, uint64_t currentRow
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) {
-
+	bool addedValue = false;
 	generator->load(terminalState);
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	// If there is no behavior, we have an error.
@@ -629,8 +629,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 				totalRateToAbsorbing += stateProbabilityPair.second;
 			}
 		}
+		addedValue = true;
 		// Absorbing state
 		transitionMatrixBuilder.addNextValue(currentRow, 0, totalRateToAbsorbing);
+	}
+	if (!addedValue) {
+		StaminaMessages::errorAndExit("Did not add to transition matrix!");
 	}
 }
 
