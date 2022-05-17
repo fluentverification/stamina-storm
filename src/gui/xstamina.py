@@ -21,9 +21,9 @@ EXECUTABLE = "stamina-cplusplus"
 class XStamina(QWidget):
 	def __init__(self, parent=None):
 		super(XStamina, self).__init__(parent)
-		self.resize(800,400)
+		self.resize(800,10)
 		self.setWindowTitle("STAMINA - State Space Truncator for CTMC")
-		self.options = MoreOptions(self)
+		self.options = MoreOptions()
 		split = QSplitter(Qt.Horizontal)
 		left = QFrame(self)
 		left.setFrameShape(QFrame.StyledPanel)
@@ -83,7 +83,7 @@ class XStamina(QWidget):
 			)
 
 	def showMoreOptions(self):
-		self.moreOptions.show()
+		self.options.show()
 		print("Showing more options...")
 
 	def getImportFilePath(self, textbox, allowedExtensions):
