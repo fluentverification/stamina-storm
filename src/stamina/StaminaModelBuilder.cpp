@@ -212,7 +212,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 ) {
 	fresh = false;
 	// Add self-loop on absorbing state to prevent undefined behavior
-	// transitionMatrixBuilder.addNextValue(0, 0, 1.0);
+	// transitionMatrixBuilder.addNextValue(0, 0, 0.0);
 	// Builds model
 	// Initialize building state valuations (if necessary)
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
