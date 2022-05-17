@@ -7,6 +7,10 @@ STAMINA/STORM provides a simple dialog-box-like GUI that allows for simple STAMI
 1. `pyqt5`
 2. `submodule` (should be included with your Python installation)
 
+## Screenshots
+
+![xstamina](../../doc/screenshots/xstamina.png)
+
 ## Future work:
 
 Add PyBind (https://pybind11.readthedocs.io/en/stable/) bindings rather than using the `subprocess` module.
