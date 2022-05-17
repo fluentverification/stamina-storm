@@ -211,8 +211,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	fresh = false;
-	// Add self-loop on absorbing state to prevent undefined behavior
-	// transitionMatrixBuilder.addNextValue(0, 0, 0.0);
 	// Builds model
 	// Initialize building state valuations (if necessary)
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
@@ -226,7 +224,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		, std::placeholders::_1
 	);
 
-	// The perimeter states require a second stateToIdCallback
+	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
+	// register new states
 	std::function<StateType (CompressedState const&)> stateToIdCallback2 = std::bind(
 		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
 		, this
@@ -278,6 +277,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
+		// TODO: Remove this check for optimization
 		for (auto variable : generator->getVariableInformation().integerVariables) {
 			if (variable.getName() == "Absorbing") {
 				if (currentState.getAsInt(variable.bitOffset + 1, variable.bitWidth) == 1) {
@@ -341,7 +341,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Now add all choices.
 		bool firstChoiceOfState = true;
 		for (auto const& choice : behavior) {
-
+			if (!firstChoiceOfState) {
+				StaminaMessages::errorAndExit("Model was not deterministic!");
+			}
 			// add the generated choice information
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
