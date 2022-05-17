@@ -223,6 +223,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		, this
 		, std::placeholders::_1
 	);
+
+	// The perimeter states require a second stateToIdCallback
+	std::function<StateType (CompressedState const&)> stateToIdCallback2 = std::bind(
+		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
+		, this
+		, std::placeholders::_1
+	);
+
 	// Create absorbing state
 	setUpAbsorbingState(
 		transitionMatrixBuilder
@@ -299,6 +307,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				transitionMatrixBuilder
 				, currentState
 				, currentRow
+				, stateToIdCallback2
 			);
 			++numberOfExploredStates;
 			++currentRow;
@@ -600,16 +609,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 	, CompressedState terminalState
 	, uint64_t currentRow
+	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) {
-	// Create a callback for the next-state generator to enable it to request the index of states.
-	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
-		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
-		, this
-		, std::placeholders::_1
-	);
 
 	generator->load(terminalState);
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+	// If there is no behavior, we have an error.
+	if (behavior.empty()) {
+		StaminaMessages::errorAndExit("Behavior for perimeter state was empty!");
+	}
 	for (auto const& choice : behavior) {
 		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {

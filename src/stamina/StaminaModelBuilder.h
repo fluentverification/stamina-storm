@@ -158,6 +158,7 @@ namespace stamina {
 			storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 			, CompressedState terminalState
 			, uint64_t currentRow
+			, std::function<StateType (CompressedState const&)> stateToIdCallback
 		);
 		/**
 		* Builds transition matrix of truncated state space for the given program.
