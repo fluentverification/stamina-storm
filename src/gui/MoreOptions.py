@@ -25,6 +25,7 @@ class MoreOptions(QWidget):
 	}
 	OPTIONS_PRISM = {
 		"Rank Transitions":ITypes.CHECKBOX
+		, "Use Default Method":ITypes.CHOICE
 		, "Use Power Method":ITypes.CHOICE
 		, "Use Jacobi Method":ITypes.CHOICE
 		, "Use Gauss-Seidel Method":ITypes.CHOICE
@@ -41,6 +42,7 @@ class MoreOptions(QWidget):
 		, "Export Modified Model":False
 		, "Export Modified Properties":False
 		, "Rank Transitions":False
+		, "Use Default Method":True
 		, "Use Power Method":False
 		, "Use Jacobi Method":False
 		, "Use Gauss-Seidel Method":False
