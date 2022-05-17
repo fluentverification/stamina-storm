@@ -211,6 +211,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	fresh = false;
+	// Add self-loop on absorbing state to prevent undefined behavior
+	transitionMatrixBuilder.addNextValue(0, 0, 1.0);
 	// Builds model
 	// Initialize building state valuations (if necessary)
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
@@ -255,8 +257,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		exploredStates.insert(index);
 	}
 
-	// Now explore the current state until there is no more reachable state.
-	uint_fast64_t currentRowGroup = 0;
+	uint_fast64_t currentRowGroup = 1;
 	uint_fast64_t currentRow = 1;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
