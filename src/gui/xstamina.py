@@ -14,6 +14,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import subprocess
 
+from MoreOptions import MoreOptions
+
 EXECUTABLE = "stamina-cplusplus"
 
 class XStamina(QWidget):
@@ -21,6 +23,7 @@ class XStamina(QWidget):
 		super(XStamina, self).__init__(parent)
 		self.resize(800,400)
 		self.setWindowTitle("STAMINA - State Space Truncator for CTMC")
+		self.options = MoreOptions(self)
 		split = QSplitter(Qt.Horizontal)
 		left = QFrame(self)
 		left.setFrameShape(QFrame.StyledPanel)
@@ -52,7 +55,14 @@ class XStamina(QWidget):
 		self.export = QLineEdit()
 		self.browseExport = QPushButton('...')
 		self.addRowWithBrowse(self.export, self.browseExport, "Export file:", False)
+		self.useStorm = QRadioButton("Use STAMINA/STORM (Written in C++)")
+		self.usePrism = QRadioButton("Use STAMINA/PRISM (Written in Java)")
+		self.leftLayout.addRow(self.useStorm)
+		self.leftLayout.addRow(self.usePrism)
 		self.moreOptions = QPushButton("More Options...")
+		self.moreOptions.clicked.connect(
+			self.showMoreOptions
+		)
 		self.leftLayout.addRow(self.moreOptions)
 		self.start = QPushButton("Analyse Model")
 		self.leftLayout.addRow(self.start)
@@ -71,6 +81,10 @@ class XStamina(QWidget):
 			browse.clicked.connect(
 				lambda state, textbox=widget, allowedExtensions=allowedExts : self.getExportFilePath(textbox, allowedExtensions)
 			)
+
+	def showMoreOptions(self):
+		self.moreOptions.show()
+		print("Showing more options...")
 
 	def getImportFilePath(self, textbox, allowedExtensions):
 		options = QFileDialog.Options()
