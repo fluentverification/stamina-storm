@@ -111,10 +111,10 @@ ModelModify::createModifiedProperties(
 		}
 		// Modify the property so that "absorbing is reflected
 		str.pop_back();
-		std::size_t firstParenPos = str.find("(");
-		str.replace(firstParenPos, 1, "((");
-		std::string propMin = str + "& (Absorbing = 0)) ]; // Property for Pmin\n";
-		std::string propMax = str + "| (Absorbing = 1)) ]; // Property for Pmax\n";
+		std::size_t firstParenPos = str.find("[");
+		str.replace(firstParenPos, 1, "[(");
+		std::string propMin = str + ") & (G Absorbing = 0) ]; // Property for Pmin\n";
+		std::string propMax = str + ") | (F Absorbing = 1) ]; // Property for Pmax\n";
 		modifiedPropertiesStream << propMin << std::endl;
 		modifiedPropertiesStream << propMax << std::endl;
 	}
