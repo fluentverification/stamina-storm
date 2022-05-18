@@ -62,12 +62,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	// Optimization for hashmaps
 	exploredStates.max_load_factor(0.25);
 	stateMap.max_load_factor(0.25);
-	tMap.max_load_factor(0.25);
-	piMap.max_load_factor(0.25);
 	exploredStates.reserve(RESERVE_VALUE);
 	stateMap.reserve(RESERVE_VALUE);
-	tMap.reserve(RESERVE_VALUE);
-	piMap.reserve(RESERVE_VALUE);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -113,22 +109,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::updateReachabilityProbability(
-	StateType currentState
-	, StateType previousState
-	, float transitionProbability
-) {
-	// Optimization to prevent unnecessary multiply
-	if (piMap[previousState] == 0.0) {
-		return;
-	}
-	// Update the probability
-	piMap[currentState] += transitionProbability * piMap[previousState];
-}
-
-
-template <typename ValueType, typename RewardModelType, typename StateType>
 std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
 	std::vector<StateType> perimeterStates;
@@ -152,10 +132,51 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		actualIndex = newIndex;
 	}
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
-	if (shouldEnqueue(actualIndex)) {
-		enqueued.insert(actualIndex);
-		statesToExplore.push(std::make_pair(actualIndex, state));
-		// stateStorage.stateToId.findOrAdd(state, actualIndex);
+	// Handle conditional enqueuing
+	if (isInit) {
+		// Create a ProbabilityState for each individual state
+		ProbabilityState initProbabilityState(
+			state
+			, actualIndex
+			, 1.0
+			, true
+		);
+		stateMap.insert({actualIndex, initProbabilityState});
+		statesToExplore.push(initProbabilityState);
+		return actualIndex;
+	}
+	auto nextState = stateMap.find(actualIndex);
+	bool stateIsExisting = nextState != stateMap.end();
+
+	// This bit handles the non-initial states
+	if (currentProbabilityState.pi == 0) {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState nextProbabilityState = stateIsExisting->second;
+			auto emplaced = exploredStates.emplace(actualIndex);
+			if (emplaced->second) {
+				// Enqueue
+				statesToExplore.push(nextProbabilityState);
+			}
+		}
+	}
+	else {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState nextProbabilityState = stateIsExisting->second;
+			auto emplaced = exploredStates.emplace(actualIndex);
+			if (emplaced->second) {
+				// Enqueue
+				statesToExplore.push(nextProbabilityState);
+			}
+		}
+		else {
+			// This state has not been seen so create a new ProbabilityState
+			ProbabilityState nextProbabilityState(state, actualIndex);
+			stateMap.insert({actualIndex, nextProbabilityState});
+			exploredStates.emplace(actualIndex);
+			statesToExplore.push(nextProbabilityState);
+		}
 	}
 	return actualIndex;
 }
@@ -216,12 +237,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
-		if (firstIteration) {
-			piMap[index] = 1.0;
-			stateMap.insert(index);
-			tMap.insert(index);
-			firstIteration = false;
-		}
 		exploredStates.insert(index);
 	}
 
@@ -235,12 +250,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	StateType currentIndex;
 	CompressedState currentState;
-	ProbabilityState currentProbabilityState;
 
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		currentProbabilityState = statesToExplore.top();
+		currentProbabilityState.updatePi();
 		statesToExplore.pop();
 
 		// Get the first state in the queue.
@@ -251,10 +266,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 		// Print out debugging information
-		i// currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
+		// currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
 		// Set our state variable in the class
-		// NOTE: this->currentState is not the same as CompressedState currentState
-		this->currentState = currentIndex;
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
@@ -335,25 +348,17 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
-				// If we get 0 from stateToIdCallback, it means we have already called
-				// it on a state and this is a duplicate
-				if (sPrime == 0) {
-					continue;
-				}
+				double probability = stateProbabilityPair.second / totalRate ? isCtmc : stateProbabilityPair.second;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				// These are next states where the previous state has a reachability
 				// greater than zero
-				if (!shouldEnqueueAll) {
-					double probability;
-					if (isCtmc) {
-						probability = stateProbabilityPair.second / totalRate;
-					}
-					else {
-						probability = stateProbabilityPair.second;
-					}
-					piMap[sPrime] += piMap[currentIndex] * probability;
+
+				auto currentProbabilityStatePair = stateMap.find(sPrime);
+				if (currentProbabilityStatePair != stateMap.end()) {
+					currentProbabilityStatePair->second.addPi = currentProbabilityState.pi * probability;
 				}
+
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);

@@ -70,6 +70,12 @@ namespace stamina {
 			CompressedState state;
 			StateType index;
 			double pi;
+			/*
+				addPi is my way of getting around the fact that we can't get the transition
+				rates or the accumulation of the rates until after the enqueue callback is
+				called.
+			*/
+			double addPi;
 			bool terminal;
 			ProbabilityState(
 				CompressedState state
@@ -80,9 +86,14 @@ namespace stamina {
 				, index(index)
 				, pi(pi)
 				, termina(terminal)
-
+				, addPi(0.0)
 			{
 				// Intentionally left empty
+			}
+
+			void updatePi() {
+				pi += addPi;
+				addPi = 0.0;
 			}
 		};
 		typedef std::priority_queue<
@@ -216,14 +227,13 @@ namespace stamina {
 		std::unordered_set<StateType> exploredStates; // States that we have explored
 		std::unordered_map<StateType, ProbabilityState> stateMap; // S in the QEST paper
 		storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder;
-		StateType currentState;
+		ProbabilityState currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
 		bool isInit;
 		bool fresh;
 		bool firstIteration;
 		double localKappa;
-		std::string currentStateString;
 		bool isCtmc;
 	};
 
