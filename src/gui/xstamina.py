@@ -20,6 +20,9 @@ EXECUTABLE = "stamina-cplusplus"
 
 class XStamina(QWidget):
 	def __init__(self, parent=None):
+		"""
+Constructor for XStamina class. Sets up widgets and creates MoreOptions class
+		"""
 		super(XStamina, self).__init__(parent)
 		self.resize(800,10)
 		self.setWindowTitle("STAMINA - State Space Truncator for CTMC")
@@ -44,6 +47,9 @@ class XStamina(QWidget):
 		self.addFormButtons()
 
 	def addFormButtons(self):
+		"""
+Adds buttons to the main window. This is called by the constructor
+		"""
 		self.modFile = QLineEdit()
 		self.browseModFile = QPushButton("...")
 		self.addRowWithBrowse(self.modFile, self.browseModFile, "Modules File: ", True, {'prism':"Prism Files", 'sm':"Prism Files (Legacy)"})
@@ -77,6 +83,9 @@ class XStamina(QWidget):
 		self.start.clicked.connect(self.run)
 
 	def addRowWithBrowse(self, widget, browse, label, open=True, allowedExts={"txt":"Text Files"}):
+		"""
+Adds a row with a text box and a browse button
+		"""
 		hbox = QHBoxLayout()
 		hbox.addWidget(widget)
 		hbox.addWidget(browse)
@@ -91,10 +100,16 @@ class XStamina(QWidget):
 			)
 
 	def showMoreOptions(self):
+		"""
+Shows the builtin 'MoreOptions' window
+		"""
 		self.options.show()
 		print("Showing more options...")
 
 	def getImportFilePath(self, textbox, allowedExtensions):
+		"""
+Gets an import fle path
+		"""
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		exs = self.createExtensionMask(allowedExtensions)
@@ -103,6 +118,9 @@ class XStamina(QWidget):
 			textbox.setText(fileName)
 
 	def getExportFilePath(self, textbox, allowedExtensions):
+		"""
+Gets an export file path
+		"""
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		exs = self.createExtensionMask(allowedExtensions)
@@ -114,6 +132,9 @@ class XStamina(QWidget):
 	# Creates a file extension mask for QFileDialog
 	#
 	def createExtensionMask(self, allowedExtensions, allFiles = True):
+		"""
+Creates a file extension mask for a QFileDialog
+		"""
 		rstr = ""
 		for ex, desc in allowedExtensions.items():
 			rstr += desc + " (*." + ex + ");;"
@@ -138,12 +159,18 @@ class XStamina(QWidget):
 		return proc
 
 	def trace(self, proc):
+		"""
+Watches the subprocess and places output in the textbox
+		"""
 		while proc.poll() is None:
 			line = proc.stdout.readline()
 			if line:
 				self.output.appendPlainText(line)
 
 	def run(self):
+		"""
+Runs STAMINA with the selected options
+		"""
 		self.output.appendPlainText("[INFO] Creating STAMINA subprocess to stamina-cplusplus executable...\n")
 		# self.output.appendPlainText("[ERROR] The GUI is not finished yet. Please use command line.\n")
 		try:
