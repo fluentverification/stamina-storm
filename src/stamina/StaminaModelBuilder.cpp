@@ -8,8 +8,8 @@
 #include "StateSpaceInformation.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-// #define MSG_FREQUENCY 100000
-#define MSG_FREQUENCY 4000
+#define MSG_FREQUENCY 100000
+// #define MSG_FREQUENCY 4000
 
 #include <functional>
 #include <sstream>
@@ -111,7 +111,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// if (piMap.find(nextState) == piMap.end()) {
 	//	piMap.insert({nextState, (double) 0.0});
 	//}
-	if (isInit) { enqueued.insert(nextState); return true; }
+	if (isInit) { return true; }
 	bool stateIsExisting = set_contains(stateMap, nextState);
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
@@ -184,7 +184,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	}
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 	if (shouldEnqueue(actualIndex)) {
-		enqueued.insert(actualIndex);
 		statesToExplore.emplace_back(state, actualIndex);
 		// stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
@@ -270,23 +269,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		enqueued.clear();
 		// Get the first state in the queue.
 		currentState = statesToExplore.front().first;
 		currentIndex = statesToExplore.front().second;
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
-		// TODO: Remove this check for optimization
-		for (auto variable : generator->getVariableInformation().integerVariables) {
-			if (variable.getName() == "Absorbing") {
-				if (currentState.getAsInt(variable.bitOffset + 1, variable.bitWidth) == 1) {
-					StaminaMessages::error("State " + std::to_string(currentIndex) + " has an absorbing value it should not!");
-				}
-				break;
-			}
-		}
-		exploredStates.insert(currentIndex);
+
 		// Print out debugging information
 		currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
 		// Set our state variable in the class
