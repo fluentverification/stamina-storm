@@ -45,6 +45,8 @@
 #include "storm/utility/ConstantsComparator.h"
 #include "storm/utility/SignalHandler.h"
 
+#define RESERVE_VALUE 10000
+
 using namespace stamina;
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -57,7 +59,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, firstIteration(true)
 	, localKappa(Options::kappa)
 {
-	// Intentionally left empty
+	// Optimization for hashmaps
+	exploredStates.max_load_factor(0.25);
+	stateMap.max_load_factor(0.25);
+	tMap.max_load_factor(0.25);
+	piMap.max_load_factor(0.25);
+	exploredStates.reserve(RESERVE_VALUE);
+	stateMap.reserve(RESERVE_VALUE);
+	tMap.reserve(RESERVE_VALUE);
+	piMap.reserve(RESERVE_VALUE);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
