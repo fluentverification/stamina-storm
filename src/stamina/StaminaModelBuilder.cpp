@@ -113,47 +113,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-bool
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateType nextState) {
-	// Optimization
-	// if (set_contains(enqueued, nextState)) { return true; }
-	// If our previous state has not been encountered, we have unexpected behavior
-	// if (piMap.find(nextState) == piMap.end()) {
-	//	piMap.insert({nextState, (double) 0.0});
-	//}
-	if (isInit) { return true; }
-	bool stateIsExisting = set_contains(stateMap, nextState);
-	// If the reachability probability of the previous state is 0, enqueue regardless
-	if (piMap[currentState] == 0.0) {
-		if (stateIsExisting) {
-			if (!set_contains(exploredStates, nextState)) {
-				exploredStates.insert(nextState);
-				return true;
-			}
-			return false;
-		}
-		// State is invisible and should not exist yet
-		tMap.insert(nextState);
-		piMap.insert({nextState, 0.0});
-		return false;
-	}
-
-	if (stateIsExisting) {
-		// Have we explored this state in this iteration of kappa
-		if (!set_contains(exploredStates, nextState)) {
-			exploredStates.insert(nextState);
-			return true; // Yes enqueue
-		}
-		return false;
-	}
-	piMap.insert({nextState, 0.0});
-	tMap.insert(nextState);
-	stateMap.insert(nextState);
-	exploredStates.insert(nextState);
-	return true;
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::updateReachabilityProbability(
 	StateType currentState
@@ -276,24 +235,27 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	StateType currentIndex;
 	CompressedState currentState;
+	ProbabilityState currentProbabilityState;
 
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
+		currentProbabilityState = statesToExplore.top();
+		statesToExplore.pop();
+
 		// Get the first state in the queue.
-		currentIndex = statesToExplore.top().first;
-		currentState = statesToExplore.top().second;
+		currentIndex = currentProbabilityState.index;
+		currentState = currentProbabilityState.state;
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
 
 		// Print out debugging information
-		currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
+		i// currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
 
-		statesToExplore.pop();
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}

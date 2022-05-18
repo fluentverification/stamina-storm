@@ -116,24 +116,6 @@ namespace stamina {
 		* */
 		std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build();
 		/**
-		* Checks whether we should enqueue a state based on its current reachability probability, and that of its
-		* previous state. Assumes that you have both the current state, and the previous state. This method is to be used by
-		* the NextStateGenerators when they expand() a current state.
-		*
-		* @param currentState The current state which we may or may not enqueue.
-		* @param nextState The state which we came from to get to currentState
-		* @return Whether or not to enqueue currentState to the statesToExplore through stateToIdCallback
-		* */
-		bool shouldEnqueue(StateType nextState);
-		/**
-		* Updates a state's reachability probability given a current state, previous state, and transition probability.
-		*
-		* @param currentState The state to update the reachability probability
-		* @param previousState The state that we're transitioning from
-		* @param transitionProbability The probability to transition from previousState to currentState
-		* */
-		void updateReachabilityProbability(StateType currentState, StateType previousState, float transitionProbability);
-		/**
 		 * Gets the state ID of a state known to already exist. This does NOT perform state-space truncation for future states
 		 * */
 		StateType getStateIndexIfKnown(CompressedState const& state);
