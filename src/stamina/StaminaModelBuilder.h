@@ -65,7 +65,30 @@ namespace stamina {
 	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 	class StaminaModelBuilder {
 	public:
-		typedef std::pair<StateType, CompressedState> QueueItem;
+		/* Sub-class for states with probabilities */
+		class ProbabilityState {
+			CompressedState state;
+			StateType index;
+			double pi;
+			bool terminal;
+			ProbabilityState(
+				CompressedState state
+				, StateType index
+				, pi = 0.0
+				, terminal = true
+			) : state(state)
+				, index(index)
+				, pi(pi)
+				, termina(terminal)
+
+			{
+				// Intentionally left empty
+			}
+		};
+		typedef std::priority_queue<
+			ProbabilityState
+			, std::vector<ProbabilityState>
+			, std::greater<ProbabilityState>> PriorityQueue;
 		/**
 		* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
 		*
@@ -191,12 +214,6 @@ namespace stamina {
 		* */
 		storm::models::sparse::StateLabeling buildStateLabeling();
 		/**
-		* Sets our reachability threshold
-		*
-		* @param threshold The new reachability threshold
-		* */
-		void setReachabilityThreshold(double threshold);
-		/**
 		 * Sets up the initial state in the transition matrix
 		 * */
 		void setUpAbsorbingState(
@@ -208,39 +225,15 @@ namespace stamina {
 		);
 
 	private:
-		/* Sub-class for states with probabilities */
-		class ProbabilityState {
-			CompressedState state;
-			StateType index;
-			double pi;
-			bool terminal;
-			ProbabilityState(
-				CompressedState state
-				, StateType index
-				, pi = 0.0
-				, terminal = true
-			) : state(state)
-				, index(index)
-				, pi(pi)
-				, termina(terminal)
-
-			{
-				// Intentionally left empty
-			}
-		};
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 		// std::deque<std::pair<CompressedState, StateType>> statesToExplore;
-		std::priority_queue<QueueItem, std::vector<QueueItem>, std::greater<QueueItem>> statesToExplore;
+		PriorityQueue statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		std::unordered_set<StateType> exploredStates; // States that we have explored
-		std::unordered_set<StateType> stateMap; // S in the QEST paper
-		std::unordered_set<StateType> tMap; // T in the QEST paper
-		std::unordered_map<StateType, double> piMap; // Maps reachability probabilities to their states
-		std::unordered_set<StateType> enqueued;
-		std::unordered_map<StateType, CompressedState> availableStates;
-		double reachabilityThreshold;
+		std::unordered_map<StateType, ProbabilityState> stateMap; // S in the QEST paper
+		storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder;
 		StateType currentState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;

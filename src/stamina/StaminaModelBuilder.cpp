@@ -442,6 +442,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	// Component builders
 	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(0, 0, 0, false, !deterministic, 0);
 	std::vector<RewardModelBuilder<typename RewardModelType::ValueType>> rewardModelBuilders;
+	this->transitionMatrixBuilder = transitionMatrixBuilder;
 	// Iterate through the reward models and add them to the rewardmodelbuilders
 	for (uint64_t i = 0; i < generator->getNumberOfRewardModels(); ++i) {
 		rewardModelBuilders.emplace_back(generator->getRewardModelInformation(i));
@@ -514,12 +515,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling()
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::setReachabilityThreshold(double threshold) {
-	reachabilityThreshold = threshold;
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = 0.0;
@@ -583,7 +578,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore = std::priority_queue<QueueItem, std::vector<QueueItem>, std::greater<QueueItem>>();
+	statesToExplore = PriorityQueue();
 	exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
