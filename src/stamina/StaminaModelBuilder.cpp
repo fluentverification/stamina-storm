@@ -195,7 +195,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 	if (shouldEnqueue(actualIndex)) {
 		enqueued.insert(actualIndex);
-		statesToExplore.emplace_back(state, actualIndex);
+		statesToExplore.push(std::make_pair(actualIndex, state));
 		// stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
 	return actualIndex;
@@ -281,8 +281,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		// Get the first state in the queue.
-		currentState = statesToExplore.front().first;
-		currentIndex = statesToExplore.front().second;
+		currentIndex = statesToExplore.top().first;
+		currentState = statesToExplore.top().second;
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
@@ -293,7 +293,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
 
-		statesToExplore.pop_front();
+		statesToExplore.pop();
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
@@ -394,7 +394,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
+					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
 				}
 			}
 
@@ -583,7 +583,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore.clear();
+	statesToExplore = std::priority_queue<QueueItem, std::vector<QueueItem>, std::greater<QueueItem>>();
 	exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
