@@ -307,7 +307,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
-				, currentRow
+				, currentIndex
 				, stateToIdCallback2
 			);
 			++numberOfExploredStates;
@@ -570,7 +570,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
 	}
 	absorbingWasSetUp = true;
-	transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
+	// transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
 	// This state shall be Markovian (to not introduce Zeno behavior)
 	if (choiceInformationBuilder.isBuildMarkovianStates()) {
 		choiceInformationBuilder.addMarkovianState(0);
@@ -611,7 +611,7 @@ void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 	, CompressedState terminalState
-	, uint64_t currentRow
+	, StateType stateId
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) {
 	bool addedValue = false;
@@ -626,7 +626,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		for (auto const& stateProbabilityPair : choice) {
 			if (stateProbabilityPair.first != 0) {
 				// row, column, value
-				transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+				transitionMatrixBuilder.addNextValue(stateId, stateProbabilityPair.first, stateProbabilityPair.second);
 			}
 			else {
 				totalRateToAbsorbing += stateProbabilityPair.second;
@@ -634,7 +634,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		}
 		addedValue = true;
 		// Absorbing state
-		transitionMatrixBuilder.addNextValue(currentRow, 0, totalRateToAbsorbing);
+		transitionMatrixBuilder.addNextValue(stateId, 0, totalRateToAbsorbing);
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
