@@ -113,9 +113,9 @@ std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
 	std::vector<StateType> perimeterStates;
 	// std::unorderd_set<StateType>::iterator itr;
-	for (auto itr = tMap.begin(); itr != tMap.end(); itr++) {
-		perimeterStates.emplace_back(*itr - 1);
-	}
+	//for (auto itr = tMap.begin(); itr != tMap.end(); itr++) {
+	//	perimeterStates.emplace_back(*itr - 1);
+	//}
 	return perimeterStates;
 }
 
@@ -152,9 +152,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (currentProbabilityState.pi == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState nextProbabilityState = stateIsExisting->second;
+			ProbabilityState nextProbabilityState = nextState->second;
 			auto emplaced = exploredStates.emplace(actualIndex);
-			if (emplaced->second) {
+			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 			}
@@ -163,9 +163,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState nextProbabilityState = stateIsExisting->second;
+			ProbabilityState nextProbabilityState = nextState->second;
 			auto emplaced = exploredStates.emplace(actualIndex);
-			if (emplaced->second) {
+			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 			}
@@ -278,7 +278,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (set_contains(tMap, currentIndex) && piMap[currentIndex] < localKappa) {
+		if (currentProbabilityState.terminal && currentProbabilityState.pi < localKappa) {
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
@@ -310,9 +310,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
-		// Determine whether or not to enqueue all next states
-		bool shouldEnqueueAll = piMap[currentIndex] == 0.0;
-
 		// Now add all choices.
 		bool firstChoiceOfState = true;
 		for (auto const& choice : behavior) {
@@ -334,6 +331,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
 				}
 			}
+
+			bool shouldEnqueueAll = currentProbabilityState.pi == 0.0;
 
 			double totalRate = 0.0;
 			if (!shouldEnqueueAll && isCtmc) {
@@ -359,24 +358,19 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					currentProbabilityStatePair->second.addPi = currentProbabilityState.pi * probability;
 				}
 
-				if (set_contains(enqueued, sPrime)) {
+				// if (set_contains(enqueued, sPrime)) {
 					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
-				}
+					// transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+				//}
 			}
 
 			++currentRow;
 			firstChoiceOfState = false;
 		}
 
-		if (set_contains(tMap, currentIndex)) {
-			// Remove currentIndex from T if it's in T
-			tMap.erase(currentIndex);
-		}
-		// Set our current state's reachability probability to 0
-		if (!shouldEnqueueAll) {
-			piMap[currentIndex] = 0;
-		}
+		currentProbabilityState.terminal = false;
+		currentProbabilityState.pi = 0.0;
+
 		++currentRowGroup;
 
 		++numberOfExploredStates;
@@ -485,11 +479,11 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = 0.0;
-	int totalStates = 0;
-	for (const auto & tState : tMap) {
-		totalStates++;
-		totalProbability += localKappa; // piMap[tState];
-	}
+	// int totalStates = 0;
+	// for (const auto & tState : tMap) {
+	// 	totalStates++;
+	// 	totalProbability += localKappa; // piMap[tState];
+	// }
 	// Reduce kappa
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;

@@ -67,6 +67,7 @@ namespace stamina {
 	public:
 		/* Sub-class for states with probabilities */
 		class ProbabilityState {
+		public:
 			CompressedState state;
 			StateType index;
 			double pi;
@@ -80,12 +81,12 @@ namespace stamina {
 			ProbabilityState(
 				CompressedState state
 				, StateType index
-				, pi = 0.0
-				, terminal = true
+				, double pi = 0.0
+				, bool terminal = true
 			) : state(state)
 				, index(index)
 				, pi(pi)
-				, termina(terminal)
+				, terminal(terminal)
 				, addPi(0.0)
 			{
 				// Intentionally left empty
