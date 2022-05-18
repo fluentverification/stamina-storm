@@ -261,8 +261,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
-	uint64_t numberOfExploredStates = 1;
-	uint64_t numberOfExploredStatesSinceLastMessage = 1;
+	uint64_t numberOfExploredStates = 0;
+	uint64_t numberOfExploredStatesSinceLastMessage = 0;
 
 	StateType currentIndex;
 	CompressedState currentState;
