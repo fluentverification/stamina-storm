@@ -208,6 +208,26 @@ namespace stamina {
 		);
 
 	private:
+		/* Sub-class for states with probabilities */
+		class ProbabilityState {
+			CompressedState state;
+			StateType index;
+			double pi;
+			bool terminal;
+			ProbabilityState(
+				CompressedState state
+				, StateType index
+				, pi = 0.0
+				, terminal = true
+			) : state(state)
+				, index(index)
+				, pi(pi)
+				, termina(terminal)
+
+			{
+				// Intentionally left empty
+			}
+		};
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
