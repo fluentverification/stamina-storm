@@ -57,6 +57,14 @@ class XStamina(QWidget):
 		self.addRowWithBrowse(self.export, self.browseExport, "Export file:", False)
 		self.useStorm = QRadioButton("Use STAMINA/STORM (Written in C++)")
 		self.usePrism = QRadioButton("Use STAMINA/PRISM (Written in Java)")
+		self.useStorm.clicked.connect(
+			lambda state : self.setGroupBoxesEnabled(True)
+		)
+		self.usePrism.clicked.connect(
+			lambda state : self.setGroupBoxesEnabled(False)
+		)
+		self.useStorm.setChecked(True)
+		self.setGroupBoxesEnabled(True)
 		self.leftLayout.addRow(self.useStorm)
 		self.leftLayout.addRow(self.usePrism)
 		self.moreOptions = QPushButton("More Options...")
@@ -114,6 +122,10 @@ class XStamina(QWidget):
 		else:
 			rstr = rstr[:len(rstr) - 2]
 		return rstr
+
+	def setGroupBoxesEnabled(self, storm):
+		self.options.stormOptions.setEnabled(storm)
+		self.options.prismOptions.setEnabled(not storm)
 
 	def runStamina(self):
 		command = f"{EXECUTABLE} {self.modFile.text()} {self.propFile.text()}".split(' ')
