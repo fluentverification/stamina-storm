@@ -264,7 +264,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		currentProbabilityState = statesToExplore.top();
-		currentProbabilityState.updatePi();
+		// currentProbabilityState.updatePi();
 		statesToExplore.pop();
 
 		// Get the first state in the queue.
@@ -367,7 +367,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 				auto currentProbabilityStatePair = stateMap.find(sPrime);
 				if (currentProbabilityStatePair != stateMap.end()) {
-					currentProbabilityStatePair->second.addPi = currentProbabilityState.pi * probability;
+					currentProbabilityStatePair->second.pi += currentProbabilityState.pi * probability;
 				}
 
 				// if (set_contains(enqueued, sPrime)) {
@@ -381,6 +381,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		if (currentProbabilityState.terminal && numberTerminal > 0) {
 			numberTerminal--;
+		}
+		else if (numberTerminal == 0 && currentProbabilityState.terminal) {
+			StaminaMessages::errorAndExit("Number terminal is incorrect!");
 		}
 		currentProbabilityState.terminal = false;
 		currentProbabilityState.pi = 0.0;
