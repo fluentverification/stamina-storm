@@ -8,7 +8,7 @@
 #include "StateSpaceInformation.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-#define MSG_FREQUENCY 100000
+#define MSG_FREQUENCY 1// 00000
 // #define MSG_FREQUENCY 4000
 
 #include <functional>
@@ -179,7 +179,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState nextProbabilityState(state, actualIndex);
+			ProbabilityState nextProbabilityState(state, actualIndex, 0.0, true);
 			stateMap.insert({actualIndex, nextProbabilityState});
 			exploredStates.emplace(actualIndex);
 			statesToExplore.push(nextProbabilityState);
@@ -366,7 +366,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// greater than zero
 
 				auto currentProbabilityStatePair = stateMap.find(sPrime);
-				if (currentProbabilityStatePair != stateMap.end()) {
+				if (currentProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
 					currentProbabilityStatePair->second.pi += currentProbabilityState.pi * probability;
 				}
 
@@ -496,11 +496,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = numberTerminal * localKappa; // 0.0;
-	// int totalStates = 0;
-	// for (const auto & tState : tMap) {
-	// 	totalStates++;
-	// 	totalProbability += localKappa; // piMap[tState];
-	// }
+	StaminaMessages::info("At this iteration the following states are terminal: " + std::to_string(numberTerminal));
 	// Reduce kappa
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;
@@ -556,7 +552,6 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	numberTerminal = 0;
 	statesToExplore = PriorityQueue();
 	exploredStates.clear(); // States explored in our current iteration
 	// API reset
