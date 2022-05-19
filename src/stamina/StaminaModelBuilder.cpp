@@ -132,7 +132,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 	}
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
 	// Handle conditional enqueuing
 	if (isInit) {
 		// Create a ProbabilityState for each individual state
@@ -145,6 +144,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		numberTerminal++;
 		stateMap.insert({actualIndex, initProbabilityState});
 		statesToExplore.push(initProbabilityState);
+		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		return actualIndex;
 	}
 	auto nextState = stateMap.find(actualIndex);
@@ -159,7 +159,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
+				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
+		}
+		else {
+			return 0;
 		}
 	}
 	else {
@@ -170,6 +174,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
+				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
 		else {
@@ -179,6 +184,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			exploredStates.emplace(actualIndex);
 			statesToExplore.push(nextProbabilityState);
 			numberTerminal++;
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
 		}
 	}
 	return actualIndex;
@@ -350,6 +356,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
+				if (sPrime == 0) {
+					continue;
+				}
 				double probability = stateProbabilityPair.second / totalRate ? isCtmc : stateProbabilityPair.second;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
