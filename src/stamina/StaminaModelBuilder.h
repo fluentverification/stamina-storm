@@ -68,11 +68,6 @@ namespace stamina {
 		/* Sub-class for states with probabilities */
 		class ProbabilityState {
 		public:
-			// Unholy tomfoolery
-			CompressedState & state;
-			StateType & index;
-			double & pi;
-			bool & terminal;
 			class ProbabilityStateInfo {
 			public:
 				CompressedState state;
@@ -100,10 +95,6 @@ namespace stamina {
 				, double pi
 				, bool terminal
 			) : info(new ProbabilityStateInfo(state, index, pi, terminal))
-				, state(info->state)
-				, index(info->index)
-				, pi(info->pi)
-				, terminal(info->terminal)
 			{
 
 			}

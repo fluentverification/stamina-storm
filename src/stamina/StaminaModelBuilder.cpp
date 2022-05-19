@@ -265,8 +265,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		statesToExplore.pop();
 
 		// Get the first state in the queue.
-		currentIndex = currentProbabilityState.index;
-		currentState = currentProbabilityState.state;
+		currentIndex = currentProbabilityState.info->index;
+		currentState = currentProbabilityState.info->state;
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
@@ -284,7 +284,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (currentProbabilityState.terminal && currentProbabilityState.pi < localKappa) {
+		if (currentProbabilityState.info->terminal && currentProbabilityState.info->pi < localKappa) {
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
@@ -338,7 +338,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
-			bool shouldEnqueueAll = currentProbabilityState.pi == 0.0;
+			bool shouldEnqueueAll = currentProbabilityState.info->pi == 0.0;
 
 			double totalRate = 0.0;
 			if (!shouldEnqueueAll && isCtmc) {
@@ -364,7 +364,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 				auto currentProbabilityStatePair = stateMap.find(sPrime);
 				if (currentProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
-					currentProbabilityStatePair->second.pi += currentProbabilityState.pi * probability;
+					currentProbabilityStatePair->second->info->pi += currentProbabilityState.pi * probability;
 				}
 
 				// if (set_contains(enqueued, sPrime)) {
@@ -382,8 +382,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		else if (numberTerminal == 0 && currentProbabilityState.terminal) {
 			StaminaMessages::errorAndExit("Number terminal is incorrect!");
 		}
-		currentProbabilityState.terminal = false;
-		currentProbabilityState.pi = 0.0;
+		currentProbabilityState.info->terminal = false;
+		currentProbabilityState.info->pi = 0.0;
 
 		++currentRowGroup;
 
