@@ -131,12 +131,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	// Handle conditional enqueuing
 	if (isInit) {
 		// Create a ProbabilityState for each individual state
-		ProbabilityState initProbabilityState(
+		std::shared_ptr<ProbabilityState> initProbabilityState(new ProbabilityState(
 			state
 			, actualIndex
 			, 1.0
 			, true
-		);
+		));
 		numberTerminal++;
 		stateMap.insert({actualIndex, initProbabilityState});
 		statesToExplore.push(initProbabilityState);
@@ -148,14 +148,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	// This bit handles the non-initial states
 	// The previous state has reachability of 0
-	if (currentProbabilityState.pi == 0) {
+	if (currentProbabilityState->pi == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState nextProbabilityState = nextState->second;
+			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
 				// Enqueue
-				statesToExplore.push(nextProbabilityState);
+				statesToExplore.push(*nextProbabilityState);
 				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
@@ -166,17 +166,17 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState nextProbabilityState = nextState->second;
+			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
 				// Enqueue
-				statesToExplore.push(nextProbabilityState);
+				statesToExplore.push(*nextProbabilityState);
 				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState nextProbabilityState(state, actualIndex, 0.0, true);
+			std::shared_ptr<ProbabilityState> nextProbabilityState(new ProbabilityState(state, actualIndex, 0.0, true));
 			stateMap.insert({actualIndex, nextProbabilityState});
 			exploredStates.emplace(actualIndex);
 			statesToExplore.push(*nextProbabilityState);
@@ -261,12 +261,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		currentProbabilityState = statesToExplore.top();
-		// currentProbabilityState.updatePi();
+		// currentProbabilityState->updatePi();
 		statesToExplore.pop();
 
 		// Get the first state in the queue.
-		currentIndex = currentProbabilityState.info->index;
-		currentState = currentProbabilityState.info->state;
+		currentIndex = currentProbabilityState->index;
+		currentState = currentProbabilityState->state;
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
@@ -284,7 +284,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (currentProbabilityState.info->terminal && currentProbabilityState.info->pi < localKappa) {
+		if (currentProbabilityState->terminal && currentProbabilityState->pi < localKappa) {
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
@@ -338,7 +338,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
-			bool shouldEnqueueAll = currentProbabilityState.info->pi == 0.0;
+			bool shouldEnqueueAll = currentProbabilityState->pi == 0.0;
 
 			double totalRate = 0.0;
 			if (!shouldEnqueueAll && isCtmc) {
@@ -364,7 +364,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 				auto currentProbabilityStatePair = stateMap.find(sPrime);
 				if (currentProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
-					currentProbabilityStatePair->second->info->pi += currentProbabilityState.pi * probability;
+					currentProbabilityStatePair->second.pi += currentProbabilityState->pi * probability;
 				}
 
 				// if (set_contains(enqueued, sPrime)) {
@@ -376,14 +376,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			++currentRow;
 			firstChoiceOfState = false;
 		}
-		if (currentProbabilityState.terminal && numberTerminal > 0) {
+		if (currentProbabilityState->terminal && numberTerminal > 0) {
 			numberTerminal--;
 		}
-		else if (numberTerminal == 0 && currentProbabilityState.terminal) {
+		else if (numberTerminal == 0 && currentProbabilityState->terminal) {
 			StaminaMessages::errorAndExit("Number terminal is incorrect!");
 		}
-		currentProbabilityState.info->terminal = false;
-		currentProbabilityState.info->pi = 0.0;
+		currentProbabilityState->terminal = false;
+		currentProbabilityState->pi = 0.0;
 
 		++currentRowGroup;
 
