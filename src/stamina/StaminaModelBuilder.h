@@ -80,11 +80,22 @@ namespace stamina {
 			bool terminal;
 			ProbabilityState(
 				CompressedState state
-				, StateType index
+				, StateType index = 0
 				, double pi = 0.0
 				, bool terminal = true
 			) : state(state)
 				, index(index)
+				, pi(pi)
+				, terminal(terminal)
+				, addPi(0.0)
+			{
+				// Intentionally left empty
+			}
+			ProbabilityState(
+				StateType index = 0
+				, double pi = 0.0
+				, bool terminal = true
+			) : index(index)
 				, pi(pi)
 				, terminal(terminal)
 				, addPi(0.0)
@@ -96,7 +107,23 @@ namespace stamina {
 				pi += addPi;
 				addPi = 0.0;
 			}
+//			inline bool operator==(const ProbabilityState & rhs) {
+//				return index == rhs.index;
+//			}
+//			inline bool operator>=(const ProbabilityState & rhs) {
+//				return index >= rhs.index;
+//			}
+//			inline bool operator<=(const ProbabilityState & rhs) {
+//				return index <= rhs.index;
+//			}
+//			inline bool operator>(const ProbabilityState & rhs) {
+//				return index > rhs.index;
+//			}
+//			inline bool operator<(const ProbabilityState & rhs) {
+//				return index < rhs.index;
+//			}
 		};
+
 		typedef std::priority_queue<
 			ProbabilityState
 			, std::vector<ProbabilityState>
@@ -227,7 +254,7 @@ namespace stamina {
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		std::unordered_set<StateType> exploredStates; // States that we have explored
 		std::unordered_map<StateType, ProbabilityState> stateMap; // S in the QEST paper
-		storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder;
+		storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder;
 		ProbabilityState currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
@@ -238,6 +265,30 @@ namespace stamina {
 		bool isCtmc;
 	};
 
+	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
+	inline bool operator==(const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & lhs, const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & rhs) {
+		return lhs.index == rhs.index;
+	}
+
+	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
+	inline bool operator>=(const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & lhs, const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & rhs) {
+		return lhs.index >= rhs.index;
+	}
+
+	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
+	inline bool operator<=(const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & lhs, const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & rhs) {
+		return lhs,index <= rhs.index;
+	}
+
+	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
+	inline bool operator>(const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & lhs, const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & rhs) {
+		return lhs.index > rhs.index;
+	}
+
+	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
+	inline bool operator<(const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & lhs, const typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState & rhs) {
+		return lhs.index < rhs.index;
+	}
 	// Helper method to find in unordered_set
 	template <typename StateType>
 	bool set_contains(std::unordered_set<StateType> current_set, StateType value);
