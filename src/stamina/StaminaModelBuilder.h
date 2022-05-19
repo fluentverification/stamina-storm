@@ -263,6 +263,7 @@ namespace stamina {
 		bool firstIteration;
 		double localKappa;
 		bool isCtmc;
+		uint32_t numberTerminal;
 	};
 
 

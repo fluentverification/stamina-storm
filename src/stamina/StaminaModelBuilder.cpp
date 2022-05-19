@@ -58,6 +58,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, fresh(true)
 	, firstIteration(true)
 	, localKappa(Options::kappa)
+	, numberTerminal(0)
 {
 	// Optimization for hashmaps
 	exploredStates.max_load_factor(0.25);
@@ -141,6 +142,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			, 1.0
 			, true
 		);
+		numberTerminal++;
 		stateMap.insert({actualIndex, initProbabilityState});
 		statesToExplore.push(initProbabilityState);
 		return actualIndex;
@@ -176,6 +178,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.insert({actualIndex, nextProbabilityState});
 			exploredStates.emplace(actualIndex);
 			statesToExplore.push(nextProbabilityState);
+			numberTerminal++;
 		}
 	}
 	return actualIndex;
@@ -367,7 +370,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			++currentRow;
 			firstChoiceOfState = false;
 		}
-
+		if (currentProbabilityState.terminal && numberTerminal > 0) {
+			numberTerminal--;
+		}
 		currentProbabilityState.terminal = false;
 		currentProbabilityState.pi = 0.0;
 
@@ -478,7 +483,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling()
 template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
-	double totalProbability = 0.0;
+	double totalProbability = numberTerminal * localKappa; // 0.0;
 	// int totalStates = 0;
 	// for (const auto & tState : tMap) {
 	// 	totalStates++;
@@ -539,6 +544,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
+	numberTerminal = 0;
 	statesToExplore = PriorityQueue();
 	exploredStates.clear(); // States explored in our current iteration
 	// API reset
