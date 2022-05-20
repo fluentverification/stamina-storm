@@ -270,8 +270,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		currentProbabilityState = statesToExplore.pop();
-		// currentProbabilityState->updatePi();
-// 		statesToExplore.pop();
 
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
@@ -281,7 +279,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 		// Print out debugging information
-		// currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
+		std::string currentStateString = StateSpaceInformation::stateToString(currentState, currentProbabilityState->getPi());
+		std::cout << "Dequeued state " << currentStateString << " (index " << currentIndex << ")" << std::endl;
 		// Set our state variable in the class
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -381,9 +380,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					if (nextProbabilityState->enqueued) {
 						// row, column, value
 						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
-
+						nextProbabilityState->enqueued = false;
 					}
-					nextProbabilityState->enqueued = false;
 				}
 			}
 
