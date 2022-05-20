@@ -8,7 +8,7 @@
 #include "StateSpaceInformation.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-#define MSG_FREQUENCY 1// 00000
+#define MSG_FREQUENCY 100000
 // #define MSG_FREQUENCY 4000
 
 #include <functional>
@@ -247,8 +247,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		exploredStates.insert(index);
 	}
 
-	uint_fast64_t currentRowGroup = 1;
-	uint_fast64_t currentRow = 1;
+	currentRowGroup = 1;
+	currentRow = 1;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
@@ -357,15 +357,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				if (sPrime == 0) {
 					continue;
 				}
-				double probability = stateProbabilityPair.second / totalRate ? isCtmc : stateProbabilityPair.second;
+				double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				// These are next states where the previous state has a reachability
 				// greater than zero
 
-				auto currentProbabilityStatePair = stateMap.find(sPrime);
-				if (currentProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
-					currentProbabilityStatePair->second->addToPi(currentProbabilityState->getPi() * probability);
+				auto nextProbabilityStatePair = stateMap.find(sPrime);
+				if (nextProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
+					nextProbabilityStatePair->second->addToPi(currentProbabilityState->getPi() * probability);
 				}
 
 				// if (set_contains(enqueued, sPrime)) {

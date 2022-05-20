@@ -143,7 +143,11 @@ namespace stamina {
 			}
 			void push(std::shared_ptr<ProbabilityState> state) {
 				auto pos = stateQueue->end();
-				for (; pos != stateQueue->begin() && (*pos)->index > state->index; pos--) {
+				for (;
+					pos == stateQueue->end()
+					|| pos > stateQueue->begin()
+					&& (*pos)->index > state->index; pos--
+				) {
 					// Intentionally left empty
 				}
 				stateQueue->insert(pos, state);
@@ -290,6 +294,8 @@ namespace stamina {
 		double localKappa;
 		bool isCtmc;
 		uint64_t numberTerminal;
+		uint_fast64_t currentRowGroup;
+		uint_fast64_t currentRow;
 
 	};
 
