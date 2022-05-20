@@ -148,14 +148,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	// This bit handles the non-initial states
 	// The previous state has reachability of 0
-	if (currentProbabilityState->pi == 0) {
+	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
+			ProbabilityState nextProbabilityState = nextState->second;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
 				// Enqueue
-				statesToExplore.push(*nextProbabilityState);
+				statesToExplore.push(nextProbabilityState);
 				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
@@ -170,7 +170,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
 				// Enqueue
-				statesToExplore.push(*nextProbabilityState);
+				statesToExplore.push(nextProbabilityState);
 				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
@@ -179,7 +179,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			std::shared_ptr<ProbabilityState> nextProbabilityState(new ProbabilityState(state, actualIndex, 0.0, true));
 			stateMap.insert({actualIndex, nextProbabilityState});
 			exploredStates.emplace(actualIndex);
-			statesToExplore.push(*nextProbabilityState);
+			statesToExplore.push(nextProbabilityState);
 			numberTerminal++;
 			stateStorage.stateToId.findOrAdd(state, actualIndex);
 		}
@@ -260,9 +260,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		currentProbabilityState = statesToExplore.top();
+		currentProbabilityState = statesToExplore.pop();
 		// currentProbabilityState->updatePi();
-		statesToExplore.pop();
+// 		statesToExplore.pop();
 
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
@@ -284,7 +284,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (currentProbabilityState->terminal && currentProbabilityState->pi < localKappa) {
+		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
@@ -338,7 +338,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
-			bool shouldEnqueueAll = currentProbabilityState->pi == 0.0;
+			bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
 
 			double totalRate = 0.0;
 			if (!shouldEnqueueAll && isCtmc) {
@@ -364,7 +364,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 				auto currentProbabilityStatePair = stateMap.find(sPrime);
 				if (currentProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
-					currentProbabilityStatePair->second.pi += currentProbabilityState->pi * probability;
+					currentProbabilityStatePair->second.addToPi(currentProbabilityState->getPi() * probability);
 				}
 
 				// if (set_contains(enqueued, sPrime)) {
@@ -376,14 +376,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			++currentRow;
 			firstChoiceOfState = false;
 		}
-		if (currentProbabilityState->terminal && numberTerminal > 0) {
+		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
 		}
-		else if (numberTerminal == 0 && currentProbabilityState->terminal) {
-			StaminaMessages::errorAndExit("Number terminal is incorrect!");
-		}
-		currentProbabilityState->terminal = false;
-		currentProbabilityState->pi = 0.0;
+		currentProbabilityState->setTerminal(false);
+		currentProbabilityState->setPi(0.0);
 
 		++currentRowGroup;
 
