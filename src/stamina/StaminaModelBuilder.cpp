@@ -177,6 +177,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			}
 		}
 		else {
+			// State does not exist yet in this iteration
 			return 0;
 		}
 	}
@@ -338,6 +339,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
+		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
 		// Now add all choices.
 		bool firstChoiceOfState = true;
 		for (auto const& choice : behavior) {
@@ -359,8 +361,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
 				}
 			}
-
-			bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
 
 			double totalRate = 0.0;
 			if (!shouldEnqueueAll && isCtmc) {
