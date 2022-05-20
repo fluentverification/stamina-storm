@@ -152,6 +152,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			return actualIndex;
 		}
 		std::shared_ptr<ProbabilityState> initProbabilityState = nextState->second;
+		initProbabilityState->enqueued = true;
 		stateMap.insert({actualIndex, initProbabilityState});
 		statesToExplore.push(initProbabilityState);
 		stateStorage.stateToId.findOrAdd(state, actualIndex);
@@ -197,6 +198,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		else {
 			// This state has not been seen so create a new ProbabilityState
 			std::shared_ptr<ProbabilityState> nextProbabilityState(new ProbabilityState(state, actualIndex, 0.0, true));
+			nextProbabilityState->enqueued = true;
 			stateMap.insert({actualIndex, nextProbabilityState});
 			exploredStates.emplace(actualIndex);
 			statesToExplore.push(nextProbabilityState);
