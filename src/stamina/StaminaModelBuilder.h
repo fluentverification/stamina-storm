@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 #include <deque>
+#include <queue>
 #include <cstdint>
 #include <functional>
 
@@ -64,6 +65,7 @@ namespace stamina {
 	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 	class StaminaModelBuilder {
 	public:
+		typedef std::pair<StateType, CompressedState> QueueItem;
 		/**
 		* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
 		*
@@ -157,7 +159,7 @@ namespace stamina {
 		void connectTerminalStatesToAbsorbing(
 			storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 			, CompressedState terminalState
-			, uint64_t currentRow
+			, StateType stateId
 			, std::function<StateType (CompressedState const&)> stateToIdCallback
 		);
 		/**
@@ -209,7 +211,8 @@ namespace stamina {
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
-		std::deque<std::pair<CompressedState, StateType>> statesToExplore;
+		// std::deque<std::pair<CompressedState, StateType>> statesToExplore;
+		std::priority_queue<QueueItem, std::vector<QueueItem>, std::greater<QueueItem>> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		std::unordered_set<StateType> exploredStates; // States that we have explored
 		std::unordered_set<StateType> stateMap; // S in the QEST paper

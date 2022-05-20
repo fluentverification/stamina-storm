@@ -37,7 +37,7 @@ class MoreOptions(QWidget):
 		, "Kappa Reduction Factor":1.25
 		, "Approximation Factor":2
 		, "Probability Window":1e-3
-		, "Maximum Iterations":10
+		, "Maximum Iterations":10000
 		, "Property Refinement":False
 		, "Export Modified Model":False
 		, "Export Modified Properties":False
@@ -48,6 +48,22 @@ class MoreOptions(QWidget):
 		, "Use Gauss-Seidel Method":False
 		, "Use Backwards Gauss-Seidel Method":False
 	}
+	SETTINGS_TYPES = {
+		"Reachability Threshold (Kappa)":float
+		, "Kappa Reduction Factor":float
+		, "Approximation Factor":float
+		, "Probability Window":float
+		, "Maximum Iterations":int
+		, "Property Refinement":bool
+		, "Export Modified Model":bool
+		, "Export Modified Properties":bool
+		, "Rank Transitions":bool
+		, "Use Default Method":bool
+		, "Use Power Method":bool
+		, "Use Jacobi Method":bool
+		, "Use Gauss-Seidel Method":bool
+		, "Use Backwards Gauss-Seidel Method":bool
+	}
 
 	def __init__(self, parent=None):
 		super(MoreOptions, self).__init__(parent)
@@ -57,8 +73,8 @@ class MoreOptions(QWidget):
 		self.mainLayout = QVBoxLayout()
 		self.setLayout(self.mainLayout)
 		self.setUpOptions(self.OPTIONS_GENERAL, "General Options")
-		self.setUpOptions(self.OPTIONS_STORM, "STORM Options")
-		self.setUpOptions(self.OPTIONS_PRISM, "PRISM Options")
+		self.stormOptions = self.setUpOptions(self.OPTIONS_STORM, "STORM Options")
+		self.prismOptions = self.setUpOptions(self.OPTIONS_PRISM, "PRISM Options")
 		self.setupFormButtons()
 		self.setInitValues()
 
@@ -81,7 +97,7 @@ class MoreOptions(QWidget):
 		layout.addWidget(self.doneButton)
 		self.mainLayout.addWidget(panel)
 		self.doneButton.clicked.connect(
-			lambda state : self.hide()
+			lambda state : (self.checkValues(), self.close())
 		)
 		self.defaultsButton.clicked.connect(
 			self.setInitValues
@@ -106,6 +122,39 @@ class MoreOptions(QWidget):
 				field = QRadioButton(description)
 				groupLayout.addRow(field)
 				self.optionWidgets[description] = field
+		return groupBox
+
+	def checkValues(self):
+		for key, valType in self.SETTINGS_TYPES.items():
+			widget = self.optionWidgets[key]
+			# If this is a boolean value, we can only use radio buttons
+			# and checkboxes so we don't need to check
+			if valType is bool:
+				continue
+			valString = widget.text()
+			print(f"Value String is {valString}")
+			if (valType is int and not valString.isnumeric()):
+				err = QMessageBox()
+				err.setIcon(QMessageBox.Critical)
+				err.setText("Parameter Error")
+				err.setInformativeText(
+					f"The following parameter is incorrect:\n{key}"
+				)
+				err.setWindowTitle("STAMINA Error")
+				err.exec_()
+			elif valType is float:
+				try:
+					float(valString)
+				except ValueError:
+					err = QMessageBox()
+					err.setIcon(QMessageBox.Critical)
+					err.setText("Parameter Error")
+					err.setInformativeText(
+						f"The following parameter is incorrect:\n{key}"
+					)
+					err.setWindowTitle("STAMINA Error")
+					err.exec_()
+
 
 if __name__=='__main__':
 	app = QApplication(sys.argv)

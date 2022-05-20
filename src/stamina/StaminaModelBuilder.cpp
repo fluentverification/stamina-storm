@@ -8,8 +8,8 @@
 #include "StateSpaceInformation.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-// #define MSG_FREQUENCY 100000
-#define MSG_FREQUENCY 4000
+#define MSG_FREQUENCY 100000
+// #define MSG_FREQUENCY 4000
 
 #include <functional>
 #include <sstream>
@@ -45,6 +45,8 @@
 #include "storm/utility/ConstantsComparator.h"
 #include "storm/utility/SignalHandler.h"
 
+#define RESERVE_VALUE 10000
+
 using namespace stamina;
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -57,7 +59,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, firstIteration(true)
 	, localKappa(Options::kappa)
 {
-	// Intentionally left empty
+	// Optimization for hashmaps
+	exploredStates.max_load_factor(0.25);
+	stateMap.max_load_factor(0.25);
+	tMap.max_load_factor(0.25);
+	piMap.max_load_factor(0.25);
+	exploredStates.reserve(RESERVE_VALUE);
+	stateMap.reserve(RESERVE_VALUE);
+	tMap.reserve(RESERVE_VALUE);
+	piMap.reserve(RESERVE_VALUE);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -111,7 +121,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::shouldEnqueue(StateT
 	// if (piMap.find(nextState) == piMap.end()) {
 	//	piMap.insert({nextState, (double) 0.0});
 	//}
-	if (isInit) { enqueued.insert(nextState); return true; }
+	if (isInit) { return true; }
 	bool stateIsExisting = set_contains(stateMap, nextState);
 	// If the reachability probability of the previous state is 0, enqueue regardless
 	if (piMap[currentState] == 0.0) {
@@ -185,7 +195,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 	if (shouldEnqueue(actualIndex)) {
 		enqueued.insert(actualIndex);
-		statesToExplore.emplace_back(state, actualIndex);
+		statesToExplore.push(std::make_pair(actualIndex, state));
 		// stateStorage.stateToId.findOrAdd(state, actualIndex);
 	}
 	return actualIndex;
@@ -270,30 +280,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		enqueued.clear();
 		// Get the first state in the queue.
-		currentState = statesToExplore.front().first;
-		currentIndex = statesToExplore.front().second;
+		currentIndex = statesToExplore.top().first;
+		currentState = statesToExplore.top().second;
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
 		}
-		// TODO: Remove this check for optimization
-		for (auto variable : generator->getVariableInformation().integerVariables) {
-			if (variable.getName() == "Absorbing") {
-				if (currentState.getAsInt(variable.bitOffset + 1, variable.bitWidth) == 1) {
-					StaminaMessages::error("State " + std::to_string(currentIndex) + " has an absorbing value it should not!");
-				}
-				break;
-			}
-		}
-		exploredStates.insert(currentIndex);
+
 		// Print out debugging information
 		currentStateString = StateSpaceInformation::stateToString(currentState, piMap[currentIndex]);
 		// Set our state variable in the class
 		// NOTE: this->currentState is not the same as CompressedState currentState
 		this->currentState = currentIndex;
 
-		statesToExplore.pop_front();
+		statesToExplore.pop();
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
@@ -307,7 +307,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
-				, currentRow
+				, currentIndex
 				, stateToIdCallback2
 			);
 			++numberOfExploredStates;
@@ -394,7 +394,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 				if (set_contains(enqueued, sPrime)) {
 					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
+					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
 				}
 			}
 
@@ -570,7 +570,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
 	}
 	absorbingWasSetUp = true;
-	transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
+	// transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
 	// This state shall be Markovian (to not introduce Zeno behavior)
 	if (choiceInformationBuilder.isBuildMarkovianStates()) {
 		choiceInformationBuilder.addMarkovianState(0);
@@ -583,7 +583,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore.clear();
+	statesToExplore = std::priority_queue<QueueItem, std::vector<QueueItem>, std::greater<QueueItem>>();
 	exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
@@ -611,7 +611,7 @@ void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 	, CompressedState terminalState
-	, uint64_t currentRow
+	, StateType stateId
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) {
 	bool addedValue = false;
@@ -626,7 +626,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		for (auto const& stateProbabilityPair : choice) {
 			if (stateProbabilityPair.first != 0) {
 				// row, column, value
-				transitionMatrixBuilder.addNextValue(currentRow, stateProbabilityPair.first, stateProbabilityPair.second);
+				transitionMatrixBuilder.addNextValue(stateId, stateProbabilityPair.first, stateProbabilityPair.second);
 			}
 			else {
 				totalRateToAbsorbing += stateProbabilityPair.second;
@@ -634,7 +634,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		}
 		addedValue = true;
 		// Absorbing state
-		transitionMatrixBuilder.addNextValue(currentRow, 0, totalRateToAbsorbing);
+		transitionMatrixBuilder.addNextValue(stateId, 0, totalRateToAbsorbing);
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
