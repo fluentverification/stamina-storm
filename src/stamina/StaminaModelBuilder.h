@@ -63,13 +63,6 @@ namespace stamina {
 	typedef storm::models::sparse::Ctmc<double> Ctmc;
 	typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
-// 	template <typename T>
-// 	class PointerComparator {
-// 		bool operator(std::shared_ptr<T> lhs, std::shared_ptr<T> rhs) {
-// 			return std::greater<T>(*lhs, *rhs);
-// 		}
-// 	};
-
 	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 	class StaminaModelBuilder {
 	public:

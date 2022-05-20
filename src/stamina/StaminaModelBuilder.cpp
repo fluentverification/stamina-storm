@@ -109,10 +109,12 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
 	std::vector<StateType> perimeterStates;
-	// std::unorderd_set<StateType>::iterator itr;
-	//for (auto itr = tMap.begin(); itr != tMap.end(); itr++) {
-	//	perimeterStates.emplace_back(*itr - 1);
-	//}
+	for (const auto & [ key, value ] : stateMap) {
+		if (value->isTerminal()) {
+			perimeterStates.push_back(value->index);
+		}
+	}
+
 	return perimeterStates;
 }
 
@@ -128,23 +130,33 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 	}
+
+	auto nextState = stateMap.find(actualIndex);
+	bool stateIsExisting = nextState != stateMap.end();
+
 	// Handle conditional enqueuing
 	if (isInit) {
-		// Create a ProbabilityState for each individual state
-		std::shared_ptr<ProbabilityState> initProbabilityState(new ProbabilityState(
-			state
-			, actualIndex
-			, 1.0
-			, true
-		));
-		numberTerminal++;
+		if (!stateIsExisting) {
+			// Create a ProbabilityState for each individual state
+			std::shared_ptr<ProbabilityState> initProbabilityState(new ProbabilityState(
+				state
+				, actualIndex
+				, 1.0
+				, true
+			));
+			numberTerminal++;
+			stateMap.insert({actualIndex, initProbabilityState});
+			statesToExplore.push(initProbabilityState);
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
+
+			return actualIndex;
+		}
+		std::shared_ptr<ProbabilityState> initProbabilityState = nextState->second;
 		stateMap.insert({actualIndex, initProbabilityState});
 		statesToExplore.push(initProbabilityState);
 		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		return actualIndex;
 	}
-	auto nextState = stateMap.find(actualIndex);
-	bool stateIsExisting = nextState != stateMap.end();
 
 	// This bit handles the non-initial states
 	// The previous state has reachability of 0
@@ -279,8 +291,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 		// Print out debugging information
-		std::string currentStateString = StateSpaceInformation::stateToString(currentState, currentProbabilityState->getPi());
-		std::cout << "Dequeued state " << currentStateString << " (index " << currentIndex << ")" << std::endl;
+		// std::string currentStateString = StateSpaceInformation::stateToString(currentState, currentProbabilityState->getPi());
+		// std::cout << "Dequeued state " << currentStateString << " (index " << currentIndex << ")" << std::endl;
 		// Set our state variable in the class
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -502,11 +514,6 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = numberTerminal * localKappa;
-	uint32_t nt = 0;
-	for (const auto & [ key, value ] : stateMap) {
-		if (value->isTerminal()) { nt++; }
-	}
-	StaminaMessages::info("nt is valued at " + std::to_string(nt));
 	StaminaMessages::info("At this iteration the following states are terminal: " + std::to_string(numberTerminal));
 	// Reduce kappa
 	localKappa /= Options::reduce_kappa;
