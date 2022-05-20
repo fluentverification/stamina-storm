@@ -120,7 +120,8 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	StateType actualIndex;
-	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
+	// The "+1" is required since index 0 is the absorbing state
+	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates() + 1);
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
 	}
@@ -269,6 +270,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentState = currentProbabilityState->state;
 		if (currentIndex == 0) {
 			StaminaMessages::error("Dequeued artificial absorbing state!");
+			continue;
 		}
 
 		// Print out debugging information

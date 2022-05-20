@@ -16,6 +16,7 @@
 #include <functional>
 
 #include "Options.h"
+#include "StaminaMessages.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -141,7 +142,7 @@ namespace stamina {
 			}
 			void push(std::shared_ptr<ProbabilityState> state) {
 				auto pos = stateQueue.end();
-				for (; (*pos)->index > state->index; pos--) {
+				for (; pos != stateQueue.begin() && (*pos)->index > state->index; pos--) {
 					// Intentionally left empty
 				}
 				stateQueue.insert(pos, state);
