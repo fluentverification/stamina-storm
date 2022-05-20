@@ -8,7 +8,7 @@
 #include "StateSpaceInformation.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-#define MSG_FREQUENCY 100000
+#define MSG_FREQUENCY 1// 00000
 // #define MSG_FREQUENCY 4000
 
 #include <functional>
@@ -120,8 +120,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	StateType actualIndex;
-	// The "+1" is required since index 0 is the absorbing state
-	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates() + 1);
+	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
 	}
@@ -244,6 +243,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
+		StaminaMessages::info("Initial state: " + std::to_string(index));
 		exploredStates.insert(index);
 	}
 
@@ -269,8 +269,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
 		if (currentIndex == 0) {
-			StaminaMessages::error("Dequeued artificial absorbing state!");
-			continue;
+			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
 		// Print out debugging information

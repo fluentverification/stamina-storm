@@ -76,8 +76,8 @@ namespace stamina {
 		/* Sub-class for states with probabilities */
 		class ProbabilityState {
 		public:
-			CompressedState const & state;
-			StateType const & index;
+			CompressedState const state;
+			StateType const index;
 			ProbabilityState(
 				CompressedState state
 				, StateType index
@@ -128,24 +128,25 @@ namespace stamina {
 
 		class StatePriorityQueue {
 		public:
-			std::vector<std::shared_ptr<ProbabilityState>> stateQueue;
-			StatePriorityQueue() {
+			std::shared_ptr<std::vector<std::shared_ptr<ProbabilityState>>> stateQueue;
+			StatePriorityQueue() : stateQueue(new std::vector<std::shared_ptr<ProbabilityState>>())
+			{
 				// Intentionally left empty
 			}
 			bool empty() {
-				return stateQueue.empty();
+				return stateQueue->empty();
 			}
 			std::shared_ptr<ProbabilityState> pop() {
-				std::shared_ptr<ProbabilityState> front = stateQueue.front();
-				stateQueue.erase(stateQueue.begin());
+				std::shared_ptr<ProbabilityState> front = stateQueue->front();
+				stateQueue->erase(stateQueue->begin());
 				return front;
 			}
 			void push(std::shared_ptr<ProbabilityState> state) {
-				auto pos = stateQueue.end();
-				for (; pos != stateQueue.begin() && (*pos)->index > state->index; pos--) {
+				auto pos = stateQueue->end();
+				for (; pos != stateQueue->begin() && (*pos)->index > state->index; pos--) {
 					// Intentionally left empty
 				}
-				stateQueue.insert(pos, state);
+				stateQueue->insert(pos, state);
 			}
 		};
 
