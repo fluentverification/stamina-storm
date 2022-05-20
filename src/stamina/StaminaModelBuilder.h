@@ -95,6 +95,9 @@ namespace stamina {
 			void addToPi(double add) {
 				pi += add;
 			}
+			void setPi(double pi) {
+				this->pi = pi;
+			}
 			bool isTerminal() {
 				return terminal;
 			}
@@ -133,7 +136,7 @@ namespace stamina {
 			}
 			std::shared_ptr<ProbabilityState> pop() {
 				std::shared_ptr<ProbabilityState> front = stateQueue.front();
-				stateQueue.pop_front();
+				stateQueue.erase(stateQueue.begin());
 				return front;
 			}
 			void push(std::shared_ptr<ProbabilityState> state) {

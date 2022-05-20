@@ -151,7 +151,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState nextProbabilityState = nextState->second;
+			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
 				// Enqueue
@@ -364,7 +364,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 				auto currentProbabilityStatePair = stateMap.find(sPrime);
 				if (currentProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
-					currentProbabilityStatePair->second.addToPi(currentProbabilityState->getPi() * probability);
+					currentProbabilityStatePair->second->addToPi(currentProbabilityState->getPi() * probability);
 				}
 
 				// if (set_contains(enqueued, sPrime)) {
@@ -492,7 +492,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilit
 	double totalProbability = numberTerminal * localKappa;
 	uint32_t nt = 0;
 	for (const auto & [ key, value ] : stateMap) {
-		if (value->terminal) { nt++; }
+		if (value->isTerminal()) { nt++; }
 	}
 	StaminaMessages::info("nt is valued at " + std::to_string(nt));
 	StaminaMessages::info("At this iteration the following states are terminal: " + std::to_string(numberTerminal));
@@ -551,7 +551,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore = PriorityQueue();
+	statesToExplore = StatePriorityQueue();
 	exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
