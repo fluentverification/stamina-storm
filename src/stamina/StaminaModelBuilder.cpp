@@ -293,9 +293,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
-		// Print out debugging information
-		// std::string currentStateString = StateSpaceInformation::stateToString(currentState, currentProbabilityState->getPi());
-		// std::cout << "Dequeued state " << currentStateString << " (index " << currentIndex << ")" << std::endl;
 		// Set our state variable in the class
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
