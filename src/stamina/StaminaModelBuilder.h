@@ -124,32 +124,28 @@ namespace stamina {
 
 		class StatePriorityQueue {
 		public:
-			std::shared_ptr<std::vector<std::shared_ptr<ProbabilityState>>> stateQueue;
-			StatePriorityQueue() : stateQueue(new std::vector<std::shared_ptr<ProbabilityState>>())
+			std::vector<std::shared_ptr<ProbabilityState>> stateQueue;
+			StatePriorityQueue()
 			{
 				// Intentionally left empty
 			}
 			bool empty() {
-				return stateQueue->empty();
+				return stateQueue.empty();
 			}
 			std::shared_ptr<ProbabilityState> pop() {
-				std::shared_ptr<ProbabilityState> front = stateQueue->front();
-				stateQueue->erase(stateQueue->begin());
+				std::shared_ptr<ProbabilityState> front = stateQueue.front();
+				stateQueue.erase(stateQueue.begin());
 				return front;
 			}
 			void push(std::shared_ptr<ProbabilityState> state) {
-				auto pos = stateQueue->end();
-				// for (; pos != std::rend(*stateQueue) && (*pos)->index > state->index; pos--) {
-					// Intentionally left empty
-				//}
-				stateQueue->insert(pos, state);
+				uint_fast32_t pos = stateQueue.size();
+				while (pos > 0 && stateQueue[pos - 1]->index > state->index) {
+					pos--;
+				}
+				stateQueue.insert(stateQueue.begin() + pos, state);
 			}
 		};
 
-// 		typedef std::priority_queue<
-// 			std::shared_ptr<ProbabilityState>
-// 			, std::vector<std::shared_ptr<ProbabilityState>>
-// 			, PointerComparator<ProbabilityState>> PriorityQueue;
 		/**
 		* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
 		*

@@ -514,7 +514,6 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = numberTerminal * localKappa;
-	StaminaMessages::info("At this iteration the following states are terminal: " + std::to_string(numberTerminal));
 	// Reduce kappa
 	localKappa /= Options::reduce_kappa;
 	return totalProbability;
