@@ -78,15 +78,18 @@ namespace stamina {
 		public:
 			CompressedState const state;
 			StateType const index;
+			bool enqueued;
 			ProbabilityState(
 				CompressedState state
 				, StateType index
 				, double pi = 0.0
 				, bool terminal = true
+				, bool enqueued = true
 			) : state(state)
 				, index(index)
 				, pi(pi)
 				, terminal(terminal)
+				, enqueued(enqueued)
 			{
 				// Intentionally left empty
 			}
@@ -143,13 +146,9 @@ namespace stamina {
 			}
 			void push(std::shared_ptr<ProbabilityState> state) {
 				auto pos = stateQueue->end();
-				for (;
-					pos == stateQueue->end()
-					|| pos > stateQueue->begin()
-					&& (*pos)->index > state->index; pos--
-				) {
+				// for (; pos != std::rend(*stateQueue) && (*pos)->index > state->index; pos--) {
 					// Intentionally left empty
-				}
+				//}
 				stateQueue->insert(pos, state);
 			}
 		};

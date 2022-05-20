@@ -157,6 +157,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 				stateStorage.stateToId.findOrAdd(state, actualIndex);
+				nextProbabilityState->enqueued = true;
+			}
+			else {
+				nextProbabilityState->enqueued = false;
 			}
 		}
 		else {
@@ -172,6 +176,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 				stateStorage.stateToId.findOrAdd(state, actualIndex);
+				nextProbabilityState->enqueued = true;
+			}
+			else {
+				nextProbabilityState->enqueued = false;
 			}
 		}
 		else {
@@ -364,14 +372,19 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// greater than zero
 
 				auto nextProbabilityStatePair = stateMap.find(sPrime);
-				if (nextProbabilityStatePair != stateMap.end() && !shouldEnqueueAll) {
-					nextProbabilityStatePair->second->addToPi(currentProbabilityState->getPi() * probability);
-				}
+				if (nextProbabilityStatePair != stateMap.end()) {
+					auto nextProbabilityState = nextProbabilityStatePair->second;
+					if (!shouldEnqueueAll) {
+						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
+					}
 
-				// if (set_contains(enqueued, sPrime)) {
-					// row, column, value
-					// transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
-				//}
+					if (nextProbabilityState->enqueued) {
+						// row, column, value
+						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+
+					}
+					nextProbabilityState->enqueued = false;
+				}
 			}
 
 			++currentRow;
