@@ -523,10 +523,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	}
 	this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
 	bool gotVar = false;
-	for (auto variable : generator->getVariableInformation().integerVariables) {
+	for (auto variable : generator->getVariableInformation().booleanVariables) {
 		if (variable.getName() == "Absorbing") {
-			this->absorbingState.setFromInt(variable.bitOffset + 1, variable.bitWidth, 1);
-			if (this->absorbingState.getAsInt(variable.bitOffset + 1, variable.bitWidth) != 1) {
+			this->absorbingState.setFromInt(variable.bitOffset + 1, 1, 1);
+			if (this->absorbingState.getAsInt(variable.bitOffset + 1, 1) != 1) {
 				StaminaMessages::errorAndExit("Absorbing state setup failed!");
 			}
 			gotVar = true;

@@ -72,7 +72,7 @@ ModelModify::createModifiedModel() {
 	modifiedModelStream << std::endl << std::endl;
 	modifiedModelStream << "// All naturally generated reachable states are not our artificially created absorbing state" << std::endl;
 	modifiedModelStream << "// The value of the absorbing state (and the absorbing state itself) are modified in STAMINA" << std::endl;
-	modifiedModelStream << "module Absorbing_Def_STAMINA\n\n\tAbsorbing : [0..1] init 0;\n\n";
+	modifiedModelStream << "module Absorbing_Def_STAMINA\n\n\tAbsorbing : bool init false;\n\n";
 	// modifiedModelStream << "\t[] Absorbing=0 -> 1.0 : (Absorbing'=0); \n" << std::endl;
 	// modifiedModelStream << "\t[] Absorbing=1 -> 1.0 : (Absorbing'=0); \n\n";
 	modifiedModelStream << "endmodule" << std::endl;
@@ -113,8 +113,8 @@ ModelModify::createModifiedProperties(
 		str.pop_back();
 		std::size_t firstParenPos = str.find("(");
 		str.replace(firstParenPos, 1, "((");
-		std::string propMin = str + "& (Absorbing = 0)) ]; // Property for Pmin\n";
-		std::string propMax = str + "| (Absorbing = 1)) ]; // Property for Pmax\n";
+		std::string propMin = str + "& (Absorbing = false)) ]; // Property for Pmin\n";
+		std::string propMax = str + "| (Absorbing = true)) ]; // Property for Pmax\n";
 		modifiedPropertiesStream << propMin << std::endl;
 		modifiedPropertiesStream << propMax << std::endl;
 	}
