@@ -17,6 +17,7 @@
 
 #include "Options.h"
 #include "StaminaMessages.h"
+#include "util/StateIndexArray.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -272,8 +273,9 @@ namespace stamina {
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 		StatePriorityQueue statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-		std::unordered_set<StateType> exploredStates; // States that we have explored
-		std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
+		// std::unordered_set<StateType> exploredStates; // States that we have explored
+		util::StateIndexArray<StateType, ProbabilityState> stateMap;
+		// std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
 		std::shared_ptr<ProbabilityState> currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
