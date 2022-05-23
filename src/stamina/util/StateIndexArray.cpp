@@ -27,16 +27,17 @@ namespace stamina {
 
 		template <typename StateType, typename ProbabilityStateType>
 		void
-		reserve(uint32_t numToReserve) {
+		StateIndexArray<StateType, ProbabilityStateType>::reserve(uint32_t numToReserve) {
 			this->clear();
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
-			uint16_t arrayIndex = actualNumberToReserve / blockSize;
-			uint32_t subArrayIndex = actualNumberToReserve % blockSize;
+			uint16_t arrayIndex = actualNumToReserve / blockSize;
+			uint32_t subArrayIndex = actualNumToReserve % blockSize;
 			for (int i = 0; i < arrayIndex; i++) {
 				stateArray.insert(new std::shared_ptr<ProbabilityStateType>[blockSize]);
 			}
 		}
 
+		template <typename StateType, typename ProbabilityStateType>
 		std::shared_ptr<ProbabilityStateType>
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
 			uint16_t arrayIndex = index / blockSize;
