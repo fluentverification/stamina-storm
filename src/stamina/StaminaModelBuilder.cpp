@@ -453,7 +453,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	stateAndChoiceInformationBuilder.setBuildStateValuations(generator->getOptions().isBuildStateValuationsSet());
 
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
-	StateSpaceInformation::printVariableNames();
 	// Builds matrices and truncates state space
 	buildMatrices(
 		transitionMatrixBuilder
