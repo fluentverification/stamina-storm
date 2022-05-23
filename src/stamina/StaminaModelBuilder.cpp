@@ -386,6 +386,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					if (nextProbabilityState->enqueued && sPrime != 0) {
 						// row, column, value
 						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+						std::cout << "Adding the following to transitionMatrix: " << currentIndex << "," << sPrime << "," << stateProbabilityPair.second << std::endl;
 						nextProbabilityState->enqueued = false;
 					}
 				}
