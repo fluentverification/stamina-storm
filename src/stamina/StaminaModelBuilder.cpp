@@ -436,7 +436,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 	// Component builders
 	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(0, 0, 0, false, !deterministic, 0);
 	std::vector<RewardModelBuilder<typename RewardModelType::ValueType>> rewardModelBuilders;
-	this->transitionMatrixBuilder = transitionMatrixBuilder;
 	// Iterate through the reward models and add them to the rewardmodelbuilders
 	for (uint64_t i = 0; i < generator->getNumberOfRewardModels(); ++i) {
 		rewardModelBuilders.emplace_back(generator->getRewardModelInformation(i));
@@ -624,12 +623,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
 	}
 }
-
+namespace stamina {
 // Explicitly instantiate the class.
-template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
+	template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 template <typename StateType>
-bool stamina::set_contains(std::unordered_set<StateType> current_set, StateType value) {
+bool set_contains(std::unordered_set<StateType> current_set, StateType value) {
 	auto search = current_set.find(value);
 	return (search != current_set.end());
 }
+
+} // namespace stamina

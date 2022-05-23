@@ -72,17 +72,20 @@ namespace stamina {
 			CompressedState const state;
 			StateType const index;
 			bool enqueued;
+			uint8_t iterationLastSeen;
 			ProbabilityState(
 				CompressedState state
 				, StateType index
 				, double pi = 0.0
 				, bool terminal = true
 				, bool enqueued = true
+				, uint8_t iterationLastSeen = 0
 			) : state(state)
 				, index(index)
 				, pi(pi)
 				, terminal(terminal)
 				, enqueued(enqueued)
+				, iterationLastSeen(iterationLastSeen)
 			{
 				// Intentionally left empty
 			}
@@ -271,12 +274,12 @@ namespace stamina {
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		std::unordered_set<StateType> exploredStates; // States that we have explored
 		std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
-		storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder;
 		std::shared_ptr<ProbabilityState> currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
 		bool isInit;
 		bool fresh;
+		uint8_t iteration;
 		bool firstIteration;
 		double localKappa;
 		bool isCtmc;
