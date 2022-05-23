@@ -134,6 +134,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	auto nextState = stateMap.find(actualIndex);
 	bool stateIsExisting = nextState != stateMap.end();
 
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
@@ -147,7 +148,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			numberTerminal++;
 			stateMap.insert({actualIndex, initProbabilityState});
 			statesToExplore.push(initProbabilityState);
-			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			initProbabilityState->enqueued = true;
 			return actualIndex;
 		}
@@ -155,7 +155,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		initProbabilityState->enqueued = true;
 		stateMap.insert({actualIndex, initProbabilityState});
 		statesToExplore.push(initProbabilityState);
-		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		return actualIndex;
 	}
 
@@ -169,7 +168,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
-				stateStorage.stateToId.findOrAdd(state, actualIndex);
 				nextProbabilityState->enqueued = true;
 			}
 			else {
@@ -189,7 +187,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
-				stateStorage.stateToId.findOrAdd(state, actualIndex);
 				nextProbabilityState->enqueued = true;
 			}
 			else {
@@ -204,7 +201,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			exploredStates.emplace(actualIndex);
 			statesToExplore.push(nextProbabilityState);
 			numberTerminal++;
-			stateStorage.stateToId.findOrAdd(state, actualIndex);
 		}
 	}
 	return actualIndex;
@@ -387,7 +383,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
 
-					if (nextProbabilityState->enqueued) {
+					if (nextProbabilityState->enqueued && sPrime != 0) {
 						// row, column, value
 						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
 						nextProbabilityState->enqueued = false;
