@@ -45,6 +45,7 @@ def createGraph():
     plt.plot(nums, pyTimes, label="Python 'set' (built-in) Times")
     plt.legend()
     plt.semilogx()
+    plt.semilogy()
     plt.xlabel("Number of states to insert")
     plt.ylabel("Time taken (s)")
     plt.show()
