@@ -148,7 +148,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.insert({actualIndex, initProbabilityState});
 			statesToExplore.push(initProbabilityState);
 			stateStorage.stateToId.findOrAdd(state, actualIndex);
-
+			initProbabilityState->enqueued = true;
 			return actualIndex;
 		}
 		std::shared_ptr<ProbabilityState> initProbabilityState = nextState->second;
@@ -266,7 +266,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
 	for (StateType index : this->stateStorage.initialStateIndices) {
-		StaminaMessages::info("Initial state: " + std::to_string(index));
 		exploredStates.insert(index);
 	}
 
