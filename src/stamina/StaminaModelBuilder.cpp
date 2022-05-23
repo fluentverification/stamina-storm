@@ -640,9 +640,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
 	}
 }
+namespace stamina {
 
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
+
+}
 
 template <typename StateType>
 bool stamina::set_contains(std::unordered_set<StateType> current_set, StateType value) {
