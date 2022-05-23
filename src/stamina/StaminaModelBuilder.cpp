@@ -184,6 +184,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			nextProbabilityState->enqueued = true;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
+				// nextProbabilityState->enqueued = true;
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 			}
