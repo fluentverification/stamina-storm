@@ -181,10 +181,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
 			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
-			nextProbabilityState->enqueued = true;
+			nextProbabilityState->enqueued = false;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
-				// nextProbabilityState->enqueued = true;
+				nextProbabilityState->enqueued = true;
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 			}
