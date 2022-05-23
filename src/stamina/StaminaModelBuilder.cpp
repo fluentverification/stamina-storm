@@ -164,14 +164,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
 			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
+			nextProbabilityState->enqueued = false;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 				nextProbabilityState->enqueued = true;
-			}
-			else {
-				nextProbabilityState->enqueued = false;
 			}
 		}
 		else {
@@ -183,14 +181,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
 			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
+			nextProbabilityState->enqueued = true;
 			auto emplaced = exploredStates.emplace(actualIndex);
 			if (emplaced.second) {
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
-				nextProbabilityState->enqueued = true;
-			}
-			else {
-				nextProbabilityState->enqueued = false;
 			}
 		}
 		else {
@@ -288,6 +283,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
+		std::cout << "Dequeued state " << currentIndex << std::endl;
 		// Set our state variable in the class
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
