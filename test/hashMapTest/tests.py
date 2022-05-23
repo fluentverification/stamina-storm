@@ -19,8 +19,9 @@ def mainTest():
             print(f"Testing insertion with size {numToInsert}")
             cppTime = timeCommand(f"./a.out {numToInsert}")
             javaTime = timeCommand(f"java Test {numToInsert}")
+            pythonTime = timeCommand(f"./hashMap.py {numToInsert}")
             with open("times.txt", 'a') as f:
-                f.write(f"{numToInsert},{cppTime},{javaTime}\n")
+                f.write(f"{numToInsert},{cppTime},{javaTime},{pythonTime}\n")
             numToInsert *= 2
     except KeyboardInterrupt:
         print("Exiting")
@@ -29,16 +30,19 @@ def mainTest():
 def createGraph():
     cppTimes = []
     javaTimes = []
+    pyTimes = []
     nums = []
     with open('times.txt', 'r') as f:
         a = f.readlines()
         for line in a:
-            n, cpp, java = line.split(',')
+            n, cpp, java, py = line.split(',')
             nums.append(int(n))
             cppTimes.append(float(cpp))
             javaTimes.append(float(java))
+            pyTimes.append(float(py))
     plt.plot(nums, cppTimes, label="C++ std::unordered_set Times")
     plt.plot(nums, javaTimes, label="Java HashSet Times")
+    plt.plot(nums, pyTimes, label="Python 'set' (built-in) Times")
     plt.legend()
     plt.semilogx()
     plt.xlabel("Number of states to insert")
