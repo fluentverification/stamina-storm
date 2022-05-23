@@ -283,7 +283,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
-		std::cout << "Dequeued state " << currentIndex << std::endl;
+		// std::cout << "Dequeued state " << currentIndex << std::endl;
 		// Set our state variable in the class
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -382,7 +382,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					if (nextProbabilityState->enqueued && sPrime != 0) {
 						// row, column, value
 						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
-						std::cout << "Adding the following to transitionMatrix: " << currentIndex << "," << sPrime << "," << stateProbabilityPair.second << std::endl;
+						// std::cout << "Adding the following to transitionMatrix: " << currentIndex << "," << sPrime << "," << stateProbabilityPair.second << std::endl;
 						nextProbabilityState->enqueued = false;
 					}
 				}
