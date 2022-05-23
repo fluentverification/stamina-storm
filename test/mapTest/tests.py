@@ -41,6 +41,8 @@ def createGraph():
     plt.plot(nums, javaTimes, label="Java HashSet Times")
     plt.legend()
     plt.semilogx()
+    plt.xlabel("Number of states to insert")
+    plt.ylabel("Time taken (s)")
     plt.show()
 
 if __name__=='__main__':
