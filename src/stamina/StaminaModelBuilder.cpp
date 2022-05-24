@@ -41,8 +41,6 @@
 #include "storm/utility/ConstantsComparator.h"
 #include "storm/utility/SignalHandler.h"
 
-#define RESERVE_VALUE 10000
-
 using namespace stamina;
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -58,10 +56,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, iteration(0)
 {
 	// Optimization for hashmaps
-	// exploredStates.max_load_factor(0.25);
-	// stateMap.max_load_factor(0.25);
-	// exploredStates.reserve(RESERVE_VALUE);
-	// stateMap.reserve(RESERVE_VALUE);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -103,18 +97,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
 		StaminaMessages::error(ss.str());
 	}
-
+	return nullptr;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
 	std::vector<StateType> perimeterStates = stateMap.getPerimeterStates();
-	// for (const auto & [ key, value ] : stateMap) {
-	// 	if (value->isTerminal()) {
-	// 		perimeterStates.push_back(value->index);
-	// 	}
-	// }
 
 	return perimeterStates;
 }
@@ -168,7 +157,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			// Don't rehash if we've already called find()
 			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState;
 			nextProbabilityState->enqueued = false;
-			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue

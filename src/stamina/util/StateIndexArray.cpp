@@ -1,5 +1,7 @@
 #include "StateIndexArray.h"
 
+#include "../StaminaModelBuilder.h"
+
 namespace stamina {
 	namespace util {
 
@@ -12,7 +14,7 @@ namespace stamina {
 			for (int i = 0; i < blockSize; i++) {
 				subArray[i] = nullptr;
 			}
-			stateArray.insert(subArray);
+			stateArray.push_back(subArray);
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -40,7 +42,7 @@ namespace stamina {
 				for (int j = 0; j < blockSize; j++) {
 					subArray[j] = nullptr;
 				}
-				stateArray.insert(subArray);
+				stateArray.push_back(subArray);
 			}
 		}
 
@@ -69,7 +71,7 @@ namespace stamina {
 				for (int j = 0; j < blockSize; j++) {
 					subArray[j] = nullptr;
 				}
-				stateArray.insert(subArray);
+				stateArray.push_back(subArray);
 			}
 			stateArray[arrayIndex][subArrayIndex] = probabilityState;
 		}
@@ -80,7 +82,7 @@ namespace stamina {
 			std::vector<StateType> perimeterStates;
 			for (auto subArray : stateArray) {
 				for (int i = 0; i < blockSize; i++) {
-					if (subArray[i] != nullptr && subArray[i]->terminal) {
+					if (subArray[i] != nullptr && subArray[i]->isTerminal()) {
 						perimeterStates.push_back(subArray[i]->index);
 					}
 				}
@@ -95,6 +97,10 @@ namespace stamina {
 				size++;
 			}
 		}
-
+		// Forward-declare
+		template class StateIndexArray<
+			uint32_t
+			, StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>::ProbabilityState
+		>;
 	}
 }
