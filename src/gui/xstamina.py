@@ -16,7 +16,20 @@ import subprocess
 
 from MoreOptions import MoreOptions
 
-EXECUTABLE = "stamina-cplusplus"
+EXECUTABLE_CPP = "../../build/stamina-cplusplus"
+EXECUTABLE_JAVA = "stamina"
+
+colorCodes = [
+"\x1B[0m"
+, "\x1B[31m"
+, "\x1B[32m"
+, "\x1B[33m"
+, "\x1B[34m"
+, "\x1B[35m"
+, "\x1B[36m"
+, "\x1B[37m"
+, "\x1B[1m"
+, "\x1B[4m" ]
 
 class XStamina(QWidget):
 	def __init__(self, parent=None):
@@ -45,6 +58,7 @@ Constructor for XStamina class. Sets up widgets and creates MoreOptions class
 		mainLayout.addWidget(split)
 		self.setLayout(mainLayout)
 		self.addFormButtons()
+		self.executable = EXECUTABLE_CPP
 
 	def addFormButtons(self):
 		"""
@@ -147,9 +161,13 @@ Creates a file extension mask for a QFileDialog
 	def setGroupBoxesEnabled(self, storm):
 		self.options.stormOptions.setEnabled(storm)
 		self.options.prismOptions.setEnabled(not storm)
+		if storm:
+			self.executable = EXECUTABLE_CPP
+		else:
+			self.executable = EXECUTABLE_JAVA
 
 	def runStamina(self):
-		command = f"{EXECUTABLE} {self.modFile.text()} {self.propFile.text()}".split(' ')
+		command = f"{self.executable} {self.modFile.text()} {self.propFile.text()}".split(' ')
 		proc = subprocess.Popen(
 			command
 			, stdout = subprocess.PIPE
@@ -165,6 +183,8 @@ Watches the subprocess and places output in the textbox
 		while proc.poll() is None:
 			line = proc.stdout.readline()
 			if line:
+				for c in colorCodes:
+					line = line.replace(c, '')
 				self.output.appendPlainText(line)
 
 	def run(self):

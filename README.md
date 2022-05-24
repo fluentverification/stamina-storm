@@ -11,9 +11,10 @@ C++ version of `stamina` integrating with the `storm` probabilistic model checke
 ```
 git clone https://github.com/fluentverification/stamina-cplusplus
 cd bin
-cmake .. -DSTORM_PATH=<PATH TO STORM DIRECTORY>
+cmake .. -DSTORM_PATH=<PATH TO STORM DIRECTORY> -DCMAKE_CXX_COMPILER=/usr/bin/clang-cpp
 make
 ```
+*Please note that testing determined that the STL implementations in `clang` are faster than in `gcc`. Because speed is required here, speed is important, so we recommend using `clang` rather than `gcc`*
 
 ### On Windows:
 1. Dual-boot Linux or buy a Mac.
