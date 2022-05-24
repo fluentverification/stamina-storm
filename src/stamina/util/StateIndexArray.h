@@ -44,6 +44,12 @@ namespace stamina {
 			 * @param probabilityState The state to emplace
 			 * */
 			void put(StateType index, std::shared_ptr<ProbabilityStateType> probabilityState);
+			/**
+			 * Gets a vector of all of the terminal states in the stateIndexArray
+			 *
+			 * @return A vector of all perimeter states
+			 * */
+			std::vector<StateType> getPerimeterStates();
 		protected:
 			/**
 			 * Gets a size that is a multiple of blockSize

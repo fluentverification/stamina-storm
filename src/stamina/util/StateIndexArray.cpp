@@ -75,6 +75,20 @@ namespace stamina {
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
+		std::vector<StateType>
+		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
+			std::vector<StateType> perimeterStates;
+			for (auto subArray : stateArray) {
+				for (int i = 0; i < blockSize; i++) {
+					if (subArray[i] != nullptr && subArray[i]->terminal) {
+						perimeterStates.push_back(subArray[i]->index);
+					}
+				}
+			}
+			return perimeterStates;
+		}
+
+		template <typename StateType, typename ProbabilityStateType>
 		uint32_t
 		StateIndexArray<StateType, ProbabilityStateType>::sizeToActualSize(uint32_t size) {
 			while (size % blockSize != 0) {

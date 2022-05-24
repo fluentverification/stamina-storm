@@ -109,12 +109,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
-	std::vector<StateType> perimeterStates;
-	for (const auto & [ key, value ] : stateMap) {
-		if (value->isTerminal()) {
-			perimeterStates.push_back(value->index);
-		}
-	}
+	std::vector<StateType> perimeterStates = stateMap.getPerimeterStates();
+	// for (const auto & [ key, value ] : stateMap) {
+	// 	if (value->isTerminal()) {
+	// 		perimeterStates.push_back(value->index);
+	// 	}
+	// }
 
 	return perimeterStates;
 }
@@ -132,8 +132,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		actualIndex = newIndex;
 	}
 
-	auto nextState = stateMap.find(actualIndex);
-	bool stateIsExisting = nextState != stateMap.end();
+	auto nextState = stateMap.get(actualIndex);
+	bool stateIsExisting = nextState != nullptr;
 
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 	// Handle conditional enqueuing
@@ -147,15 +147,17 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				, true
 			));
 			numberTerminal++;
-			stateMap.insert(actualIndex, initProbabilityState);
+			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push(initProbabilityState);
 			initProbabilityState->enqueued = true;
+			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
-		std::shared_ptr<ProbabilityState> initProbabilityState = nextState->second;
+		std::shared_ptr<ProbabilityState> initProbabilityState = nextState;
 		initProbabilityState->enqueued = true;
-		stateMap.insert(actualIndex, initProbabilityState);
+		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push(initProbabilityState);
+		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
 
@@ -164,10 +166,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
+			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState;
 			nextProbabilityState->enqueued = false;
-			auto emplaced = exploredStates.emplace(actualIndex);
-			if (emplaced.second) {
+			// auto emplaced = exploredStates.emplace(actualIndex);
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
 				nextProbabilityState->enqueued = true;
@@ -181,10 +184,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
+			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState;
 			nextProbabilityState->enqueued = false;
-			auto emplaced = exploredStates.emplace(actualIndex);
-			if (emplaced.second) {
+			// auto emplaced = exploredStates.emplace(actualIndex);
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
 				nextProbabilityState->enqueued = true;
 				// Enqueue
 				statesToExplore.push(nextProbabilityState);
@@ -194,8 +198,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			// This state has not been seen so create a new ProbabilityState
 			std::shared_ptr<ProbabilityState> nextProbabilityState(new ProbabilityState(state, actualIndex, 0.0, true));
 			nextProbabilityState->enqueued = true;
-			stateMap.insert(actualIndex, nextProbabilityState);
-			exploredStates.emplace(actualIndex);
+			stateMap.put(actualIndex, nextProbabilityState);
+			nextProbabilityState->iterationLastSeen = iteration;
+			// exploredStates.emplace(actualIndex);
 			statesToExplore.push(nextProbabilityState);
 			numberTerminal++;
 		}
@@ -258,9 +263,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	if (this->stateStorage.initialStateIndices.empty()) {
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
-	for (StateType index : this->stateStorage.initialStateIndices) {
-		exploredStates.insert(index);
-	}
+	// for (StateType index : this->stateStorage.initialStateIndices) {
+	// 	exploredStates.insert(index);
+	// }
 
 	currentRowGroup = 1;
 	currentRow = 1;
@@ -374,9 +379,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// These are next states where the previous state has a reachability
 				// greater than zero
 
-				auto nextProbabilityStatePair = stateMap.find(sPrime);
-				if (nextProbabilityStatePair != stateMap.end()) {
-					auto nextProbabilityState = nextProbabilityStatePair->second;
+				auto nextProbabilityState = stateMap.get(sPrime);
+				if (nextProbabilityState != nullptr) {
 					if (!shouldEnqueueAll) {
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
@@ -562,7 +566,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 		return;
 	}
 	statesToExplore = StatePriorityQueue();
-	exploredStates.clear(); // States explored in our current iteration
+	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
 	// stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
