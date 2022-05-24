@@ -28,9 +28,7 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::clear() {
-			//for (auto subArray : stateArray) {
-			//	if (subArray) { delete subArray; }
-			//}
+			this->stateArray.clear();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
