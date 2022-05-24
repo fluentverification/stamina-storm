@@ -16,7 +16,19 @@ import subprocess
 
 from MoreOptions import MoreOptions
 
-EXECUTABLE = "stamina-cplusplus"
+EXECUTABLE = "../../build/stamina-cplusplus"
+
+colorCodes = [
+"\x1B[0m"
+, "\x1B[31m"
+, "\x1B[32m"
+, "\x1B[33m"
+, "\x1B[34m"
+, "\x1B[35m"
+, "\x1B[36m"
+, "\x1B[37m"
+, "\x1B[1m"
+, "\x1B[4m" ]
 
 class XStamina(QWidget):
 	def __init__(self, parent=None):
@@ -165,6 +177,8 @@ Watches the subprocess and places output in the textbox
 		while proc.poll() is None:
 			line = proc.stdout.readline()
 			if line:
+				for c in colorCodes:
+					line = line.replace(c, '')
 				self.output.appendPlainText(line)
 
 	def run(self):
