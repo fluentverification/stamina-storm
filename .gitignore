@@ -1,6 +1,13 @@
 __pycache__
+build
+bin
+tmp
+doxysite
+storm
 *.o
 *.out
 *.csv
 *.class
 *.txt
+notes.md
+modelFiles.sh
