@@ -61,6 +61,6 @@ find_package(storm REQUIRED PATHS ${STORM_PATH})
 #endif
 
 # Add executable target with source files listed in SOURCE_FILES variable
-add_executable(stamina-cplusplus ${SOURCE_FILES})
+add_executable(sstamina ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
 target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
