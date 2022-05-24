@@ -35,6 +35,8 @@ set(SOURCE_FILES
 	# Files for `stamina::util` namespace
 	src/stamina/util/ModelModify.h
 	src/stamina/util/ModelModify.cpp
+	src/stamina/util/StateIndexArray.h
+	src/stamina/util/StateIndexArray.cpp
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})

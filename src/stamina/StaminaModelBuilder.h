@@ -16,6 +16,8 @@
 #include <functional>
 
 #include "Options.h"
+#include "StaminaMessages.h"
+#include "util/StateIndexArray.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -65,7 +67,89 @@ namespace stamina {
 	template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 	class StaminaModelBuilder {
 	public:
-		typedef std::pair<StateType, CompressedState> QueueItem;
+		/* Sub-class for states with probabilities */
+		class ProbabilityState {
+		public:
+			CompressedState const state;
+			StateType const index;
+			bool enqueued;
+			uint8_t iterationLastSeen;
+			ProbabilityState(
+				CompressedState state
+				, StateType index
+				, double pi = 0.0
+				, bool terminal = true
+				, bool enqueued = true
+				, uint8_t iterationLastSeen = 0
+			) : state(state)
+				, index(index)
+				, pi(pi)
+				, terminal(terminal)
+				, enqueued(enqueued)
+				, iterationLastSeen(iterationLastSeen)
+			{
+				// Intentionally left empty
+			}
+			double getPi() {
+				return pi;
+			}
+			void addToPi(double add) {
+				pi += add;
+			}
+			void setPi(double pi) {
+				this->pi = pi;
+			}
+			bool isTerminal() {
+				return terminal;
+			}
+			void setTerminal(bool term) {
+				terminal = term;
+			}
+			inline bool operator==(const ProbabilityState & rhs) const {
+				return index == rhs.index;
+			}
+			inline bool operator>=(const ProbabilityState & rhs) const {
+				return index >= rhs.index;
+			}
+			inline bool operator<=(const ProbabilityState & rhs) const {
+				return index <= rhs.index;
+			}
+			inline bool operator>(const ProbabilityState & rhs) const {
+				return index > rhs.index;
+			}
+			inline bool operator<(const ProbabilityState & rhs) const {
+				return index < rhs.index;
+			}
+		private:
+			double pi;
+			bool terminal;
+
+		};
+
+		class StatePriorityQueue {
+		public:
+			std::vector<std::shared_ptr<ProbabilityState>> stateQueue;
+			StatePriorityQueue()
+			{
+				// Intentionally left empty
+			}
+			bool empty() {
+				return stateQueue.empty();
+			}
+			std::shared_ptr<ProbabilityState> pop() {
+				std::shared_ptr<ProbabilityState> front = stateQueue.front();
+				stateQueue.erase(stateQueue.begin());
+				return front;
+			}
+			void push(std::shared_ptr<ProbabilityState> state) {
+				uint_fast32_t pos = stateQueue.size();
+				while (pos > 0 && stateQueue[pos - 1]->index > state->index) {
+					pos--;
+				}
+				stateQueue.insert(stateQueue.begin() + pos, state);
+			}
+		};
+
 		/**
 		* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
 		*
@@ -92,24 +176,6 @@ namespace stamina {
 		* @return The truncated model.
 		* */
 		std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>> build();
-		/**
-		* Checks whether we should enqueue a state based on its current reachability probability, and that of its
-		* previous state. Assumes that you have both the current state, and the previous state. This method is to be used by
-		* the NextStateGenerators when they expand() a current state.
-		*
-		* @param currentState The current state which we may or may not enqueue.
-		* @param nextState The state which we came from to get to currentState
-		* @return Whether or not to enqueue currentState to the statesToExplore through stateToIdCallback
-		* */
-		bool shouldEnqueue(StateType nextState);
-		/**
-		* Updates a state's reachability probability given a current state, previous state, and transition probability.
-		*
-		* @param currentState The state to update the reachability probability
-		* @param previousState The state that we're transitioning from
-		* @param transitionProbability The probability to transition from previousState to currentState
-		* */
-		void updateReachabilityProbability(StateType currentState, StateType previousState, float transitionProbability);
 		/**
 		 * Gets the state ID of a state known to already exist. This does NOT perform state-space truncation for future states
 		 * */
@@ -191,12 +257,6 @@ namespace stamina {
 		* */
 		storm::models::sparse::StateLabeling buildStateLabeling();
 		/**
-		* Sets our reachability threshold
-		*
-		* @param threshold The new reachability threshold
-		* */
-		void setReachabilityThreshold(double threshold);
-		/**
 		 * Sets up the initial state in the transition matrix
 		 * */
 		void setUpAbsorbingState(
@@ -211,25 +271,24 @@ namespace stamina {
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
-		// std::deque<std::pair<CompressedState, StateType>> statesToExplore;
-		std::priority_queue<QueueItem, std::vector<QueueItem>, std::greater<QueueItem>> statesToExplore;
+		StatePriorityQueue statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-		std::unordered_set<StateType> exploredStates; // States that we have explored
-		std::unordered_set<StateType> stateMap; // S in the QEST paper
-		std::unordered_set<StateType> tMap; // T in the QEST paper
-		std::unordered_map<StateType, double> piMap; // Maps reachability probabilities to their states
-		std::unordered_set<StateType> enqueued;
-		std::unordered_map<StateType, CompressedState> availableStates;
-		double reachabilityThreshold;
-		StateType currentState;
+		// std::unordered_set<StateType> exploredStates; // States that we have explored
+		util::StateIndexArray<StateType, ProbabilityState> stateMap;
+		// std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
+		std::shared_ptr<ProbabilityState> currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
 		bool isInit;
 		bool fresh;
+		uint8_t iteration;
 		bool firstIteration;
 		double localKappa;
-		std::string currentStateString;
 		bool isCtmc;
+		uint64_t numberTerminal;
+		uint_fast64_t currentRowGroup;
+		uint_fast64_t currentRow;
+
 	};
 
 	// Helper method to find in unordered_set
