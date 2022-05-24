@@ -9,6 +9,9 @@ namespace stamina {
 			, numElements(0)
 		{
 			std::shared_ptr<ProbabilityStateType> * subArray = new std::shared_ptr<ProbabilityStateType>[blockSize];
+			for (int i = 0; i < blockSize; i++) {
+				subArray[i] = nullptr;
+			}
 			stateArray.insert(subArray);
 		}
 
@@ -33,7 +36,11 @@ namespace stamina {
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
 			uint32_t subArrayIndex = actualNumToReserve % blockSize;
 			for (int i = 0; i < arrayIndex; i++) {
-				stateArray.insert(new std::shared_ptr<ProbabilityStateType>[blockSize]);
+				auto subArray = new std::shared_ptr<ProbabilityStateType>[blockSize];
+				for (int j = 0; j < blockSize; j++) {
+					subArray[j] = nullptr;
+				}
+				stateArray.insert(subArray);
 			}
 		}
 
@@ -41,6 +48,9 @@ namespace stamina {
 		std::shared_ptr<ProbabilityStateType>
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
 			uint16_t arrayIndex = index / blockSize;
+			if (arrayIndex > stateArray.size() - 1) {
+				return nullptr;
+			}
 			uint32_t subArrayIndex = index % blockSize;
 			return stateArray[arrayIndex][subArrayIndex];
 		}
@@ -55,7 +65,11 @@ namespace stamina {
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;
 			while (arrayIndex > stateArray.size() - 1) {
-				stateArray.insert(new std::shared_ptr<ProbabilityStateType>[blockSize]);
+				auto subArray = new std::shared_ptr<ProbabilityStateType>[blockSize];
+				for (int j = 0; j < blockSize; j++) {
+					subArray[j] = nullptr;
+				}
+				stateArray.insert(subArray);
 			}
 			stateArray[arrayIndex][subArrayIndex] = probabilityState;
 		}

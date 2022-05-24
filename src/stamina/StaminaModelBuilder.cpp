@@ -55,12 +55,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, firstIteration(true)
 	, localKappa(Options::kappa)
 	, numberTerminal(0)
+	, iteration(0)
 {
 	// Optimization for hashmaps
-	exploredStates.max_load_factor(0.25);
-	stateMap.max_load_factor(0.25);
-	exploredStates.reserve(RESERVE_VALUE);
-	stateMap.reserve(RESERVE_VALUE);
+	// exploredStates.max_load_factor(0.25);
+	// stateMap.max_load_factor(0.25);
+	// exploredStates.reserve(RESERVE_VALUE);
+	// stateMap.reserve(RESERVE_VALUE);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -380,12 +381,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
 
-					if (nextProbabilityState->enqueued && sPrime != 0) {
+					// if (nextProbabilityState->enqueued && sPrime != 0) {
 						// row, column, value
 						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
 						// std::cout << "Adding the following to transitionMatrix: " << currentIndex << "," << sPrime << "," << stateProbabilityPair.second << std::endl;
 						nextProbabilityState->enqueued = false;
-					}
+					//}
 				}
 			}
 
@@ -418,6 +419,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 	}
+	iteration++;
 	StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " states in total.");
 }
 
