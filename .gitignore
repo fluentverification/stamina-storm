@@ -1,6 +1,6 @@
 __pycache__
-.o
-.out
-.csv
-.class
-.txt
+*.o
+*.out
+*.csv
+*.class
+*.txt
