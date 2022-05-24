@@ -10,9 +10,12 @@ namespace stamina {
 		: blockSize(2 << blockSizeExponent)
 			, numElements(0)
 		{
-			std::shared_ptr<ProbabilityStateType> * subArray = new std::shared_ptr<ProbabilityStateType>[blockSize];
+			std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
+				new std::shared_ptr<ProbabilityStateType>[blockSize]
+				, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
+			);
 			for (int i = 0; i < blockSize; i++) {
-				subArray[i] = nullptr;
+				subArray.get()[i] = nullptr;
 			}
 			stateArray.push_back(subArray);
 		}
@@ -25,9 +28,9 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::clear() {
-			for (auto subArray : stateArray) {
-				delete subArray;
-			}
+			//for (auto subArray : stateArray) {
+			//	if (subArray) { delete subArray; }
+			//}
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -38,9 +41,12 @@ namespace stamina {
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
 			uint32_t subArrayIndex = actualNumToReserve % blockSize;
 			for (int i = 0; i < arrayIndex; i++) {
-				auto subArray = new std::shared_ptr<ProbabilityStateType>[blockSize];
+				std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
+					new std::shared_ptr<ProbabilityStateType>[blockSize]
+					, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
+				);
 				for (int j = 0; j < blockSize; j++) {
-					subArray[j] = nullptr;
+					subArray.get()[j] = nullptr;
 				}
 				stateArray.push_back(subArray);
 			}
@@ -54,7 +60,7 @@ namespace stamina {
 				return nullptr;
 			}
 			uint32_t subArrayIndex = index % blockSize;
-			return stateArray[arrayIndex][subArrayIndex];
+			return stateArray[arrayIndex].get()[subArrayIndex];
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -67,13 +73,16 @@ namespace stamina {
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;
 			while (arrayIndex > stateArray.size() - 1) {
-				auto subArray = new std::shared_ptr<ProbabilityStateType>[blockSize];
+				std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
+					new std::shared_ptr<ProbabilityStateType>[blockSize]
+					, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
+				);
 				for (int j = 0; j < blockSize; j++) {
-					subArray[j] = nullptr;
+					subArray.get()[j] = nullptr;
 				}
 				stateArray.push_back(subArray);
 			}
-			stateArray[arrayIndex][subArrayIndex] = probabilityState;
+			stateArray[arrayIndex].get()[subArrayIndex] = probabilityState;
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -82,8 +91,8 @@ namespace stamina {
 			std::vector<StateType> perimeterStates;
 			for (auto subArray : stateArray) {
 				for (int i = 0; i < blockSize; i++) {
-					if (subArray[i] != nullptr && subArray[i]->isTerminal()) {
-						perimeterStates.push_back(subArray[i]->index);
+					if (subArray.get()[i] != nullptr && subArray.get()[i]->isTerminal()) {
+						perimeterStates.push_back(subArray.get()[i]->index);
 					}
 				}
 			}
@@ -96,6 +105,7 @@ namespace stamina {
 			while (size % blockSize != 0) {
 				size++;
 			}
+			return size;
 		}
 		// Forward-declare
 		template class StateIndexArray<
