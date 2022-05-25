@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <string>
+#include <regex>
 
 #include <boost/algorithm/string/trim.hpp>
 
@@ -102,6 +103,7 @@ ModelModify::createModifiedProperties(
 	modifiedPropertiesStream << "// file '" << modifiedModel << "'" << std::endl;
 
 	std::string str;
+	// std::regex r(); // TODO:
 	while (std::getline(originalPropertiesStream, str)) {
 		// Remove whitespace
 		boost::algorithm::trim(str);
@@ -111,10 +113,10 @@ ModelModify::createModifiedProperties(
 		}
 		// Modify the property so that "absorbing is reflected
 		str.pop_back();
-		std::size_t firstParenPos = str.find("(");
-		str.replace(firstParenPos, 1, "((");
-		std::string propMin = str + "& (Absorbing = false)) ]; // Property for Pmin\n";
-		std::string propMax = str + "| (Absorbing = true)) ]; // Property for Pmax\n";
+		// std::size_t firstParenPos = str.find("(");
+		// str.replace(firstParenPos, 1, "((");
+		std::string propMin = str + "& (Absorbing = false) ]; // Property for Pmin\n";
+		std::string propMax = str + "| (Absorbing = true) ]; // Property for Pmax\n";
 		modifiedPropertiesStream << propMin << std::endl;
 		modifiedPropertiesStream << propMax << std::endl;
 	}
