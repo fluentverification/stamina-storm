@@ -16,7 +16,7 @@ import subprocess
 
 from MoreOptions import MoreOptions
 
-EXECUTABLE_CPP = "../../build/stamina-cplusplus"
+EXECUTABLE_CPP = "../../build/sstamina"
 EXECUTABLE_JAVA = "stamina"
 
 colorCodes = [
@@ -202,7 +202,7 @@ Runs STAMINA with the selected options
 			err.setText("STAMINA Error")
 			err.setInformativeText(
 				f"Caught a runtime exception while trying to run STAMINA:\n\n{e}\n"
-				+ f"\nIf this exception states that \"There is no such file {EXECUTABLE}\", then it means you have not added STAMINA to your PATH"
+				+ f"\nIf this exception states that \"There is no such file {self.executable}\", then it means you have not added STAMINA to your PATH"
 			)
 			err.setWindowTitle("STAMINA Error")
 			err.exec_()
