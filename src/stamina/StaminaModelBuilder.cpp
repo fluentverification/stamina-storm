@@ -262,8 +262,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		currentProbabilityState = statesToExplore.pop();
-
+		currentProbabilityState = statesToExplore.top();
+		statesToExplore.pop();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
@@ -546,7 +546,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore = StatePriorityQueue();
+	statesToExplore = std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison>(); // .clear(); // = StatePriorityQueue();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }

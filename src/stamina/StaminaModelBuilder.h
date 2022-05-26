@@ -125,7 +125,16 @@ namespace stamina {
 			bool terminal;
 
 		};
+		struct ProbabilityStateComparison {
+			bool operator() (
+				const std::shared_ptr<ProbabilityState> first
+				, const std::shared_ptr<ProbabilityState> second
+			) const {
+				return first->index > second->index;
+			}
+		};
 
+		// TODO: potentially depricated
 		class StatePriorityQueue {
 		public:
 			std::vector<std::shared_ptr<ProbabilityState>> stateQueue;
@@ -271,9 +280,9 @@ namespace stamina {
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
-		StatePriorityQueue statesToExplore;
+		// StatePriorityQueue statesToExplore;
+		std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-		// std::unordered_set<StateType> exploredStates; // States that we have explored
 		util::StateIndexArray<StateType, ProbabilityState> stateMap;
 		// std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
 		std::shared_ptr<ProbabilityState> currentProbabilityState;
