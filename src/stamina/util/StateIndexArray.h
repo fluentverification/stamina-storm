@@ -4,6 +4,9 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <thread>
 
 /**
  * Because state indecies are generally assigned in order, it is more efficient to
@@ -50,6 +53,10 @@ namespace stamina {
 			 * @return A vector of all perimeter states
 			 * */
 			std::vector<StateType> getPerimeterStates();
+			/**
+			 * Joins the worker thread (i.e., waits for it to finish
+			 * */
+			void joinWorker();
 		protected:
 			/**
 			 * Gets a size that is a multiple of blockSize
@@ -58,10 +65,16 @@ namespace stamina {
 			 * @return The next size of a multiple of blockSize
 			 * */
 			uint32_t sizeToActualSize(uint32_t size);
+			/**
+			 * Helper for put()--A function that can be passed into a detached thread
+			 * */
+			void putHelper(StateType index, std::shared_ptr<ProbabilityStateType> probabilityState);
 		private:
 			uint32_t numElements;
 			uint32_t blockSize;
 			std::vector<std::shared_ptr<std::shared_ptr<ProbabilityStateType>>> stateArray;
+			mutable std::shared_mutex mutex;
+			std::shared_ptr<std::thread> worker;
 		};
 	}
 }
