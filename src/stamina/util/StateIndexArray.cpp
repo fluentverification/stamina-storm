@@ -75,7 +75,7 @@ namespace stamina {
 			StateType index
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
-			worker = std::make_shared<std::thread>(
+			std::thread worker(
 				&StateIndexArray<StateType, ProbabilityStateType>::putHelper
 				, this
 				, index
@@ -87,10 +87,11 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::joinWorker() {
+			return;
 			// Only join worker if finished
-			if (worker && worker->joinable()) {
-				worker->join();
-			}
+			// if (worker && worker->joinable()) {
+			// 	worker->join();
+			// }
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
