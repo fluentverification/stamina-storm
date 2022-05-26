@@ -108,6 +108,7 @@ StaminaModelChecker::modelCheckProperty(
 	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator);
 
 	auto startTime = std::chrono::high_resolution_clock::now();
+	auto modelTime = startTime;
 	// Instantiate lower and upper results
 	min_results = std::allocate_shared<Result>(allocatorResult);
 	max_results = std::allocate_shared<Result>(allocatorResult);
@@ -115,11 +116,6 @@ StaminaModelChecker::modelCheckProperty(
 	// Create number of refined iterations and rechability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
-
-	// Get the name of the property
-
-	// Lower and upper bound times
-	double lTime, uTime;
 
 	// While we should not terminate
 	while (numRefineIterations == 0
@@ -135,15 +131,11 @@ StaminaModelChecker::modelCheckProperty(
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 		int innerLoopCount = 0;
 		while (piHat >= Options::prob_win / Options::approx_factor) {
-			StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
+			// StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
 			builder->reset();
 			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 			// Rebuild the initial state labels
-			labeling = &( model->getStateLabeling());
-			labeling->addLabel("(Absorbing = true)");
-			labeling->addLabelToState("(Absorbing = true)", 0);
 
-			checker = std::make_shared<CtmcModelChecker>(*model);
 			// Accumulate probabilities
 			piHat = builder->accumulateProbabilities();
 			innerLoopCount++;
@@ -152,7 +144,15 @@ StaminaModelChecker::modelCheckProperty(
 			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 			builder->setGenerator(generator);
 		}
+		// Rebuild the initial state labels
+		labeling = &( model->getStateLabeling());
+			labeling->addLabel("(Absorbing = true)");
+			labeling->addLabelToState("(Absorbing = true)", 0);
+
+			checker = std::make_shared<CtmcModelChecker>(*model);
+
 		builder->setLocalKappaToGlobal();
+		modelTime = std::chrono::high_resolution_clock::now();
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
@@ -195,8 +195,13 @@ StaminaModelChecker::modelCheckProperty(
 
 	auto endTime = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> timeTaken = endTime - startTime;
+	std::chrono::duration<double> timeTakenModel = modelTime - startTime;
+	std::chrono::duration<double> timeTakenCheck = endTime - modelTime;
 	std::stringstream ss;
-	ss << "Taken total time: " << timeTaken.count() << " s\n";
+	ss << "The following summary shows the time for each step:" << std::endl;
+	ss << "\tTime taken for model building: " << timeTakenModel.count() << " s\n";
+	ss << "\tTime taken for model checking " << timeTakenCheck.count() << " s\n";
+	ss << "\tTaken total time: " << timeTaken.count() << " s\n";
 	StaminaMessages::info(ss.str());
 
 	// Print results

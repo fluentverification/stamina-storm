@@ -405,7 +405,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	}
 	iteration++;
-	StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " states in total.");
+	// StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " states in total.");
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
