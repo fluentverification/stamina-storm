@@ -348,7 +348,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					totalRate += stateProbabilityPair.second;
 				}
 			}
-			stateMap.joinWorker();
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
