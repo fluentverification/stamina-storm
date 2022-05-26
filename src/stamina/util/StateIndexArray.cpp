@@ -12,7 +12,7 @@ namespace stamina {
 			, numElements(0)
 		{
 			// Lock write mutex, even on constructor
-			std::unique_lock lock(mutex);
+			mutex.lock();
 			std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
 				new std::shared_ptr<ProbabilityStateType>[blockSize]
 				, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
@@ -21,6 +21,7 @@ namespace stamina {
 				subArray.get()[i] = nullptr;
 			}
 			stateArray.push_back(subArray);
+			mutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -31,8 +32,9 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::clear() {
-			std::unique_lock lock(mutex);
+			mutex.lock();
 			this->stateArray.clear();
+			mutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -40,7 +42,7 @@ namespace stamina {
 		StateIndexArray<StateType, ProbabilityStateType>::reserve(uint32_t numToReserve) {
 			this->clear();
 			// Lock once cleared
-			std::unique_lock lock(mutex);
+			mutex.lock();
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
 			uint32_t subArrayIndex = actualNumToReserve % blockSize;
@@ -54,19 +56,22 @@ namespace stamina {
 				}
 				stateArray.push_back(subArray);
 			}
+			mutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		std::shared_ptr<ProbabilityStateType>
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
 			// This will prevent a read when another thread is writing to it
-			std::shared_lock lock(mutex);
+			mutex.lock();
 			uint16_t arrayIndex = index / blockSize;
 			if (arrayIndex > stateArray.size() - 1) {
 				return nullptr;
 			}
 			uint32_t subArrayIndex = index % blockSize;
-			return stateArray[arrayIndex].get()[subArrayIndex];
+			auto result = stateArray[arrayIndex].get()[subArrayIndex];
+			mutex.unlock();
+			return result;
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -75,7 +80,7 @@ namespace stamina {
 			StateType index
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
-			std::thread worker(
+			worker = std::make_shared<std::thread>(
 				&StateIndexArray<StateType, ProbabilityStateType>::putHelper
 				, this
 				, index
@@ -87,11 +92,10 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::joinWorker() {
-			return;
 			// Only join worker if finished
-			// if (worker && worker->joinable()) {
-			// 	worker->join();
-			// }
+			if (worker && worker->joinable()) {
+				worker->join();
+			}
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -101,7 +105,7 @@ namespace stamina {
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
 			// Lock so main thread does not try to read
-			std::unique_lock lock(mutex);
+			mutex.lock();
 			numElements++;
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;
@@ -116,12 +120,13 @@ namespace stamina {
 				stateArray.push_back(subArray);
 			}
 			stateArray[arrayIndex].get()[subArrayIndex] = probabilityState;
+			mutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		std::vector<StateType>
 		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
-			std::shared_lock lock(mutex);
+			mutex.lock();
 			std::vector<StateType> perimeterStates;
 			for (auto subArray : stateArray) {
 				for (int i = 0; i < blockSize; i++) {
@@ -130,6 +135,7 @@ namespace stamina {
 					}
 				}
 			}
+			mutex.unlock();
 			return perimeterStates;
 		}
 
