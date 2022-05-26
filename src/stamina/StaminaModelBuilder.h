@@ -79,7 +79,7 @@ namespace stamina {
 				, StateType index
 				, double pi = 0.0
 				, bool terminal = true
-				, bool enqueued = true
+				// , bool enqueued = true
 				, uint8_t iterationLastSeen = 0
 			) : state(state)
 				, index(index)
@@ -125,30 +125,15 @@ namespace stamina {
 			bool terminal;
 
 		};
-
-		class StatePriorityQueue {
-		public:
-			std::vector<std::shared_ptr<ProbabilityState>> stateQueue;
-			StatePriorityQueue()
-			{
-				// Intentionally left empty
-			}
-			bool empty() {
-				return stateQueue.empty();
-			}
-			std::shared_ptr<ProbabilityState> pop() {
-				std::shared_ptr<ProbabilityState> front = stateQueue.front();
-				stateQueue.erase(stateQueue.begin());
-				return front;
-			}
-			void push(std::shared_ptr<ProbabilityState> state) {
-				uint_fast32_t pos = stateQueue.size();
-				while (pos > 0 && stateQueue[pos - 1]->index > state->index) {
-					pos--;
-				}
-				stateQueue.insert(stateQueue.begin() + pos, state);
+		struct ProbabilityStateComparison {
+			bool operator() (
+				const std::shared_ptr<ProbabilityState> first
+				, const std::shared_ptr<ProbabilityState> second
+			) const {
+				return first->index > second->index;
 			}
 		};
+
 
 		/**
 		* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
@@ -271,9 +256,9 @@ namespace stamina {
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
-		StatePriorityQueue statesToExplore;
+		// StatePriorityQueue statesToExplore;
+		std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-		// std::unordered_set<StateType> exploredStates; // States that we have explored
 		util::StateIndexArray<StateType, ProbabilityState> stateMap;
 		// std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
 		std::shared_ptr<ProbabilityState> currentProbabilityState;
