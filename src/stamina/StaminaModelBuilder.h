@@ -79,7 +79,7 @@ namespace stamina {
 				, StateType index
 				, double pi = 0.0
 				, bool terminal = true
-				, bool enqueued = true
+				// , bool enqueued = true
 				, uint8_t iterationLastSeen = 0
 			) : state(state)
 				, index(index)
