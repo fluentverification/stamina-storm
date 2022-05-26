@@ -1,4 +1,5 @@
 #include "StateIndexArray.h"
+#include <thread>
 
 #include "../StaminaModelBuilder.h"
 
@@ -74,13 +75,22 @@ namespace stamina {
 			StateType index
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
-			std::thread pThread(
+			worker = std::make_shared<std::thread>(
 				&StateIndexArray<StateType, ProbabilityStateType>::putHelper
 				, this
 				, index
 				, probabilityState
 			);
-			pThread.detach();
+			// pThread.detach();
+		}
+
+		template <typename StateType, typename ProbabilityStateType>
+		void
+		StateIndexArray<StateType, ProbabilityStateType>::joinWorker() {
+			// Only join worker if finished
+			if (worker && worker->joinable()) {
+				worker->join();
+			}
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -110,6 +120,7 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		std::vector<StateType>
 		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
+			std::shared_lock lock(mutex);
 			std::vector<StateType> perimeterStates;
 			for (auto subArray : stateArray) {
 				for (int i = 0; i < blockSize; i++) {
