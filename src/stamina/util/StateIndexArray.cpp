@@ -10,6 +10,8 @@ namespace stamina {
 		: blockSize(2 << blockSizeExponent)
 			, numElements(0)
 		{
+			// Lock write mutex, even on constructor
+			std::unique_lock lock(mutex);
 			std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
 				new std::shared_ptr<ProbabilityStateType>[blockSize]
 				, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
@@ -28,6 +30,7 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::clear() {
+			std::unique_lock lock(mutex);
 			this->stateArray.clear();
 		}
 
@@ -35,6 +38,8 @@ namespace stamina {
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::reserve(uint32_t numToReserve) {
 			this->clear();
+			// Lock once cleared
+			std::unique_lock lock(mutex);
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
 			uint32_t subArrayIndex = actualNumToReserve % blockSize;
@@ -53,6 +58,8 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		std::shared_ptr<ProbabilityStateType>
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
+			// This will prevent a read when another thread is writing to it
+			std::shared_lock lock(mutex);
 			uint16_t arrayIndex = index / blockSize;
 			if (arrayIndex > stateArray.size() - 1) {
 				return nullptr;
@@ -67,6 +74,23 @@ namespace stamina {
 			StateType index
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
+			std::thread pThread(
+				&StateIndexArray<StateType, ProbabilityStateType>::putHelper
+				, this
+				, index
+				, probabilityState
+			);
+			pThread.detach();
+		}
+
+		template <typename StateType, typename ProbabilityStateType>
+		void
+		StateIndexArray<StateType, ProbabilityStateType>::putHelper(
+			StateType index
+			, std::shared_ptr<ProbabilityStateType> probabilityState
+		) {
+			// Lock so main thread does not try to read
+			std::unique_lock lock(mutex);
 			numElements++;
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;

@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <shared_mutex>
 
 /**
  * Because state indecies are generally assigned in order, it is more efficient to
@@ -58,10 +59,15 @@ namespace stamina {
 			 * @return The next size of a multiple of blockSize
 			 * */
 			uint32_t sizeToActualSize(uint32_t size);
+			/**
+			 * Helper for put()--A function that can be passed into a detached thread
+			 * */
+			void putHelper(StateType index, std::shared_ptr<ProbabilityStateType> probabilityState);
 		private:
 			uint32_t numElements;
 			uint32_t blockSize;
 			std::vector<std::shared_ptr<std::shared_ptr<ProbabilityStateType>>> stateArray;
+			mutable std::shared_mutex mutex;
 		};
 	}
 }
