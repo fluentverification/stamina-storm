@@ -134,30 +134,6 @@ namespace stamina {
 			}
 		};
 
-		// TODO: potentially depricated
-		class StatePriorityQueue {
-		public:
-			std::vector<std::shared_ptr<ProbabilityState>> stateQueue;
-			StatePriorityQueue()
-			{
-				// Intentionally left empty
-			}
-			bool empty() {
-				return stateQueue.empty();
-			}
-			std::shared_ptr<ProbabilityState> pop() {
-				std::shared_ptr<ProbabilityState> front = stateQueue.front();
-				stateQueue.erase(stateQueue.begin());
-				return front;
-			}
-			void push(std::shared_ptr<ProbabilityState> state) {
-				uint_fast32_t pos = stateQueue.size();
-				while (pos > 0 && stateQueue[pos - 1]->index > state->index) {
-					pos--;
-				}
-				stateQueue.insert(stateQueue.begin() + pos, state);
-			}
-		};
 
 		/**
 		* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
