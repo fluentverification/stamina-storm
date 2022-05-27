@@ -259,8 +259,8 @@ namespace stamina {
 		// StatePriorityQueue statesToExplore;
 		std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-		util::StateIndexArray<StateType, ProbabilityState> stateMap;
-		// std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
+		// util::StateIndexArray<StateType, ProbabilityState> stateMap;
+		std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
 		std::shared_ptr<ProbabilityState> currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
