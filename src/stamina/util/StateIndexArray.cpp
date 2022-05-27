@@ -10,7 +10,6 @@ namespace stamina {
 		: blockSize(2 << blockSizeExponent)
 			, numElements(0)
 		{
-			const std::lock_guard<std::mutex> lock(dataMutex);
 			std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
 				new std::shared_ptr<ProbabilityStateType>[blockSize]
 				, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
@@ -30,13 +29,11 @@ namespace stamina {
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::clear() {
 			this->stateArray.clear();
-			numElements = 0;
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::reserve(uint32_t numToReserve) {
-			const std::lock_guard<std::mutex> lock(dataMutex);
 			this->clear();
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
@@ -56,14 +53,12 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		std::shared_ptr<ProbabilityStateType>
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
-			const std::lock_guard<std::mutex> lock(dataMutex);
 			uint16_t arrayIndex = index / blockSize;
 			if (arrayIndex > stateArray.size() - 1) {
 				return nullptr;
 			}
 			uint32_t subArrayIndex = index % blockSize;
-			auto value = stateArray[arrayIndex].get()[subArrayIndex];
-			return value;
+			return stateArray[arrayIndex].get()[subArrayIndex];
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -72,22 +67,6 @@ namespace stamina {
 			StateType index
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
-			insertWorker = std::thread(
-				&StateIndexArray::putHelper
-				, this
-				, index
-				, probabilityState
-			);
-			// Allow the worker to insert independently of the main thread
-			insertWorker.detach();
-		}
-		template <typename StateType, typename ProbabilityStateType>
-		void
-		StateIndexArray<StateType, ProbabilityStateType>::putHelper(
-			StateType index
-			, std::shared_ptr<ProbabilityStateType> probabilityState
-		) {
-			const std::lock_guard<std::mutex> lock(dataMutex);
 			numElements++;
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;
@@ -107,7 +86,6 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		std::vector<StateType>
 		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
-			const std::lock_guard<std::mutex> lock(dataMutex);
 			std::vector<StateType> perimeterStates;
 			for (auto subArray : stateArray) {
 				for (int i = 0; i < blockSize; i++) {
