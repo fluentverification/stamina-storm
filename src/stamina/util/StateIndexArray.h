@@ -72,7 +72,7 @@ namespace stamina {
 			uint32_t blockSize;
 			std::vector<std::shared_ptr<std::shared_ptr<ProbabilityStateType>>> stateArray;
 			std::thread insertWorker;
-			mutable std::mutex readWriteMutex;
+			mutable std::mutex dataMutex;
 		};
 	}
 }

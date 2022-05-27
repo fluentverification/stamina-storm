@@ -10,7 +10,7 @@ namespace stamina {
 		: blockSize(2 << blockSizeExponent)
 			, numElements(0)
 		{
-			readWriteMutex.lock();
+			const std::lock_guard<std::mutex> lock(dataMutex);
 			std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
 				new std::shared_ptr<ProbabilityStateType>[blockSize]
 				, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
@@ -19,7 +19,6 @@ namespace stamina {
 				subArray.get()[i] = nullptr;
 			}
 			stateArray.push_back(subArray);
-			readWriteMutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -37,7 +36,7 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::reserve(uint32_t numToReserve) {
-			readWriteMutex.lock();
+			const std::lock_guard<std::mutex> lock(dataMutex);
 			this->clear();
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
@@ -52,21 +51,18 @@ namespace stamina {
 				}
 				stateArray.push_back(subArray);
 			}
-			readWriteMutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		std::shared_ptr<ProbabilityStateType>
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
-			readWriteMutex.lock();
+			const std::lock_guard<std::mutex> lock(dataMutex);
 			uint16_t arrayIndex = index / blockSize;
 			if (arrayIndex > stateArray.size() - 1) {
-				readWriteMutex.unlock();
 				return nullptr;
 			}
 			uint32_t subArrayIndex = index % blockSize;
 			auto value = stateArray[arrayIndex].get()[subArrayIndex];
-			readWriteMutex.unlock();
 			return value;
 		}
 
@@ -91,7 +87,7 @@ namespace stamina {
 			StateType index
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
-			readWriteMutex.lock();
+			const std::lock_guard<std::mutex> lock(dataMutex);
 			numElements++;
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;
@@ -106,13 +102,12 @@ namespace stamina {
 				stateArray.push_back(subArray);
 			}
 			stateArray[arrayIndex].get()[subArrayIndex] = probabilityState;
-			readWriteMutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		std::vector<StateType>
 		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
-			readWriteMutex.lock();
+			const std::lock_guard<std::mutex> lock(dataMutex);
 			std::vector<StateType> perimeterStates;
 			for (auto subArray : stateArray) {
 				for (int i = 0; i < blockSize; i++) {
@@ -121,7 +116,6 @@ namespace stamina {
 					}
 				}
 			}
-			readWriteMutex.unlock();
 			return perimeterStates;
 		}
 
