@@ -36,7 +36,7 @@ namespace stamina {
 			 *
 			 * @param blockSize Exponent on 2 of
 			 * */
-			StateMemoryPool(uint8_t blockSize = 16); // 2 ^ 12
+			StateMemoryPool(uint8_t blockSize = 13); // 2 ^ 12
 			/**
 			 * Destructor. Frees all of the memory allocated by the memory pool
 			 * */
