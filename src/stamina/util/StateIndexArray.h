@@ -19,6 +19,7 @@ namespace stamina {
 		template <typename StateType, typename ProbabilityStateType>
 		class StateIndexArray {
 		public:
+			inline static std::mutex dataMutex;
 			StateIndexArray(uint8_t blockSizeExponent = 15); // 2 ^ 15
 			~StateIndexArray();
 			/**
@@ -72,7 +73,6 @@ namespace stamina {
 			uint32_t blockSize;
 			std::vector<std::shared_ptr<std::shared_ptr<ProbabilityStateType>>> stateArray;
 			std::thread insertWorker;
-			mutable std::mutex dataMutex;
 		};
 	}
 }
