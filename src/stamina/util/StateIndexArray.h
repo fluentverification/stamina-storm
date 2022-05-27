@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <thread>
+#include <mutex>
 
 /**
  * Because state indecies are generally assigned in order, it is more efficient to
@@ -52,6 +54,13 @@ namespace stamina {
 			std::vector<StateType> getPerimeterStates();
 		protected:
 			/**
+			 * Puts a ProbabilityState in at index and if needed, expands the array to accomodate
+			 *
+			 * @param probabilityState The state to emplace
+			 * */
+			void putHelper(StateType index, std::shared_ptr<ProbabilityStateType> probabilityState);
+
+			/**
 			 * Gets a size that is a multiple of blockSize
 			 *
 			 * @param size The size you want
@@ -62,6 +71,8 @@ namespace stamina {
 			uint32_t numElements;
 			uint32_t blockSize;
 			std::vector<std::shared_ptr<std::shared_ptr<ProbabilityStateType>>> stateArray;
+			std::thread insertWorker;
+			mutable std::mutex readWriteMutex;
 		};
 	}
 }

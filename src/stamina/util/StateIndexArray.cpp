@@ -10,6 +10,7 @@ namespace stamina {
 		: blockSize(2 << blockSizeExponent)
 			, numElements(0)
 		{
+			readWriteMutex.lock();
 			std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
 				new std::shared_ptr<ProbabilityStateType>[blockSize]
 				, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
@@ -18,6 +19,7 @@ namespace stamina {
 				subArray.get()[i] = nullptr;
 			}
 			stateArray.push_back(subArray);
+			readWriteMutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -29,11 +31,13 @@ namespace stamina {
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::clear() {
 			this->stateArray.clear();
+			numElements = 0;
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::reserve(uint32_t numToReserve) {
+			readWriteMutex.lock();
 			this->clear();
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
@@ -48,17 +52,22 @@ namespace stamina {
 				}
 				stateArray.push_back(subArray);
 			}
+			readWriteMutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		std::shared_ptr<ProbabilityStateType>
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
+			readWriteMutex.lock();
 			uint16_t arrayIndex = index / blockSize;
 			if (arrayIndex > stateArray.size() - 1) {
+				readWriteMutex.unlock();
 				return nullptr;
 			}
 			uint32_t subArrayIndex = index % blockSize;
-			return stateArray[arrayIndex].get()[subArrayIndex];
+			auto value = stateArray[arrayIndex].get()[subArrayIndex];
+			readWriteMutex.unlock();
+			return value;
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
@@ -67,6 +76,22 @@ namespace stamina {
 			StateType index
 			, std::shared_ptr<ProbabilityStateType> probabilityState
 		) {
+			insertWorker = std::thread(
+				&StateIndexArray::putHelper
+				, this
+				, index
+				, probabilityState
+			);
+			// Allow the worker to insert independently of the main thread
+			insertWorker.detach();
+		}
+		template <typename StateType, typename ProbabilityStateType>
+		void
+		StateIndexArray<StateType, ProbabilityStateType>::putHelper(
+			StateType index
+			, std::shared_ptr<ProbabilityStateType> probabilityState
+		) {
+			readWriteMutex.lock();
 			numElements++;
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;
@@ -81,11 +106,13 @@ namespace stamina {
 				stateArray.push_back(subArray);
 			}
 			stateArray[arrayIndex].get()[subArrayIndex] = probabilityState;
+			readWriteMutex.unlock();
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
 		std::vector<StateType>
 		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
+			readWriteMutex.lock();
 			std::vector<StateType> perimeterStates;
 			for (auto subArray : stateArray) {
 				for (int i = 0; i < blockSize; i++) {
@@ -94,6 +121,7 @@ namespace stamina {
 					}
 				}
 			}
+			readWriteMutex.unlock();
 			return perimeterStates;
 		}
 
