@@ -50,5 +50,14 @@ namespace stamina {
 			}
 			return addressToReturn;
 		}
+
+		// Forward declare
+		template class StateMemoryPool<
+			StaminaModelBuilder<
+				double
+				, storm::models::sparse::StandardRewardModel<double>
+				, uint32_t
+			>::ProbabilityState
+		>;
 	}
 }

@@ -75,6 +75,7 @@ namespace stamina {
 			StateType index;
 			bool enqueued;
 			uint8_t iterationLastSeen;
+			ProbabilityState() { /* Intentionally left empty */ }
 			ProbabilityState(
 				CompressedState state
 				, StateType index
