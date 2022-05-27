@@ -1,6 +1,8 @@
 #ifndef STATEINDEXARRAY_H
 #define STATEINDEXARRAY_H
 
+#include <boost/pool/object_pool.hpp>
+
 #include <vector>
 #include <cstdint>
 #include <memory>
@@ -13,6 +15,13 @@
  * Blocksizes are assumed to be large
  * */
 namespace stamina {
+	// Pool pointer is not within the util namespace
+	/* template <typename T, typename P = boost::object_pool<T>>
+	struct poolDeleter {
+
+	private:
+		P & pool;
+	}; */
 	namespace util {
 		template <typename StateType, typename ProbabilityStateType>
 		class StateIndexArray {
