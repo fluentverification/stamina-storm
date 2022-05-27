@@ -4,6 +4,7 @@
 // #include <deque>
 // #include <ordered_set>
 #include <cstdint>
+#include <vector>
 
 /**
  * Stamina Memory Pool allocator
@@ -39,7 +40,7 @@ namespace stamina {
 			/**
 			 * Destructor. Frees all of the memory allocated by the memory pool
 			 * */
-			~StaminaMemoryPool();
+			~StateMemoryPool();
 			/**
 			 * Allocates a T value and returns a pointer to it
 			 * */

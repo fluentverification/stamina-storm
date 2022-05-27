@@ -26,7 +26,7 @@ namespace stamina {
 
 		template <typename T>
 		void
-		freeAll() {
+		StateMemoryPool<T>::freeAll() {
 			for (T * block : blocks) {
 				delete block;
 			}
@@ -34,21 +34,21 @@ namespace stamina {
 
 		template <typename T>
 		T *
-		allocate(uint32_t number = 1) {
+		StateMemoryPool<T>::allocate(uint32_t number) {
 			if (number > blockSize - usedThisBlock) {
 				// TODO: be smarter about this
 				StaminaMessages::error("Cannot allocate array of this size on current block!");
 				return nullptr;
 			}
 			// We have enough memory in the current block to offer
-			T * addressToReturn = blocks[blocks.size() - 1] + usedthisBlock;
+			T * addressToReturn = blocks[blocks.size() - 1] + usedThisBlock;
 			usedThisBlock += number;
 			// Create new block if necessary
 			if (usedThisBlock == blockSize) {
 				blocks.push_back(new T[blockSize]);
 				usedThisBlock = 0;
 			}
-			return addressToReturn
+			return addressToReturn;
 		}
 	}
 }

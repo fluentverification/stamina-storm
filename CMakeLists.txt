@@ -37,6 +37,9 @@ set(SOURCE_FILES
 	src/stamina/util/ModelModify.cpp
 	src/stamina/util/StateIndexArray.h
 	src/stamina/util/StateIndexArray.cpp
+	src/stamina/util/StateMemoryPool.h
+	src/stamina/util/StateMemoryPool.cpp
+
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})
