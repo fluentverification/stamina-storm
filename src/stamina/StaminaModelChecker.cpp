@@ -196,7 +196,7 @@ StaminaModelChecker::modelCheckProperty(
 	std::stringstream ss;
 	ss << "The following summary shows the time for each step:" << std::endl;
 	ss << "\tTime taken for model building: " << timeTakenModel.count() << " s\n";
-	ss << "\tTime taken for model checking " << timeTakenCheck.count() << " s\n";
+	ss << "\tTime taken for model checking: " << timeTakenCheck.count() << " s\n";
 	ss << "\tTaken total time: " << timeTaken.count() << " s\n";
 	StaminaMessages::info(ss.str());
 
