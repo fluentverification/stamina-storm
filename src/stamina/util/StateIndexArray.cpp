@@ -10,9 +10,9 @@ namespace stamina {
 		: blockSize(2 << blockSizeExponent)
 			, numElements(0)
 		{
-			std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
-				new std::shared_ptr<ProbabilityStateType>[blockSize]
-				, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
+			std::shared_ptr<ProbabilityStateType *> subArray(
+				new ProbabilityStateType *[blockSize]
+				, std::default_delete<ProbabilityStateType *[]>()
 			);
 			for (int i = 0; i < blockSize; i++) {
 				subArray.get()[i] = nullptr;
@@ -39,9 +39,9 @@ namespace stamina {
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
 			uint32_t subArrayIndex = actualNumToReserve % blockSize;
 			for (int i = 0; i < arrayIndex; i++) {
-				std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
-					new std::shared_ptr<ProbabilityStateType>[blockSize]
-					, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
+				std::shared_ptr<ProbabilityStateType *> subArray(
+					new ProbabilityStateType *[blockSize]
+					, std::default_delete<ProbabilityStateType *[]>()
 				);
 				for (int j = 0; j < blockSize; j++) {
 					subArray.get()[j] = nullptr;
@@ -51,7 +51,7 @@ namespace stamina {
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
-		std::shared_ptr<ProbabilityStateType>
+		ProbabilityStateType *
 		StateIndexArray<StateType, ProbabilityStateType>::get(StateType index) {
 			uint16_t arrayIndex = index / blockSize;
 			if (arrayIndex > stateArray.size() - 1) {
@@ -65,15 +65,15 @@ namespace stamina {
 		void
 		StateIndexArray<StateType, ProbabilityStateType>::put(
 			StateType index
-			, std::shared_ptr<ProbabilityStateType> probabilityState
+			, ProbabilityStateType * probabilityState
 		) {
 			numElements++;
 			uint16_t arrayIndex = index / blockSize;
 			uint32_t subArrayIndex = index % blockSize;
 			while (arrayIndex > stateArray.size() - 1) {
-				std::shared_ptr<std::shared_ptr<ProbabilityStateType>> subArray(
-					new std::shared_ptr<ProbabilityStateType>[blockSize]
-					, std::default_delete<std::shared_ptr<ProbabilityStateType>[]>()
+				std::shared_ptr<ProbabilityStateType *> subArray(
+					new ProbabilityStateType *[blockSize]
+					, std::default_delete<ProbabilityStateType *[]>()
 				);
 				for (int j = 0; j < blockSize; j++) {
 					subArray.get()[j] = nullptr;

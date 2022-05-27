@@ -129,19 +129,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
-			std::shared_ptr<ProbabilityState> initProbabilityState(new ProbabilityState(
+			ProbabilityState * initProbabilityState = memoryPool.allocate();
+			*initProbabilityState = ProbabilityState(
 				state
 				, actualIndex
 				, 1.0
 				, true
-			));
+			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
-		std::shared_ptr<ProbabilityState> initProbabilityState = nextState;
+		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push(initProbabilityState);
 		initProbabilityState->iterationLastSeen = iteration;
@@ -153,7 +154,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState;
+			ProbabilityState * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
@@ -168,7 +169,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState;
+			ProbabilityState * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
@@ -178,7 +179,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			std::shared_ptr<ProbabilityState> nextProbabilityState(new ProbabilityState(state, actualIndex, 0.0, true));
+			ProbabilityState * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
@@ -546,7 +548,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore = std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison>(); // .clear(); // = StatePriorityQueue();
+	statesToExplore = std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, ProbabilityStateComparison>(); // .clear(); // = StatePriorityQueue();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }

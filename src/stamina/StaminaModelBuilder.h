@@ -18,6 +18,7 @@
 #include "Options.h"
 #include "StaminaMessages.h"
 #include "util/StateIndexArray.h"
+#include "util/StateMemoryPool.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -127,8 +128,8 @@ namespace stamina {
 		};
 		struct ProbabilityStateComparison {
 			bool operator() (
-				const std::shared_ptr<ProbabilityState> first
-				, const std::shared_ptr<ProbabilityState> second
+				const ProbabilityState * first
+				, const ProbabilityState * second
 			) const {
 				return first->index > second->index;
 			}
@@ -256,12 +257,13 @@ namespace stamina {
 		/* Data Members */
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
+		util::StateMemoryPool<ProbabilityState> memoryPool;
 		// StatePriorityQueue statesToExplore;
-		std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison> statesToExplore;
+		std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, ProbabilityStateComparison> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		util::StateIndexArray<StateType, ProbabilityState> stateMap;
-		// std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
-		std::shared_ptr<ProbabilityState> currentProbabilityState;
+		// std::unordered_map<StateType, ProbabilityState *> stateMap; // S in the QEST paper
+		ProbabilityState * currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
 		bool isInit;
