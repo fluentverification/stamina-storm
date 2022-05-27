@@ -211,6 +211,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	fresh = false;
+	numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
@@ -371,6 +372,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					// if (nextProbabilityState->enqueued && sPrime != 0) {
 						// row, column, value
 						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+						numberTransitions++;
 						// std::cout << "Adding the following to transitionMatrix: " << currentIndex << "," << sPrime << "," << stateProbabilityPair.second << std::endl;
 					//	nextProbabilityState->enqueued = false;
 					//}
@@ -407,7 +409,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	}
 	iteration++;
-	// StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " states in total.");
+	numberStates = numberOfExploredStates;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::printStateSpaceInformation() {
+	StaminaMessages::info("Finished state space truncation.\n\tExplored " + std::to_string(numberStates) + " states in total.\n\tGot " + std::to_string(numberTransitions) + " transitions.");
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

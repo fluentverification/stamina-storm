@@ -203,6 +203,7 @@ namespace stamina {
 		  * Sets the value of &kappa; in Options to what we have stored locally here
 		  * */
 		void setLocalKappaToGlobal();
+		void printStateSpaceInformation();
 	protected:
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
@@ -285,6 +286,8 @@ namespace stamina {
 		double localKappa;
 		bool isCtmc;
 		uint64_t numberTerminal;
+		uint64_t numberStates;
+		uint64_t numberTransitions;
 		uint_fast64_t currentRowGroup;
 		uint_fast64_t currentRow;
 
