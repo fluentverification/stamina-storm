@@ -71,8 +71,8 @@ namespace stamina {
 		/* Sub-class for states with probabilities */
 		class ProbabilityState {
 		public:
-			CompressedState const state;
-			StateType const index;
+			CompressedState state;
+			StateType index;
 			bool enqueued;
 			uint8_t iterationLastSeen;
 			ProbabilityState(
@@ -91,6 +91,17 @@ namespace stamina {
 			{
 				// Intentionally left empty
 			}
+			// Copy constructor
+			ProbabilityState(const ProbabilityState & other)
+				: index(other.index)
+				, state(other.state)
+				, pi(other.pi)
+				, terminal(other.terminal)
+				, enqueued(other.enqueued)
+			{
+				// Intentionally left empty
+			}
+
 			double getPi() {
 				return pi;
 			}
@@ -121,7 +132,7 @@ namespace stamina {
 			inline bool operator<(const ProbabilityState & rhs) const {
 				return index < rhs.index;
 			}
-		private:
+//		private:
 			double pi;
 			bool terminal;
 
