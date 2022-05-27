@@ -21,14 +21,16 @@ namespace stamina {
 
 		template <typename T>
 		StateMemoryPool<T>::~StateMemoryPool() {
-			freeAll();
+			// TODO: We get an error in freeAll()
+			// There would be a memory leak but this lasts until the end of program execution
+			// freeAll();
 		}
 
 		template <typename T>
 		void
 		StateMemoryPool<T>::freeAll() {
 			for (T * block : blocks) {
-				delete block;
+				if (block) { delete block; }
 			}
 		}
 
