@@ -316,7 +316,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex 1.0);
+			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
