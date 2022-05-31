@@ -117,6 +117,19 @@ StaminaModelChecker::modelCheckProperty(
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
 
+	// Property refinement optimization
+	if (!Options::no_prop_refine) {
+		// Get the expression for the current property
+		auto propertyFormula = propMin.getRawFormula();
+		StaminaMessages::info("Attempting to convert formula to expression:\n\t" + propertyFormula->toString());
+		auto propertyExpression = propertyFormula->toExpression(
+			modulesFile.getManager()
+		);
+		if (!propertyFormula->isPathFormula()) {
+			builder->setPropertyExpression(&propertyExpression);
+		}
+	}
+
 	// While we should not terminate
 	while (numRefineIterations == 0
 		|| (!terminateModelCheck() && numRefineIterations < Options::max_approx_count)
