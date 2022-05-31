@@ -54,6 +54,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, localKappa(Options::kappa)
 	, numberTerminal(0)
 	, iteration(0)
+	, propertyExpression(nullptr)
 {
 	// Optimization for hashmaps
 }
@@ -284,6 +285,25 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
+
+		// Load state for us to use
+		generator->load(currentState);
+
+		if (propertyExpression != nullptr) {
+			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
+			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+			// If the property does not hold at the current state, make it absorbing in the
+			// state graph and do not explore its successors
+			if (!evaluationAtCurrentState) {
+				transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+				// We treat this state as terminal even though it is also absorbing and does not
+				// go to our artificial absorbing state
+				currentProbabilityState->terminal = true;
+				numberTerminal++;
+				continue;
+			}
+		}
+
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
@@ -298,8 +318,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			++currentRowGroup;
 			continue;
 		}
-		// Load state for us to use
-		generator->load(currentState);
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -616,6 +634,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
 	}
 }
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+storm::expressions::Expression *
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPropertyExpression() {
+	return propertyExpression;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::setPropertyExpression(storm::expressions::Expression * expression) {
+	propertyExpression = expression;
+}
+
+
 namespace stamina {
 // Explicitly instantiate the class.
 	template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

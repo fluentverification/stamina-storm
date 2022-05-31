@@ -204,6 +204,8 @@ namespace stamina {
 		  * */
 		void setLocalKappaToGlobal();
 		void printStateSpaceInformation();
+		storm::expressions::Expression * getPropertyExpression();
+		void setPropertyExpression(storm::expressions::Expression * expression);
 	protected:
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
@@ -268,6 +270,7 @@ namespace stamina {
 
 	private:
 		/* Data Members */
+		storm::expressions::Expression * propertyExpression;
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 		util::StateMemoryPool<ProbabilityState> memoryPool;
