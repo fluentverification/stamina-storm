@@ -212,6 +212,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
+	loadPropertyExpressionFromFormula();
 	fresh = false;
 	numberTransitions = 0;
 	// Builds model
