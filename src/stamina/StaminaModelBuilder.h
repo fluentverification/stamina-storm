@@ -205,8 +205,22 @@ namespace stamina {
 		void setLocalKappaToGlobal();
 		void printStateSpaceInformation();
 		storm::expressions::Expression * getPropertyExpression();
-		void setPropertyExpression(storm::expressions::Expression * expression);
+		/**
+		 * Sets the property formula for state space truncation optimization. Does not load
+		 * or create an expression from the formula.
+		 *
+		 * @param formula The formula to set
+		 * @param modulesFile The modules file which contains the expressionmanager
+		 * */
+		void setPropertyFormula(
+			std::shared_ptr<const storm::logic::Formula> formula
+			, const storm::prism::Program & modulesFile
+		);
 	protected:
+		/**
+		 * Creates and loads the property expression from the formula
+		 * */
+		void loadPropertyExpressionFromFormula();
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 		* and state space truncation from that state.
@@ -271,6 +285,8 @@ namespace stamina {
 	private:
 		/* Data Members */
 		storm::expressions::Expression * propertyExpression;
+		storm::expressions::ExpressionManager * expressionManager;
+		std::shared_ptr<const storm::logic::Formula> propertyFormula;
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 		util::StateMemoryPool<ProbabilityState> memoryPool;
@@ -288,6 +304,7 @@ namespace stamina {
 		bool firstIteration;
 		double localKappa;
 		bool isCtmc;
+		bool formulaMatchesExpression;
 		uint64_t numberTerminal;
 		uint64_t numberStates;
 		uint64_t numberTransitions;

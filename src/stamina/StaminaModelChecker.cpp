@@ -122,11 +122,8 @@ StaminaModelChecker::modelCheckProperty(
 		// Get the expression for the current property
 		auto propertyFormula = propMin.getRawFormula();
 		StaminaMessages::info("Attempting to convert formula to expression:\n\t" + propertyFormula->toString());
-		auto propertyExpression = propertyFormula->toExpression(
-			modulesFile.getManager()
-		);
 		if (!propertyFormula->isPathFormula()) {
-			builder->setPropertyExpression(&propertyExpression);
+			builder->setPropertyFormula(propertyFormula, modulesFile);
 		}
 	}
 

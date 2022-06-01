@@ -55,6 +55,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, numberTerminal(0)
 	, iteration(0)
 	, propertyExpression(nullptr)
+	, formulaMatchesExpression(true)
 {
 	// Optimization for hashmaps
 }
@@ -643,10 +644,33 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPropertyExpressio
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::setPropertyExpression(storm::expressions::Expression * expression) {
-	propertyExpression = expression;
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::setPropertyFormula(
+	std::shared_ptr<const storm::logic::Formula> formula
+	, const storm::prism::Program & modulesFile
+) {
+	formulaMatchesExpression = false;
+	propertyFormula = formula;
+	this->expressionManager = &modulesFile.getManager();
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressionFromFormula() {
+	if (formulaMatchesExpression) {
+		return;
+	}
+	// If we are called here, we assume that Options::no_prop_refine is false
+	std::shared_ptr<storm::expressions::Expression> pExpression(
+		// Invoke copy constructor
+		new storm::expressions::Expression(
+			propertyFormula->toExpression(
+				// Expression manager
+				*(this->expressionManager)
+			)
+		)
+	);
+	formulaMatchesExpression = true;
+}
 
 namespace stamina {
 // Explicitly instantiate the class.
