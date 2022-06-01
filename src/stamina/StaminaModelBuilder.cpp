@@ -661,6 +661,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 	if (formulaMatchesExpression) {
 		return;
 	}
+	std::cout << propertyFormula->toString() << std::endl;
 	// If we are called here, we assume that Options::no_prop_refine is false
 	std::shared_ptr<storm::expressions::Expression> pExpression(
 		// Invoke copy constructor
