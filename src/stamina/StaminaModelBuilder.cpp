@@ -393,13 +393,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
 
-					// if (nextProbabilityState->enqueued && sPrime != 0) {
-						// row, column, value
-						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
-						numberTransitions++;
-						// std::cout << "Adding the following to transitionMatrix: " << currentIndex << "," << sPrime << "," << stateProbabilityPair.second << std::endl;
-					//	nextProbabilityState->enqueued = false;
-					//}
+					// row, column, value
+					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+					numberTransitions++;
 				}
 			}
 
@@ -661,7 +657,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 	if (formulaMatchesExpression) {
 		return;
 	}
-	std::cout << propertyFormula->toString() << std::endl;
 	// If we are called here, we assume that Options::no_prop_refine is false
 	std::shared_ptr<storm::expressions::Expression> pExpression(
 		// Invoke copy constructor
