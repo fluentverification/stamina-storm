@@ -212,7 +212,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-	loadPropertyExpressionFromFormula();
 	fresh = false;
 	numberTransitions = 0;
 	// Builds model
@@ -220,6 +219,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
 	}
+
+	loadPropertyExpressionFromFormula();
 
 	// Create a callback for the next-state generator to enable it to request the index of states.
 	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
