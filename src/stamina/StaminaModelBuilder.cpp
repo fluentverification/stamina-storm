@@ -56,6 +56,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, iteration(0)
 	, propertyExpression(nullptr)
 	, formulaMatchesExpression(true)
+	, stateRemapping(nullptr)
 {
 	// Optimization for hashmaps
 }
@@ -130,6 +131,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 
+	if (!stateRemapping) {
+		StaminaMessages::errorAndExit("stateRemapping is nullptr!");
+	}
+
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
@@ -145,7 +150,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
 			// Make a slot for the new state
-			if (indexIsNew) { stateRemapping->push_back(storm::utility::zero<StateType>()); }
+			if (indexIsNew) {
+				stateRemapping->push_back(storm::utility::zero<StateType>());
+			}
 			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
@@ -227,6 +234,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	fresh = false;
+	std::allocator<std::vector<uint_fast64_t>> alloc;
+	std::default_delete<std::vector<uint_fast64_t>> del;
+	stateRemapping = std::allocate_shared<std::vector<uint_fast64_t>> (alloc);
 	numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -627,10 +637,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	stateRemapping = nullptr;
-	std::shared_ptr<std::vector<uint_fast64_t>> newRemapping(
-		new std::vector<uint_fast64_t>()
-	);
-	stateRemapping = newRemapping;
+
 	// stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }
