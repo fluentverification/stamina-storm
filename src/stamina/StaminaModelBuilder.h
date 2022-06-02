@@ -18,6 +18,7 @@
 #include "Options.h"
 #include "StaminaMessages.h"
 #include "util/StateIndexArray.h"
+#include "util/StateMemoryPool.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -70,10 +71,11 @@ namespace stamina {
 		/* Sub-class for states with probabilities */
 		class ProbabilityState {
 		public:
-			CompressedState const state;
-			StateType const index;
+			CompressedState state;
+			StateType index;
 			bool enqueued;
 			uint8_t iterationLastSeen;
+			ProbabilityState() { /* Intentionally left empty */ }
 			ProbabilityState(
 				CompressedState state
 				, StateType index
@@ -90,6 +92,17 @@ namespace stamina {
 			{
 				// Intentionally left empty
 			}
+			// Copy constructor
+			ProbabilityState(const ProbabilityState & other)
+				: index(other.index)
+				, state(other.state)
+				, pi(other.pi)
+				, terminal(other.terminal)
+				, enqueued(other.enqueued)
+			{
+				// Intentionally left empty
+			}
+
 			double getPi() {
 				return pi;
 			}
@@ -120,15 +133,15 @@ namespace stamina {
 			inline bool operator<(const ProbabilityState & rhs) const {
 				return index < rhs.index;
 			}
-		private:
+//		private:
 			double pi;
 			bool terminal;
 
 		};
 		struct ProbabilityStateComparison {
 			bool operator() (
-				const std::shared_ptr<ProbabilityState> first
-				, const std::shared_ptr<ProbabilityState> second
+				const ProbabilityState * first
+				, const ProbabilityState * second
 			) const {
 				return first->index > second->index;
 			}
@@ -190,7 +203,24 @@ namespace stamina {
 		  * Sets the value of &kappa; in Options to what we have stored locally here
 		  * */
 		void setLocalKappaToGlobal();
+		void printStateSpaceInformation();
+		storm::expressions::Expression * getPropertyExpression();
+		/**
+		 * Sets the property formula for state space truncation optimization. Does not load
+		 * or create an expression from the formula.
+		 *
+		 * @param formula The formula to set
+		 * @param modulesFile The modules file which contains the expressionmanager
+		 * */
+		void setPropertyFormula(
+			std::shared_ptr<const storm::logic::Formula> formula
+			, const storm::prism::Program & modulesFile
+		);
 	protected:
+		/**
+		 * Creates and loads the property expression from the formula
+		 * */
+		void loadPropertyExpressionFromFormula();
 		/**
 		* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 		* and state space truncation from that state.
@@ -254,14 +284,18 @@ namespace stamina {
 
 	private:
 		/* Data Members */
+		storm::expressions::Expression * propertyExpression;
+		storm::expressions::ExpressionManager * expressionManager;
+		std::shared_ptr<const storm::logic::Formula> propertyFormula;
 		storm::storage::sparse::StateStorage<StateType>& stateStorage;
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
+		util::StateMemoryPool<ProbabilityState> memoryPool;
 		// StatePriorityQueue statesToExplore;
-		std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison> statesToExplore;
+		std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, ProbabilityStateComparison> statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
-		// util::StateIndexArray<StateType, ProbabilityState> stateMap;
-		std::unordered_map<StateType, std::shared_ptr<ProbabilityState>> stateMap; // S in the QEST paper
-		std::shared_ptr<ProbabilityState> currentProbabilityState;
+		util::StateIndexArray<StateType, ProbabilityState> stateMap;
+		// std::unordered_map<StateType, ProbabilityState *> stateMap; // S in the QEST paper
+		ProbabilityState * currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;
 		bool isInit;
@@ -270,7 +304,10 @@ namespace stamina {
 		bool firstIteration;
 		double localKappa;
 		bool isCtmc;
+		bool formulaMatchesExpression;
 		uint64_t numberTerminal;
+		uint64_t numberStates;
+		uint64_t numberTransitions;
 		uint_fast64_t currentRowGroup;
 		uint_fast64_t currentRow;
 

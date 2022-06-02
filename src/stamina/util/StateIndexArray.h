@@ -1,6 +1,8 @@
 #ifndef STATEINDEXARRAY_H
 #define STATEINDEXARRAY_H
 
+#include <boost/pool/object_pool.hpp>
+
 #include <vector>
 #include <cstdint>
 #include <memory>
@@ -13,6 +15,13 @@
  * Blocksizes are assumed to be large
  * */
 namespace stamina {
+	// Pool pointer is not within the util namespace
+	/* template <typename T, typename P = boost::object_pool<T>>
+	struct poolDeleter {
+
+	private:
+		P & pool;
+	}; */
 	namespace util {
 		template <typename StateType, typename ProbabilityStateType>
 		class StateIndexArray {
@@ -37,13 +46,13 @@ namespace stamina {
 			 * @param index The index to find
 			 * @return The ProbabilityState or nullptr if does not exist
 			 * */
-			std::shared_ptr<ProbabilityStateType> get(StateType index);
+			ProbabilityStateType * get(StateType index);
 			/**
 			 * Puts a ProbabilityState in at index and if needed, expands the array to accomodate
 			 *
 			 * @param probabilityState The state to emplace
 			 * */
-			void put(StateType index, std::shared_ptr<ProbabilityStateType> probabilityState);
+			void put(StateType index, ProbabilityStateType * probabilityState);
 			/**
 			 * Gets a vector of all of the terminal states in the stateIndexArray
 			 *
@@ -61,7 +70,7 @@ namespace stamina {
 		private:
 			uint32_t numElements;
 			uint32_t blockSize;
-			std::vector<std::shared_ptr<std::shared_ptr<ProbabilityStateType>>> stateArray;
+			std::vector<std::shared_ptr<ProbabilityStateType *>> stateArray;
 		};
 	}
 }

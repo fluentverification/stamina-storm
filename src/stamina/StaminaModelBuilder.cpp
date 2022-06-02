@@ -54,6 +54,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, localKappa(Options::kappa)
 	, numberTerminal(0)
 	, iteration(0)
+	, propertyExpression(nullptr)
+	, formulaMatchesExpression(true)
 {
 	// Optimization for hashmaps
 }
@@ -129,20 +131,26 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
-			std::shared_ptr<ProbabilityState> initProbabilityState(new ProbabilityState(
+			ProbabilityState * initProbabilityState = memoryPool.allocate();
+			*initProbabilityState = ProbabilityState(
 				state
 				, actualIndex
 				, 1.0
 				, true
-			));
+			);
 			numberTerminal++;
 			stateMap.insert({actualIndex, initProbabilityState});
 			statesToExplore.push(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
+<<<<<<< HEAD
 		std::shared_ptr<ProbabilityState> initProbabilityState = nextState->second;
 		stateMap.insert({actualIndex, initProbabilityState});
+=======
+		ProbabilityState * initProbabilityState = nextState;
+		stateMap.put(actualIndex, initProbabilityState);
+>>>>>>> dev
 		statesToExplore.push(initProbabilityState);
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
@@ -153,7 +161,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
+<<<<<<< HEAD
 			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
+=======
+			ProbabilityState * nextProbabilityState = nextState;
+>>>>>>> dev
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
@@ -168,7 +180,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
+<<<<<<< HEAD
 			std::shared_ptr<ProbabilityState> nextProbabilityState = nextState->second;
+=======
+			ProbabilityState * nextProbabilityState = nextState;
+>>>>>>> dev
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
@@ -178,8 +194,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
+<<<<<<< HEAD
 			std::shared_ptr<ProbabilityState> nextProbabilityState(new ProbabilityState(state, actualIndex, 0.0, true));
 			stateMap.insert({actualIndex, nextProbabilityState});
+=======
+			ProbabilityState * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
+			stateMap.put(actualIndex, nextProbabilityState);
+>>>>>>> dev
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
 			statesToExplore.push(nextProbabilityState);
@@ -209,11 +231,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	fresh = false;
+	numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
 	}
+
+	loadPropertyExpressionFromFormula();
 
 	// Create a callback for the next-state generator to enable it to request the index of states.
 	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
@@ -281,6 +306,25 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
+
+		// Load state for us to use
+		generator->load(currentState);
+
+		if (propertyExpression != nullptr) {
+			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
+			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+			// If the property does not hold at the current state, make it absorbing in the
+			// state graph and do not explore its successors
+			if (!evaluationAtCurrentState) {
+				transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+				// We treat this state as terminal even though it is also absorbing and does not
+				// go to our artificial absorbing state
+				currentProbabilityState->terminal = true;
+				numberTerminal++;
+				continue;
+			}
+		}
+
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
@@ -295,8 +339,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			++currentRowGroup;
 			continue;
 		}
-		// Load state for us to use
-		generator->load(currentState);
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -312,7 +354,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
-			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
+			// Make absorbing
+			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+			continue;
+			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
@@ -366,12 +411,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 						nextProbabilityState->second->addToPi(currentProbabilityState->getPi() * probability);
 					}
 
-					// if (nextProbabilityState->enqueued && sPrime != 0) {
-						// row, column, value
-						transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
-						// std::cout << "Adding the following to transitionMatrix: " << currentIndex << "," << sPrime << "," << stateProbabilityPair.second << std::endl;
-					//	nextProbabilityState->enqueued = false;
-					//}
+					// row, column, value
+					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+					numberTransitions++;
 				}
 			}
 
@@ -405,7 +447,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	}
 	iteration++;
-	// StaminaMessages::info("Finished state space truncation. Explored " + std::to_string(numberOfExploredStates) + " states in total.");
+	numberStates = numberOfExploredStates;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::printStateSpaceInformation() {
+	StaminaMessages::info("Finished state space truncation.\n\tExplored " + std::to_string(numberStates) + " states in total.\n\tGot " + std::to_string(numberTransitions) + " transitions.");
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -546,7 +594,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore = std::priority_queue<std::shared_ptr<ProbabilityState>, std::vector<std::shared_ptr<ProbabilityState>>, ProbabilityStateComparison>(); // .clear(); // = StatePriorityQueue();
+	statesToExplore = std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, ProbabilityStateComparison>(); // .clear(); // = StatePriorityQueue();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
@@ -603,6 +651,43 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
 	}
 }
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+storm::expressions::Expression *
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPropertyExpression() {
+	return propertyExpression;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::setPropertyFormula(
+	std::shared_ptr<const storm::logic::Formula> formula
+	, const storm::prism::Program & modulesFile
+) {
+	formulaMatchesExpression = false;
+	propertyFormula = formula;
+	this->expressionManager = &modulesFile.getManager();
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressionFromFormula() {
+	if (formulaMatchesExpression) {
+		return;
+	}
+	// If we are called here, we assume that Options::no_prop_refine is false
+	std::shared_ptr<storm::expressions::Expression> pExpression(
+		// Invoke copy constructor
+		new storm::expressions::Expression(
+			propertyFormula->toExpression(
+				// Expression manager
+				*(this->expressionManager)
+			)
+		)
+	);
+	formulaMatchesExpression = true;
+}
+
 namespace stamina {
 // Explicitly instantiate the class.
 	template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

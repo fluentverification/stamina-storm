@@ -117,6 +117,23 @@ StaminaModelChecker::modelCheckProperty(
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
 
+	// Property refinement optimization
+	if (!Options::no_prop_refine) {
+		// Get the expression for the current property
+		auto propertyFormula = propMin.getRawFormula();
+		StaminaMessages::info("Attempting to convert formula to expression:\n\t" + propertyFormula->toString());
+		if ((!propertyFormula->isPathFormula())
+			&& (
+				propertyFormula->isAtomicExpressionFormula()
+				|| propertyFormula->isBinaryBooleanStateFormula()
+				|| propertyFormula->isBooleanLiteralFormula()
+				|| propertyFormula->isUnaryBooleanStateFormula()
+			)
+		) {
+			builder->setPropertyFormula(propertyFormula, modulesFile);
+		}
+	}
+
 	// While we should not terminate
 	while (numRefineIterations == 0
 		|| (!terminateModelCheck() && numRefineIterations < Options::max_approx_count)
@@ -156,17 +173,13 @@ StaminaModelChecker::modelCheckProperty(
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
-			StaminaMessages::info(
-				"Properties are as follows:\n\t"
-				+ propMin.getRawFormula()->toString() + "\n"
-				+ "\t" + propMax.getRawFormula()->toString()
-			);
 			auto result_lower = checker->check(
 				storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 			);
 			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true));
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+			builder->printStateSpaceInformation();
 			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
 				"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
 				"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
@@ -200,7 +213,7 @@ StaminaModelChecker::modelCheckProperty(
 	std::stringstream ss;
 	ss << "The following summary shows the time for each step:" << std::endl;
 	ss << "\tTime taken for model building: " << timeTakenModel.count() << " s\n";
-	ss << "\tTime taken for model checking " << timeTakenCheck.count() << " s\n";
+	ss << "\tTime taken for model checking: " << timeTakenCheck.count() << " s\n";
 	ss << "\tTaken total time: " << timeTaken.count() << " s\n";
 	StaminaMessages::info(ss.str());
 
