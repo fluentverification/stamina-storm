@@ -121,6 +121,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		// Create new index just in case we need it
 		actualIndex = newIndex;
+		// Make a slot for the new state
+		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	}
 
 	auto nextState = stateMap.get(actualIndex);
