@@ -126,10 +126,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-	// NOTE: The following line WOULD, if uncommented, register all states
-	// passed in here with an index. Rather than here, we register only IF
-	// we enqueue
-	// stateStorage.stateToId.findOrAdd(state, actualIndex);
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
 
 	// Handle conditional enqueuing
 	if (isInit) {
@@ -151,7 +148,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
-		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		statesToExplore.push_back(initProbabilityState);
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
@@ -166,7 +162,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				stateStorage.stateToId.findOrAdd(state, actualIndex);
 				statesToExplore.push_back(nextProbabilityState);
 			}
 		}
@@ -183,7 +178,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				stateStorage.stateToId.findOrAdd(state, actualIndex);
 				statesToExplore.push_back(nextProbabilityState);
 			}
 		}
@@ -194,7 +188,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
 			numberTerminal++;
 		}
@@ -260,9 +253,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	if (this->stateStorage.initialStateIndices.empty()) {
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
-	// for (StateType index : this->stateStorage.initialStateIndices) {
-	// 	exploredStates.insert(index);
-	// }
+	// Create State Remapping
+	stateRemapping = std::vector<uint_fast64_t>();
 
 	currentRowGroup = 1;
 	currentRow = 1;
@@ -287,8 +279,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
-		// Set our state variable in the class
+		// Create entry in remapping
+		stateRemapping.get()[currentIndex] = currentRowGroup;
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
@@ -307,7 +299,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// If the property does not hold at the current state, make it absorbing in the
 			// state graph and do not explore its successors
 			if (!evaluationAtCurrentState) {
-				transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+				transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
@@ -322,7 +314,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
-				, currentIndex
+				, currentRow
 				, stateToIdCallback2
 			);
 			++numberOfExploredStates;
@@ -346,7 +338,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -403,7 +395,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 
 					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
 					numberTransitions++;
 				}
 			}
@@ -439,6 +431,41 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
+
+	// We must fix state with remapping
+	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
+
+	// Fix transition matrix
+	transitionMatrixBuilder.replaceColumns(remapping, 0);
+
+	// Fix the initial states
+	std::vector<StateType> newInitialStateIndices(
+		this->stateStorage.initialStateIndices.size()
+	);
+	std::transform(
+		this->stateStorage.initialStateIndices.begin()
+		, this->stateStorage.initialStateIndices.end()
+		, newInitialStateIndices.begin()
+		, [&remapping](StateType const& state) {
+			return remapping[state];
+		}
+	);
+	std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
+	this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
+
+	// Fix stateStorage.stateToId
+	this->stateStorage.stateToId.remap(
+		[&remapping](StateType const& state) {
+			return remapping[state];
+		}
+	);
+
+	// Fix remapping labels (pretty sure we need this
+	this->generator->remapStateIds(
+		[&remapping](StateType const& state) {
+			return remapping[state];
+		}
+	);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
