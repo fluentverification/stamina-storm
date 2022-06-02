@@ -126,7 +126,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	// NOTE: The following line WOULD, if uncommented, register all states
+	// passed in here with an index. Rather than here, we register only IF
+	// we enqueue
+	// stateStorage.stateToId.findOrAdd(state, actualIndex);
+
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
@@ -141,11 +145,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
+		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		statesToExplore.push_back(initProbabilityState);
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
@@ -160,6 +166,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
+				stateStorage.stateToId.findOrAdd(state, actualIndex);
 				statesToExplore.push_back(nextProbabilityState);
 			}
 		}
@@ -176,6 +183,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
+				stateStorage.stateToId.findOrAdd(state, actualIndex);
 				statesToExplore.push_back(nextProbabilityState);
 			}
 		}
@@ -186,6 +194,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
 			numberTerminal++;
 		}
