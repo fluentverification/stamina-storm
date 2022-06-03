@@ -127,7 +127,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-// 	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
 
 	// Handle conditional enqueuing
 	if (isInit) {
@@ -186,6 +186,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				statesToExplore.push_back(nextProbabilityState);
 				// Make a slot for the new state
 				stateStorage.stateToId.findOrAdd(state, actualIndex);
+
 			}
 		}
 		else {
@@ -196,8 +197,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
-			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			numberTerminal++;
+			// Make a slot for the new state
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
 		}
 	}
 	return actualIndex;
@@ -287,6 +289,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			continue;
 		}
 
+		stateStorage.stateToId.findOrAdd(currentState, currentIndex);
+
+// 		stateRemapping.get().resize(currentIndex, storm::utility::zero<StateType>());
 		while (stateRemapping.get().size() <= currentIndex) {
 			stateRemapping.get().push_back(storm::utility::zero<StateType>());
 		}
