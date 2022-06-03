@@ -115,7 +115,6 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	StateType actualIndex;
-	bool indexIsNew = false;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
@@ -123,20 +122,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		// Create new index just in case we need it
 		actualIndex = newIndex;
-		indexIsNew = true;
-	}
-	while (stateRemapping.get().size() <= actualIndex) {
-		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	}
 
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
-
-	if (!stateRemapping) {
-		StaminaMessages::errorAndExit("stateRemapping is nullptr!");
-	}
+// 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 
 	// Handle conditional enqueuing
 	if (isInit) {
@@ -151,20 +142,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(initProbabilityState);
-			// Make a slot for the new state
-// 			if (indexIsNew) {
-// 				stateRemapping.get().push_back(storm::utility::zero<StateType>());
-// 			}
 			stateStorage.stateToId.findOrAdd(state, actualIndex);
+			statesToExplore.push_back(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push_back(initProbabilityState);
+		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		// Make a slot for the new state
-// 		if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
@@ -180,7 +167,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
 				// Make a slot for the new state
-// 				if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
+				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
 		else {
@@ -198,7 +185,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
 				// Make a slot for the new state
-// 				if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
+				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
 		else {
@@ -209,8 +196,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
-			// Make a slot for the new state
-// 			if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			numberTerminal++;
 		}
 	}
@@ -299,6 +285,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (currentIndex == 0) {
 			StaminaMessages::warning("Dequeued artificial absorbing state!");
 			continue;
+		}
+
+		while (stateRemapping.get().size() <= currentIndex) {
+			stateRemapping.get().push_back(storm::utility::zero<StateType>());
 		}
 
 		// Create entry in remapping
