@@ -62,4 +62,5 @@ Options::setArgs(struct arguments * arguments) {
 	rank_transitions = arguments->rank_transitions;
 	max_iterations = arguments->max_iterations;
 	max_states = arguments->max_states;
+	verbose = true;
 }

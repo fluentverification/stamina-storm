@@ -1,4 +1,5 @@
 #include "StaminaMessages.h"
+#include "Options.h"
 
 #include "ANSIColors.h"
 
@@ -46,6 +47,14 @@ void StaminaMessages::debugPrint(std::string msg) {
 	std::cout << BOLD(FMAG("[DEBUG MESSAGE]: ")) << msg << std::endl;
 }
 #endif
+
+void
+StaminaMessages::log(std::string msg, bool verbose) {
+	if (verbose && !Options::verbose) {
+		return;
+	}
+	std::cout << BOLD(FCYN("[LOG MESSAGE]: ")) << msg << std::endl;
+}
 
 void
 StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream out) {

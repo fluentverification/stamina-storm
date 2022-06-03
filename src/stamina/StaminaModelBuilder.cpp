@@ -116,8 +116,7 @@ StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	StateType actualIndex;
 	bool indexIsNew = false;
-	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates()) + 1;
-	stateRemapping.get().push_back(storm::utility::zero<StateType>());
+	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
 	}
@@ -125,6 +124,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 		indexIsNew = true;
+	}
+	while (stateRemapping.get().size() <= actualIndex) {
+		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	}
 
 	auto nextState = stateMap.get(actualIndex);
@@ -235,7 +237,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	fresh = false;
-	stateRemapping = std::vector<uint_fast64_t>();
+	stateRemapping = std::vector<uint_fast64_t>(1);
 	numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -452,6 +454,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	iteration++;
 	numberStates = numberOfExploredStates;
 
+	if (!stateRemapping) {
+		StaminaMessages::errorAndExit("Cannot remap states!");
+	}
+
 	// We must fix state with remapping
 	std::vector<uint_fast64_t> const & remapping = stateRemapping.get();
 
@@ -474,12 +480,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
 
 	// Fix stateStorage.stateToId
-// 	this->stateStorage.stateToId.remap(
-// 		[&remapping](StateType const& state) {
-// 			// TODO: Issue is here
-// 			return remapping[state];
-// 		}
-// 	);
+	this->stateStorage.stateToId.remap(
+		[&remapping](StateType const& state) {
+			// TODO: Issue is here
+			return remapping[state];
+		}
+	);
 
 	// Fix remapping labels (pretty sure we need this
 	this->generator->remapStateIds(
@@ -487,6 +493,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			return remapping[state];
 		}
 	);
+
+	StaminaMessages::log("Finished state space truncation. Explored " + std::to_string(numberStates) + " states.");
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

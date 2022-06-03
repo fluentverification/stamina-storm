@@ -62,6 +62,7 @@ namespace stamina {
 		* */
 		static void debugPrint(std::string msg);
 #endif
+		static void log(std::string msg, bool verbose = true);
 		static void writeResults(ResultInformation resultInformation, std::ostream out);
 	protected:
 		static constexpr char * horizontalSeparator =
