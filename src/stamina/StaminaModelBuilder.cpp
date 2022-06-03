@@ -98,7 +98,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 		std::stringstream ss;
 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-		StaminaMessages::error(ss.str());
+		StaminaMessages::errorAndExit(ss.str());
 	}
 	return nullptr;
 }
@@ -127,7 +127,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
+// 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 
 	// Handle conditional enqueuing
 	if (isInit) {
@@ -150,8 +150,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push_back(initProbabilityState);
-		stateStorage.stateToId.findOrAdd(state, actualIndex);
-		// Make a slot for the new state
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
@@ -166,8 +164,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
-				// Make a slot for the new state
-				stateStorage.stateToId.findOrAdd(state, actualIndex);
 			}
 		}
 		else {
@@ -184,8 +180,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
-				// Make a slot for the new state
-				stateStorage.stateToId.findOrAdd(state, actualIndex);
 
 			}
 		}
@@ -197,9 +191,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
-			numberTerminal++;
-			// Make a slot for the new state
 			stateStorage.stateToId.findOrAdd(state, actualIndex);
+			numberTerminal++;
 		}
 	}
 	return actualIndex;
@@ -270,7 +263,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
-	uint64_t numberOfExploredStates = 0;
+	uint64_t numberOfExploredStates = 1;
 	uint64_t numberOfExploredStatesSinceLastMessage = 0;
 
 	StateType currentIndex;
@@ -288,8 +281,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			StaminaMessages::warning("Dequeued artificial absorbing state!");
 			continue;
 		}
-
-		stateStorage.stateToId.findOrAdd(currentState, currentIndex);
 
 // 		stateRemapping.get().resize(currentIndex, storm::utility::zero<StateType>());
 		while (stateRemapping.get().size() <= currentIndex) {
@@ -321,6 +312,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
 				numberTerminal++;
+				++numberOfExploredStates;
+				++currentRow;
+				++currentRowGroup;
 				continue;
 			}
 		}
@@ -417,6 +411,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
+			// Sanity check
+			int sizeDifference = choice.size();
+			if (stateStorage.getNumberOfStates() > numberOfExploredStates + sizeDifference + 1) {
+				StaminaMessages::warning("Choice size is: " + std::to_string(sizeDifference));
+				StaminaMessages::warning("Explored state size is: " + std::to_string(numberOfExploredStates));
+				StaminaMessages::errorAndExit(
+					std::string("Number of states in state storage has exceeded the number that should be!")
+					+ "\n\tState Storage Size: " + std::to_string(stateStorage.getNumberOfStates())
+					+ "\n\tThere should be: " + std::to_string(numberOfExploredStates + sizeDifference + 1)
+				);
+			}
+
 			++currentRow;
 			firstChoiceOfState = false;
 		}
@@ -489,7 +495,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 	);
 
-	StaminaMessages::log("Finished state space truncation. Explored " + std::to_string(numberStates) + " states.");
+	StaminaMessages::log(
+		"Finished state space truncation for this iteration. Explored "
+		+ std::to_string(numberStates) + " states.\n\t"
+		+ "State storage has " + std::to_string(stateStorage.getNumberOfStates())
+		+ " states."
+	);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
