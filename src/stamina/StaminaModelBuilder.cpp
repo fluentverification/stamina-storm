@@ -411,18 +411,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				}
 			}
 
-			// Sanity check
-			int sizeDifference = choice.size();
-			if (stateStorage.getNumberOfStates() > numberOfExploredStates + sizeDifference + 1) {
-				StaminaMessages::warning("Choice size is: " + std::to_string(sizeDifference));
-				StaminaMessages::warning("Explored state size is: " + std::to_string(numberOfExploredStates));
-				StaminaMessages::errorAndExit(
-					std::string("Number of states in state storage has exceeded the number that should be!")
-					+ "\n\tState Storage Size: " + std::to_string(stateStorage.getNumberOfStates())
-					+ "\n\tThere should be: " + std::to_string(numberOfExploredStates + sizeDifference + 1)
-				);
-			}
-
 			++currentRow;
 			firstChoiceOfState = false;
 		}
