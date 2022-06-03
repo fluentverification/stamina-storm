@@ -56,7 +56,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, iteration(0)
 	, propertyExpression(nullptr)
 	, formulaMatchesExpression(true)
-	, stateRemapping(nullptr)
+	, stateRemapping(boost::none)
 {
 	// Optimization for hashmaps
 }
@@ -117,6 +117,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	StateType actualIndex;
 	bool indexIsNew = false;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates()) + 1;
+	stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
 	}
@@ -150,9 +151,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
 			// Make a slot for the new state
-			if (indexIsNew) {
-				stateRemapping->push_back(storm::utility::zero<StateType>());
-			}
+// 			if (indexIsNew) {
+// 				stateRemapping.get().push_back(storm::utility::zero<StateType>());
+// 			}
 			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
@@ -161,7 +162,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push_back(initProbabilityState);
 		// Make a slot for the new state
-		if (indexIsNew) { stateRemapping->push_back(storm::utility::zero<StateType>()); }
+// 		if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
@@ -177,7 +178,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
 				// Make a slot for the new state
-				if (indexIsNew) { stateRemapping->push_back(storm::utility::zero<StateType>()); }
+// 				if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
 			}
 		}
 		else {
@@ -195,7 +196,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
 				// Make a slot for the new state
-				if (indexIsNew) { stateRemapping->push_back(storm::utility::zero<StateType>()); }
+// 				if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
 			}
 		}
 		else {
@@ -207,7 +208,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
 			// Make a slot for the new state
-			if (indexIsNew) { stateRemapping->push_back(storm::utility::zero<StateType>()); }
+// 			if (indexIsNew) { stateRemapping.get().push_back(storm::utility::zero<StateType>()); }
 			numberTerminal++;
 		}
 	}
@@ -234,9 +235,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	fresh = false;
-	std::allocator<std::vector<uint_fast64_t>> alloc;
-	std::default_delete<std::vector<uint_fast64_t>> del;
-	stateRemapping = std::allocate_shared<std::vector<uint_fast64_t>> (alloc);
+	stateRemapping = std::vector<uint_fast64_t>();
 	numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -301,7 +300,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 
 		// Create entry in remapping
-		(*stateRemapping)[currentIndex] = currentRowGroup;
+		stateRemapping.get()[currentIndex] = currentRowGroup;
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
@@ -454,10 +453,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	numberStates = numberOfExploredStates;
 
 	// We must fix state with remapping
-	std::vector<uint_fast64_t> & remapping = *stateRemapping;
+	std::vector<uint_fast64_t> const & remapping = stateRemapping.get();
 
 	// Fix transition matrix
-	transitionMatrixBuilder.replaceColumns(*stateRemapping, 0);
+	transitionMatrixBuilder.replaceColumns(remapping, 0);
 
 	// Fix the initial states
 	std::vector<StateType> newInitialStateIndices(
@@ -475,11 +474,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
 
 	// Fix stateStorage.stateToId
-	this->stateStorage.stateToId.remap(
-		[&remapping](StateType const& state) {
-			return remapping[state];
-		}
-	);
+// 	this->stateStorage.stateToId.remap(
+// 		[&remapping](StateType const& state) {
+// 			// TODO: Issue is here
+// 			return remapping[state];
+// 		}
+// 	);
 
 	// Fix remapping labels (pretty sure we need this
 	this->generator->remapStateIds(
@@ -636,7 +636,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	statesToExplore.clear();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
-	stateRemapping = nullptr;
+	stateRemapping = boost::none;
 
 	// stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;

@@ -292,7 +292,7 @@ namespace stamina {
 		util::StateMemoryPool<ProbabilityState> memoryPool;
 		// StatePriorityQueue statesToExplore;
 		std::deque<ProbabilityState *> statesToExplore;
-		std::shared_ptr<std::vector<uint_fast64_t>> stateRemapping;
+		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		util::StateIndexArray<StateType, ProbabilityState> stateMap;
 		// std::unordered_map<StateType, ProbabilityState *> stateMap; // S in the QEST paper
 		ProbabilityState * currentProbabilityState;
