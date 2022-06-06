@@ -121,7 +121,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		// Create new index just in case we need it
 		actualIndex = newIndex;
-		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	}
 
 	auto nextState = stateMap.get(actualIndex);
@@ -288,7 +287,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	while (!statesToExplore.empty()) {
 		currentProbabilityState = statesToExplore.front();
 		statesToExplore.pop_front();
+		currentState = currentProbabilityState->state;
+		currentIndex = currentProbabilityState->index;
 
+		std::cout << "Current index is " << currentIndex << " and size of state remapping is " << stateRemapping.get().size() << std::endl;
 		while (stateRemapping.get().size() <= currentIndex) {
 			stateRemapping.get().push_back(0);
 		}
@@ -303,7 +305,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
 		if (currentIndex == 0) {
-			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
+			StaminaMessages::errorAndExit("Dequeued artificial absorbing state! State Values: " + StateSpaceInformation::stateToString(currentState, currentProbabilityState->getPi()));
 		}
 
 		// std::cout << "Dequeued state " << currentIndex << std::endl;
