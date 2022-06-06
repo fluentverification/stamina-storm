@@ -292,8 +292,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		while (stateRemapping.get().size() <= currentIndex) {
 			stateRemapping.get().push_back(0);
 		}
-		std::cout << "Remapping vector is currently: ";
 		stateRemapping.get()[currentIndex] = currentRowGroup - 1;
+
+		std::cout << "Remapping vector is currently: ";
 		for (auto val : stateRemapping.get()) {
 			std::cout << val << ",";
 		}
@@ -459,7 +460,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	numberStates = numberOfExploredStates;
 
 	// State Remapping
-	stateRemapping.get()[currentIndex] = currentRowGroup;
+	stateRemapping.get()[currentIndex] = currentRowGroup - 1;
 	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
 
 	// According to the STORM Folks, this is what needs to be done
@@ -493,7 +494,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			return remapping[state];
 		}
 	);
-
+	std::cout << "Remapping vector is currently: ";
+		for (auto val : stateRemapping.get()) {
+			std::cout << val << ",";
+		}
+		std::cout << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
