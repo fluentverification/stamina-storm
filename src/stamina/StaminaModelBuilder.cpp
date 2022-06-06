@@ -114,8 +114,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-	StateType actualIndex;
+	StateType actualIndex = 0;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
+	if (newIndex >= 1845) {
+		StaminaMessages::error("Temp error message for specific model: " + std::to_string(newIndex));
+	}
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
 	}
@@ -123,34 +126,43 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 	}
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
+
+	bool isOffender = false;
+	if (actualIndex >= 1845) {
+		isOffender = true;
+		StaminaMessages::error("Temp error message for (state registration) specific model: " + std::to_string(newIndex));
+	}
 
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
-
-// 	stateStorage.stateToId.findOrAdd(state, actualIndex);
 
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
+			// This is the case where we need the new index
 			ProbabilityState * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
 				state
-				, actualIndex
+				, newIndex
 				, 1.0
 				, true
 			);
 			numberTerminal++;
+			stateStorage.stateToId.findOrAdd(state, newIndex);
 			stateMap.put(actualIndex, initProbabilityState);
-			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			statesToExplore.push_back(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
-			return actualIndex;
+			return newIndex;
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push_back(initProbabilityState);
 		initProbabilityState->iterationLastSeen = iteration;
+		if (actualIndex == 0) {
+			StaminaMessages::warning("Actual Index is 0! (in isInit)");
+		}
 		return actualIndex;
 	}
 
@@ -165,14 +177,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
 			}
+			if (actualIndex == 0) {
+
+				StaminaMessages::warning("Actual Index is 0! (In re-exploration)");
+			}
+			return actualIndex;
 		}
 		else {
+			StaminaMessages::log("Returning 0 for state that should not yet exist");
 			// State does not exist yet in this iteration
 			return 0;
 		}
 	}
 	else {
 		if (stateIsExisting) {
+
 			// Don't rehash if we've already called find()
 			ProbabilityState * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
@@ -182,20 +201,26 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				statesToExplore.push_back(nextProbabilityState);
 
 			}
+			if (actualIndex == 0) {
+			StaminaMessages::warning("Actual Index is 0! (for existing state)");
+			}
+			return actualIndex;
 		}
 		else {
+			if (isOffender) {
+				StaminaMessages::warning("Offending state is new state this iteration,not expld. previously");
+			}
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
-			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
+			*nextProbabilityState = ProbabilityState(state, newIndex, 0.0, true);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
-			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
 			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			numberTerminal++;
+			return newIndex;
 		}
 	}
-	return actualIndex;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -263,12 +288,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
-	uint64_t numberOfExploredStates = 1;
+	uint64_t numberOfExploredStates = 0;
 	uint64_t numberOfExploredStatesSinceLastMessage = 0;
 
 	StateType currentIndex;
 	CompressedState currentState;
 
+	StateType maxColumn = 0;
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
@@ -277,6 +303,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
+
 		if (currentIndex == 0) {
 			StaminaMessages::warning("Dequeued artificial absorbing state!");
 			continue;
@@ -393,6 +420,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				if (sPrime == 0) {
 					continue;
 				}
+				if (sPrime > maxColumn) {
+					maxColumn = sPrime;
+				}
 				double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
@@ -414,6 +444,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			++currentRow;
 			firstChoiceOfState = false;
 		}
+		if (maxColumn > transitionMatrixBuilder.getLastColumn()) {
+			StaminaMessages::errorAndExit("Transition matrix builder has " + std::to_string(transitionMatrixBuilder.getLastColumn()) + " columns but maxColumn is " + std::to_string(maxColumn));
+		}
+
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
 		}
@@ -677,6 +711,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	for (auto const& choice : behavior) {
 		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {
+			// The state index exists (this is a loop back into the existing state space)
 			if (stateProbabilityPair.first != 0) {
 				// row, column, value
 				transitionMatrixBuilder.addNextValue(stateId, stateProbabilityPair.first, stateProbabilityPair.second);
