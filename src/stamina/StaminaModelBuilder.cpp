@@ -126,8 +126,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
-
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
+
+	std::cout << "Registering state in index " << actualIndex << std::endl;
+	std::cout << "States are currently: ";
+	for (auto state : stateStorage.stateToId) {
+		std::cout << state.second << ", ";
+	}
+	std::cout << std::endl;
+
+	// Print state storage size
+	StaminaMessages::info("State storage size " + std::to_string(stateStorage.getNumberOfStates()));
+	if (stateStorage.getNumberOfStates() <= actualIndex) {
+		StaminaMessages::errorAndExit("Got an actual index of " + std::to_string(actualIndex) + " but number of states after registration is " + std::to_string(stateStorage.getNumberOfStates()));
+	}
+
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
@@ -199,6 +212,7 @@ StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing(CompressedState const& state) {
 	if (stateStorage.stateToId.contains(state)) {
 		return stateStorage.stateToId.getValue(state);
+
 	}
 	// This state should not exist yet and should point to the absorbing state
 	return 0;
@@ -278,7 +292,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		while (stateRemapping.get().size() <= currentIndex) {
 			stateRemapping.get().push_back(0);
 		}
-		stateRemapping.get()[currentIndex] = currentRowGroup;
+		std::cout << "Remapping vector is currently: ";
+		stateRemapping.get()[currentIndex] = currentRowGroup - 1;
+		for (auto val : stateRemapping.get()) {
+			std::cout << val << ",";
+		}
+		std::cout << std::endl;
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
@@ -443,26 +462,37 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	stateRemapping.get()[currentIndex] = currentRowGroup;
 	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
 
-    // We need to fix the following entities:
-    // (a) the transition matrix
-    // (b) the initial states
-    // (c) the hash map storing the mapping states -> ids
-    // (d) fix remapping for state-generation labels
+	// According to the STORM Folks, this is what needs to be done
+	// in order to use the state remapping:
 
-    // Fix (a).
+    // Fix the transition matrix with the new entries
     transitionMatrixBuilder.replaceColumns(remapping, 0);
 
-    // Fix (b).
+    // Fix the initial state indecies
     std::vector<StateType> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
-    std::transform(this->stateStorage.initialStateIndices.begin(), this->stateStorage.initialStateIndices.end(), newInitialStateIndices.begin(),
-                   [&remapping](StateType const& state) { return remapping[state]; });
+    std::transform(
+		this->stateStorage.initialStateIndices.begin()
+		, this->stateStorage.initialStateIndices.end()
+		, newInitialStateIndices.begin()
+		, [&remapping](StateType const& state) {
+			return remapping[state];
+		}
+	);
     std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
     this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
 
-    // Fix (c).
-    this->stateStorage.stateToId.remap([&remapping](StateType const& state) { return remapping[state]; });
+    // Remap stateStorage.stateToId
+    this->stateStorage.stateToId.remap(
+		[&remapping](StateType const& state) {
+			return remapping[state];
+		}
+	);
 
-    this->generator->remapStateIds([&remapping](StateType const& state) { return remapping[state]; });
+    this->generator->remapStateIds(
+		[&remapping](StateType const& state) {
+			return remapping[state];
+		}
+	);
 
 }
 
@@ -548,6 +578,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
+	std::cout << "States are currently: ";
+	for (auto state : stateStorage.stateToId) {
+		std::cout << state.second << ", ";
+	}
+	std::cout << std::endl;
+
 	return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
 }
 
