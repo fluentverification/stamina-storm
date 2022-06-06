@@ -576,7 +576,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
-	statesToExplore = std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, ProbabilityStateComparison>(); // .clear(); // = StatePriorityQueue();
+	statesToExplore.clear(); // = StatePriorityQueue();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	if (stateRemapping) { stateRemapping->clear(); }
