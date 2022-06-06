@@ -113,14 +113,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-	StateType actualIndex;
+	StateType actualIndex = 1;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
+		std::cout << "Actual index already exists and it is " << actualIndex << std::endl;
 	}
 	else {
+		std::cout << "Setting actual index to new index" << std::endl;
 		// Create new index just in case we need it
 		actualIndex = newIndex;
+	}
+
+	if (actualIndex == 0) {
+		StaminaMessages::errorAndExit("Cannot register actual index 0!");
 	}
 
 	auto nextState = stateMap.get(actualIndex);
