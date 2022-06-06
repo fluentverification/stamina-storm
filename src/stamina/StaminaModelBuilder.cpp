@@ -140,13 +140,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push(initProbabilityState);
+			statesToExplore.push_back(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
-		statesToExplore.push(initProbabilityState);
+		statesToExplore.push_back(initProbabilityState);
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
@@ -160,7 +160,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statesToExplore.push(nextProbabilityState);
+				statesToExplore.push_back(nextProbabilityState);
 			}
 		}
 		else {
@@ -176,7 +176,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statesToExplore.push(nextProbabilityState);
+				statesToExplore.push_back(nextProbabilityState);
 			}
 		}
 		else {
@@ -186,7 +186,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			statesToExplore.push(nextProbabilityState);
+			statesToExplore.push_back(nextProbabilityState);
 			numberTerminal++;
 		}
 	}
@@ -269,8 +269,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		currentProbabilityState = statesToExplore.top();
-		statesToExplore.pop();
+		currentProbabilityState = statesToExplore.front();
+		statesToExplore.pop_front();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
@@ -298,7 +298,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			// If the property does not hold at the current state, make it absorbing in the
 			// state graph and do not explore its successors
 			if (!evaluationAtCurrentState) {
-				transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+				transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
@@ -313,7 +313,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			connectTerminalStatesToAbsorbing(
 				transitionMatrixBuilder
 				, currentState
-				, currentIndex
+				, currentRow
 				, stateToIdCallback2
 			);
 			++numberOfExploredStates;
@@ -337,7 +337,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -394,7 +394,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 					}
 
 					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentIndex, sPrime, stateProbabilityPair.second);
+					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
 					numberTransitions++;
 				}
 			}

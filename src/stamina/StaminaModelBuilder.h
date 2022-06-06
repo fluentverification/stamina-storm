@@ -291,7 +291,7 @@ namespace stamina {
 		std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 		util::StateMemoryPool<ProbabilityState> memoryPool;
 		// StatePriorityQueue statesToExplore;
-		std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, ProbabilityStateComparison> statesToExplore;
+		std::deque<ProbabilityState * > statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		util::StateIndexArray<StateType, ProbabilityState> stateMap;
 		// std::unordered_map<StateType, ProbabilityState *> stateMap; // S in the QEST paper
