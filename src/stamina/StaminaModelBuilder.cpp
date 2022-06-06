@@ -121,6 +121,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		// Create new index just in case we need it
 		actualIndex = newIndex;
+		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	}
 
 	auto nextState = stateMap.get(actualIndex);
@@ -220,6 +221,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
 	}
 
+	stateRemapping = std::vector<uint_fast64_t>();
+
 	loadPropertyExpressionFromFormula();
 
 	// Create a callback for the next-state generator to enable it to request the index of states.
@@ -271,6 +274,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	while (!statesToExplore.empty()) {
 		currentProbabilityState = statesToExplore.front();
 		statesToExplore.pop_front();
+
+		while (stateRemapping.get().size() <= currentIndex) {
+			stateRemapping.get().push_back(0);
+		}
+		stateRemapping.get()[currentIndex] = currentRowGroup;
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
@@ -430,6 +438,32 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
+
+	// State Remapping
+	stateRemapping.get()[currentIndex] = currentRowGroup;
+	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
+
+    // We need to fix the following entities:
+    // (a) the transition matrix
+    // (b) the initial states
+    // (c) the hash map storing the mapping states -> ids
+    // (d) fix remapping for state-generation labels
+
+    // Fix (a).
+    transitionMatrixBuilder.replaceColumns(remapping, 0);
+
+    // Fix (b).
+    std::vector<StateType> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
+    std::transform(this->stateStorage.initialStateIndices.begin(), this->stateStorage.initialStateIndices.end(), newInitialStateIndices.begin(),
+                   [&remapping](StateType const& state) { return remapping[state]; });
+    std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
+    this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
+
+    // Fix (c).
+    this->stateStorage.stateToId.remap([&remapping](StateType const& state) { return remapping[state]; });
+
+    this->generator->remapStateIds([&remapping](StateType const& state) { return remapping[state]; });
+
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -538,6 +572,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	if (absorbingWasSetUp) {
 		return;
 	}
+
+	stateRemapping.get().push_back(storm::utility::zero<StateType>());
+
 	this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
 	bool gotVar = false;
 	for (auto variable : generator->getVariableInformation().booleanVariables) {
