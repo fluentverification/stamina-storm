@@ -469,6 +469,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	std::unordered_map<StateType, uint32_t> remappingSet;
 	for (int i = 0; i < stateRemapping.get().size(); i++) {
 		rV += std::to_string(stateRemapping.get()[i]);
+		rV += ",";
 		auto found = remappingSet.find(i);
 		if (found != remappingSet.end()) {
 			std::cout << "Duplicate element in remapping: " << found->first << " at indecies " << found->second << " and " << i << std::endl;
@@ -477,6 +478,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			remappingSet.insert({stateRemapping.get()[i], i});
 		}
 	}
+
+	std:: cout << rV << std::endl;
 
 	// State Remapping
 	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
@@ -663,6 +666,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 		return;
 	}
 	statesToExplore.clear(); // = StatePriorityQueue();
+	stateRemapping.get().clear();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	// stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
