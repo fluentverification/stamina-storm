@@ -141,7 +141,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	std::cout << std::endl;
 
 	// Print state storage size
-	StaminaMessages::info("State storage size " + std::to_string(stateStorage.getNumberOfStates()));
 	if (stateStorage.getNumberOfStates() <= actualIndex) {
 		StaminaMessages::errorAndExit("Got an actual index of " + std::to_string(actualIndex) + " but number of states after registration is " + std::to_string(stateStorage.getNumberOfStates()));
 	}
@@ -276,6 +275,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// for (StateType index : this->stateStorage.initialStateIndices) {
 	// 	exploredStates.insert(index);
 	// }
+		std::cout << "Remapping vector is currently: ";
+		for (auto val : stateRemapping.get()) {
+			std::cout << val << ",";
+		}
+		std::cout << std::endl;
 
 	currentRowGroup = 1;
 	currentRow = 1;
@@ -290,7 +294,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	isInit = false;
 	// Perform a search through the model.
-	while (!statesToExplore.empty()) {
+	while (!statesToExplore.empty() ) {
 		currentProbabilityState = statesToExplore.front();
 		statesToExplore.pop_front();
 		currentState = currentProbabilityState->state;
@@ -300,7 +304,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		while (stateRemapping.get().size() <= currentIndex) {
 			stateRemapping.get().push_back(0);
 		}
-		stateRemapping.get()[currentIndex] = currentRowGroup - 1;
+		stateRemapping.get()[currentIndex] = currentRowGroup;
 
 		std::cout << "Remapping vector is currently: ";
 		for (auto val : stateRemapping.get()) {
@@ -308,8 +312,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		std::cout << std::endl;
 		// Get the first state in the queue.
-		currentIndex = currentProbabilityState->index;
-		currentState = currentProbabilityState->state;
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state! State Values: " + StateSpaceInformation::stateToString(currentState, currentProbabilityState->getPi()));
 		}
