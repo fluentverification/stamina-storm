@@ -257,11 +257,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// for (StateType index : this->stateStorage.initialStateIndices) {
 	// 	exploredStates.insert(index);
 	// }
-		std::cout << "Remapping vector is currently: ";
-		for (auto val : stateRemapping.get()) {
-			std::cout << val << ",";
-		}
-		std::cout << std::endl;
 
 	currentRowGroup = 1;
 	currentRow = 1;
@@ -289,10 +284,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		stateRemapping.get()[currentIndex] = currentRowGroup;
 
-		std::cout << "Remapping vector is currently: ";
-		for (auto val : stateRemapping.get()) {
-			std::cout << val << ",";
-		}
 		std::cout << std::endl;
 		// Get the first state in the queue.
 		if (currentIndex == 0) {
@@ -493,11 +484,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 			return remapping[state];
 		}
 	);
-	std::cout << "Remapping vector is currently: ";
-		for (auto val : stateRemapping.get()) {
-			std::cout << val << ",";
-		}
-		std::cout << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -582,12 +568,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
-	std::cout << "States are currently: ";
-	for (auto state : stateStorage.stateToId) {
-		std::cout << state.second << ", ";
-	}
-	std::cout << std::endl;
-
 	return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
 }
 
