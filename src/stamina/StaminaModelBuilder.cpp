@@ -279,25 +279,25 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty() ) {
-		std::cout << "statesToExplore has size: " << statesToExplore.size() << std::endl;
+		// std::cout  "statesToExplore has size: " << statesToExplore.size() << std::endl;
 		currentProbabilityState = statesToExplore.front();
 		statesToExplore.pop_front();
 		currentState = currentProbabilityState->state;
 		currentIndex = currentProbabilityState->index;
 
-		std::cout << "Current index is " << currentIndex << " and size of state remapping is " << stateRemapping.get().size() << std::endl;
+		// std::cout  "Current index is " << currentIndex << " and size of state remapping is " << stateRemapping.get().size() << std::endl;
 		while (stateRemapping.get().size() <= currentIndex) {
 			stateRemapping.get().push_back(0);
 		}
 		stateRemapping.get()[currentIndex] = currentRowGroup;
 
-		std::cout << std::endl;
+		// std::cout  std::endl;
 		// Get the first state in the queue.
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state! State Values: " + StateSpaceInformation::stateToString(currentState, currentProbabilityState->getPi()));
 		}
 
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
+		// // std::cout  "Dequeued state " << currentIndex << std::endl;
 		// Set our state variable in the class
 
 		if (currentIndex % MSG_FREQUENCY == 0) {
@@ -335,14 +335,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				, currentRow
 				, stateToIdCallback2
 			);
-			std::cout << "The current probability state has pi = " << currentProbabilityState->getPi() << " wherease kappa = " << localKappa << " so not enqueuing successors" << std::endl;
+			// std::cout  "The current probability state has pi = " << currentProbabilityState->getPi() << " wherease kappa = " << localKappa << " so not enqueuing successors" << std::endl;
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
 			continue;
 		}
 
-		std::cout << "Expanding state: " << currentState << std::endl;
+		// std::cout  "Expanding state: " << currentState << std::endl;
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
@@ -416,7 +416,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
-					std::cout << "Transition to column " << sPrime << std::endl;
+					// std::cout  "Transition to column " << sPrime << std::endl;
 					numberTransitions++;
 				}
 			}
@@ -453,32 +453,33 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	iteration++;
 	numberStates = numberOfExploredStates;
 
-	std::cout << "States are: " << std::endl;
+	// std::cout  "States are: " << std::endl;
 	for (auto s : stateStorage.stateToId) {
-		std::cout << s.second << ",";
+		// std::cout  s.second << ",";
 	}
-	std::cout << std::endl;
+	// std::cout  std::endl;
 
-	std::cout << "=======================================================" << std::endl;
+	std::cout <<  "=======================================================" << std::endl;
 	std::cout << "FINISHED Exploring state space. Explored " << numberStates << " states" << std::endl;
+	std::cout << "Perimeter reachability is " << accumulateProbabilities() << std::endl;
 	std::cout << "=======================================================" << std::endl;
 
 	std::string rV;
 	// For debugging, verify state remapping
-	std::unordered_map<StateType, uint32_t> remappingSet;
-	for (int i = 0; i < stateRemapping.get().size(); i++) {
-		rV += std::to_string(stateRemapping.get()[i]);
-		rV += ",";
-		auto found = remappingSet.find(stateRemapping.get()[i]);
-		if (found != remappingSet.end()) {
-			std::cout << "Duplicate element in remapping: " << found->first << " at indecies " << found->second << " and " << i << std::endl;
-		}
-		else {
-			remappingSet.insert({stateRemapping.get()[i], i});
-		}
-	}
+	// std::unordered_map<StateType, uint32_t> remappingSet;
+	// for (int i = 0; i < stateRemapping.get().size(); i++) {
+	// 	rV += std::to_string(stateRemapping.get()[i]);
+	// 	rV += ",";
+	// 	auto found = remappingSet.find(stateRemapping.get()[i]);
+	// 	if (found != remappingSet.end()) {
+	// 		// std::cout  "Duplicate element in remapping: " << found->first << " at indecies " << found->second << " and " << i << std::endl;
+	// 	}
+	// 	else {
+	// 		remappingSet.insert({stateRemapping.get()[i], i});
+	// 	}
+	// }
 
-	std:: cout << rV << std::endl;
+	// std:: cout << rV << std::endl;
 
 	// State Remapping
 	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
@@ -667,7 +668,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	statesToExplore.clear(); // = StatePriorityQueue();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
-	// stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
+	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;
 }
 
