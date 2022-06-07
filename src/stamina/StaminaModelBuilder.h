@@ -73,7 +73,7 @@ namespace stamina {
 		public:
 			CompressedState state;
 			StateType index;
-			bool enqueued;
+			bool assignedInRemapping;
 			uint8_t iterationLastSeen;
 			ProbabilityState() { /* Intentionally left empty */ }
 			ProbabilityState(
@@ -87,7 +87,7 @@ namespace stamina {
 				, index(index)
 				, pi(pi)
 				, terminal(terminal)
-				, enqueued(enqueued)
+				, assignedInRemapping(false)
 				, iterationLastSeen(iterationLastSeen)
 			{
 				// Intentionally left empty
@@ -98,7 +98,7 @@ namespace stamina {
 				, state(other.state)
 				, pi(other.pi)
 				, terminal(other.terminal)
-				, enqueued(other.enqueued)
+				, assignedInRemapping(other.assignedInRemapping)
 			{
 				// Intentionally left empty
 			}

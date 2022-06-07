@@ -126,7 +126,7 @@ StateType actualIndex;
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	// stateStorage.stateToId.findOrAdd(state, actualIndex);
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
@@ -141,12 +141,14 @@ StateType actualIndex;
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
+		stateStorage.stateToId.findOrAdd(state, actualIndex);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push_back(initProbabilityState);
+		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
@@ -155,6 +157,7 @@ StateType actualIndex;
 	// The previous state has reachability of 0
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			// Don't rehash if we've already called find()
 			ProbabilityState * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
@@ -169,6 +172,7 @@ StateType actualIndex;
 		}
 	}
 	else {
+		stateStorage.stateToId.findOrAdd(state, actualIndex);
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
 			ProbabilityState * nextProbabilityState = nextState;
@@ -279,10 +283,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentIndex = currentProbabilityState->index;
 
 		std::cout << "Current index is " << currentIndex << " and size of state remapping is " << stateRemapping.get().size() << std::endl;
-		while (stateRemapping.get().size() <= currentIndex) {
-			stateRemapping.get().push_back(0);
+		if (currentProbabilityState->iterationLastSeen < iteration + 1) {
+			while (stateRemapping.get().size() <= currentIndex) {
+				stateRemapping.get().push_back(0);
+			}
+			stateRemapping.get()[currentIndex] = currentRowGroup;
+			currentProbabilityState->assignedInRemapping = true;
 		}
-		stateRemapping.get()[currentIndex] = currentRowGroup;
 
 		std::cout << std::endl;
 		// Get the first state in the queue.
@@ -409,6 +416,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 					// row, column, value
 					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
+					std::cout << "Transition to column " << sPrime << std::endl;
 					numberTransitions++;
 				}
 			}
@@ -445,12 +453,29 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	iteration++;
 	numberStates = numberOfExploredStates;
 
+	std::cout << "States are: " << std::endl;
+	for (auto s : stateStorage.stateToId) {
+		std::cout << s.second << ",";
+	}
+	std::cout << std::endl;
+
 	std::cout << "=======================================================" << std::endl;
 	std::cout << "FINISHED Exploring state space. Explored " << numberStates << " states" << std::endl;
 	std::cout << "=======================================================" << std::endl;
 
+	// For debugging, verify state remapping
+	std::unordered_map<StateType, uint32_t> remappingSet;
+	for (int i = 0; i < stateRemapping.get().size(); i++) {
+		auto found = remappingSet.find(i);
+		if (found != remappingSet.end()) {
+			std::cout << "Duplicate element in remapping: " << found->first << " at indecies " << found->second << " and " << i << std::endl;
+		}
+		else {
+			remappingSet.insert({stateRemapping.get()[i], i});
+		}
+	}
+
 	// State Remapping
-	stateRemapping.get()[currentIndex] = currentRowGroup - 1;
 	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
 
 	// According to the STORM Folks, this is what needs to be done
@@ -620,9 +645,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
 	}
 	// Create a self-loop for the absorbing state in the transition matrix
-	transitionMatrixBuilder.addNextValue(0, 0, 1);
 	absorbingWasSetUp = true;
-	// transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
+	transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
 	// This state shall be Markovian (to not introduce Zeno behavior)
 	if (choiceInformationBuilder.isBuildMarkovianStates()) {
 		choiceInformationBuilder.addMarkovianState(0);
