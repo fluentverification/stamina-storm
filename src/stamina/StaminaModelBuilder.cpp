@@ -461,7 +461,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
 	std::cout <<  "=======================================================" << std::endl;
 	std::cout << "FINISHED Exploring state space. Explored " << numberStates << " states" << std::endl;
-	std::cout << "Perimeter reachability is " << accumulateProbabilities() << std::endl;
+	std::cout << "Perimeter reachability is " << accumulateProbabilities() << " (" << numberTerminal << " terminal states)" << std::endl;
 	std::cout << "=======================================================" << std::endl;
 
 	std::string rV;
