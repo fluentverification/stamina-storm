@@ -262,7 +262,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// for (StateType index : this->stateStorage.initialStateIndices) {
 	// 	exploredStates.insert(index);
 	// }
-	for (int i = 0; i < stateRemapping.get().size(); i++) {
+	for (int i = 1; i < stateRemapping.get().size(); i++) {
 		stateRemapping.get()[i] = 0;
 	}
 	currentRowGroup = 1;
