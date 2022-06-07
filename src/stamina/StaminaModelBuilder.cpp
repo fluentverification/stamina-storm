@@ -113,7 +113,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-	StateType actualIndex = 1;
+	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
@@ -159,12 +159,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
+			std::cout << "Enqueuing init state" << std::endl;
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push_back(initProbabilityState);
+		std::cout << "Enqueuing init state" << std::endl;
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
@@ -179,9 +181,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
+				std::cout << "Enqueuing re-explored state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
+			}
+			else {
+
+				std::cout << "NOT enqueuing re-explored state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			}
 		}
 		else {
+			std::cout << "NOT enqueuing un-explored state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			// State does not exist yet in this iteration
 			return 0;
 		}
@@ -195,16 +203,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
+				std::cout << "Enqueuing new state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
+			}
+			else {
+				std::cout << "NOT enqueuing new state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			}
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
-			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
+			*nextProbabilityState = ProbabilityState(currentProbabilityState->state, actualIndex, 0.0, true);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
+			std::cout << "Enqueuing new state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			numberTerminal++;
 		}
 	}
@@ -295,6 +308,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty() ) {
+		std::cout << "statesToExplore has size: " << statesToExplore.size() << std::endl;
 		currentProbabilityState = statesToExplore.front();
 		statesToExplore.pop_front();
 		currentState = currentProbabilityState->state;
@@ -354,12 +368,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 				, currentRow
 				, stateToIdCallback2
 			);
+			std::cout << "The current probability state has pi = " << currentProbabilityState->getPi() << " wherease kappa = " << localKappa << " so not enqueuing successors" << std::endl;
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
 			continue;
 		}
 
+		std::cout << "Expanding state: " << currentState << std::endl;
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
@@ -468,6 +484,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
+
+	std::cout << "=======================================================" << std::endl;
+	std::cout << "FINISHED Exploring state space. Explored " << numberStates << " states" << std::endl;
+	std::cout << "=======================================================" << std::endl;
 
 	// State Remapping
 	stateRemapping.get()[currentIndex] = currentRowGroup - 1;
@@ -650,6 +670,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	if (actualIndex != 0) {
 		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
 	}
+	// Create a self-loop for the absorbing state in the transition matrix
+	transitionMatrixBuilder.addNextValue(0, 0, 1);
 	absorbingWasSetUp = true;
 	// transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
 	// This state shall be Markovian (to not introduce Zeno behavior)
