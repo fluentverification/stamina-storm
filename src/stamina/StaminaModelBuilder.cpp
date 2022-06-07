@@ -113,38 +113,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
-	StateType actualIndex;
+StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
-		std::cout << "Actual index already exists and it is " << actualIndex << std::endl;
 	}
 	else {
-		std::cout << "Setting actual index to new index" << std::endl;
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 	}
 
-	if (actualIndex == 0) {
-		StaminaMessages::errorAndExit("Cannot register actual index 0!");
-	}
-
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
+
 	stateStorage.stateToId.findOrAdd(state, actualIndex);
-
-	std::cout << "Registering state in index " << actualIndex << std::endl;
-	std::cout << "States are currently: ";
-	for (auto state : stateStorage.stateToId) {
-		std::cout << state.second << ", ";
-	}
-	std::cout << std::endl;
-
-	// Print state storage size
-	if (stateStorage.getNumberOfStates() <= actualIndex) {
-		StaminaMessages::errorAndExit("Got an actual index of " + std::to_string(actualIndex) + " but number of states after registration is " + std::to_string(stateStorage.getNumberOfStates()));
-	}
-
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
@@ -159,14 +141,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
-			std::cout << "Enqueuing init state" << std::endl;
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
 		ProbabilityState * initProbabilityState = nextState;
 		stateMap.put(actualIndex, initProbabilityState);
 		statesToExplore.push_back(initProbabilityState);
-		std::cout << "Enqueuing init state" << std::endl;
 		initProbabilityState->iterationLastSeen = iteration;
 		return actualIndex;
 	}
@@ -181,15 +161,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
-				std::cout << "Enqueuing re-explored state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
-			}
-			else {
-
-				std::cout << "NOT enqueuing re-explored state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			}
 		}
 		else {
-			std::cout << "NOT enqueuing un-explored state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			// State does not exist yet in this iteration
 			return 0;
 		}
@@ -203,25 +177,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
-				std::cout << "Enqueuing new state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
-			}
-			else {
-				std::cout << "NOT enqueuing new state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			}
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
-			*nextProbabilityState = ProbabilityState(currentProbabilityState->state, actualIndex, 0.0, true);
+			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
-			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
-			std::cout << "Enqueuing new state: " << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 			numberTerminal++;
 		}
 	}
 	return actualIndex;
+
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
