@@ -262,7 +262,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	// for (StateType index : this->stateStorage.initialStateIndices) {
 	// 	exploredStates.insert(index);
 	// }
-
+	for (int i = 0; i < stateRemapping.get().size(); i++) {
+		stateRemapping.get()[i] = 0;
+	}
 	currentRowGroup = 1;
 	currentRow = 1;
 
@@ -284,13 +286,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		currentIndex = currentProbabilityState->index;
 
 		std::cout << "Current index is " << currentIndex << " and size of state remapping is " << stateRemapping.get().size() << std::endl;
-		if (currentProbabilityState->iterationLastSeen < iteration + 1) {
-			while (stateRemapping.get().size() <= currentIndex) {
-				stateRemapping.get().push_back(0);
-			}
-			stateRemapping.get()[currentIndex] = currentRowGroup;
-			currentProbabilityState->assignedInRemapping = true;
+		while (stateRemapping.get().size() <= currentIndex) {
+			stateRemapping.get().push_back(0);
 		}
+		stateRemapping.get()[currentIndex] = currentRowGroup;
 
 		std::cout << std::endl;
 		// Get the first state in the queue.
@@ -470,7 +469,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	for (int i = 0; i < stateRemapping.get().size(); i++) {
 		rV += std::to_string(stateRemapping.get()[i]);
 		rV += ",";
-		auto found = remappingSet.find(i);
+		auto found = remappingSet.find(stateRemapping.get()[i]);
 		if (found != remappingSet.end()) {
 			std::cout << "Duplicate element in remapping: " << found->first << " at indecies " << found->second << " and " << i << std::endl;
 		}
@@ -666,7 +665,6 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 		return;
 	}
 	statesToExplore.clear(); // = StatePriorityQueue();
-	stateRemapping.get().clear();
 	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	// stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
