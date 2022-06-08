@@ -433,8 +433,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
-
-	std::cout << "Explored " << numberStates << " with piHat = " << perimeterReachability << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
