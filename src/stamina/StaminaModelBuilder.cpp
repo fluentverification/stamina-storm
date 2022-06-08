@@ -266,6 +266,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	StateType currentIndex;
 	CompressedState currentState;
 
+	perimeterReachability = 1.0;
+
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
@@ -404,6 +406,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		}
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
+			perimeterReachability -= currentProbabilityState->getPi();
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
@@ -430,6 +433,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
+
+	std::cout << "Explored " << numberStates << " with piHat = " << perimeterReachability << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

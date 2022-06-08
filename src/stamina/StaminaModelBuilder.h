@@ -305,6 +305,7 @@ namespace stamina {
 		double localKappa;
 		bool isCtmc;
 		bool formulaMatchesExpression;
+		double perimeterReachability;
 		uint64_t numberTerminal;
 		uint64_t numberStates;
 		uint64_t numberTransitions;
