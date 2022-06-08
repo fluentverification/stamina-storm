@@ -359,8 +359,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (behavior.empty()) {
 			// Make absorbing
 			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+			stateStorage.deadlockStateIndices.push_back(currentRow);
 			continue;
-			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
@@ -455,12 +455,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
-
-	// std::cout  "States are: " << std::endl;
-	for (auto s : stateStorage.stateToId) {
-		// std::cout  s.second << ",";
-	}
-	// std::cout  std::endl;
 
 	std::cout <<  "=======================================================" << std::endl;
 	std::cout << "FINISHED Exploring state space. Explored " << numberStates << " states" << std::endl;
