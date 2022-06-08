@@ -473,17 +473,17 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 
     // Fix the initial state indecies
     // (not sure if we need to do this since our initial state indecies are fine)
-	// std::vector<StateType> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
-    // std::transform(
-	// 	this->stateStorage.initialStateIndices.begin()
-	// 	, this->stateStorage.initialStateIndices.end()
-	// 	, newInitialStateIndices.begin()
-	// 	, [&remapping](StateType const& state) {
-	// 		return remapping[state];
-	// 	}
-	// );
-    // std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
-    // this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
+	std::vector<StateType> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
+    std::transform(
+		this->stateStorage.initialStateIndices.begin()
+		, this->stateStorage.initialStateIndices.end()
+		, newInitialStateIndices.begin()
+		, [&remapping](StateType const& state) {
+			return remapping[state];
+		}
+	);
+    std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
+    this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
 
     // Remap stateStorage.stateToId
     this->stateStorage.stateToId.remap(
