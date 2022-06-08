@@ -427,6 +427,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
 		}
+		else if (currentProbabilityState->isTerminal()) {
+			StaminaMessages::warning("numberTerminal is at least 1 too high!");
+		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
 
@@ -465,21 +468,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	std::cout << "=======================================================" << std::endl;
 
 	std::string rV;
-	// For debugging, verify state remapping
-	// std::unordered_map<StateType, uint32_t> remappingSet;
-	// for (int i = 0; i < stateRemapping.get().size(); i++) {
-	// 	rV += std::to_string(stateRemapping.get()[i]);
-	// 	rV += ",";
-	// 	auto found = remappingSet.find(stateRemapping.get()[i]);
-	// 	if (found != remappingSet.end()) {
-	// 		// std::cout  "Duplicate element in remapping: " << found->first << " at indecies " << found->second << " and " << i << std::endl;
-	// 	}
-	// 	else {
-	// 		remappingSet.insert({stateRemapping.get()[i], i});
-	// 	}
-	// }
-
-	// std:: cout << rV << std::endl;
 
 	// State Remapping
 	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
@@ -666,7 +654,6 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 		return;
 	}
 	statesToExplore.clear(); // = StatePriorityQueue();
-	// exploredStates.clear(); // States explored in our current iteration
 	// API reset
 	stateStorage = storm::storage::sparse::StateStorage<StateType>(generator->getStateSize());
 	absorbingWasSetUp = false;

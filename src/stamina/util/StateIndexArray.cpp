@@ -84,6 +84,12 @@ namespace stamina {
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
+		uint32_t
+		StateIndexArray<StateType, ProbabilityStateType>::getNumberTerminal() {
+			return getPerimeterStates().size();
+		}
+
+		template <typename StateType, typename ProbabilityStateType>
 		std::vector<StateType>
 		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
 			std::vector<StateType> perimeterStates;
