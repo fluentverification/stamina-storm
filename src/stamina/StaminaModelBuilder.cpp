@@ -126,7 +126,6 @@ StateType actualIndex;
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-	// stateStorage.stateToId.findOrAdd(state, actualIndex);
 	// Handle conditional enqueuing
 	if (isInit) {
 		if (!stateIsExisting) {
@@ -141,7 +140,7 @@ StateType actualIndex;
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
-		stateStorage.stateToId.findOrAdd(state, actualIndex);
+			stateStorage.stateToId.findOrAdd(state, actualIndex);
 			initProbabilityState->iterationLastSeen = iteration;
 			return actualIndex;
 		}
