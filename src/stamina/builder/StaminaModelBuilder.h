@@ -26,6 +26,10 @@
 
 #include "__storm_needed_for_builder.h"
 
+// Frequency for info/debug messages in terms of number of states explored.
+#define MSG_FREQUENCY 100000
+// #define MSG_FREQUENCY 4000
+
 namespace stamina {
 	namespace builder {
 
@@ -206,7 +210,7 @@ namespace stamina {
 			* @param state Pointer to the state we are looking it
 			* @return A pair with the state id and whether or not it was already discovered
 			* */
-			StateType getOrAddStateIndex(CompressedState const& state);
+			virtual StateType getOrAddStateIndex(CompressedState const& state);
 			/**
 			* Alterate state ID grabber. Returns state ID if exists. If it does not, returns the absorbing state
 			* This is used as an alternative callback function for terminal (perimeter) states
@@ -230,19 +234,19 @@ namespace stamina {
 			* @param markovianChoices is set to a bit vector storing whether a choice is Markovian (is only set if the model type requires this information).
 			* @param stateValuationsBuilder if not boost::none, we insert valuations for the corresponding states
 			* */
-			void buildMatrices(
+			virtual void buildMatrices(
 				storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 				, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
 				, StateAndChoiceInformationBuilder& choiceInformationBuilder
 				, boost::optional<storm::storage::BitVector>& markovianChoices
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
-			);
+			) = 0;
 			/**
 			* Explores state space and truncates the model
 			*
 			* @return The components of the truncated model
 			* */
-			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents();
+			virtual storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() = 0;
 			/**
 			* Builds state labeling for our program
 			*

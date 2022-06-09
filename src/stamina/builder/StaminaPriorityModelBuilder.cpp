@@ -1,5 +1,8 @@
 #include "StaminaPriorityModelBuilder.h"
 
+#include <functional>
+#include <sstream>
+
 namespace stamina {
 namespace builder {
 
