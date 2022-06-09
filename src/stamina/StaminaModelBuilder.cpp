@@ -127,7 +127,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	else {
 		// Create new index just in case we need it
 		actualIndex = newIndex;
-		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	}
 
 	auto nextState = stateMap.get(actualIndex);
@@ -149,14 +148,20 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
-			return actualIndex;
 		}
-		ProbabilityState * initProbabilityState = nextState;
-		stateMap.put(actualIndex, initProbabilityState);
-		statesToExplore.push_back(initProbabilityState);
-		initProbabilityState->iterationLastSeen = iteration;
+		else {
+			ProbabilityState * initProbabilityState = nextState;
+			stateMap.put(actualIndex, initProbabilityState);
+			statesToExplore.push_back(initProbabilityState);
+			initProbabilityState->iterationLastSeen = iteration;
+		}
+		if (actualIndex == newIndex) {
+			stateRemapping.get().push_back(storm::utility::zero<StateType>());
+		}
 		return actualIndex;
 	}
+
+	bool enqueued = false;
 
 	// This bit handles the non-initial states
 	// The previous state has reachability of 0
@@ -168,6 +173,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
+				enqueued = true;
 			}
 		}
 		else {
@@ -184,6 +190,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(nextProbabilityState);
+				enqueued = true;
 			}
 		}
 		else {
@@ -194,8 +201,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
 			statesToExplore.push_back(nextProbabilityState);
+			enqueued = true;
 			numberTerminal++;
 		}
+	}
+	if (enqueued && actualIndex == newIndex) {
+		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 	}
 	return actualIndex;
 }
@@ -438,7 +449,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	iteration++;
 	numberStates = numberOfExploredStates;
 
-	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
+// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -447,6 +458,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::remapStates(storm::s
 
 	// State Remapping
 	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
+
+	if (remapping.size() < numberStates) {
+		StaminaMessages::warning(
+			std::string("Remapping vector and number of explored states do not match sizes!")
+			+ "\n\tVector Size: " + std::to_string(remapping.size())
+			+ "\n\tNumber of states: " + std::to_string(numberStates)
+		);
+	}
+	else {
+		StaminaMessages::info(
+			std::string("Remapping vector and number of explored states match.")
+			+ "\n\tVector Size: " + std::to_string(remapping.size())
+			+ "\n\tNumber of states: " + std::to_string(numberStates)
+		);
+	}
 
 	// According to the STORM Folks, this is what needs to be done
 	// in order to use the state remapping:
@@ -615,35 +641,38 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	if (absorbingWasSetUp) {
 		return;
 	}
-	this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
-	bool gotVar = false;
-	for (auto variable : generator->getVariableInformation().booleanVariables) {
-		if (variable.getName() == "Absorbing") {
-			this->absorbingState.setFromInt(variable.bitOffset + 1, 1, 1);
-			if (this->absorbingState.getAsInt(variable.bitOffset + 1, 1) != 1) {
-				StaminaMessages::errorAndExit("Absorbing state setup failed!");
+	if (firstIteration) {
+		stateRemapping.get().push_back(storm::utility::zero<StateType>());
+		this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
+		bool gotVar = false;
+		for (auto variable : generator->getVariableInformation().booleanVariables) {
+			if (variable.getName() == "Absorbing") {
+				this->absorbingState.setFromInt(variable.bitOffset + 1, 1, 1);
+				if (this->absorbingState.getAsInt(variable.bitOffset + 1, 1) != 1) {
+					StaminaMessages::errorAndExit("Absorbing state setup failed!");
+				}
+				gotVar = true;
+				break;
 			}
-			gotVar = true;
-			break;
 		}
-	}
-	if (!gotVar) {
-		StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
-	}
-	// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
-	stateStorage.deadlockStateIndices.push_back(0);
-	// Check if state is already registered
-	std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+		if (!gotVar) {
+			StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
+		}
+		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
+		stateStorage.deadlockStateIndices.push_back(0);
+		// Check if state is already registered
+		std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
 
-	StateType actualIndex = actualIndexPair.first;
-	if (actualIndex != 0) {
-		StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
-	}
-	absorbingWasSetUp = true;
-	// transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
-	// This state shall be Markovian (to not introduce Zeno behavior)
-	if (choiceInformationBuilder.isBuildMarkovianStates()) {
-		choiceInformationBuilder.addMarkovianState(0);
+		StateType actualIndex = actualIndexPair.first;
+		if (actualIndex != 0) {
+			StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
+		}
+		absorbingWasSetUp = true;
+		// transitionMatrixBuilder.addNextValue(0, 0, storm::utility::one<ValueType>());
+		// This state shall be Markovian (to not introduce Zeno behavior)
+		if (choiceInformationBuilder.isBuildMarkovianStates()) {
+			choiceInformationBuilder.addMarkovianState(0);
+		}
 	}
 }
 
