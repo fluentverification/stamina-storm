@@ -105,7 +105,7 @@ StaminaModelChecker::modelCheckProperty(
 	auto options = BuilderOptions(*propMin.getFilter().getFormula());
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	// Create StaminaModelBuilder
-	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator, modulesFile);
+	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 	auto modelTime = startTime;
@@ -152,6 +152,8 @@ StaminaModelChecker::modelCheckProperty(
 		labeling = &( model->getStateLabeling());
 		labeling->addLabel("(Absorbing = true)");
 		labeling->addLabelToState("(Absorbing = true)", 0);
+
+		std::cout << "Labeling:\n" << model->getStateLabeling() << std::endl;
 
 		checker = std::make_shared<CtmcModelChecker>(*model);
 

@@ -47,6 +47,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, storm::prism::Program const& modulesFile
+	, storm::generator::NextStateGeneratorOptions const & options
 ) : generator(generator)
 	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(generator->getStateSize())))
 	, absorbingWasSetUp(false)
@@ -59,6 +60,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, formulaMatchesExpression(true)
 	, stateRemapping(std::vector<uint_fast64_t>())
 	, modulesFile(modulesFile)
+	, options(options)
 {
 	// Optimization for hashmaps
 }
@@ -70,11 +72,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 ) : StaminaModelBuilder( // Invoke other constructor
 	std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(program, generatorOptions)
 	, program
+	, generatorOptions
 )
 {
 	// Intentionally left empty
 }
-
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>>
@@ -435,6 +437,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
+
+	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -544,7 +548,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 
 		piHat = this->accumulateProbabilities();
 		innerLoopCount++;
-		generator = std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(modulesFile, options);
+		generator = std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(modulesFile, this->options);
 		this->setGenerator(generator);
 	}
 

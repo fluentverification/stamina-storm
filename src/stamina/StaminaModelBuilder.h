@@ -156,6 +156,7 @@ namespace stamina {
 		StaminaModelBuilder(
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 			, storm::prism::Program const& modulesFile
+			, storm::generator::NextStateGeneratorOptions const & options
 		);
 		/**
 		* Constructs a StaminaModelBuilder with a PRISM program and generatorOptions
@@ -301,6 +302,8 @@ namespace stamina {
 		std::deque<ProbabilityState * > statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		util::StateIndexArray<StateType, ProbabilityState> stateMap;
+		// Options for next state generators
+		storm::generator::NextStateGeneratorOptions const & options;
 		// The model builder must have access to this to create a fresh next state generator each iteration
 		storm::prism::Program const& modulesFile;
 		ProbabilityState * currentProbabilityState;
