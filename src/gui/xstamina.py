@@ -58,6 +58,7 @@ Constructor for XStamina class. Sets up widgets and creates MoreOptions class
 		mainLayout.addWidget(split)
 		self.setLayout(mainLayout)
 		self.addFormButtons()
+		self.optionsVisible = False
 		self.executable = EXECUTABLE_CPP
 
 	def addFormButtons(self):
@@ -87,6 +88,8 @@ Adds buttons to the main window. This is called by the constructor
 		self.setGroupBoxesEnabled(True)
 		self.leftLayout.addRow(self.useStorm)
 		self.leftLayout.addRow(self.usePrism)
+		self.leftLayout.addRow(self.options)
+		self.options.setVisible(False)
 		self.moreOptions = QPushButton("More Options...")
 		self.moreOptions.clicked.connect(
 			self.showMoreOptions
@@ -117,8 +120,14 @@ Adds a row with a text box and a browse button
 		"""
 Shows the builtin 'MoreOptions' window
 		"""
-		self.options.show()
-		print("Showing more options...")
+		if not self.optionsVisible:
+			self.options.setVisible(True)
+			print("Showing more options...")
+			self.optionsVisible = True
+		else:
+			self.options.setVisible(False)
+			print("Hiding more options...")
+			self.optionsVisible = False
 
 	def getImportFilePath(self, textbox, allowedExtensions):
 		"""

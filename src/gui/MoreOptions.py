@@ -22,6 +22,8 @@ class MoreOptions(QWidget):
 	OPTIONS_STORM = {
 		"Export Modified Model":ITypes.CHECKBOX
 		, "Export Modified Properties":ITypes.CHECKBOX
+		, "Use STAMINA Iterative method":ITypes.CHOICE
+		, "Use STAMINA Priority Method":ITypes.CHOICE
 	}
 	OPTIONS_PRISM = {
 		"Rank Transitions":ITypes.CHECKBOX
@@ -47,6 +49,8 @@ class MoreOptions(QWidget):
 		, "Use Jacobi Method":False
 		, "Use Gauss-Seidel Method":False
 		, "Use Backwards Gauss-Seidel Method":False
+		, "Use STAMINA Iterative method":True
+		, "Use STAMINA Priority Method":False
 	}
 	SETTINGS_TYPES = {
 		"Reachability Threshold (Kappa)":float
@@ -63,6 +67,8 @@ class MoreOptions(QWidget):
 		, "Use Jacobi Method":bool
 		, "Use Gauss-Seidel Method":bool
 		, "Use Backwards Gauss-Seidel Method":bool
+		, "Use STAMINA Iterative method":bool
+		, "Use STAMINA Priority Method":bool
 	}
 
 	def __init__(self, parent=None):
@@ -90,7 +96,7 @@ class MoreOptions(QWidget):
 	def setupFormButtons(self):
 		panel = QFrame()
 		self.defaultsButton = QPushButton("Defaults")
-		self.doneButton = QPushButton("Done")
+		self.doneButton = QPushButton("Check Options")
 		layout = QHBoxLayout()
 		panel.setLayout(layout)
 		layout.addWidget(self.defaultsButton)
