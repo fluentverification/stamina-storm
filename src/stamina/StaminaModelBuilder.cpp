@@ -438,7 +438,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	iteration++;
 	numberStates = numberOfExploredStates;
 
-// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
+	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
