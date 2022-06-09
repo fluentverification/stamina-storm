@@ -104,7 +104,6 @@ namespace stamina {
 				inline bool operator<(const ProbabilityState & rhs) const {
 					return index < rhs.index;
 				}
-	//		private:
 				double pi;
 				bool terminal;
 
