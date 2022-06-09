@@ -261,7 +261,6 @@ namespace stamina {
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			);
 
-		private:
 			/* Data Members */
 			storm::expressions::Expression * propertyExpression;
 			storm::expressions::ExpressionManager * expressionManager;
