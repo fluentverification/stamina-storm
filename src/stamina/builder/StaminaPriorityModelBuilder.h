@@ -35,6 +35,20 @@ namespace stamina {
 				storm::prism::Program const& program
 				, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 			);
+			/**
+			* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
+			* and state space truncation from that state.
+			*
+			* @param state Pointer to the state we are looking it
+			* @return A pair with the state id and whether or not it was already discovered
+			* */
+			StateType getOrAddStateIndex(CompressedState const& state) override;
+			/**
+			* Explores state space and truncates the model
+			*
+			* @return The components of the truncated model
+			* */
+			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() override;
 		private:
 
 		};
