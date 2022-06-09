@@ -552,6 +552,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents
 		this->setGenerator(generator);
 	}
 
+	remapStates(*transitionMatrixBuilder);
+
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
 		transitionMatrixBuilder->build(0, transitionMatrixBuilder->getCurrentRowGroupCount())
