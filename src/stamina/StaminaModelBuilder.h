@@ -155,6 +155,7 @@ namespace stamina {
 		* */
 		StaminaModelBuilder(
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
+			, storm::prism::Program const& modulesFile
 		);
 		/**
 		* Constructs a StaminaModelBuilder with a PRISM program and generatorOptions
@@ -216,6 +217,12 @@ namespace stamina {
 			std::shared_ptr<const storm::logic::Formula> formula
 			, const storm::prism::Program & modulesFile
 		);
+		/**
+		 * Applies the remapping in the state remapping vector to the transition matrix
+		 *
+		 * @param transitionMatrixBuilder The transition matrix to apply it to.
+		 * */
+		void remapStates(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
 	protected:
 		/**
 		 * Creates and loads the property expression from the formula
@@ -294,7 +301,8 @@ namespace stamina {
 		std::deque<ProbabilityState * > statesToExplore;
 		boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 		util::StateIndexArray<StateType, ProbabilityState> stateMap;
-		// std::unordered_map<StateType, ProbabilityState *> stateMap; // S in the QEST paper
+		// The model builder must have access to this to create a fresh next state generator each iteration
+		storm::prism::Program const& modulesFile;
 		ProbabilityState * currentProbabilityState;
 		CompressedState absorbingState;
 		bool absorbingWasSetUp;

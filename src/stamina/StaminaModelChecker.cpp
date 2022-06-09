@@ -105,7 +105,7 @@ StaminaModelChecker::modelCheckProperty(
 	auto options = BuilderOptions(*propMin.getFilter().getFormula());
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	// Create StaminaModelBuilder
-	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator);
+	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator, modulesFile);
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 	auto modelTime = startTime;
@@ -143,30 +143,17 @@ StaminaModelChecker::modelCheckProperty(
 		// Reset the reachability threshold
 		reachThreshold = Options::kappa;
 
-		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
-		int innerLoopCount = 0;
-		while (piHat >= Options::prob_win / Options::approx_factor) {
-			// StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
-			builder->reset();
-			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
-			// Rebuild the initial state labels
+		model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 
-			// Accumulate probabilities
-			piHat = builder->accumulateProbabilities();
-			innerLoopCount++;
-			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
-			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-			builder->setGenerator(generator);
-		}
 		// Rebuild the initial state labels
 		labeling = &( model->getStateLabeling());
-			labeling->addLabel("(Absorbing = true)");
-			labeling->addLabelToState("(Absorbing = true)", 0);
+		labeling->addLabel("(Absorbing = true)");
+		labeling->addLabelToState("(Absorbing = true)", 0);
 
-			checker = std::make_shared<CtmcModelChecker>(*model);
+		checker = std::make_shared<CtmcModelChecker>(*model);
 
 		builder->setLocalKappaToGlobal();
 		modelTime = std::chrono::high_resolution_clock::now();
