@@ -34,5 +34,17 @@ StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::StaminaPrior
 	// Intentionally left empty
 }
 
+template<typename ValueType, typename RewardModelType, typename StateType>
+StateType
+StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::getOrAddStateIndex(CompressedState const& state) {
+
 }
+
+template<typename ValueType, typename RewardModelType, typename StateType>
+storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
+StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::buildModelComponents() {
+
 }
+
+} // namespace builder
+} // namespace stamina
