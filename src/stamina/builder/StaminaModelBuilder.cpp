@@ -42,6 +42,7 @@
 #include "storm/utility/SignalHandler.h"
 
 namespace stamina {
+namespace builder {
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
@@ -786,4 +787,5 @@ bool set_contains(std::unordered_set<StateType> current_set, StateType value) {
 	return (search != current_set.end());
 }
 
+} // namespace builder
 } // namespace stamina
