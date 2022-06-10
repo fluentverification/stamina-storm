@@ -109,7 +109,7 @@ StaminaModelChecker::modelCheckProperty(
 		// Create StaminaModelBuilder
 		builder = std::allocate_shared<StaminaIterativeModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);
 	}
-	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD {
+	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
 		std::allocator<StaminaPriorityModelBuilder<double>> allocatorBuilder;
 		// Create StaminaModelBuilder
 		builder = std::allocate_shared<StaminaPriorityModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);

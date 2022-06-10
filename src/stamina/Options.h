@@ -45,8 +45,7 @@ namespace stamina {
 		inline static bool rank_transitions;
 		inline static uint64_t max_iterations;
 		inline static uint64_t max_states;
-		inline static bool iterative_method;
-		inline static bool priority_method;
+		inline static uint8_t method;
 	};
 	/**
 	* Tells us if a string ends with another

@@ -15,10 +15,10 @@
 #include <cstdint>
 #include <functional>
 
-#include "Options.h"
-#include "StaminaMessages.h"
-#include "util/StateIndexArray.h"
-#include "util/StateMemoryPool.h"
+#include "../Options.h"
+#include "../StaminaMessages.h"
+#include "../util/StateIndexArray.h"
+#include "../util/StateMemoryPool.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>

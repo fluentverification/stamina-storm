@@ -1,5 +1,5 @@
 #include "StateMemoryPool.h"
-#include "../StaminaModelBuilder.h"
+#include "../builder/StaminaModelBuilder.h"
 #include "../StaminaMessages.h"
 
 /**
@@ -55,7 +55,7 @@ namespace stamina {
 
 		// Forward declare
 		template class StateMemoryPool<
-			StaminaModelBuilder<
+			builder::StaminaModelBuilder<
 				double
 				, storm::models::sparse::StandardRewardModel<double>
 				, uint32_t
