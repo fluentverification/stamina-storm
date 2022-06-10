@@ -5,6 +5,7 @@
 #include "builder/StaminaModelBuilder.h"
 #include "builder/StaminaIterativeModelBuilder.h"
 #include "builder/StaminaPriorityModelBuilder.h"
+#include "builder/StaminaReExploringModelBuilder.h"
 
 #include <sstream>
 #include <string>

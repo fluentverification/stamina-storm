@@ -108,11 +108,17 @@ StaminaModelChecker::modelCheckProperty(
 
 	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
 		// Create StaminaModelBuilder
-		builder = std::make_shared<StaminaIterativeModelBuilder<double>> (generator, modulesFile, options);
+		const auto builderPointer = std::make_shared<StaminaIterativeModelBuilder<double>> (generator, modulesFile, options);
+		builder = builderPointer;
 	}
 	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
 		// Create StaminaModelBuilder
-		builder = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		const auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		builder = builderPointer;
+	}
+	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {
+		const auto builderPointer = std::make_shared<StaminaReExploringModelBuilder<double>> (generator, modulesFile, options);
+		builder = builderPointer;
 	}
 	else {
 		StaminaMessages::errorAndExit("Truncation method is invalid!");
