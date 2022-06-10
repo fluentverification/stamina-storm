@@ -1,4 +1,4 @@
-#include "StaminaIterativeModelBuilder.h"
+#include "StaminaReExploringModelBuilder.h"
 
 #include <functional>
 #include <sstream>
@@ -7,7 +7,7 @@ namespace stamina {
 namespace builder {
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaIterativeModelBuilder<ValueType, StateType, RewardModelType>::StaminaIterativeModelBuilder(
+StaminaReExploringModelBuilder<ValueType, StateType, RewardModelType>::StaminaReExploringModelBuilder(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
@@ -22,7 +22,7 @@ StaminaIterativeModelBuilder<ValueType, StateType, RewardModelType>::StaminaIter
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaIterativeModelBuilder<ValueType, StateType, RewardModelType>::StaminaIterativeModelBuilder(
+StaminaReExploringModelBuilder<ValueType, StateType, RewardModelType>::StaminaReExploringModelBuilder(
 	storm::prism::Program const& program
 	, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 ) // Invoke super constructor
@@ -36,7 +36,7 @@ StaminaIterativeModelBuilder<ValueType, StateType, RewardModelType>::StaminaIter
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
+StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatrices(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 	, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
 	, StateAndChoiceInformationBuilder& stateAndChoiceInformationBuilder
@@ -55,35 +55,28 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 	// Create a callback for the next-state generator to enable it to request the index of states.
 	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
-		&StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
+		&StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
 		, this
 		, std::placeholders::_1
 	);
-
-	if (firstIteration) {
-		// Create absorbing state
-		setUpAbsorbingState(
-			transitionMatrixBuilder
-			, rewardModelBuilders
-			, stateAndChoiceInformationBuilder
-			, markovianChoices
-			, stateValuationsBuilder
-		);
-		isInit = true;
-		// Let the generator create all initial states.
-		this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
-		if (this->stateStorage.initialStateIndices.empty()) {
-			StaminaMessages::errorAndExit("Initial states are empty!");
-		}
-		currentRowGroup = 1;
-		currentRow = 1;
-		numberOfExploredStates = 0;
-		numberOfExploredStatesSinceLastMessage = 0;
+	// Create absorbing state
+	setUpAbsorbingState(
+		transitionMatrixBuilder
+		, rewardModelBuilders
+		, stateAndChoiceInformationBuilder
+		, markovianChoices
+		, stateValuationsBuilder
+	);
+	isInit = true;
+	// Let the generator create all initial states.
+	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+	if (this->stateStorage.initialStateIndices.empty()) {
+		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
-	else {
-		// Flush the previously early-terminated states into statesToExplore FIRST
-		flushStatesTerminated();
-	}
+	currentRowGroup = 1;
+	currentRow = 1;
+	numberOfExploredStates = 0;
+	numberOfExploredStatesSinceLastMessage = 0;
 
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
@@ -137,7 +130,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
-			// Do not connect to absorbing yet
+			// Do not connect to absorbing yet--only connect at the end
 			// Place this in statesTerminatedLastIteration
 			statesTerminatedLastIteration.push_back(currentProbabilityState);
 			++numberOfExploredStates;
@@ -260,7 +253,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
@@ -355,7 +348,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
+StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
 	// Is this model deterministic? (I.e., is there only one choice per state?)
 	bool deterministic = generator->isDeterministicModel();
 
@@ -388,21 +381,21 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 
 	// Component builders
 	std::shared_ptr<storm::storage::SparseMatrixBuilder<ValueType>> transitionMatrixBuilder;
-	transitionMatrixBuilder =
-		std::allocate_shared<storm::storage::SparseMatrixBuilder<ValueType>>(
-			alloc
-			, 0
-			, 0
-			, 0
-			, false
-			, false // All models are deterministic
-			, 0
-		);
 	double piHat = 1.0;
 	int innerLoopCount = 0;
 
 	// Continuously decrement kappa
 	while (piHat >= Options::prob_win / Options::approx_factor) {
+		transitionMatrixBuilder =
+			std::allocate_shared<storm::storage::SparseMatrixBuilder<ValueType>>(
+				alloc
+				, 0
+				, 0
+				, 0
+				, false
+				, false // All models are deterministic
+				, 0
+			);
 		// Builds matrices and truncates state space
 		buildMatrices(
 			*transitionMatrixBuilder
@@ -411,6 +404,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 			, markovianStates
 			, stateValuationsBuilder
 		);
+
+		generator = std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(modulesFile, this->options);
 
 		piHat = this->accumulateProbabilities();
 		innerLoopCount++;
@@ -455,20 +450,11 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
-	while (!statesTerminatedLastIteration.empty()) {
-		statesToExplore.push_back(statesTerminatedLastIteration.front());
-		statesTerminatedLastIteration.pop_front();
-	}
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing() {
+StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing() {
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
 	std::function<StateType (CompressedState const&)> terminalStateToIdCallback = std::bind(
-		&StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
+		&StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
 		, this
 		, std::placeholders::_1
 	);
@@ -484,7 +470,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 	}
 }
 
-template class StaminaIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
+template class StaminaReExploringModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 } // namespace builder
 } // namespace stamina

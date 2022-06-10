@@ -4,8 +4,8 @@
 * Created by Josh Jeppson on 8/17/2021
 * */
 #include "StaminaModelBuilder.h"
-#include "StaminaMessages.h"
-#include "StateSpaceInformation.h"
+#include "../StaminaMessages.h"
+#include "../StateSpaceInformation.h"
 
 #include <functional>
 #include <sstream>
@@ -245,7 +245,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 	if (fresh) {
 		return;
 	}
@@ -260,7 +260,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::reset() {
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerator(
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerator(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator
 ) {
 	this->generator = generator;
@@ -268,7 +268,7 @@ stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerato
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-stamina::StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
 	Options::kappa = localKappa;
 }
 
@@ -345,7 +345,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 
 
 // Explicitly instantiate the class.
-	template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
+template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 template <typename StateType>
 bool set_contains(std::unordered_set<StateType> current_set, StateType value) {

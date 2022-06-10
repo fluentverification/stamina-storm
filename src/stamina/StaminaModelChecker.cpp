@@ -23,7 +23,9 @@
 	#include "ExplicitTruncatedModelBuilder.h"
 #endif // USE_STAMINA_TRUNCATION
 
-using namespace stamina;
+namespace stamina {
+
+using namespace stamina::builder;
 
 StaminaModelChecker::StaminaModelChecker(
 	std::shared_ptr<storm::prism::Program> modulesFile
@@ -105,14 +107,12 @@ StaminaModelChecker::modelCheckProperty(
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 
 	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
-		std::allocator<StaminaIterativeModelBuilder<double>> allocatorBuilder;
 		// Create StaminaModelBuilder
-		builder = std::allocate_shared<StaminaIterativeModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);
+		builder = std::make_shared<StaminaIterativeModelBuilder<double>> (generator, modulesFile, options);
 	}
 	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
-		std::allocator<StaminaPriorityModelBuilder<double>> allocatorBuilder;
 		// Create StaminaModelBuilder
-		builder = std::allocate_shared<StaminaPriorityModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);
+		builder = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
 	}
 	else {
 		StaminaMessages::errorAndExit("Truncation method is invalid!");
@@ -308,3 +308,5 @@ StaminaModelChecker::modifyState(bool isMin) {
 		}
 	}
 }
+
+} // namespace stamina

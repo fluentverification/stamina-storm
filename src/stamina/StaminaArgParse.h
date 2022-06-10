@@ -12,9 +12,10 @@
 #include <argp.h>
 #include <stdlib.h>
 
-static enum STAMINA_METHODS {
-	ITERATIVE_METHOD = 0
-	, PRIORITY_METHOD = 1
+enum STAMINA_METHODS {
+	ITERATIVE_METHOD = 0          // STAMINA 2.5
+	, PRIORITY_METHOD = 1         // STAMINA 3.0
+	, RE_EXPLORING_METHOD = 2     // STAMINA 2.0
 };
 
 
@@ -60,10 +61,12 @@ static struct argp_option options[] = {
 		"Maximum iteration for solution (default: 10000)"}
 	, {"maxStates", 'V', "integer", 0,
 		"The maximum number of states to explore in an iteration (default 2000000)"}
-	, {"iterative", 'I', 0,
+	, {"iterative", 'I', 0, 0,
 		"Use the STAMINA 2.5 method (iterative)"}
-	, {"priority", 'P', 0,
+	, {"priority", 'P', 0, 0,
 		"Use the STAMINA 3.0 method (priority)"}
+	, {"reExploring", 'J', 0, 0,
+		"Use the STAMINA 2.0 method (the method in STAMINA/PRISM)"}
 	, { 0 }
 };
 
@@ -168,6 +171,9 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			break;
 		case 'P':
 			arguments->method = STAMINA_METHODS::PRIORITY_METHOD;
+			break;
+		case 'J':
+			arguments->method = STAMINA_METHODS::RE_EXPLORING_METHOD;
 			break;
 		// model and properties file
 		case ARGP_KEY_ARG:

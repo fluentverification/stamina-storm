@@ -1,8 +1,10 @@
-#ifndef STAMINA_ITERATIVE_MODEL_BUILDER_H
-#define STAMINA_ITERATIVE_MODEL_BUILDER_H
+#ifndef STAMINA_RE_EXPLORING_MODEL_BUILDER_H
+#define STAMINA_RE_EXPLORING_MODEL_BUILDER_H
 
 /**
- * The model builder class which implements the STAMINA 2.5 algorithm (STAMINA 2.0/2.1 with dynamic programming)
+ * The model builder class which implements the STAMINA 2.0 algorithm (no dynamic programming)
+ *
+ * NOTE: This algorithm is here for testing purposes and benchmarking. It is NOT recommended to use this method
  *
  * Created by Josh Jeppson on Jun 9, 2021
  * */
@@ -12,26 +14,26 @@
 namespace stamina {
 	namespace builder {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
-		class StaminaIterativeModelBuilder : StaminaModelBuilder<ValueType, RewardModelType, StateType> {
+		class StaminaReExploringModelBuilder : StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
 			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
 			/**
-			* Constructs a StaminaIterativeModelBuilder with a given storm::generator::PrismNextStateGenerator. Invokes super's constructor
+			* Constructs a StaminaReExploringModelBuilder with a given storm::generator::PrismNextStateGenerator. Invokes super's constructor
 			*
 			* @param generator The generator we are going to use.
 			* */
-			StaminaIterativeModelBuilder(
+			StaminaReExploringModelBuilder(
 				std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 				, storm::prism::Program const& modulesFile
 				, storm::generator::NextStateGeneratorOptions const & options
 			);
 			/**
-			* Constructs a StaminaIterativeModelBuilder with a PRISM program and generatorOptions. Invokes super's constructor
+			* Constructs a StaminaReExploringModelBuilder with a PRISM program and generatorOptions. Invokes super's constructor
 			*
 			* @param program The PRISM program we are going to use to build the model with.
 			* @param generatorOptions Options for the storm::generator::PrismNextStateGenerator we are going to use.
 			* */
-			StaminaIterativeModelBuilder(
+			StaminaReExploringModelBuilder(
 				storm::prism::Program const& program
 				, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 			);
@@ -67,10 +69,6 @@ namespace stamina {
 			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() override;
 		private:
 			/**
-			 * Flushes the states terminated into statesToExplore
-			 * */
-			void flushStatesTerminated();
-			/**
 			 * Connects all states which are terminal
 			 * */
 			void connectAllTerminalStatesToAbsorbing();
@@ -83,7 +81,7 @@ namespace stamina {
 		};
 		// "Custom" deleter (which actually is not custom) to allow for polymorphic shared pointers
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
-		void __delete_stamina_iterative_model_builder(StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType> * t) { delete t; }
+		void __delete_stamina_iterative_model_builder(StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType> * t) { delete t; }
 	}
 }
-#endif // STAMINA_ITERATIVE_MODEL_BUILDER_H
+#endif // STAMINA_RE_EXPLORING_MODEL_BUILDER_H

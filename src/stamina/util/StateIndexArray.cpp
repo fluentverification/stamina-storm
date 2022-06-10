@@ -1,6 +1,6 @@
 #include "StateIndexArray.h"
 
-#include "../StaminaModelBuilder.h"
+#include "../builder/StaminaModelBuilder.h"
 
 namespace stamina {
 	namespace util {
@@ -114,7 +114,7 @@ namespace stamina {
 		// Forward-declare
 		template class StateIndexArray<
 			uint32_t
-			, StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>::ProbabilityState
+			, builder::StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>::ProbabilityState
 		>;
 	}
 }
