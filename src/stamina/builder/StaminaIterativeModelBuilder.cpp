@@ -60,39 +60,34 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		, std::placeholders::_1
 	);
 
-	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
-	// register new states
-	std::function<StateType (CompressedState const&)> stateToIdCallback2 = std::bind(
-		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
-		, this
-		, std::placeholders::_1
-	);
-
-	// Create absorbing state
-	setUpAbsorbingState(
-		transitionMatrixBuilder
-		, rewardModelBuilders
-		, stateAndChoiceInformationBuilder
-		, markovianChoices
-		, stateValuationsBuilder
-	);
-	isInit = true;
-	// Let the generator create all initial states.
-	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
-	if (this->stateStorage.initialStateIndices.empty()) {
-		StaminaMessages::errorAndExit("Initial states are empty!");
+	if (firstIteration) {
+		// Create absorbing state
+		setUpAbsorbingState(
+			transitionMatrixBuilder
+			, rewardModelBuilders
+			, stateAndChoiceInformationBuilder
+			, markovianChoices
+			, stateValuationsBuilder
+		);
+		isInit = true;
+		// Let the generator create all initial states.
+		this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+		if (this->stateStorage.initialStateIndices.empty()) {
+			StaminaMessages::errorAndExit("Initial states are empty!");
+		}
+		currentRowGroup = 1;
+		currentRow = 1;
+		numberOfExploredStates = 0;
+		numberOfExploredStatesSinceLastMessage = 0;
 	}
-	// for (StateType index : this->stateStorage.initialStateIndices) {
-	// 	exploredStates.insert(index);
-	// }
+	else {
+		// Flush the previously early-terminated states into statesToExplore FIRST
+		flushStatesTerminated();
+	}
 
-	currentRowGroup = 1;
-	currentRow = 1;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
-	uint64_t numberOfExploredStates = 0;
-	uint64_t numberOfExploredStatesSinceLastMessage = 0;
 
 	StateType currentIndex;
 	CompressedState currentState;
@@ -134,6 +129,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
 				numberTerminal++;
+				// Do NOT place this in the deque of states we should start with next iteration
 				continue;
 			}
 		}
@@ -141,12 +137,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
-			connectTerminalStatesToAbsorbing(
-				transitionMatrixBuilder
-				, currentState
-				, currentRow
-				, stateToIdCallback2
-			);
+			// Do not connect to absorbing yet
+			// Place this in statesTerminatedLastIteration
+			statesTerminatedLastIteration.push_back(currentProbabilityState);
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -395,20 +388,21 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 
 	// Component builders
 	std::shared_ptr<storm::storage::SparseMatrixBuilder<ValueType>> transitionMatrixBuilder;
+	transitionMatrixBuilder =
+		std::allocate_shared<storm::storage::SparseMatrixBuilder<ValueType>>(
+			alloc
+			, 0
+			, 0
+			, 0
+			, false
+			, false // All models are deterministic
+			, 0
+		);
 	double piHat = 1.0;
 	int innerLoopCount = 0;
+
+	// Continuously decrement kappa
 	while (piHat >= Options::prob_win / Options::approx_factor) {
-		transitionMatrixBuilder =
-			std::allocate_shared<storm::storage::SparseMatrixBuilder<ValueType>>(
-				alloc
-				, 0
-				, 0
-				, 0
-				, false
-				, false // All models are deterministic
-				, 0
-			);
-		reset();
 		// Builds matrices and truncates state space
 		buildMatrices(
 			*transitionMatrixBuilder
@@ -420,11 +414,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 
 		piHat = this->accumulateProbabilities();
 		innerLoopCount++;
-		generator = std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(modulesFile, this->options);
-		this->setGenerator(generator);
 	}
 
-	remapStates(*transitionMatrixBuilder);
+	// No remapping is necessary
+	connectAllTerminalStatesToAbsorbing();
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
@@ -458,6 +451,37 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 		}
 	}
 	return modelComponents;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
+	while (!statesTerminatedLastIteration.empty()) {
+		statesToExplore.push_back(statesTerminatedLastIteration.front());
+		statesTerminatedLastIteration.pop_front();
+	}
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing() {
+	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
+	// register new states
+	std::function<StateType (CompressedState const&)> terminalStateToIdCallback = std::bind(
+		&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
+		, this
+		, std::placeholders::_1
+	);
+	while (statesTerminatedLastIteration.empty()) {
+		auto currentProbabilityState = statesTerminatedLastIteration.front();
+		statesTerminatedLastIteration.pop_front();
+		connectTerminalStatesToAbsorbing(
+			transitionMatrixBuilder
+			, currentProbabilityState->state;
+			, currentProbabilityState->index;
+			, terminalStateToIdCallback
+		);
+	}
 }
 
 } // namespace builder

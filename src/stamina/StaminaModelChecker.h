@@ -3,6 +3,8 @@
 
 #include "Options.h"
 #include "builder/StaminaModelBuilder.h"
+#include "builder/StaminaIterativeModelBuilder.h"
+#include "builder/StaminaPriorityModelBuilder.h"
 
 #include <sstream>
 #include <string>

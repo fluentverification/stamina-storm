@@ -20,8 +20,12 @@ set(SOURCE_FILES
     src/stamina/Stamina.cpp
     src/stamina/Stamina.h
     src/stamina/StaminaArgParse.h
-    src/stamina/StaminaModelBuilder.h
-    src/stamina/StaminaModelBuilder.cpp
+    src/stamina/builder/StaminaModelBuilder.h
+    src/stamina/builder/StaminaModelBuilder.cpp
+    src/stamina/builder/StaminaIterativeModelBuilder.h
+    src/stamina/builder/StaminaIterativeModelBuilder.h
+	src/stamina/builder/StaminaPriorityModelBuilder.h
+    src/stamina/builder/StaminaPriorityModelBuilder.h
     src/stamina/StaminaModelChecker.h
     src/stamina/StaminaModelChecker.cpp
     src/stamina/StaminaMessages.h

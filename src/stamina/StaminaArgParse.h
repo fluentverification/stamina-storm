@@ -12,6 +12,11 @@
 #include <argp.h>
 #include <stdlib.h>
 
+static enum STAMINA_METHODS {
+	ITERATIVE_METHOD = 0
+	, PRIORITY_METHOD = 1
+};
+
 
 
 static char doc[] = "STAMINA -- truncates infinite CTMC state space and passes into STORM";
@@ -55,6 +60,10 @@ static struct argp_option options[] = {
 		"Maximum iteration for solution (default: 10000)"}
 	, {"maxStates", 'V', "integer", 0,
 		"The maximum number of states to explore in an iteration (default 2000000)"}
+	, {"iterative", 'I', 0,
+		"Use the STAMINA 2.5 method (iterative)"}
+	, {"priority", 'P', 0,
+		"Use the STAMINA 3.0 method (priority)"}
 	, { 0 }
 };
 
@@ -79,11 +88,8 @@ struct arguments {
 	std::string export_trans;
 	bool rank_transitions;
 	uint64_t max_iterations;
-	bool power;
-	bool jacobi;
-	bool gauss_seidel;
-	bool backward_gauss_seidel;
 	uint64_t max_states;
+	uint8_t method;
 };
 
 /**
@@ -156,6 +162,13 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			break;
 		case 'V':
 			arguments->max_states = (uint64_t) atoi(arg);
+			break;
+		case 'I':
+			arguments->method = STAMINA_METHODS::ITERATIVE_METHOD;
+			break;
+		case 'P':
+			arguments->method = STAMINA_METHODS::PRIORITY_METHOD;
+			break;
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file

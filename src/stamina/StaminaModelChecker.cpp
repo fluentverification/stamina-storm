@@ -100,12 +100,23 @@ StaminaModelChecker::modelCheckProperty(
 ) {
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
-	std::allocator<StaminaModelBuilder<double>> allocatorBuilder;
-	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto options = BuilderOptions(*propMin.getFilter().getFormula());
+	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-	// Create StaminaModelBuilder
-	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);
+
+	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
+		std::allocator<StaminaIterativeModelBuilder<double>> allocatorBuilder;
+		// Create StaminaModelBuilder
+		builder = std::allocate_shared<StaminaIterativeModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);
+	}
+	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD {
+		std::allocator<StaminaPriorityModelBuilder<double>> allocatorBuilder;
+		// Create StaminaModelBuilder
+		builder = std::allocate_shared<StaminaPriorityModelBuilder<double>> (allocatorBuilder, generator, modulesFile, options);
+	}
+	else {
+		StaminaMessages::errorAndExit("Truncation method is invalid!");
+	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 	auto modelTime = startTime;
@@ -135,6 +146,7 @@ StaminaModelChecker::modelCheckProperty(
 	}
 
 	// While we should not terminate
+	// All versions of the STAMINA algorithm (except for the heuristic version use refinement iterations)
 	while (numRefineIterations == 0
 		|| (!terminateModelCheck() && numRefineIterations < Options::max_approx_count)
 	) {
