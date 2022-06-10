@@ -39,6 +39,8 @@
 
 namespace stamina {
 
+namespace builder {
+
 template<typename ValueType, typename RewardModelType, typename StateType>
 ExplicitTruncatedModelBuilder<ValueType, RewardModelType, StateType>::Options::Options()
     : explorationOrder(storm::settings::getModule<storm::settings::modules::BuildSettings>().getExplorationOrder()) {
@@ -411,5 +413,7 @@ storm::models::sparse::StateLabeling ExplicitTruncatedModelBuilder<ValueType, Re
 
 // Explicitly instantiate the class.
 template class ExplicitTruncatedModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
+
+}
 
 }  // namespace stamina

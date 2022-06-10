@@ -140,7 +140,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
 			// Do not connect to absorbing yet
 			// Place this in statesTerminatedLastIteration
-			statesTerminatedLastIteration.push_back(currentProbabilityState);
+			statesTerminatedLastIteration.emplace_back(currentProbabilityState);
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -458,7 +458,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
-		statesToExplore.push_back(statesTerminatedLastIteration.front());
+		statesToExplore.emplace_back(statesTerminatedLastIteration.front());
 		statesTerminatedLastIteration.pop_front();
 	}
 }

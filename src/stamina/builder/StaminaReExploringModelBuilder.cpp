@@ -61,7 +61,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		, std::placeholders::_1
 	);
 	// Create absorbing state
-	setUpAbsorbingState(
+	this->setUpAbsorbingState(
 		transitionMatrixBuilder
 		, rewardModelBuilders
 		, stateAndChoiceInformationBuilder
@@ -133,7 +133,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
 			// Do not connect to absorbing yet--only connect at the end
 			// Place this in statesTerminatedLastIteration
-			statesTerminatedLastIteration.push_back(currentProbabilityState);
+			statesTerminatedLastIteration.emplace_back(currentProbabilityState);
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -282,7 +282,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(initProbabilityState);
+			statesToExplore.emplace_back(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {

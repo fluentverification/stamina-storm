@@ -108,7 +108,7 @@ namespace stamina {
 			// Dynamic programming improvement: we keep an ordered set of the states terminated
 			// during the previous iteration (in an order that prevents needing to use a remapping
 			// vector for state indecies.
-			std::deque<std::shared_ptr<ProbabilityState>> statesTerminatedLastIteration;
+			std::deque<ProbabilityState *> statesTerminatedLastIteration;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 		};

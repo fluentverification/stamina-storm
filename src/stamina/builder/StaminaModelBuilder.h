@@ -198,11 +198,6 @@ namespace stamina {
 			* @param transitionMatrixBuilder The transition matrix to apply it to.
 			* */
 			void remapStates(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
-		protected:
-			/**
-			* Creates and loads the property expression from the formula
-			* */
-			void loadPropertyExpressionFromFormula();
 			/**
 			* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 			* and state space truncation from that state.
@@ -216,6 +211,11 @@ namespace stamina {
 			* This is used as an alternative callback function for terminal (perimeter) states
 			* */
 			StateType getStateIndexOrAbsorbing(CompressedState const& state);
+		protected:
+			/**
+			* Creates and loads the property expression from the formula
+			* */
+			void loadPropertyExpressionFromFormula();
 			/**
 			* Connects all terminal states to the absorbing state
 			* */
