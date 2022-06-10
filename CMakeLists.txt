@@ -20,6 +20,15 @@ set(SOURCE_FILES
     src/stamina/Stamina.cpp
     src/stamina/Stamina.h
     src/stamina/StaminaArgParse.h
+    src/stamina/StaminaModelChecker.h
+    src/stamina/StaminaModelChecker.cpp
+    src/stamina/StaminaMessages.h
+	src/stamina/StaminaMessages.cpp
+    src/stamina/Options.h
+    src/stamina/Options.cpp
+	src/stamina/StateSpaceInformation.cpp
+	src/stamina/StateSpaceInformation.h
+	# Files for `stamina::builder` namespace
     src/stamina/builder/StaminaModelBuilder.h
     src/stamina/builder/StaminaModelBuilder.cpp
     src/stamina/builder/StaminaIterativeModelBuilder.cpp
@@ -28,16 +37,8 @@ set(SOURCE_FILES
     src/stamina/builder/StaminaPriorityModelBuilder.h
 	src/stamina/builder/StaminaReExploringModelBuilder.cpp
     src/stamina/builder/StaminaReExploringModelBuilder.h
-    src/stamina/StaminaModelChecker.h
-    src/stamina/StaminaModelChecker.cpp
-    src/stamina/StaminaMessages.h
-	src/stamina/StaminaMessages.cpp
-    src/stamina/Options.h
-    src/stamina/Options.cpp
-	src/stamina/ExplicitTruncatedModelBuilder.h
-	src/stamina/ExplicitTruncatedModelBuilder.cpp
-	src/stamina/StateSpaceInformation.cpp
-	src/stamina/StateSpaceInformation.h
+	src/stamina/builder/ExplicitTruncatedModelBuilder.h
+	src/stamina/builder/ExplicitTruncatedModelBuilder.cpp
 	# Files for `stamina::util` namespace
 	src/stamina/util/ModelModify.h
 	src/stamina/util/ModelModify.cpp
