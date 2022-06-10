@@ -13,7 +13,7 @@
 namespace stamina {
 	namespace builder {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
-		class StaminaPriorityModelBuilder : StaminaModelBuilder<ValueType, RewardModelType, StateType> {
+		class StaminaPriorityModelBuilder : protected StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
 			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
 			/**
@@ -50,8 +50,54 @@ namespace stamina {
 			* @return The components of the truncated model
 			* */
 			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() override;
+			/**
+			* Builds transition matrix of truncated state space for the given program.
+			*
+			* @param transitionMatrixBuilder The builder of the transition matrix.
+			* @param rewardModelBuilders The builders for the selected reward models.
+			* @param choiceInformationBuilder The builder for the requested information of the choices
+			* @param markovianChoices is set to a bit vector storing whether a choice is Markovian (is only set if the model type requires this information).
+			* @param stateValuationsBuilder if not boost::none, we insert valuations for the corresponding states
+			* */
+			void buildMatrices(
+				storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+				, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
+				, StateAndChoiceInformationBuilder& choiceInformationBuilder
+				, boost::optional<storm::storage::BitVector>& markovianChoices
+				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
+			) override;
+			/*
+			 * Access to data members of parent class
+			 * */
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyExpression;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::expressionManager;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyFormula;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::generator;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::memoryPool;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::statesToExplore;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateRemapping;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateMap;
+			// Options for next state generators
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::options;
+			// The model builder must have access to this to create a fresh next state generator each iteration
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::modulesFile;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentProbabilityState;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::absorbingState;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::absorbingWasSetUp;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::isInit;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::fresh;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::iteration;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::firstIteration;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::localKappa;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::isCtmc;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::formulaMatchesExpression;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTerminal;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberStates;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
 		private:
-
 		};
 	}
 }

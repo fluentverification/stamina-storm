@@ -1,4 +1,5 @@
 #include "StaminaReExploringModelBuilder.h"
+#include "../StateSpaceInformation.h"
 
 #include <functional>
 #include <sstream>
@@ -7,7 +8,7 @@ namespace stamina {
 namespace builder {
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaReExploringModelBuilder<ValueType, StateType, RewardModelType>::StaminaReExploringModelBuilder(
+StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::StaminaReExploringModelBuilder(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
@@ -22,9 +23,9 @@ StaminaReExploringModelBuilder<ValueType, StateType, RewardModelType>::StaminaRe
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaReExploringModelBuilder<ValueType, StateType, RewardModelType>::StaminaReExploringModelBuilder(
+StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::StaminaReExploringModelBuilder(
 	storm::prism::Program const& program
-	, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
+	, storm::generator::NextStateGeneratorOptions const& generatorOptions
 ) // Invoke super constructor
 	: StaminaModelBuilder<ValueType, RewardModelType, StateType>(
 		program
@@ -51,7 +52,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
 	}
 
-	loadPropertyExpressionFromFormula();
+	this->loadPropertyExpressionFromFormula();
 
 	// Create a callback for the next-state generator to enable it to request the index of states.
 	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
@@ -412,12 +413,12 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 	}
 
 	// No remapping is necessary
-	connectAllTerminalStatesToAbsorbing();
+	connectAllTerminalStatesToAbsorbing(*transitionMatrixBuilder);
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
 		transitionMatrixBuilder->build(0, transitionMatrixBuilder->getCurrentRowGroupCount())
-		, buildStateLabeling()
+		, this->buildStateLabeling()
 		, std::unordered_map<std::string, RewardModelType>()
 		, !generator->isDiscreteTimeModel()
 		, std::move(markovianStates)
@@ -450,7 +451,9 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing() {
+StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
+	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+) {
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
 	std::function<StateType (CompressedState const&)> terminalStateToIdCallback = std::bind(
@@ -461,10 +464,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 	while (statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
 		statesTerminatedLastIteration.pop_front();
-		connectTerminalStatesToAbsorbing(
+		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
-			, currentProbabilityState->state;
-			, currentProbabilityState->index;
+			, currentProbabilityState->state
+			, currentProbabilityState->index
 			, terminalStateToIdCallback
 		);
 	}

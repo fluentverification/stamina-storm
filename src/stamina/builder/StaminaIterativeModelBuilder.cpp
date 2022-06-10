@@ -1,4 +1,5 @@
 #include "StaminaIterativeModelBuilder.h"
+#include "../StateSpaceInformation.h"
 
 #include <functional>
 #include <sstream>
@@ -7,7 +8,7 @@ namespace stamina {
 namespace builder {
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaIterativeModelBuilder<ValueType, StateType, RewardModelType>::StaminaIterativeModelBuilder(
+StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::StaminaIterativeModelBuilder(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
@@ -22,9 +23,9 @@ StaminaIterativeModelBuilder<ValueType, StateType, RewardModelType>::StaminaIter
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaIterativeModelBuilder<ValueType, StateType, RewardModelType>::StaminaIterativeModelBuilder(
+StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::StaminaIterativeModelBuilder(
 	storm::prism::Program const& program
-	, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
+	, storm::generator::NextStateGeneratorOptions const& generatorOptions
 ) // Invoke super constructor
 	: StaminaModelBuilder<ValueType, RewardModelType, StateType>(
 		program
@@ -51,7 +52,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
 	}
 
-	loadPropertyExpressionFromFormula();
+	this->loadPropertyExpressionFromFormula();
 
 	// Create a callback for the next-state generator to enable it to request the index of states.
 	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
@@ -62,7 +63,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 	if (firstIteration) {
 		// Create absorbing state
-		setUpAbsorbingState(
+		this->setUpAbsorbingState(
 			transitionMatrixBuilder
 			, rewardModelBuilders
 			, stateAndChoiceInformationBuilder
@@ -417,12 +418,12 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	}
 
 	// No remapping is necessary
-	connectAllTerminalStatesToAbsorbing();
+	connectAllTerminalStatesToAbsorbing(*transitionMatrixBuilder);
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
 		transitionMatrixBuilder->build(0, transitionMatrixBuilder->getCurrentRowGroupCount())
-		, buildStateLabeling()
+		, this->buildStateLabeling()
 		, std::unordered_map<std::string, RewardModelType>()
 		, !generator->isDiscreteTimeModel()
 		, std::move(markovianStates)
@@ -464,7 +465,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStates
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing() {
+StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
+	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+) {
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
 	std::function<StateType (CompressedState const&)> terminalStateToIdCallback = std::bind(
@@ -475,10 +478,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 	while (statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
 		statesTerminatedLastIteration.pop_front();
-		connectTerminalStatesToAbsorbing(
+		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
-			, currentProbabilityState->state;
-			, currentProbabilityState->index;
+			, currentProbabilityState->state
+			, currentProbabilityState->index
 			, terminalStateToIdCallback
 		);
 	}

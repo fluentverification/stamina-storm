@@ -1,4 +1,5 @@
 #include "StaminaPriorityModelBuilder.h"
+#include "../StateSpaceInformation.h"
 
 #include <functional>
 #include <sstream>
@@ -7,7 +8,7 @@ namespace stamina {
 namespace builder {
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::StaminaPriorityModelBuilder(
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPriorityModelBuilder(
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
@@ -22,9 +23,9 @@ StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::StaminaPrior
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
-StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::StaminaPriorityModelBuilder(
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPriorityModelBuilder(
 	storm::prism::Program const& program
-	, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
+	, storm::generator::NextStateGeneratorOptions const& generatorOptions
 ) // Invoke super constructor
 	: StaminaModelBuilder<ValueType, RewardModelType, StateType>(
 		program
@@ -36,13 +37,7 @@ StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::StaminaPrior
 
 template<typename ValueType, typename RewardModelType, typename StateType>
 StateType
-StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::getOrAddStateIndex(CompressedState const& state) {
-
-}
-
-template<typename ValueType, typename RewardModelType, typename StateType>
-storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
-StaminaPriorityModelBuilder<ValueType, StateType, RewardModelType>::buildModelComponents() {
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 
 }
 
@@ -100,14 +95,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 		, stateValuationsBuilder
 	);
 
-	piHat = this->accumulateProbabilities();
+// 	piHat = this->accumulateProbabilities();
 	generator = std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(modulesFile, this->options);
 	this->setGenerator(generator);
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
 		transitionMatrixBuilder->build(0, transitionMatrixBuilder->getCurrentRowGroupCount())
-		, buildStateLabeling()
+		, this->buildStateLabeling()
 		, std::unordered_map<std::string, RewardModelType>()
 		, !generator->isDiscreteTimeModel()
 		, std::move(markovianStates)

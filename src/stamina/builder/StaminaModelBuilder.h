@@ -140,7 +140,7 @@ namespace stamina {
 			* */
 			StaminaModelBuilder(
 				storm::prism::Program const& program
-				, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
+				, storm::generator::NextStateGeneratorOptions const& generatorOptions
 			);
 			/**
 			* Creates a model with a truncated state space for the program provided during construction. State space
