@@ -265,6 +265,7 @@ namespace stamina {
 			);
 
 			/* Data Members */
+			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 			storm::expressions::Expression * propertyExpression;
 			storm::expressions::ExpressionManager * expressionManager;
 			std::shared_ptr<const storm::logic::Formula> propertyFormula;

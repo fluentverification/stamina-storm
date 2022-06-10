@@ -130,7 +130,7 @@ StaminaModelChecker::modelCheckProperty(
 	min_results = std::allocate_shared<Result>(allocatorResult);
 	max_results = std::allocate_shared<Result>(allocatorResult);
 
-	// Create number of refined iterations and rechability threshold
+	// Create number of refined iterations and reachability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
 

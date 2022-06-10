@@ -470,11 +470,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 ) {
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
-	std::function<StateType (CompressedState const&)> terminalStateToIdCallback = std::bind(
-		&StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
-		, this
-		, std::placeholders::_1
-	);
 	while (statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
 		statesTerminatedLastIteration.pop_front();
@@ -482,7 +477,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 			transitionMatrixBuilder
 			, currentProbabilityState->state
 			, currentProbabilityState->index
-			, terminalStateToIdCallback
+			, this->terminalStateToIdCallback
 		);
 	}
 }

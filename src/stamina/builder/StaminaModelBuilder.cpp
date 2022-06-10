@@ -31,8 +31,14 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, stateRemapping(std::vector<uint_fast64_t>())
 	, modulesFile(modulesFile)
 	, options(options)
+	, terminalStateToIdCallback(
+		std::bind(
+			&StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing
+			, this
+			, std::placeholders::_1
+		)
+	)
 {
-	// Optimization for hashmaps
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
