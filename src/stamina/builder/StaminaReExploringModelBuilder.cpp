@@ -213,10 +213,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 					if (!shouldEnqueueAll) {
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
+
 					if (nextProbabilityState->isNew) {
 						std::cout << "Creating transition in row " << currentIndex << std::endl;
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
-
 						nextProbabilityState->isNew = false;
 					}
 				}
