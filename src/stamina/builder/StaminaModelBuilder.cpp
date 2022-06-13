@@ -57,7 +57,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
-// 	try {
+	try {
 		switch (generator->getModelType()) {
 			// Only supports CTMC models.
 			case storm::generator::ModelType::CTMC:
@@ -74,13 +74,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 				StaminaMessages::error("This model type is not supported!");
 		}
 		return nullptr;
-// 	}
-// 	catch(const std::exception& e) {
-// 		std::stringstream ss;
-// 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
-// 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-// 		StaminaMessages::error(ss.str());
-// 	}
+	}
+	catch(const std::exception& e) {
+		std::stringstream ss;
+		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
+		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
+		StaminaMessages::error(ss.str());
+	}
 	return nullptr;
 }
 
@@ -128,7 +128,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 	std::cout << "About to flush to transition matrix " << std::endl;
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
 		for (TransitionInfo tInfo : transitionsToAdd[row]) {
-			std::cout << "Creating element in row " << row << " (element " << tInfo.to << std::endl;
+			std::cout << "Creating element in row " << row << " (element " << tInfo.to << ")" << std::endl;
 			transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
 		}
 	}

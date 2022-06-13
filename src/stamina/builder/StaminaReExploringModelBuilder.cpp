@@ -215,10 +215,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 					if (!shouldEnqueueAll) {
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
-					if (nextProbabilityState->isNew) {
+					if (currentProbabilityState->isNew) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 
-						nextProbabilityState->isNew = false;
+						currentProbabilityState->isNew = false;
 					}
 				}
 			}
@@ -416,6 +416,8 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 		piHat = this->accumulateProbabilities();
 		innerLoopCount++;
 	}
+
+	this->printStateSpaceInformation();
 
 	// No remapping is necessary
 	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
