@@ -215,7 +215,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 					}
 
 					if (nextProbabilityState->isNew) {
-						std::cout << "Matrix entry: " << currentIndex << ',' << sPrime << ',' << stateProbabilityPair.second << std::endl;
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						nextProbabilityState->isNew = false;
 					}

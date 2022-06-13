@@ -127,9 +127,17 @@ void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMatrix(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder) {
 	std::cout << "About to flush to transition matrix " << std::endl;
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
-		for (TransitionInfo tInfo : transitionsToAdd[row]) {
-// 			std::cout << "Creating element in row " << row << " (element " << tInfo.to << ")" << std::endl;
-			transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
+		if (transitionsToAdd[row].empty()) {
+			// This state is deadlock
+			std::cout << "Matrix entry: " << row << ',' << row << ", 1.0" << std::endl;
+			transitionMatrixBuilder.addNextValue(row, row, 1);
+		}
+		else {
+			for (TransitionInfo tInfo : transitionsToAdd[row]) {
+	// 			std::cout << "Creating element in row " << row << " (element " << tInfo.to << ")" << std::endl;
+				std::cout << "Matrix entry: " << row << ',' << tInfo.to << ',' << tInfo.transition << std::endl;
+				transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
+			}
 		}
 	}
 }
@@ -138,7 +146,8 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
 	TransitionInfo tInfo(to, probability);
-	while (transitionsToAdd.size() <= from) {
+	// Create an element for both from and to
+	while (transitionsToAdd.size() <= std::max(from, to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
 	// Check if we need to push back or not
