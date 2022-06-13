@@ -18,7 +18,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::StaminaRe
 		, modulesFile
 		, options
 	)
-	, statesTerminatedLastIteration(std::deque<ProbabilityState *>())
 {
 	// Intentionally left empty
 }
@@ -258,7 +257,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
-
+	std::cout << "At this iteration, the number of terminated states is " << statesTerminatedLastIteration.size() << "." << std::endl;
 	firstIteration = false;
 // 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
@@ -464,9 +463,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 ) {
 	std::cout << "connecting all terminal states to absorbing" << std::endl;
+	std::cout << "The number of states to connect is " << statesTerminatedLastIteration.size() << "." << std::endl;
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
-	while (statesTerminatedLastIteration.empty()) {
+	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
