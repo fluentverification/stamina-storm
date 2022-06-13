@@ -100,8 +100,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
 
-		std::cout << "Dequeued state " << currentIndex << std::endl;
-
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -162,7 +160,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			this->createTransition(currentIndex, currentIndex, 1.0);
+			this->createTransition(currentRow, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -217,10 +215,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 					if (!shouldEnqueueAll) {
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
-// 					if (currentProbabilityState->isNew) {
+					if (currentProbabilityState->isNew) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 
-// 						currentProbabilityState->isNew = false;
+						currentProbabilityState->isNew = false;
 					}
 				}
 			}
@@ -258,6 +256,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		}
 
 	}
+	iteration++;
 	numberStates = numberOfExploredStates;
 
 	firstIteration = false;

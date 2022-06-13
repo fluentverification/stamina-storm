@@ -141,13 +141,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	while (transitionsToAdd.size() <= from) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
-	// Note that for a certain state, as a result of how STORM works, we only need to check the last
-	// element of the vector to see if already registered.
-	int sizeOfCurrentRow = transitionsToAdd[from].size();
-	if (transitionsToAdd[from][sizeOfCurrentRow - 1].to == to) {
-		// Additionally, the rates do not change
-		return;
-	}
 	transitionsToAdd[from].push_back(tInfo);
 }
 
