@@ -121,6 +121,17 @@ namespace stamina {
 				}
 			};
 
+			/**
+			 * A basic struct for out of order transitions to insert into the transition matrix.
+			 * This is faster than using the remapping and std::sort in the STORM API
+			 * */
+			class TransitionInfo {
+			public:
+				TransitionInfo(StateType to, ValueType transition) :
+					to(to), transition(transition) { /* Intentionally left empty */ }
+				StateType to;
+				ValueType transition;
+			};
 
 			/**
 			* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
@@ -242,6 +253,17 @@ namespace stamina {
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			) = 0;
 			/**
+			 * Flushes the elements in transitionsToAdd into the transition matrix
+			 *
+			 * @param transitionMatrixBuilder The transition matrix builder
+			 * */
+			void flushToTransitionMatrix(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
+			/**
+			 * Inserts a TransitionInfo into transitionsToAdd. This method must NOT be called
+			 * after flushToTransitionMatrix has cleared transitionsToAdd
+			 * */
+			void createTransition(StateType from, StateType to, ValueType probability);
+			/**
 			* Explores state space and truncates the model
 			*
 			* @return The components of the truncated model
@@ -276,6 +298,8 @@ namespace stamina {
 			std::deque<ProbabilityState * > statesToExplore;
 			boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 			util::StateIndexArray<StateType, ProbabilityState> stateMap;
+			// Transitions which we must add
+			std::vector<std::vector<TransitionInfo>> transitionsToAdd;
 			// Options for next state generators
 			storm::generator::NextStateGeneratorOptions const & options;
 			// The model builder must have access to this to create a fresh next state generator each iteration

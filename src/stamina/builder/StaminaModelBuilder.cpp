@@ -122,6 +122,33 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsor
 	return 0;
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMatrix(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder) {
+	std::cout << "About to flush to transition matrix " << std::endl;
+	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
+		for (TransitionInfo tInfo : transitionsToAdd[row]) {
+			transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
+		}
+	}
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
+	std::cout << "Creating transition info" << std::endl;
+	TransitionInfo tInfo(to, probability);
+	while (transitionsToAdd.size() < from) {
+		std::cout << "Adding subVector" << std::endl;
+		TransitionInfo blank(0, 0);
+		std::vector<TransitionInfo> elem;
+		elem.push_back(blank);
+		transitionsToAdd.push_back(elem);
+	}
+	std::cout << "About to add to row " << from << std::endl;
+	transitionsToAdd[from].push_back(tInfo);
+}
+
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
@@ -298,7 +325,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		for (auto const& stateProbabilityPair : choice) {
 			if (stateProbabilityPair.first != 0) {
 				// row, column, value
-				transitionMatrixBuilder.addNextValue(stateId, stateProbabilityPair.first, stateProbabilityPair.second);
+				createTransition(stateId, stateProbabilityPair.first, stateProbabilityPair.second);
 			}
 			else {
 				totalRateToAbsorbing += stateProbabilityPair.second;
@@ -306,7 +333,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		}
 		addedValue = true;
 		// Absorbing state
-		transitionMatrixBuilder.addNextValue(stateId, 0, totalRateToAbsorbing);
+		createTransition(stateId, 0, totalRateToAbsorbing);
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");

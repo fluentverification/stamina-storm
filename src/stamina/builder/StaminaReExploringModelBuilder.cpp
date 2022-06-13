@@ -74,8 +74,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	if (this->stateStorage.initialStateIndices.empty()) {
 		StaminaMessages::errorAndExit("Initial states are empty!");
 	}
-	currentRowGroup = 1;
-	currentRow = 1;
+	if (firstIteration) {
+		currentRowGroup = 1;
+		currentRow = 1;
+	}
 	numberOfExploredStates = 0;
 	numberOfExploredStatesSinceLastMessage = 0;
 
@@ -94,6 +96,9 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
+
+		std::cout << "Dequeued state " << currentIndex << std::endl;
+
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -118,7 +123,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			// If the property does not hold at the current state, make it absorbing in the
 			// state graph and do not explore its successors
 			if (!evaluationAtCurrentState) {
-				transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+				this->createTransition(currentRow, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
@@ -128,12 +133,12 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			}
 		}
 
+		std::cout << "About to check " << std::endl;
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
 			// Do not connect to absorbing yet--only connect at the end
-			// Place this in statesTerminatedLastIteration
-			statesTerminatedLastIteration.emplace_back(currentProbabilityState);
+
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -155,7 +160,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+			this->createTransition(currentRow, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -211,13 +216,13 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
 
-					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
-					numberTransitions++;
+					this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 				}
 			}
 
-			++currentRow;
+			if (currentIndex >= currentRow) {
+				++currentRow;
+			}
 			firstChoiceOfState = false;
 		}
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
@@ -226,7 +231,9 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
 
-		++currentRowGroup;
+		if (currentRow >= currentRowGroup) {
+			++currentRowGroup;
+		}
 
 		++numberOfExploredStates;
 		if (generator->getOptions().isShowProgressSet()) {
@@ -249,6 +256,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	iteration++;
 	numberStates = numberOfExploredStates;
 
+	firstIteration = false;
 // 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
@@ -376,30 +384,24 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
 
-	// Allocator and deleters
-	std::allocator<storm::storage::SparseMatrixBuilder<ValueType>> alloc;
-	std::default_delete<storm::storage::SparseMatrixBuilder<ValueType>> del;
-
 	// Component builders
-	std::shared_ptr<storm::storage::SparseMatrixBuilder<ValueType>> transitionMatrixBuilder;
+	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(
+			0
+			, 0
+			, 0
+			, false
+			, false // All models are deterministic
+			, 0
+		);
+
 	double piHat = 1.0;
 	int innerLoopCount = 0;
 
 	// Continuously decrement kappa
 	while (piHat >= Options::prob_win / Options::approx_factor) {
-		transitionMatrixBuilder =
-			std::allocate_shared<storm::storage::SparseMatrixBuilder<ValueType>>(
-				alloc
-				, 0
-				, 0
-				, 0
-				, false
-				, false // All models are deterministic
-				, 0
-			);
 		// Builds matrices and truncates state space
 		buildMatrices(
-			*transitionMatrixBuilder
+			transitionMatrixBuilder
 			, rewardModelBuilders
 			, stateAndChoiceInformationBuilder
 			, markovianStates
@@ -413,11 +415,11 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 	}
 
 	// No remapping is necessary
-	connectAllTerminalStatesToAbsorbing(*transitionMatrixBuilder);
+	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
-		transitionMatrixBuilder->build(0, transitionMatrixBuilder->getCurrentRowGroupCount())
+		transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount())
 		, this->buildStateLabeling()
 		, std::unordered_map<std::string, RewardModelType>()
 		, !generator->isDiscreteTimeModel()
