@@ -53,7 +53,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
 	}
 
-	statesTerminatedLastIteration.clear();
 
 	this->loadPropertyExpressionFromFormula();
 
@@ -215,10 +214,11 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 					if (!shouldEnqueueAll) {
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
-					if (currentProbabilityState->isNew) {
+					if (nextProbabilityState->isNew) {
+						std::cout << "Creating transition in row " << currentIndex << std::endl;
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 
-						currentProbabilityState->isNew = false;
+						nextProbabilityState->isNew = false;
 					}
 				}
 			}
@@ -402,6 +402,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 
 	// Continuously decrement kappa
 	while (piHat >= Options::prob_win / Options::approx_factor) {
+		statesTerminatedLastIteration.clear();
 		// Builds matrices and truncates state space
 		buildMatrices(
 			transitionMatrixBuilder
@@ -462,6 +463,7 @@ void
 StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 ) {
+	std::cout << "connecting all terminal states to absorbing" << std::endl;
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
 	while (statesTerminatedLastIteration.empty()) {

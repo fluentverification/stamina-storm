@@ -128,7 +128,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 	std::cout << "About to flush to transition matrix " << std::endl;
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
 		for (TransitionInfo tInfo : transitionsToAdd[row]) {
-			std::cout << "Creating element in row " << row << " (element " << tInfo.to << ")" << std::endl;
+// 			std::cout << "Creating element in row " << row << " (element " << tInfo.to << ")" << std::endl;
 			transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
 		}
 	}
@@ -141,6 +141,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	while (transitionsToAdd.size() <= from) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
+	// Check if we need to push back or not
+// 	if (transitionsToAdd[from].size() >= 1 && transitionsToAdd[from][transitionsToAdd[from].size() - 1].to == to) {
+// 		return;
+// 	}
 	transitionsToAdd[from].push_back(tInfo);
 }
 
