@@ -215,7 +215,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 					}
 
 					if (nextProbabilityState->isNew) {
-						std::cout << "Creating transition in row " << currentIndex << std::endl;
+						std::cout << "Matrix entry: " << currentIndex << ',' << sPrime << ',' << stateProbabilityPair.second << std::endl;
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						nextProbabilityState->isNew = false;
 					}
@@ -257,7 +257,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	}
 	iteration++;
 	numberStates = numberOfExploredStates;
-	std::cout << "At this iteration, the number of terminated states is " << statesTerminatedLastIteration.size() << "." << std::endl;
 	firstIteration = false;
 // 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
