@@ -97,8 +97,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
 
-		std::cout << "Dequeued state " << currentIndex << std::endl;
-
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -133,7 +131,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			}
 		}
 
-		std::cout << "About to check " << std::endl;
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
@@ -215,8 +212,11 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 					if (!shouldEnqueueAll) {
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
+					if (nextProbabilityState->isNew) {
+						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 
-					this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+						nextProbabilityState->isNew = false;
+					}
 				}
 			}
 
@@ -416,6 +416,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 
 	// No remapping is necessary
 	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
+	this->flushToTransitionMatrix(transitionMatrixBuilder);
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(

@@ -57,7 +57,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::shared_ptr<storm::models::sparse::Model<ValueType, RewardModelType>>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
-	try {
+// 	try {
 		switch (generator->getModelType()) {
 			// Only supports CTMC models.
 			case storm::generator::ModelType::CTMC:
@@ -74,13 +74,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::build() {
 				StaminaMessages::error("This model type is not supported!");
 		}
 		return nullptr;
-	}
-	catch(const std::exception& e) {
-		std::stringstream ss;
-		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
-		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
-		StaminaMessages::error(ss.str());
-	}
+// 	}
+// 	catch(const std::exception& e) {
+// 		std::stringstream ss;
+// 		ss << "STAMINA encountered the following error (possibly in the interface with STORM)";
+// 		ss << " in the function StaminaModelBuilder::build():\n\t" << e.what();
+// 		StaminaMessages::error(ss.str());
+// 	}
 	return nullptr;
 }
 
@@ -128,6 +128,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 	std::cout << "About to flush to transition matrix " << std::endl;
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
 		for (TransitionInfo tInfo : transitionsToAdd[row]) {
+			std::cout << "Creating element in row " << row << " (element " << tInfo.to << std::endl;
 			transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
 		}
 	}
@@ -136,16 +137,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
-	std::cout << "Creating transition info" << std::endl;
 	TransitionInfo tInfo(to, probability);
-	while (transitionsToAdd.size() < from) {
-		std::cout << "Adding subVector" << std::endl;
-		TransitionInfo blank(0, 0);
-		std::vector<TransitionInfo> elem;
-		elem.push_back(blank);
-		transitionsToAdd.push_back(elem);
+	while (transitionsToAdd.size() <= from) {
+		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
-	std::cout << "About to add to row " << from << std::endl;
 	transitionsToAdd[from].push_back(tInfo);
 }
 
@@ -309,7 +304,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-	, CompressedState terminalState
+	, CompressedState & terminalState
 	, StateType stateId
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) {
@@ -318,7 +313,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	// If there is no behavior, we have an error.
 	if (behavior.empty()) {
-		StaminaMessages::errorAndExit("Behavior for perimeter state was empty!");
+		StaminaMessages::warning("Behavior for perimeter state was empty!");
+		return;
 	}
 	for (auto const& choice : behavior) {
 		double totalRateToAbsorbing = 0;

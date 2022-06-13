@@ -50,6 +50,7 @@ namespace stamina {
 				StateType index;
 				bool assignedInRemapping;
 				uint8_t iterationLastSeen;
+				bool isNew;
 				ProbabilityState() { /* Intentionally left empty */ }
 				ProbabilityState(
 					CompressedState state
@@ -64,6 +65,7 @@ namespace stamina {
 					, terminal(terminal)
 					, assignedInRemapping(false)
 					, iterationLastSeen(iterationLastSeen)
+					, isNew(true)
 				{
 					// Intentionally left empty
 				}
@@ -74,6 +76,7 @@ namespace stamina {
 					, pi(other.pi)
 					, terminal(other.terminal)
 					, assignedInRemapping(other.assignedInRemapping)
+					, isNew(other.isNew)
 				{
 					// Intentionally left empty
 				}
@@ -232,7 +235,7 @@ namespace stamina {
 			* */
 			void connectTerminalStatesToAbsorbing(
 				storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-				, CompressedState terminalState
+				, CompressedState & terminalState
 				, StateType stateId
 				, std::function<StateType (CompressedState const&)> stateToIdCallback
 			);
