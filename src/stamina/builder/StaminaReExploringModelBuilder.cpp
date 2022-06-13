@@ -18,6 +18,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::StaminaRe
 		, modulesFile
 		, options
 	)
+	, statesTerminatedLastIteration(std::deque<ProbabilityState *>())
 {
 	// Intentionally left empty
 }
@@ -51,6 +52,8 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
 	}
+
+	statesTerminatedLastIteration.clear();
 
 	this->loadPropertyExpressionFromFormula();
 
@@ -135,7 +138,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
 			// Do not connect to absorbing yet--only connect at the end
-
+			statesTerminatedLastIteration.push_back(currentProbabilityState);
 			++numberOfExploredStates;
 			++currentRow;
 			++currentRowGroup;
@@ -461,13 +464,14 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 	// register new states
 	while (statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
-		statesTerminatedLastIteration.pop_front();
+		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
 			, currentProbabilityState->state
 			, currentProbabilityState->index
 			, this->terminalStateToIdCallback
 		);
+		statesTerminatedLastIteration.pop_front();
 	}
 }
 
