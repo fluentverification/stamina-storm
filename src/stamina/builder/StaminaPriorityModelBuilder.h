@@ -13,7 +13,7 @@
 namespace stamina {
 	namespace builder {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
-		class StaminaPriorityModelBuilder : protected StaminaModelBuilder<ValueType, RewardModelType, StateType> {
+		class StaminaPriorityModelBuilder : public StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
 			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
 			/**
