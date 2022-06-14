@@ -101,6 +101,7 @@ namespace stamina {
 			std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStateComparison> statePriorityQueue;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
+			double piHat;
 		};
 	}
 }

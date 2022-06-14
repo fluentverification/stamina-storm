@@ -131,7 +131,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
 	StaminaMessages::info("Using STAMINA 3.0 Algorithm");
-	StaminaMessages::errorAndExit("STAMINA 3.0 is not yet implemented!");
+// 	StaminaMessages::errorAndExit("STAMINA 3.0 is not yet implemented!");
 	// Is this model deterministic? (I.e., is there only one choice per state?)
 	bool deterministic = generator->isDeterministicModel();
 
@@ -230,7 +230,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
-	double piHat = 1.0;
+	piHat = 1.0;
 	numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
@@ -378,8 +378,13 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				auto nextProbabilityState = stateMap.get(sPrime);
 				if (nextProbabilityState != nullptr) {
 					if (!shouldEnqueueAll) {
-						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
+						double piToAdd = currentProbabilityState->getPi() * probability;
+						nextProbabilityState->addToPi(piToAdd);
+						if (currentProbabilityState->isTerminal()) {
+							piHat += piToAdd;
+						}
 					}
+
 
 					if (currentProbabilityState->isNew) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
@@ -396,6 +401,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
+			piHat -= currentProbabilityState->getPi();
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
