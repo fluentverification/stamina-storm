@@ -89,8 +89,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	StateType currentIndex;
 	CompressedState currentState;
 
-	perimeterReachability = 1.0;
-
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
@@ -231,7 +229,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		currentProbabilityState->isNew = false;
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
-			perimeterReachability -= currentProbabilityState->getPi();
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
