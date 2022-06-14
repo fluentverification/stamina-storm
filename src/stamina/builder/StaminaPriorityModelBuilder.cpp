@@ -247,14 +247,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		, std::placeholders::_1
 	);
 
-// 	// Create absorbing state
-// 	this->setUpAbsorbingState(
-// 		transitionMatrixBuilder
-// 		, rewardModelBuilders
-// 		, stateAndChoiceInformationBuilder
-// 		, markovianChoices
-// 		, stateValuationsBuilder
-// 	);
+	// Create absorbing state
+	this->setUpAbsorbingState(
+		transitionMatrixBuilder
+		, rewardModelBuilders
+		, stateAndChoiceInformationBuilder
+		, markovianChoices
+		, stateValuationsBuilder
+	);
 	isInit = true;
 	// Let the generator create all initial states.
 	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
