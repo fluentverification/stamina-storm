@@ -129,13 +129,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
 		if (transitionsToAdd[row].empty()) {
 			// This state is deadlock
-			std::cout << "Matrix entry: " << row << ',' << row << ", 1.0" << std::endl;
 			transitionMatrixBuilder.addNextValue(row, row, 1);
 		}
 		else {
 			for (TransitionInfo tInfo : transitionsToAdd[row]) {
-	// 			std::cout << "Creating element in row " << row << " (element " << tInfo.to << ")" << std::endl;
-				std::cout << "Matrix entry: " << row << ',' << tInfo.to << ',' << tInfo.transition << std::endl;
 				transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
 			}
 		}
