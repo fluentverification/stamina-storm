@@ -125,7 +125,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsor
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMatrix(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder) {
-	std::cout << "About to flush to transition matrix " << std::endl;
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
 		if (transitionsToAdd[row].empty()) {
 			// This state is deadlock

@@ -218,15 +218,19 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
 
-					// row, column, value
-					transitionMatrixBuilder.addNextValue(currentRow, sPrime, stateProbabilityPair.second);
-					numberTransitions++;
+					if (currentProbabilityState->isNew) {
+						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+						numberTransitions++;
+					}
 				}
 			}
 
 			++currentRow;
 			firstChoiceOfState = false;
 		}
+
+		currentProbabilityState->isNew = false;
+
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
 		}
@@ -388,11 +392,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	std::default_delete<storm::storage::SparseMatrixBuilder<ValueType>> del;
 
 	// Component builders
-	std::shared_ptr<storm::storage::SparseMatrixBuilder<ValueType>> transitionMatrixBuilder;
-	transitionMatrixBuilder =
-		std::allocate_shared<storm::storage::SparseMatrixBuilder<ValueType>>(
-			alloc
-			, 0
+	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(
+			0
 			, 0
 			, 0
 			, false
@@ -406,7 +407,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	while (piHat >= Options::prob_win / Options::approx_factor) {
 		// Builds matrices and truncates state space
 		buildMatrices(
-			*transitionMatrixBuilder
+			transitionMatrixBuilder
 			, rewardModelBuilders
 			, stateAndChoiceInformationBuilder
 			, markovianStates
@@ -418,11 +419,12 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	}
 
 	// No remapping is necessary
-	connectAllTerminalStatesToAbsorbing(*transitionMatrixBuilder);
+	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
+	this->flushToTransitionMatrix(transitionMatrixBuilder);
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
-		transitionMatrixBuilder->build(0, transitionMatrixBuilder->getCurrentRowGroupCount())
+		transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount())
 		, this->buildStateLabeling()
 		, std::unordered_map<std::string, RewardModelType>()
 		, !generator->isDiscreteTimeModel()
