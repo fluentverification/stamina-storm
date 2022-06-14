@@ -359,6 +359,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
 StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
+	StaminaMessages::info("Using STAMINA 2.0 Algorithm");
 	// Is this model deterministic? (I.e., is there only one choice per state?)
 	bool deterministic = generator->isDeterministicModel();
 
