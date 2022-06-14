@@ -49,7 +49,7 @@ void StaminaMessages::debugPrint(std::string msg) {
 
 void
 StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream out) {
-	out.setf( std::ios::fixed, std:: ios::floatfield );
+	out.setf( std:: ios::floatfield );
 	out << std::fixed << std::setprecision(12);
 	out << horizontalSeparator << std::endl;
 	out << "RESULTS" << std::endl << horizontalSeparator << std::endl;
