@@ -38,13 +38,100 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 template<typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+	StateType actualIndex;
+	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
+	if (stateStorage.stateToId.contains(state)) {
+		actualIndex = stateStorage.stateToId.getValue(state);
+	}
+	else {
+		// Create new index just in case we need it
+		actualIndex = newIndex;
+	}
 
+	auto nextState = stateMap.get(actualIndex);
+	bool stateIsExisting = nextState != nullptr;
+
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	// Handle conditional enqueuing
+	if (isInit) {
+		if (!stateIsExisting) {
+			// Create a ProbabilityState for each individual state
+			ProbabilityState * initProbabilityState = memoryPool.allocate();
+			*initProbabilityState = ProbabilityState(
+				state
+				, actualIndex
+				, 1.0
+				, true
+			);
+			numberTerminal++;
+			stateMap.put(actualIndex, initProbabilityState);
+			statePriorityQueue.push(initProbabilityState);
+			initProbabilityState->iterationLastSeen = iteration;
+		}
+		else {
+			ProbabilityState * initProbabilityState = nextState;
+			stateMap.put(actualIndex, initProbabilityState);
+			statePriorityQueue.push_back(initProbabilityState);
+			initProbabilityState->iterationLastSeen = iteration;
+		}
+		if (actualIndex == newIndex) {
+			stateRemapping.get().push_back(storm::utility::zero<StateType>());
+		}
+		return actualIndex;
+	}
+
+	bool enqueued = false;
+
+	// This bit handles the non-initial states
+	// The previous state has reachability of 0
+	if (currentProbabilityState->getPi() == 0) {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState * nextProbabilityState = nextState;
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
+				// Enqueue
+				statePriorityQueue.push(nextProbabilityState);
+				enqueued = true;
+			}
+		}
+		else {
+			// State does not exist yet in this iteration
+			return 0;
+		}
+	}
+	else {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState * nextProbabilityState = nextState;
+			// auto emplaced = exploredStates.emplace(actualIndex);
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
+				// Enqueue
+				statePriorityQueue.push(nextProbabilityState);
+				enqueued = true;
+			}
+		}
+		else {
+			// This state has not been seen so create a new ProbabilityState
+			ProbabilityState * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
+			stateMap.put(actualIndex, nextProbabilityState);
+			nextProbabilityState->iterationLastSeen = iteration;
+			// exploredStates.emplace(actualIndex);
+			statePriorityQueue.push(nextProbabilityState);
+			enqueued = true;
+			numberTerminal++;
+		}
+	}
+	return actualIndex;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::ModelComponents<ValueType, RewardModelType>
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelComponents() {
 	StaminaMessages::info("Using STAMINA 3.0 Algorithm");
+	StaminaMessages::errorAndExit("STAMINA 3.0 is not yet implemented!");
 	// Is this model deterministic? (I.e., is there only one choice per state?)
 	bool deterministic = generator->isDeterministicModel();
 
@@ -143,7 +230,209 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	, boost::optional<storm::storage::BitVector>& markovianChoices
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
+	double piHat = 1.0;
+	numberTransitions = 0;
+	// Builds model
+	// Initialize building state valuations (if necessary)
+	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
+		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
+	}
 
+	this->loadPropertyExpressionFromFormula();
+
+	// Create a callback for the next-state generator to enable it to request the index of states.
+	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
+		&StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
+		, this
+		, std::placeholders::_1
+	);
+
+	// Create absorbing state
+	this->setUpAbsorbingState(
+		transitionMatrixBuilder
+		, rewardModelBuilders
+		, stateAndChoiceInformationBuilder
+		, markovianChoices
+		, stateValuationsBuilder
+	);
+	isInit = true;
+	// Let the generator create all initial states.
+	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+	if (this->stateStorage.initialStateIndices.empty()) {
+		StaminaMessages::errorAndExit("Initial states are empty!");
+	}
+	currentRowGroup = 1;
+	currentRow = 1;
+	numberOfExploredStates = 0;
+	numberOfExploredStatesSinceLastMessage = 0;
+
+	auto timeOfStart = std::chrono::high_resolution_clock::now();
+	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
+
+	StateType currentIndex;
+	CompressedState currentState;
+
+	isInit = false;
+	// Perform a search through the model.
+	while (!statesToExplore.empty() && (piHat >= Options::prob_win / Options::approx_factor)) {
+		currentProbabilityState = statesToExplore.front();
+		statesToExplore.pop_front();
+		// Get the first state in the queue.
+		currentIndex = currentProbabilityState->index;
+		currentState = currentProbabilityState->state;
+		if (currentIndex == 0) {
+			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
+		}
+
+		if (currentIndex % MSG_FREQUENCY == 0) {
+			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
+		}
+
+		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
+			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
+		}
+
+		// Load state for us to use
+		generator->load(currentState);
+
+		if (propertyExpression != nullptr) {
+			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
+			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+			// If the property does not hold at the current state, make it absorbing in the
+			// state graph and do not explore its successors
+			if (!evaluationAtCurrentState) {
+				transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+				// We treat this state as terminal even though it is also absorbing and does not
+				// go to our artificial absorbing state
+				currentProbabilityState->terminal = true;
+				numberTerminal++;
+				// Do NOT place this in the deque of states we should start with next iteration
+				continue;
+			}
+		}
+
+		// Add the state rewards to the corresponding reward models.
+		// Do not explore if state is terminal and its reachability probability is less than kappa
+		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
+			// Do not connect to absorbing yet
+			// Place this in statesTerminatedLastIteration
+			statesTerminatedLastIteration.emplace_back(currentProbabilityState);
+			++numberOfExploredStates;
+			++currentRow;
+			++currentRowGroup;
+			continue;
+		}
+
+		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
+		// is greater than kappa
+		// Expand (explore next states)
+		storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+
+		auto stateRewardIt = behavior.getStateRewards().begin();
+		for (auto& rewardModelBuilder : rewardModelBuilders) {
+			if (rewardModelBuilder.hasStateRewards()) {
+				rewardModelBuilder.addStateReward(*stateRewardIt);
+			}
+			++stateRewardIt;
+		}
+		// If there is no behavior, we have an error.
+		if (behavior.empty()) {
+			// Make absorbing
+			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+			continue;
+		}
+
+		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
+		// Now add all choices.
+		bool firstChoiceOfState = true;
+		for (auto const& choice : behavior) {
+			if (!firstChoiceOfState) {
+				StaminaMessages::errorAndExit("Model was not deterministic!");
+			}
+			// add the generated choice information
+			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
+				for (auto const& label : choice.getLabels()) {
+					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+
+				}
+			}
+			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
+				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+			}
+			if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
+				if (firstChoiceOfState) {
+					stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
+				}
+			}
+
+			double totalRate = 0.0;
+			if (!shouldEnqueueAll && isCtmc) {
+				for (auto const & stateProbabilityPair : choice) {
+					if (stateProbabilityPair.first == 0) {
+						StaminaMessages::warning("Transition to absorbing state from API!!!");
+						continue;
+					}
+					totalRate += stateProbabilityPair.second;
+				}
+			}
+			// Add the probabilistic behavior to the matrix.
+			for (auto const& stateProbabilityPair : choice) {
+				StateType sPrime = stateProbabilityPair.first;
+				if (sPrime == 0) {
+					continue;
+				}
+				double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
+				// Enqueue S is handled in stateToIdCallback
+				// Update transition probability only if we should enqueue all
+				// These are next states where the previous state has a reachability
+				// greater than zero
+
+				auto nextProbabilityState = stateMap.get(sPrime);
+				if (nextProbabilityState != nullptr) {
+					if (!shouldEnqueueAll) {
+						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
+					}
+
+					if (currentProbabilityState->isNew) {
+						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+						numberTransitions++;
+					}
+				}
+			}
+
+			++currentRow;
+			firstChoiceOfState = false;
+		}
+
+		currentProbabilityState->isNew = false;
+
+		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
+			numberTerminal--;
+		}
+		currentProbabilityState->setTerminal(false);
+		currentProbabilityState->setPi(0.0);
+
+		++currentRowGroup;
+
+		++numberOfExploredStates;
+		if (generator->getOptions().isShowProgressSet()) {
+			++numberOfExploredStatesSinceLastMessage;
+
+			auto now = std::chrono::high_resolution_clock::now();
+			auto durationSinceLastMessage = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfLastMessage).count();
+			if (static_cast<uint64_t>(durationSinceLastMessage) >= generator->getOptions().getShowProgressDelay()) {
+				auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
+				auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfStart).count();
+				StaminaMessages::info(
+					"Explored " + std::to_string(numberOfExploredStates) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
+				);
+				timeOfLastMessage = std::chrono::high_resolution_clock::now();
+				numberOfExploredStatesSinceLastMessage = 0;
+			}
+		}
+
+	}
+	numberStates = numberOfExploredStates;
 }
 
 template class StaminaPriorityModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

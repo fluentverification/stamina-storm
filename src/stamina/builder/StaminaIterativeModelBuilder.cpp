@@ -352,9 +352,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			numberTerminal++;
 		}
 	}
-	if (enqueued && actualIndex == newIndex) {
-		stateRemapping.get().push_back(storm::utility::zero<StateType>());
-	}
 	return actualIndex;
 }
 

@@ -98,6 +98,7 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
 		private:
+			std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, ProbabilityStateComparison> statePriorityQueue;
 		};
 	}
 }

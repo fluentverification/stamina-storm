@@ -120,7 +120,8 @@ namespace stamina {
 					const ProbabilityState * first
 					, const ProbabilityState * second
 				) const {
-					return first->index > second->index;
+					// Create a max heap on the reachability probability
+					return first->pi < second->pi;
 				}
 			};
 
