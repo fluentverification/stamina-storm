@@ -71,7 +71,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 		else {
 			ProbabilityState * initProbabilityState = nextState;
 			stateMap.put(actualIndex, initProbabilityState);
-			statePriorityQueue.push_back(initProbabilityState);
+			statePriorityQueue.push(initProbabilityState);
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		if (actualIndex == newIndex) {
@@ -242,19 +242,19 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 	// Create a callback for the next-state generator to enable it to request the index of states.
 	std::function<StateType (CompressedState const&)> stateToIdCallback = std::bind(
-		&StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
+		&StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex
 		, this
 		, std::placeholders::_1
 	);
 
-	// Create absorbing state
-	this->setUpAbsorbingState(
-		transitionMatrixBuilder
-		, rewardModelBuilders
-		, stateAndChoiceInformationBuilder
-		, markovianChoices
-		, stateValuationsBuilder
-	);
+// 	// Create absorbing state
+// 	this->setUpAbsorbingState(
+// 		transitionMatrixBuilder
+// 		, rewardModelBuilders
+// 		, stateAndChoiceInformationBuilder
+// 		, markovianChoices
+// 		, stateValuationsBuilder
+// 	);
 	isInit = true;
 	// Let the generator create all initial states.
 	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
@@ -309,18 +309,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				// Do NOT place this in the deque of states we should start with next iteration
 				continue;
 			}
-		}
-
-		// Add the state rewards to the corresponding reward models.
-		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
-			// Do not connect to absorbing yet
-			// Place this in statesTerminatedLastIteration
-			statesTerminatedLastIteration.emplace_back(currentProbabilityState);
-			++numberOfExploredStates;
-			++currentRow;
-			++currentRowGroup;
-			continue;
 		}
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
