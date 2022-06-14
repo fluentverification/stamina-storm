@@ -23,7 +23,9 @@
 	#include "ExplicitTruncatedModelBuilder.h"
 #endif // USE_STAMINA_TRUNCATION
 
-using namespace stamina;
+namespace stamina {
+
+using namespace stamina::builder;
 
 StaminaModelChecker::StaminaModelChecker(
 	std::shared_ptr<storm::prism::Program> modulesFile
@@ -100,12 +102,27 @@ StaminaModelChecker::modelCheckProperty(
 ) {
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
-	std::allocator<StaminaModelBuilder<double>> allocatorBuilder;
-	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto options = BuilderOptions(*propMin.getFilter().getFormula());
+	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-	// Create StaminaModelBuilder
-	builder = std::allocate_shared<StaminaModelBuilder<double>> (allocatorBuilder, generator);
+
+	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
+		// Create StaminaModelBuilder
+		auto builderPointer = std::make_shared<StaminaIterativeModelBuilder<double>> (generator, modulesFile, options);
+		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+	}
+	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
+		// Create StaminaModelBuilder
+		auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+	}
+	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {
+		auto builderPointer = std::make_shared<StaminaReExploringModelBuilder<double>> (generator, modulesFile, options);
+		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+	}
+	else {
+		StaminaMessages::errorAndExit("Truncation method is invalid!");
+	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 	auto modelTime = startTime;
@@ -113,7 +130,7 @@ StaminaModelChecker::modelCheckProperty(
 	min_results = std::allocate_shared<Result>(allocatorResult);
 	max_results = std::allocate_shared<Result>(allocatorResult);
 
-	// Create number of refined iterations and rechability threshold
+	// Create number of refined iterations and reachability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
 
@@ -135,6 +152,7 @@ StaminaModelChecker::modelCheckProperty(
 	}
 
 	// While we should not terminate
+	// All versions of the STAMINA algorithm (except for the heuristic version use refinement iterations)
 	while (numRefineIterations == 0
 		|| (!terminateModelCheck() && numRefineIterations < Options::max_approx_count)
 	) {
@@ -143,30 +161,19 @@ StaminaModelChecker::modelCheckProperty(
 		// Reset the reachability threshold
 		reachThreshold = Options::kappa;
 
-		double piHat = 1.0;
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
 		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
-		int innerLoopCount = 0;
-		while (piHat >= Options::prob_win / Options::approx_factor) {
-			// StaminaMessages::info("Perimeter reachability: " + std::to_string(piHat));
-			builder->reset();
-			model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
-			// Rebuild the initial state labels
+		model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 
-			// Accumulate probabilities
-			piHat = builder->accumulateProbabilities();
-			innerLoopCount++;
-			// NOTE: Kappa reduction taken care of in StaminaModelBuilder::buildMatrices
 
-			generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-			builder->setGenerator(generator);
-		}
 		// Rebuild the initial state labels
 		labeling = &( model->getStateLabeling());
-			labeling->addLabel("(Absorbing = true)");
-			labeling->addLabelToState("(Absorbing = true)", 0);
+		labeling->addLabel("(Absorbing = true)");
+		labeling->addLabelToState("(Absorbing = true)", 0);
 
-			checker = std::make_shared<CtmcModelChecker>(*model);
+		std::cout << "Labeling:\n" << model->getStateLabeling() << std::endl;
+
+		checker = std::make_shared<CtmcModelChecker>(*model);
 
 		builder->setLocalKappaToGlobal();
 		modelTime = std::chrono::high_resolution_clock::now();
@@ -307,3 +314,5 @@ StaminaModelChecker::modifyState(bool isMin) {
 		}
 	}
 }
+
+} // namespace stamina

@@ -16,10 +16,7 @@ set_default_values(struct arguments * arguments) {
     arguments->export_trans = "trans.txt";
     arguments->rank_transitions = false;
     arguments->max_iterations = 10000;
-    arguments->power = false;
-    arguments->jacobi = false;
-    arguments->gauss_seidel = false;
-    arguments->backward_gauss_seidel = false;
+    arguments->method = STAMINA_METHODS::ITERATIVE_METHOD;
 }
 
 /**

@@ -1,6 +1,6 @@
 #include "StateIndexArray.h"
 
-#include "../StaminaModelBuilder.h"
+#include "../builder/StaminaModelBuilder.h"
 
 namespace stamina {
 	namespace util {
@@ -84,6 +84,12 @@ namespace stamina {
 		}
 
 		template <typename StateType, typename ProbabilityStateType>
+		uint32_t
+		StateIndexArray<StateType, ProbabilityStateType>::getNumberTerminal() {
+			return getPerimeterStates().size();
+		}
+
+		template <typename StateType, typename ProbabilityStateType>
 		std::vector<StateType>
 		StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
 			std::vector<StateType> perimeterStates;
@@ -108,7 +114,7 @@ namespace stamina {
 		// Forward-declare
 		template class StateIndexArray<
 			uint32_t
-			, StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>::ProbabilityState
+			, builder::StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>::ProbabilityState
 		>;
 	}
 }

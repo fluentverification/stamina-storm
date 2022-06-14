@@ -40,6 +40,8 @@
 
 namespace stamina {
 
+namespace builder {
+
 using namespace storm::utility::prism;
 using namespace storm::generator;
 using namespace storm::builder;
@@ -154,6 +156,7 @@ private:
 	uint64_t numberOfExploredStates;
 };
 
+}
 }  // namespace stamina
 
 #endif /* STAMINA_EXPLICITTRUNCATEDMODELBUILDER_H */

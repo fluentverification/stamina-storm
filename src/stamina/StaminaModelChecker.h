@@ -2,43 +2,20 @@
 #define STAMINA_MODEL_CHECKER_H
 
 #include "Options.h"
-#include "StaminaModelBuilder.h"
+#include "builder/StaminaModelBuilder.h"
+#include "builder/StaminaIterativeModelBuilder.h"
+#include "builder/StaminaPriorityModelBuilder.h"
+#include "builder/StaminaReExploringModelBuilder.h"
 
 #include <sstream>
 #include <string>
 #include <unordered_set>
 
-#include "storm/api/storm.h"
-#include "storm-parsers/parser/PrismParser.h"
-#include "storm-parsers/api/storm-parsers.h"
-#include "storm/api/properties.h"
-#include "storm/storage/jani/Property.h"
-#include "storm/modelchecker/results/CheckResult.h"
-#include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
-#include "storm/utility/initialize.h"
-#include "storm-parsers/api/properties.h"
-#include "storm/models/sparse/Ctmc.h"
-#include "storm/modelchecker/csl/SparseCtmcCslModelChecker.h"
-#include "storm/modelchecker/csl/helper/SparseCtmcCslHelper.h"
-#include "storm/storage/expressions/Expression.h"
-#include "storm/storage/expressions/BaseExpression.h"
-#include "storm/storage/expressions/BinaryExpression.h"
-#include "storm/storage/expressions/BinaryRelationExpression.h"
-#include "storm/storage/expressions/VariableExpression.h"
-#include "storm/storage/expressions/ExpressionManager.h"
-#include "storm/storage/expressions/UnaryBooleanFunctionExpression.h"
-#include "storm/storage/expressions/BinaryBooleanFunctionExpression.h"
-#include "storm/logic/Formula.h"
-#include "storm/storage/prism/Constant.h"
-#include "storm/settings/SettingsManager.h"
-#include "storm/storage/expressions/Valuation.h"
-#include "storm/environment/Environment.h"
-#include "storm/modelchecker/results/CheckResult.h"
-#include "storm/builder/BuilderOptions.h"
-#include "storm/generator/VariableInformation.h"
-#include "storm/models/sparse/StateLabeling.h"
+#include "__storm_needed_for_checker.h"
 
 namespace stamina {
+
+	using namespace stamina::builder;
 	const uint32_t absorbingStateIndex = 0;
 	class StaminaModelChecker {
 	public:

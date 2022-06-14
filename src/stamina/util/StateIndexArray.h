@@ -59,6 +59,10 @@ namespace stamina {
 			 * @return A vector of all perimeter states
 			 * */
 			std::vector<StateType> getPerimeterStates();
+			/**
+			 * Gets the actual number of terminal states in the map
+			 * */
+			uint32_t getNumberTerminal();
 		protected:
 			/**
 			 * Gets a size that is a multiple of blockSize
