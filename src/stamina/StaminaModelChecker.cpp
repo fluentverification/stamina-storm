@@ -218,6 +218,8 @@ StaminaModelChecker::modelCheckProperty(
 	std::chrono::duration<double> timeTakenModel = modelTime - startTime;
 	std::chrono::duration<double> timeTakenCheck = endTime - modelTime;
 	std::stringstream ss;
+	ss.setf( std::ios::floatfield );
+	ss << std::fixed << std::setprecision(12);
 	ss << "The following summary shows the time for each step:" << std::endl;
 	ss << "\tTime taken for model building: " << timeTakenModel.count() << " s\n";
 	ss << "\tTime taken for model checking: " << timeTakenCheck.count() << " s\n";
@@ -226,6 +228,8 @@ StaminaModelChecker::modelCheckProperty(
 
 	// Print results
 	std::stringstream resultInfo;
+	resultInfo.setf( std::ios::floatfield );
+	resultInfo << std::fixed << std::setprecision(12);
 	resultInfo << "Finished checking property: " << propMin.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
