@@ -135,6 +135,14 @@ namespace stamina {
 				StateType to;
 				ValueType transition;
 			};
+			struct TransitionInfoComparison {
+				bool operator() (
+					const TransitionInfo * first
+					, const TransitionInfo * second
+				) const {
+					return first->to > second->to;
+				}
+			};
 
 			/**
 			* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator

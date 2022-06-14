@@ -214,9 +214,8 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
 					}
 
-					if (nextProbabilityState->isNew) {
+					if (currentProbabilityState->isNew) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
-						nextProbabilityState->isNew = false;
 					}
 				}
 			}
@@ -226,6 +225,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			}
 			firstChoiceOfState = false;
 		}
+		currentProbabilityState->isNew = false;
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
 		}
@@ -460,13 +460,13 @@ void
 StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 ) {
-	std::cout << "connecting all terminal states to absorbing" << std::endl;
-	std::cout << "The number of states to connect is " << statesTerminatedLastIteration.size() << "." << std::endl;
+// 	std::cout << "connecting all terminal states to absorbing" << std::endl;
+// 	std::cout << "The number of states to connect is " << statesTerminatedLastIteration.size() << "." << std::endl;
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
 	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
-		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
+// 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
 			, currentProbabilityState->state
