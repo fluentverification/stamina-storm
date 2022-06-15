@@ -433,7 +433,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 			}
 		}
 
-	} while (!statePriorityQueue.empty() && (piHat >= Options::prob_win));
+	} while (!statePriorityQueue.empty() && (piHat >= Options::prob_win) / Options::approx_factor);
 	numberStates = numberOfExploredStates;
 
 	this->printStateSpaceInformation();
