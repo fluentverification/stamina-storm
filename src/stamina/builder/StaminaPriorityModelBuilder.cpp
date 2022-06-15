@@ -274,9 +274,12 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 	isInit = false;
 	// Perform a search through the model.
-	while (!statesToExplore.empty() && (piHat >= Options::prob_win / Options::approx_factor)) {
-		currentProbabilityState = statesToExplore.front();
-		statesToExplore.pop_front();
+	do {
+		std::cout << piHat << " >=? " << Options::prob_win / Options::approx_factor << std::endl;
+		std::cout << "statePriorityQueue size is " << statePriorityQueue.size() << std::endl;
+		std::cout << "At this iteration, piHat = " << piHat << " and numberTerminal is " << numberTerminal << std::endl;
+		currentProbabilityState = statePriorityQueue.top();
+		statePriorityQueue.pop();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
 		currentState = currentProbabilityState->state;
@@ -381,7 +384,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						double piToAdd = currentProbabilityState->getPi() * probability;
 						nextProbabilityState->addToPi(piToAdd);
 						if (currentProbabilityState->isTerminal()) {
+							std::cout << "Adding " << piToAdd << " to pi" << std::endl;
 							piHat += piToAdd;
+							std::cout << "Now piHat is " << piHat << std::endl;
 						}
 					}
 
@@ -401,7 +406,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
+			std::cout << "Before editing piHat, it is " << piHat << std::endl;
+			std::cout << "Subtracting " << currentProbabilityState->getPi() <<  " from piHat" << std::endl;
 			piHat -= currentProbabilityState->getPi();
+			std::cout << "Now piHat is " << piHat << std::endl;
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
@@ -425,8 +433,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 			}
 		}
 
-	}
+	} while (!statePriorityQueue.empty() && (piHat >= Options::prob_win / Options::approx_factor));
 	numberStates = numberOfExploredStates;
+
+	this->printStateSpaceInformation();
 }
 
 template class StaminaPriorityModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
