@@ -98,6 +98,11 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
 		private:
+			/**
+			 * Connects all states which are terminal
+			 * */
+			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
+			/* Data members */
 			std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStateComparison> statePriorityQueue;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;

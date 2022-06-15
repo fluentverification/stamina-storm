@@ -163,11 +163,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 	std::default_delete<storm::storage::SparseMatrixBuilder<ValueType>> del;
 
 	// Component builders
-	std::shared_ptr<storm::storage::SparseMatrixBuilder<ValueType>> transitionMatrixBuilder;
-	transitionMatrixBuilder =
-		std::allocate_shared<storm::storage::SparseMatrixBuilder<ValueType>>(
-			alloc
-			, 0
+	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(
+			0
 			, 0
 			, 0
 			, false
@@ -176,20 +173,23 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 		);
 	// Builds matrices and truncates state space
 	buildMatrices(
-		*transitionMatrixBuilder
+		transitionMatrixBuilder
 		, rewardModelBuilders
 		, stateAndChoiceInformationBuilder
 		, markovianStates
 		, stateValuationsBuilder
 	);
 
-// 	piHat = this->accumulateProbabilities();
+	// No remapping is necessary
+	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
+	this->flushToTransitionMatrix(transitionMatrixBuilder);
+
 	generator = std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(modulesFile, this->options);
 	this->setGenerator(generator);
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
-		transitionMatrixBuilder->build(0, transitionMatrixBuilder->getCurrentRowGroupCount())
+		transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount())
 		, this->buildStateLabeling()
 		, std::unordered_map<std::string, RewardModelType>()
 		, !generator->isDiscreteTimeModel()
@@ -437,6 +437,18 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	numberStates = numberOfExploredStates;
 
 	this->printStateSpaceInformation();
+	StaminaMessages::info("Perimeter reachability is " + std::to_string(piHat));
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
+	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+) {
+	auto terminalStates = stateMap.getPerimeterStates();
+	for (auto terminalState : terminalStates) {
+		// TODO: connect to absorbing
+	}
 }
 
 template class StaminaPriorityModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
