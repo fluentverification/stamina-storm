@@ -80,6 +80,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		currentRow = 1;
 		numberOfExploredStates = 0;
 		numberOfExploredStatesSinceLastMessage = 0;
+		firstIteration = false;
 	}
 	else {
 		// Flush the previously early-terminated states into statesToExplore FIRST
@@ -470,8 +471,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 ) {
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
-	while (statesTerminatedLastIteration.empty()) {
+	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
+// 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 		statesTerminatedLastIteration.pop_front();
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
