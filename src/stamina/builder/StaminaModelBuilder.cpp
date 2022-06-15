@@ -146,10 +146,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	while (transitionsToAdd.size() <= std::max(from, to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
-	// Check if we need to push back or not
-// 	if (transitionsToAdd[from].size() >= 1 && transitionsToAdd[from][transitionsToAdd[from].size() - 1].to == to) {
-// 		return;
-// 	}
 	transitionsToAdd[from].push_back(tInfo);
 }
 
