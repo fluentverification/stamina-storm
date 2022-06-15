@@ -383,7 +383,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 					if (!shouldEnqueueAll) {
 						double piToAdd = currentProbabilityState->getPi() * probability;
 						nextProbabilityState->addToPi(piToAdd);
-						if (currentProbabilityState->isTerminal()) {
+						if (nextProbabilityState->isTerminal()) {
 							std::cout << "Adding " << piToAdd << " to pi" << std::endl;
 							piHat += piToAdd;
 							std::cout << "Now piHat is " << piHat << std::endl;
