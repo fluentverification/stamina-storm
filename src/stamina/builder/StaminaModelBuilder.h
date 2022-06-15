@@ -51,6 +51,7 @@ namespace stamina {
 				bool assignedInRemapping;
 				uint8_t iterationLastSeen;
 				bool isNew;
+				bool wasPutInTerminalQueue;
 				ProbabilityState() { /* Intentionally left empty */ }
 				ProbabilityState(
 					CompressedState state
@@ -66,6 +67,7 @@ namespace stamina {
 					, assignedInRemapping(false)
 					, iterationLastSeen(iterationLastSeen)
 					, isNew(true)
+					, wasPutInTerminalQueue(false)
 				{
 					// Intentionally left empty
 				}

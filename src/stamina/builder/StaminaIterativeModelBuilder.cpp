@@ -141,10 +141,13 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
 			// Do not connect to absorbing yet
 			// Place this in statesTerminatedLastIteration
-			statesTerminatedLastIteration.emplace_back(currentProbabilityState);
-			++numberOfExploredStates;
-			++currentRow;
-			++currentRowGroup;
+			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
+				statesTerminatedLastIteration.emplace_back(currentProbabilityState);
+				currentProbabilityState->wasPutInTerminalQueue = true;
+				++numberOfExploredStates;
+				++currentRow;
+				++currentRowGroup;
+			}
 			continue;
 		}
 
@@ -220,6 +223,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 					}
 
 					if (currentProbabilityState->isNew) {
+						std::cout << "Creating transition in model build: ";
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						numberTransitions++;
 					}
@@ -459,7 +463,9 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
-		statesToExplore.emplace_back(statesTerminatedLastIteration.front());
+		auto probabilityState = statesTerminatedLastIteration.front();
+		statesToExplore.emplace_back(probabilityState);
+		probabilityState->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
 	}
 }

@@ -132,6 +132,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 		}
 		else {
 			for (TransitionInfo tInfo : transitionsToAdd[row]) {
+				std::cout << "Adding to transition matrix: " << row << ", " << tInfo.to << ", " << tInfo.transition << std::endl;
 				transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
 			}
 		}
@@ -141,6 +142,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
+	std::cout << "Creating transition: " << from << ", " << to << ", " << probability << std::endl;
 	TransitionInfo tInfo(to, probability);
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(from, to)) {
