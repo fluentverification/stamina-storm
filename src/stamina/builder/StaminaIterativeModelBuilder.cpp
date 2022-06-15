@@ -223,7 +223,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 					}
 
 					if (currentProbabilityState->isNew) {
-						std::cout << "Creating transition in model build: ";
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						numberTransitions++;
 					}
