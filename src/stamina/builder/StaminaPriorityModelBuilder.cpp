@@ -446,8 +446,15 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 ) {
 	auto terminalStates = stateMap.getPerimeterStates();
-	for (auto terminalState : terminalStates) {
+	for (auto terminalStateIndex : terminalStates) {
+		auto terminalState = stateMap.get(terminalStateIndex);
 		// TODO: connect to absorbing
+		this->connectTerminalStatesToAbsorbing(
+			transitionMatrixBuilder
+			, terminalState->state
+			, terminalState->index
+			, this->terminalStateToIdCallback
+		);
 	}
 }
 
