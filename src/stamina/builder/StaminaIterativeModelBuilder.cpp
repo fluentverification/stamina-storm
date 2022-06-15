@@ -481,12 +481,17 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 		auto currentProbabilityState = statesTerminatedLastIteration.front();
 // 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 		statesTerminatedLastIteration.pop_front();
+		// If the state is not marked as terminal, we've already connected it to absorbing
+		if (!currentProbabilityState->isTerminal()) {
+			continue;
+		}
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
 			, currentProbabilityState->state
 			, currentProbabilityState->index
 			, this->terminalStateToIdCallback
 		);
+		currentProbabilityState->setTerminal(false);
 	}
 }
 
