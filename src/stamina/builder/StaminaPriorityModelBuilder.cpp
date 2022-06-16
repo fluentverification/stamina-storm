@@ -69,10 +69,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
-			ProbabilityState * initProbabilityState = nextState;
-			stateMap.put(actualIndex, initProbabilityState);
-			statePriorityQueue.push(initProbabilityState);
-			initProbabilityState->iterationLastSeen = iteration;
+			StaminaMessages::errorAndExit("Initial state should not exist yet, but does!");
 		}
 		if (actualIndex == newIndex) {
 			stateRemapping.get().push_back(storm::utility::zero<StateType>());
@@ -180,6 +177,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 		, stateValuationsBuilder
 	);
 
+// 	StaminaMessages::errorAndExit("Exit");
+
 	// No remapping is necessary
 	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 	this->flushToTransitionMatrix(transitionMatrixBuilder);
@@ -275,9 +274,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 	// Perform a search through the model.
 	do {
-		std::cout << piHat << " >=? " << Options::prob_win / Options::approx_factor << std::endl;
-		std::cout << "statePriorityQueue size is " << statePriorityQueue.size() << std::endl;
-		std::cout << "At this iteration, piHat = " << piHat << " and numberTerminal is " << numberTerminal << std::endl;
+
 		currentProbabilityState = statePriorityQueue.top();
 		statePriorityQueue.pop();
 		// Get the first state in the queue.
@@ -432,8 +429,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
-
-	} while (!statePriorityQueue.empty() && (piHat >= Options::prob_win) / Options::approx_factor);
+		std::cout << piHat << " >=? " << Options::prob_win / Options::approx_factor << std::endl;
+		std::cout << "statePriorityQueue size is " << statePriorityQueue.size() << std::endl;
+		std::cout << "At this iteration, piHat = " << piHat << " and numberTerminal is " << numberTerminal << std::endl;
+	} while (!statePriorityQueue.empty() && (piHat > Options::prob_win) / Options::approx_factor);
 	numberStates = numberOfExploredStates;
 
 	this->printStateSpaceInformation();
@@ -448,7 +447,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 	auto terminalStates = stateMap.getPerimeterStates();
 	for (auto terminalStateIndex : terminalStates) {
 		auto terminalState = stateMap.get(terminalStateIndex);
-		// TODO: connect to absorbing
+		// connect to absorbing
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
 			, terminalState->state
