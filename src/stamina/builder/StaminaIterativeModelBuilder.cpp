@@ -78,15 +78,13 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		}
 		currentRowGroup = 1;
 		currentRow = 1;
-		numberOfExploredStates = 0;
-		numberOfExploredStatesSinceLastMessage = 0;
 		firstIteration = false;
 	}
 	else {
 		// Flush the previously early-terminated states into statesToExplore FIRST
 		flushStatesTerminated();
 	}
-
+	numberOfExploredStatesSinceLastMessage = 0;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
@@ -144,7 +142,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
 				statesTerminatedLastIteration.emplace_back(currentProbabilityState);
 				currentProbabilityState->wasPutInTerminalQueue = true;
-				++numberOfExploredStates;
 				++currentRow;
 				++currentRowGroup;
 			}
@@ -243,7 +240,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 		++currentRowGroup;
 
-		++numberOfExploredStates;
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
 
@@ -253,7 +249,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 				auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
 				auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfStart).count();
 				StaminaMessages::info(
-					"Explored " + std::to_string(numberOfExploredStates) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
+					"Explored " + std::to_string(numberOfExploredStatesSinceLastMessage) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
 				);
 				timeOfLastMessage = std::chrono::high_resolution_clock::now();
 				numberOfExploredStatesSinceLastMessage = 0;
@@ -262,7 +258,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 	}
 	iteration++;
-	numberStates = numberOfExploredStates;
+	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
 
 // 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
