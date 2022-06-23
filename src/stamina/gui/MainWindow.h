@@ -42,6 +42,7 @@ namespace stamina {
 			void saveModelFile();
 			void saveModelFileAs();
 			void downloadFinished(KJob * job);
+			void showAbout();
 		};
 	} // namespace gui
 } // namespace stamina

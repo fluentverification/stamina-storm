@@ -56,7 +56,7 @@ The following options are allowed (these are *slightly* different than in the Ja
                              State Index> <Destination State Index> <Action
                              Label>
   -T, --rankTransitions      Rank transitions before expanding (default: false)
-                            
+
   -w, --probWin=double       Probability window between lower and upperbound
                              for termination (default: 1.0e-3)
   -?, --help                 Give this help list

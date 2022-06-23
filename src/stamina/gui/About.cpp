@@ -16,12 +16,12 @@ About::setupActions() {
 
 void
 About::show() {
-
+	this->exec();
 }
 
 void
 About::hide() {
-
+// 	ui.hide();
 }
 
 }

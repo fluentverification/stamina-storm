@@ -60,6 +60,12 @@ MainWindow::setupActions() {
 		, this
 		, SLOT(saveModelFileAs())
 	);
+	connect(
+		ui.actionAbout_STAMINA_2
+		, SIGNAL(triggered())
+		, this
+		, SLOT(showAbout())
+	);
 	// setupGUI(Default, "mainWindow.ui");
 }
 
@@ -158,6 +164,11 @@ MainWindow::downloadFinished(KJob* job) {
 
 	KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
 	ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+}
+
+void
+MainWindow::showAbout() {
+	this->about->show();
 }
 
 } // namespace gui
