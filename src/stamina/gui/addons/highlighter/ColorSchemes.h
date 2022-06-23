@@ -1,5 +1,4 @@
 #include <QColor>
-
 namespace stamina {
 	namespace gui {
 		namespace addons {
@@ -13,12 +12,14 @@ namespace stamina {
 						, QColor type
 						, QColor function
 						, QColor string
+						, QColor constant
 					) : keyword(keyword)
 						, comment(comment)
 						, number(number)
 						, type(type)
 						, function(function)
 						, string(string)
+						, constant(constant)
 					{
 						// Intentionally left empty
 					}
@@ -28,6 +29,7 @@ namespace stamina {
 					QColor type;
 					QColor function;
 					QColor string;
+					QColor constant;
 				};
 				class ColorSchemes {
 				public:
@@ -36,8 +38,9 @@ namespace stamina {
 						, QColor("#919191")
 						, QColor("#ff4747")
 						, QColor("#3cbc00")
-						, QColor("#94e8ff")
+						, QColor("#629aa8")
 						, QColor("#ff9040")
+						, QColor("#3cbc00") // QColor("#ff58bf")
 					);
 					inline static ColorScheme lightMode = ColorScheme(
 						QColor("#006598")
@@ -46,6 +49,7 @@ namespace stamina {
 						, QColor("#267300")
 						, QColor("#314d54")
 						, QColor("#7a451f")
+						, QColor("#267300") // QColor("#461835")
 					);
 				};
 			}

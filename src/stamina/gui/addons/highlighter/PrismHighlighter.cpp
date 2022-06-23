@@ -115,6 +115,13 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = functionFormat;
 	highlightingRules.append(rule);
 
+	// Constants
+	constFormat.setFontItalic(true);
+	constFormat.setForeground(cs.constant);
+	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z_]+\\b"));
+	rule.format = constFormat;
+	highlightingRules.append(rule);
+
 	// Single line comments
 	singleLineCommentFormat.setForeground(cs.comment);
 	rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));

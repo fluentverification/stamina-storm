@@ -39,6 +39,7 @@ namespace stamina {
 					QTextCharFormat quotationFormat;
 					QTextCharFormat functionFormat;
 					QTextCharFormat numberFormat;
+					QTextCharFormat constFormat;
 				};
 			}
 		}
