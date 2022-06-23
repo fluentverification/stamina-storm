@@ -1,6 +1,8 @@
 #include "PrismHighlighter.h"
 
 #include <QStringLiteral>
+#include <QRegularExpressionMatchIterator>
+#include <QRegularExpression>
 #include <QFont>
 #include <QColor>
 
@@ -9,7 +11,7 @@ namespace gui {
 namespace addons {
 namespace highlighter {
 
-PrismHighlighter(QTextDocument * parent)
+PrismHighlighter::PrismHighlighter(QTextDocument * parent)
 	: Highlighter(parent)
 {
 	setupKeyWordPatterns();

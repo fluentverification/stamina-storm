@@ -2,11 +2,18 @@
 #include "Highlighter.h"
 
 #include <QRegularExpressionMatchIterator>
+#include <QRegularExpression>
 
 namespace stamina {
 namespace gui {
 namespace addons {
 namespace highlighter {
+
+Highlighter::Highlighter(QTextDocument * parent)
+	: QSyntaxHighlighter(parent)
+{
+
+}
 
 void Highlighter::highlightBlock(const QString &text)
 {

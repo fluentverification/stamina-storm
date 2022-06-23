@@ -36,6 +36,9 @@ set(xstamina_SRCS
 	Preferences.cpp
 	addons/CodeEditor.cpp
 	addons/LineNumberArea.cpp
+	# Syntax Highlighting
+	addons/highlighter/Highlighter.cpp
+	addons/highlighter/PrismHighlighter.cpp
 )
 
 add_executable(xstamina ${xstamina_SRCS})

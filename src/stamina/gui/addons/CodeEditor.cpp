@@ -10,7 +10,7 @@ namespace addons {
 
 CodeEditor::CodeEditor(QWidget * parent)
 	: QPlainTextEdit(parent)
-	, hl(new PrismHighlighter(this))
+	, hl(new highlighter::PrismHighlighter(this->document()))
 {
 	lineNumberArea = new LineNumberArea(this);
 

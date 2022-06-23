@@ -2,6 +2,9 @@
 #define STAMINA_GUI_ADDONS_HIGHLIGHTER_H
 
 #include <QSyntaxHighlighter>
+#include <QRegularExpressionMatchIterator>
+#include <QRegularExpression>
+#include <QTextDocument>
 
 #include "ColorSchemes.h"
 
