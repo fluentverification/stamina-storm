@@ -33,7 +33,7 @@ namespace stamina {
 				public:
 					inline static ColorScheme darkMode = ColorScheme(
 						QColor("#00aaff")
-						, QColor("#bcbcbc")
+						, QColor("#919191")
 						, QColor("#ff4747")
 						, QColor("#3cbc00")
 						, QColor("#94e8ff")
