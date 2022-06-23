@@ -1,8 +1,6 @@
 ![stamina-logo](doc/staminaLogo.png)
 
-***PLEASE NOTE THAT THE MOST "UP-TO-DATE" VERSION OF STAMINA CAN BE FOUND UNDER THE `dev` BRANCH***
-
-# STAMINA (C++ Version)
+# STAMINA (STORM Integration)
 
 C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm]. This version is different from the [Java version](https://github.com/fluentverification/stamina ), and is **still under development**.
 
@@ -67,4 +65,17 @@ The following options are allowed (these are *slightly* different than in the Ja
 
 ## GUI (Work in Progress)
 
-A (simple) GUI is also being developed in Python/PyQt5. Since I don't want to write PyBind bindings for Stamina, the GUI will just invoke the executable using the `os.system()` call and pipe output to the screen. It's essentially just a way to build a command to pass into the C++ executable.
+The GUI I wrote in Python was not the best...I'm going to be honest...it wasn't. So I am writing a new GUI using QtDesigner and C++. This new GUI is heavily inspired by `xprism` and longtime PRISM users will find it quite familiar. The newest version of the GUI *only* integrates with STAMINA/STORM, *not* STAMINA/PRISM.
+
+Some features of this new GUI include (or rather, *will include*:
+	- PRISM File editing/CSL Properties editing
+	- Syntax highlighting for PRISM model files
+	- Direct "Check" button included in the GUI
+	- CSL Properties wizard
+	- Label Editor
+	- State viewer
+	- Counterexample viewer (to integrate with the other FLUENT projects)
+
+![xstamina screenshot](doc/screenshots/xstamina.png)
+
+![xstamina screenshot](doc/screenshots/xstamina2.png)
