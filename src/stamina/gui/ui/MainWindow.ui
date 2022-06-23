@@ -43,10 +43,22 @@
            <layout class="QVBoxLayout" name="modelLeftVBox">
             <item>
              <widget class="QTreeWidget" name="modelInfoTree">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
                 <height>16777215</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>500</width>
+                <height>0</height>
                </size>
               </property>
               <column>
@@ -583,7 +595,16 @@
       <addaction name="actionUnbounded_Variable"/>
       <addaction name="actionBounded_Variable"/>
      </widget>
+     <widget class="QMenu" name="menuProperties">
+      <property name="title">
+       <string>Properties</string>
+      </property>
+      <addaction name="actionForever_Property"/>
+      <addaction name="actionUntil_Property"/>
+      <addaction name="actionBounded_Until_Property"/>
+     </widget>
      <addaction name="menuModel"/>
+     <addaction name="menuProperties"/>
     </widget>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
@@ -1180,6 +1201,21 @@
    </property>
    <property name="text">
     <string>Right</string>
+   </property>
+  </action>
+  <action name="actionForever_Property">
+   <property name="text">
+    <string>Forever Property</string>
+   </property>
+  </action>
+  <action name="actionUntil_Property">
+   <property name="text">
+    <string>Until Property</string>
+   </property>
+  </action>
+  <action name="actionBounded_Until_Property">
+   <property name="text">
+    <string>Bounded Until Property</string>
    </property>
   </action>
  </widget>

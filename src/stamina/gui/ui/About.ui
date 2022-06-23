@@ -62,16 +62,23 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="usageDocs">
            <property name="text">
             <string>Usage Documentation</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="apiDocs">
            <property name="text">
             <string>API Documentation</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="caseStudies">
+           <property name="text">
+            <string>Case Studies</string>
            </property>
           </widget>
          </item>
