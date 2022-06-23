@@ -11,6 +11,8 @@
 #include <QPlainTextEdit>
 #include <QPainter>
 
+#include "highlighter/Highlighter.h"
+
 namespace stamina {
 	namespace gui {
 		namespace addons {
@@ -30,6 +32,7 @@ namespace stamina {
 
 			private:
 				QWidget * lineNumberArea;
+				highlighter::Highlighter * hl;
 			};
 		}
 	}

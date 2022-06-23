@@ -1,12 +1,16 @@
 #include "CodeEditor.h"
 #include "LineNumberArea.h"
 
+#include "highlighter/PrismHighlighter.h"
+
+
 namespace stamina {
 namespace gui {
 namespace addons {
 
 CodeEditor::CodeEditor(QWidget * parent)
 	: QPlainTextEdit(parent)
+	, hl(new PrismHighlighter(this))
 {
 	lineNumberArea = new LineNumberArea(this);
 

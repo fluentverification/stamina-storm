@@ -3,6 +3,8 @@
 
 #include <QSyntaxHighlighter>
 
+#include "ColorSchemes.h"
+
 namespace stamina {
 	namespace gui {
 		namespace addons {

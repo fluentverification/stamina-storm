@@ -17,9 +17,10 @@ PrismHighlighter(QTextDocument * parent)
 
 void
 PrismHighlighter::setupKeyWordPatterns() {
+	ColorScheme & cs = ColorSchemes::darkMode;
 	HighlightingRule rule;
 
-	keywordFormat.setForeground(Qt::darkBlue); // TODO: Use color from theme
+	keywordFormat.setForeground(cs.keyword);
 	keywordFormat.setFontWeight(QFont::Bold);
 	const QString keywordPatterns[] = {
 		QStringLiteral("\\bA\\b")
@@ -87,28 +88,28 @@ PrismHighlighter::setupKeyWordPatterns() {
 
 	// String expressions
 	classFormat.setFontWeight(QFont::Bold);
-	classFormat.setForeground(Qt::darkMagenta); // TODO: Use color from theme
+	classFormat.setForeground(cs.string);
 	rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
 	rule.format = classFormat;
 	highlightingRules.append(rule);
 
-	quotationFormat.setForeground(Qt::darkGreen); // TODO: Use color from theme
+	quotationFormat.setForeground(cs.function);
 	rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
 	rule.format = quotationFormat;
 	highlightingRules.append(rule);
 
 	functionFormat.setFontItalic(true);
-	functionFormat.setForeground(Qt::blue); // TODO: Use color from theme
+	functionFormat.setForeground(cs.number);
 	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
 	rule.format = functionFormat;
 	highlightingRules.append(rule);
 
-	singleLineCommentFormat.setForeground(Qt::red);  // TODO: Use color from theme
+	singleLineCommentFormat.setForeground(cs.comment);
 	rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
 	rule.format = singleLineCommentFormat;
 	highlightingRules.append(rule);
 
-	multiLineCommentFormat.setForeground(Qt::red);  // TODO: Use color from theme
+	multiLineCommentFormat.setForeground(cs.comment);
 
 	commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
 	commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
