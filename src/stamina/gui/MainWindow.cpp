@@ -66,6 +66,18 @@ MainWindow::setupActions() {
 		, this
 		, SLOT(showAbout())
 	);
+	connect(
+		ui.modelFile
+		, SIGNAL(textChanged())
+		, this
+		, SLOT(setModifiedModel())
+	);
+	connect(
+		ui.propertiesEditor
+		, SIGNAL(textChanged())
+		, this
+		, SLOT(setModifiedProperties())
+	);
 	// setupGUI(Default, "mainWindow.ui");
 }
 
@@ -79,8 +91,8 @@ MainWindow::saveToActiveModelFile() {
 		bArray.append(ui.modelFile->toPlainText().toUtf8());
 		file.write(bArray);
 		file.commit();
+		unsavedChangesModel = false;
 	}
-	unsavedChangesModel = false;
 }
 
 void
@@ -93,8 +105,8 @@ MainWindow::saveToActivePropertiesFile() {
 		bArray.append(ui.propertiesEditor->toPlainText().toUtf8());
 		file.write(bArray);
 		file.commit();
+		unsavedChangesProperty = false;
 	}
-	unsavedChangesProperty = false;
 }
 
 void
@@ -127,7 +139,8 @@ MainWindow::openFromAcceptedPath() {
 		, SIGNAL(accepted())
 	);
 	if (selectedFile != "") {
-		KIO::Job * job = KIO::storedGet(QUrl(selectedFile));
+		setCaption(QString("OPEN MODEL")); // TODO: The actual filename
+		KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(selectedFile));
 		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinished(KJob*)));
 		job->exec();
 	}
@@ -155,8 +168,7 @@ MainWindow::saveModelFileAs() {
 
 void
 MainWindow::downloadFinished(KJob* job) {
-	if (job->error())
-	{
+	if (job->error()) {
 		KMessageBox::error(this, job->errorString());
 		activeModelFile.clear();
 		return;
@@ -169,6 +181,20 @@ MainWindow::downloadFinished(KJob* job) {
 void
 MainWindow::showAbout() {
 	this->about->show();
+}
+
+void
+MainWindow::setModifiedModel() {
+	if (unsavedChangesModel) { return; }
+	setCaption(windowTitle() + " * ");
+	unsavedChangesModel = true;
+}
+
+void
+MainWindow::setModifiedProperties() {
+	if (unsavedChangesProperty) { return; }
+	setCaption(windowTitle() + " * ");
+	unsavedChangesProperty = true;
 }
 
 } // namespace gui

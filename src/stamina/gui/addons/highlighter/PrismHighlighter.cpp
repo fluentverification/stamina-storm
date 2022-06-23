@@ -98,7 +98,7 @@ PrismHighlighter::setupKeyWordPatterns() {
 	// Numbers
 	numberFormat.setFontWeight(QFont::Bold);
 	numberFormat.setForeground(cs.number);
-	rule.pattern = QRegularExpression(QStringLiteral("([eE]?\\d+(\\.)?)"));
+	rule.pattern = QRegularExpression(QStringLiteral("\\b([eE]?\\d+(\\.)?)"));
 	rule.format = numberFormat;
 	highlightingRules.append(rule);
 
