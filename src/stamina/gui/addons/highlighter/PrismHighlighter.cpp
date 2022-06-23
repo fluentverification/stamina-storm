@@ -95,22 +95,33 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = classFormat;
 	highlightingRules.append(rule);
 
-	quotationFormat.setForeground(cs.function);
+	// Numbers
+	numberFormat.setFontWeight(QFont::Bold);
+	numberFormat.setForeground(cs.number);
+	rule.pattern = QRegularExpression(QStringLiteral("([eE]?\\d+(\\.)?)"));
+	rule.format = numberFormat;
+	highlightingRules.append(rule);
+
+	// String literals
+	quotationFormat.setForeground(cs.string);
 	rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
 	rule.format = quotationFormat;
 	highlightingRules.append(rule);
 
+	// Functions
 	functionFormat.setFontItalic(true);
-	functionFormat.setForeground(cs.number);
+	functionFormat.setForeground(cs.function);
 	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
 	rule.format = functionFormat;
 	highlightingRules.append(rule);
 
+	// Single line comments
 	singleLineCommentFormat.setForeground(cs.comment);
 	rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
 	rule.format = singleLineCommentFormat;
 	highlightingRules.append(rule);
 
+	// Multiline comments
 	multiLineCommentFormat.setForeground(cs.comment);
 
 	commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));

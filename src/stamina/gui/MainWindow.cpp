@@ -10,6 +10,7 @@
 #include <KActionCollection>
 #include <KStandardAction>
 #include <KMessageBox>
+#include <KIO/Job>
 
 #include "MainWindow.h"
 
@@ -26,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, activePropertiesFile("")
 	, about(new About(this))
 	, prefs(new Preferences(this))
+	, unsavedChangesModel(false)
+	, unsavedChangesProperty(false)
 {
 	setupActions();
 }
@@ -62,12 +65,30 @@ MainWindow::setupActions() {
 
 void
 MainWindow::saveToActiveModelFile() {
+	if (activeModelFile != "") {
+		QSaveFile file(activeModelFile);
+		file.open(QIODevice::WriteOnly);
 
+		QByteArray bArray;
+		bArray.append(ui.modelFile->toPlainText().toUtf8());
+		file.write(bArray);
+		file.commit();
+	}
+	unsavedChangesModel = false;
 }
 
 void
 MainWindow::saveToActivePropertiesFile() {
+	if (activePropertiesFile != "") {
+		QSaveFile file(activePropertiesFile);
+		file.open(QIODevice::WriteOnly);
 
+		QByteArray bArray;
+		bArray.append(ui.propertiesEditor->toPlainText().toUtf8());
+		file.write(bArray);
+		file.commit();
+	}
+	unsavedChangesProperty = false;
 }
 
 void
@@ -80,8 +101,31 @@ void
 MainWindow::openModelFile() {
 	std::cout << "Opening model file" << std::endl;
 	fd->setOperationMode(KFileWidget::Opening);
+	fd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
+	connect(
+		fd->fileWidget()
+		, SIGNAL(accepted())
+		, this
+		, SLOT(openFromAcceptedPath())
+	);
 	fd->show();
 // 	QString openFileName = KFileDialog::getOpenFileName(this, i18n("Open model file"));
+}
+
+void
+MainWindow::openFromAcceptedPath() {
+	QString selectedFile = fd->fileWidget()->selectedFile();
+	std::cout << "Opening file " << selectedFile.toStdString() << std::endl;
+	disconnect(
+		fd->fileWidget()
+		, SIGNAL(accepted())
+	);
+	if (selectedFile != "") {
+		KIO::Job * job = KIO::storedGet(QUrl(selectedFile));
+		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinished(KJob*)));
+		job->exec();
+	}
+
 }
 
 void
@@ -99,7 +143,21 @@ MainWindow::saveModelFileAs() {
 	std::cout << "Saving model file as" << std::endl;
 	fd->setOperationMode(KFileWidget::Saving);
 	fd->show();
+	fd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
 	saveToActiveModelFile();
+}
+
+void
+MainWindow::downloadFinished(KJob* job) {
+	if (job->error())
+	{
+		KMessageBox::error(this, job->errorString());
+		activeModelFile.clear();
+		return;
+	}
+
+	KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
+	ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 }
 
 } // namespace gui

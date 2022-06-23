@@ -24,6 +24,8 @@ namespace stamina {
 			void setupActions();
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();
+			bool unsavedChangesModel;
+			bool unsavedChangesProperty;
 			// UI
 			Ui::MainWindow ui;
 			// Showable dialogs
@@ -36,8 +38,10 @@ namespace stamina {
 		private slots:
 			void showPreferences();
 			void openModelFile();
+			void openFromAcceptedPath();
 			void saveModelFile();
 			void saveModelFileAs();
+			void downloadFinished(KJob * job);
 		};
 	} // namespace gui
 } // namespace stamina
