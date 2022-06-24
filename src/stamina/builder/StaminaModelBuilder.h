@@ -46,15 +46,15 @@ namespace stamina {
 			/* Sub-class for states with probabilities */
 			class ProbabilityState {
 			public:
-				CompressedState state;
+				CompressedState & state; // TODO: make this into reference
 				StateType index;
 				bool assignedInRemapping;
 				uint8_t iterationLastSeen;
 				bool isNew;
 				bool wasPutInTerminalQueue;
-				ProbabilityState() { /* Intentionally left empty */ }
+// 				ProbabilityState() : { /* Intentionally left empty */ }
 				ProbabilityState(
-					CompressedState state
+					CompressedState & state
 					, StateType index
 					, double pi = 0.0
 					, bool terminal = true

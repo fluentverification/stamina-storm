@@ -13,6 +13,7 @@ namespace stamina {
 			BINARY_OPERAND
 			, UNARY_OPERAND
 			, VARIABLE
+			, VALUE
 		};
 		typedef uint8_t operandType_t;
 		struct OperandAndDescription {
@@ -27,13 +28,23 @@ namespace stamina {
 				OperandAndDescription("&", "AND Operand") // AND Operand
 				, OperandAndDescription("|", "OR Operand") // OR Operand
 				// Path-formula Operands
-				, OperandAndDescription("F", "Eventually Operand") // Eventually Operand
 				, OperandAndDescription("U", "Until Operand") // Until operand
+// 				, OperandAndDescription("U <=", "Bounded Until Operand") // TODO: Until operand
 				// Math Operands
 				, OperandAndDescription("+", "Addition Operand") // Add
 				, OperandAndDescription("-", "Subtraction Operand") // Subtract
 				, OperandAndDescription("*", "Multiply Operand") // Multiply
 				, OperandAndDescription("/", "Division Operand") // divide
+			};
+			inline const static OperandAndDescription unaryOperands[] = {
+				// Logic operands
+				OperandAndDescription("!", "NOT Operand") // NOT Operand
+				// Path-formula Operands
+				, OperandAndDescription("F", "Eventually Operand") // Eventually Operand
+				, OperandAndDescription("G", "Always (globally) Operand") // Always Operand
+				, OperandAndDescription("X", "Next Operand") // Next Operand
+				// Math Operands
+				, OperandAndDescription("-", "Numeric Negation Operand") // Subtract
 			};
 		};
 		class PropertyWizard : public QDialog {
@@ -43,7 +54,6 @@ namespace stamina {
 		protected:
 			void setupActions();
 			Ui::PropertyWizard ui;
-		private slots:
 			/**
 			 * Inserts into the operand tree. Will insert over "EMPTY" if selected. If no "EMPTY" is
 			 * selected, raises messagebox
@@ -52,10 +62,20 @@ namespace stamina {
 			 * @param opType The type of the Operand
 			 * */
 			void insertOperand(QString opString, operandType_t opType);
+			std::vector<QString> variables;
+		private slots:
+			/**
+			 * Gets information from the comboboxes in ui and inserts the operand
+			 * */
+			void getInfoAndInsertOperand();
 			/**
 			 * Deletes the selected operand in the tree.
 			 * */
 			void deleteSelectedOperand();
+			/**
+			 * Updates the values in expressionOptions
+			 * */
+			void updateValuesInExpressionOptions();
 		};
 	}
 }

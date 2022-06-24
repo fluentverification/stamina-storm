@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="KComboBox" name="kcombobox">
+      <widget class="KComboBox" name="prefixLeft">
        <item>
         <property name="text">
          <string>P</string>
@@ -41,7 +41,7 @@
       </widget>
      </item>
      <item>
-      <widget class="KComboBox" name="kcombobox_2">
+      <widget class="KComboBox" name="prefixOperand">
        <item>
         <property name="text">
          <string>&gt;</string>
@@ -70,7 +70,7 @@
       </widget>
      </item>
      <item>
-      <widget class="KComboBox" name="kcombobox_5">
+      <widget class="KComboBox" name="prefixRight">
        <property name="editable">
         <bool>true</bool>
        </property>
@@ -92,7 +92,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeWidget" name="treeWidget">
+    <widget class="QTreeWidget" name="propertyTree">
      <column>
       <property name="text">
        <string notr="true">1</string>
@@ -103,7 +103,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="KComboBox" name="kcombobox_3">
+      <widget class="KComboBox" name="expressionType">
        <item>
         <property name="text">
          <string>Binary Expression</string>
@@ -116,18 +116,18 @@
        </item>
        <item>
         <property name="text">
-         <string>Value</string>
+         <string>Variable</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Variable</string>
+         <string>Value</string>
         </property>
        </item>
       </widget>
      </item>
      <item>
-      <widget class="KComboBox" name="kcombobox_4">
+      <widget class="KComboBox" name="expressionOptions">
        <item>
         <property name="text">
          <string>AND</string>
@@ -151,22 +151,24 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButton">
+      <widget class="QToolButton" name="addExpression">
        <property name="text">
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset theme="add"/>
+        <iconset theme="add">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButton_2">
+      <widget class="QToolButton" name="deleteExpression">
        <property name="text">
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset theme="delete"/>
+        <iconset theme="delete">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>

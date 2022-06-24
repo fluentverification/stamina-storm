@@ -37,6 +37,7 @@ namespace stamina {
 			QString activeModelFile;
 			QString activePropertiesFile;
 			QString baseWindowTitle;
+			bool modelWasBuilt;
 
 		private slots:
 			void showPreferences();

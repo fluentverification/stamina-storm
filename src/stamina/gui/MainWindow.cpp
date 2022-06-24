@@ -23,14 +23,15 @@ namespace gui {
 MainWindow::MainWindow(QWidget *parent)
 	: KXmlGuiWindow(parent)
 	, fd(new KFileCustomDialog())
-	, activeModelFile("")
-	, activePropertiesFile("")
 	, about(new About(this))
 	, prefs(new Preferences(this))
 	, propWizard(new PropertyWizard(this))
+	, activeModelFile("")
+	, activePropertiesFile("")
 	, unsavedChangesModel(false)
 	, unsavedChangesProperty(false)
 	, baseWindowTitle("New File")
+	, modelWasBuilt(false)
 {
 	setupActions();
 }
@@ -250,6 +251,12 @@ MainWindow::onClose() {
 
 void
 MainWindow::showPropertyWizard() {
+	if (!modelWasBuilt) {
+		bool shouldShow = KMessageBox::warningContinueCancel(0, i18n("The model has not been built yet! Variable names will not appear in the Property Wizard.")) == KMessageBox::Continue;
+		if (!shouldShow) {
+			return;
+		}
+	}
 	propWizard->show();
 	// TODO: connect the close() slot to appending to the text file
 }

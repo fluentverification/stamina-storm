@@ -31,7 +31,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="modelTab">
        <attribute name="title">
@@ -409,9 +409,9 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="simulatorTab">
+      <widget class="QWidget" name="resultsTab">
        <attribute name="title">
-        <string>Simulator</string>
+        <string>Results</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
