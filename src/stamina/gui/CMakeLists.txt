@@ -41,6 +41,10 @@ set(xstamina_SRCS
 	addons/highlighter/PrismHighlighter.cpp
 )
 
+set(xstamina_RECS
+	resources/resources.qrc
+)
+
 add_executable(xstamina ${xstamina_SRCS})
 
 target_link_libraries(xstamina

@@ -21,9 +21,9 @@ namespace stamina {
 			MainWindow(QWidget * parent = 0);
 
 		private:
-			void setupActions();
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();
+			void setupActions();
 			bool unsavedChangesModel;
 			bool unsavedChangesProperty;
 			// UI
@@ -34,6 +34,7 @@ namespace stamina {
 			KFileCustomDialog * fd;
 			QString activeModelFile;
 			QString activePropertiesFile;
+			QString baseWindowTitle;
 
 		private slots:
 			void showPreferences();
@@ -45,6 +46,8 @@ namespace stamina {
 			void showAbout();
 			void setModifiedModel();
 			void setModifiedProperties();
+			void setActiveModelFileAndSave();
+			void onClose();
 		};
 	} // namespace gui
 } // namespace stamina

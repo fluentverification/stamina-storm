@@ -6,12 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1169</width>
-    <height>822</height>
+    <width>1624</width>
+    <height>951</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>STAMINA/STORM</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/images/staminaIcon.svg</normaloff>:/images/staminaIcon.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -539,7 +543,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1169</width>
+     <width>1624</width>
      <height>30</height>
     </rect>
    </property>
@@ -742,6 +746,9 @@
    <property name="text">
     <string>Properties File</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
+   </property>
   </action>
   <action name="actionPRISM_Language">
    <property name="icon">
@@ -750,6 +757,9 @@
    </property>
    <property name="text">
     <string>PRISM Language</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionJANI_Language">

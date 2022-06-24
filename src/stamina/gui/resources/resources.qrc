@@ -1,3 +1,5 @@
 <RCC>
-  <qresource prefix="images"/>
+  <qresource prefix="images">
+    <file>staminaIcon.svg</file>
+  </qresource>
 </RCC>

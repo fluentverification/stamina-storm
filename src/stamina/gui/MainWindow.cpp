@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, prefs(new Preferences(this))
 	, unsavedChangesModel(false)
 	, unsavedChangesProperty(false)
+	, baseWindowTitle("New File")
 {
 	setupActions();
 }
@@ -78,11 +79,15 @@ MainWindow::setupActions() {
 		, this
 		, SLOT(setModifiedProperties())
 	);
+
+	// TODO: Connect on close to onClose()
+
 	// setupGUI(Default, "mainWindow.ui");
 }
 
 void
 MainWindow::saveToActiveModelFile() {
+
 	if (activeModelFile != "") {
 		QSaveFile file(activeModelFile);
 		file.open(QIODevice::WriteOnly);
@@ -92,6 +97,7 @@ MainWindow::saveToActiveModelFile() {
 		file.write(bArray);
 		file.commit();
 		unsavedChangesModel = false;
+		setCaption(baseWindowTitle);
 	}
 }
 
@@ -106,6 +112,7 @@ MainWindow::saveToActivePropertiesFile() {
 		file.write(bArray);
 		file.commit();
 		unsavedChangesProperty = false;
+		setCaption(baseWindowTitle);
 	}
 }
 
@@ -117,6 +124,12 @@ MainWindow::showPreferences() {
 
 void
 MainWindow::openModelFile() {
+	if (unsavedChangesModel) {
+		bool shouldNotDiscard = KMessageBox::questionYesNo(0, i18n("You have unsaved changes to your model file! Would you like to save it now?")) == KMessageBox::Yes;
+		if (shouldNotDiscard) {
+			saveModelFile();
+		}
+	}
 	std::cout << "Opening model file" << std::endl;
 	fd->setOperationMode(KFileWidget::Opening);
 	fd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
@@ -139,7 +152,9 @@ MainWindow::openFromAcceptedPath() {
 		, SIGNAL(accepted())
 	);
 	if (selectedFile != "") {
-		setCaption(QString("OPEN MODEL")); // TODO: The actual filename
+		QFileInfo info(selectedFile);
+		baseWindowTitle = info.fileName();
+		setCaption(baseWindowTitle);
 		KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(selectedFile));
 		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinished(KJob*)));
 		job->exec();
@@ -161,9 +176,15 @@ void
 MainWindow::saveModelFileAs() {
 	std::cout << "Saving model file as" << std::endl;
 	fd->setOperationMode(KFileWidget::Saving);
+	connect(
+		fd->fileWidget()
+		, SIGNAL(accepted())
+		, this
+		, SLOT(setActiveModelFileAndSave())
+	);
 	fd->show();
 	fd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
-	saveToActiveModelFile();
+// 	saveToActiveModelFile();
 }
 
 void
@@ -186,15 +207,37 @@ MainWindow::showAbout() {
 void
 MainWindow::setModifiedModel() {
 	if (unsavedChangesModel) { return; }
-	setCaption(windowTitle() + " * ");
+// 	baseWindowTitle = windowTitle();
+	setCaption(baseWindowTitle + " * ");
 	unsavedChangesModel = true;
 }
 
 void
 MainWindow::setModifiedProperties() {
 	if (unsavedChangesProperty) { return; }
-	setCaption(windowTitle() + " * ");
+	setCaption(baseWindowTitle + " * ");
 	unsavedChangesProperty = true;
+}
+
+void
+MainWindow::setActiveModelFileAndSave() {
+	// Disconnect fd just in case it sent us here
+	disconnect(
+		fd->fileWidget()
+		, SIGNAL(accepted())
+	);
+	activeModelFile = fd->fileWidget()->selectedFile();
+	saveToActiveModelFile();
+}
+
+void
+MainWindow::onClose() {
+	if (unsavedChangesModel) {
+		bool shouldSave = KMessageBox::questionYesNo(0, i18n("You have unsaved changes to your model file! Would you like to save it now?")) == KMessageBox::Yes;
+		if (shouldSave) {
+			saveModelFile();
+		}
+	}
 }
 
 } // namespace gui
