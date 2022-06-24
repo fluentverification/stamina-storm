@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, activePropertiesFile("")
 	, about(new About(this))
 	, prefs(new Preferences(this))
+	, propWizard(new PropertyWizard(this))
 	, unsavedChangesModel(false)
 	, unsavedChangesProperty(false)
 	, baseWindowTitle("New File")
@@ -78,6 +79,13 @@ MainWindow::setupActions() {
 		, SIGNAL(textChanged())
 		, this
 		, SLOT(setModifiedProperties())
+	);
+
+	connect(
+		ui.propertyWizardButton
+		, SIGNAL(clicked())
+		, this
+		, SLOT(showPropertyWizard())
 	);
 
 	// TODO: Connect on close to onClose()
@@ -238,6 +246,12 @@ MainWindow::onClose() {
 			saveModelFile();
 		}
 	}
+}
+
+void
+MainWindow::showPropertyWizard() {
+	propWizard->show();
+	// TODO: connect the close() slot to appending to the text file
 }
 
 } // namespace gui

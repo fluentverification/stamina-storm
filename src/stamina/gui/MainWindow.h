@@ -8,6 +8,7 @@
 
 #include "About.h"
 #include "Preferences.h"
+#include "PropertyWizard.h"
 
 #include "addons/CodeEditor.h"
 
@@ -31,6 +32,7 @@ namespace stamina {
 			// Showable dialogs
 			About * about;
 			Preferences * prefs;
+			PropertyWizard * propWizard;
 			KFileCustomDialog * fd;
 			QString activeModelFile;
 			QString activePropertiesFile;
@@ -48,6 +50,7 @@ namespace stamina {
 			void setModifiedProperties();
 			void setActiveModelFileAndSave();
 			void onClose();
+			void showPropertyWizard();
 		};
 	} // namespace gui
 } // namespace stamina

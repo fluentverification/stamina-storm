@@ -1,7 +1,9 @@
 #ifndef STAMINA_PROPERTY_WIZARD_H
 #define STAMINA_PROPERTY_WIZARD_H
 
-#include <KXmlGuiWindow>
+#include "ui/ui_PropertyWizard.h"
+
+#include <QDialog>
 #include <QString>
 #include <cstdint>
 
@@ -20,7 +22,7 @@ namespace stamina {
 				: operand(operand), description(description) { /* Intentionally left empty */ }
 		};
 		struct OperandInformation {
-			static OperandAndDescription[] binaryOperands = {
+			inline const static OperandAndDescription binaryOperands[] = {
 				// Logic operands
 				OperandAndDescription("&", "AND Operand") // AND Operand
 				, OperandAndDescription("|", "OR Operand") // OR Operand
@@ -28,17 +30,19 @@ namespace stamina {
 				, OperandAndDescription("F", "Eventually Operand") // Eventually Operand
 				, OperandAndDescription("U", "Until Operand") // Until operand
 				// Math Operands
-				, "+" // Add
-				, "-" // Subtract
-				, "*" // Multiply
-				, "/" // divide
+				, OperandAndDescription("+", "Addition Operand") // Add
+				, OperandAndDescription("-", "Subtraction Operand") // Subtract
+				, OperandAndDescription("*", "Multiply Operand") // Multiply
+				, OperandAndDescription("/", "Division Operand") // divide
 			};
 		};
-		class PropertyWizard : KXmlGuiWindow {
+		class PropertyWizard : public QDialog {
 			Q_OBJECT
 		public:
-			PropertyWizard(QObject * parent = nullptr);
+			PropertyWizard(QWidget * parent = nullptr);
 		protected:
+			void setupActions();
+			Ui::PropertyWizard ui;
 		private slots:
 			/**
 			 * Inserts into the operand tree. Will insert over "EMPTY" if selected. If no "EMPTY" is

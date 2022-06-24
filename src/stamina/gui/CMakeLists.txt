@@ -34,6 +34,8 @@ set(xstamina_SRCS
 	MainWindow.cpp
 	About.cpp
 	Preferences.cpp
+	PropertyWizard.cpp
+	# Code editing
 	addons/CodeEditor.cpp
 	addons/LineNumberArea.cpp
 	# Syntax Highlighting
