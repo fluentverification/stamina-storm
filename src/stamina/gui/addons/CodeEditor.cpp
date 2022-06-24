@@ -3,6 +3,10 @@
 
 #include "highlighter/PrismHighlighter.h"
 
+#include <iostream>
+
+#include <QPalette>
+
 
 namespace stamina {
 namespace gui {
@@ -10,7 +14,7 @@ namespace addons {
 
 CodeEditor::CodeEditor(QWidget * parent)
 	: QPlainTextEdit(parent)
-	, hl(new highlighter::PrismHighlighter(this->document()))
+	, hl(new highlighter::PrismHighlighter(this->document(), this->palette().color(QPalette::AlternateBase).black() > 100))
 {
 	lineNumberArea = new LineNumberArea(this);
 
@@ -20,6 +24,8 @@ CodeEditor::CodeEditor(QWidget * parent)
 
 	updateLineNumberAreaWidth(0);
 	highlightCurrentLine();
+
+// 	std::cout << "Amount of black in color palette is: " << this->palette().color(QPalette::AlternateBase).black() << std::endl;
 }
 
 uint16_t
@@ -69,7 +75,9 @@ CodeEditor::highlightCurrentLine()
 	if (!isReadOnly()) {
 		QTextEdit::ExtraSelection selection;
 
-		QColor lineColor = QColor(Qt::darkGray).darker(350);
+// 		QColor selectionColor = QPalette::Base; // selection.format.background().color();
+
+		QColor lineColor(this->palette().color(QPalette::AlternateBase));
 
 		selection.format.setBackground(lineColor);
 		selection.format.setProperty(QTextFormat::FullWidthSelection, true);
@@ -84,7 +92,7 @@ CodeEditor::highlightCurrentLine()
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
 	QPainter painter(lineNumberArea);
-	painter.fillRect(event->rect(), QColor(Qt::darkGray).darker(400));
+	painter.fillRect(event->rect(), QColor(this->palette().color(QPalette::Window)).darker(100)); //  QColor(Qt::darkGray).darker(400)
 	QTextBlock block = firstVisibleBlock();
 	int blockNumber = block.blockNumber();
 	int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
@@ -95,7 +103,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 	while (block.isValid() && top <= event->rect().bottom()) {
 		if (block.isVisible() && bottom >= event->rect().top()) {
 			QString number = QString::number(blockNumber + 1);
-			painter.setPen(Qt::white);
+			painter.setPen(this->palette().color(QPalette::Text));
 			painter.drawText(-5, top,
 				lineNumberArea->width(), fontMetrics().height(),
 				Qt::AlignRight, number);

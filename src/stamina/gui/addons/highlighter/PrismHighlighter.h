@@ -10,10 +10,11 @@ namespace stamina {
 				class PrismHighlighter : public Highlighter {
 					Q_OBJECT
 				public:
-					PrismHighlighter(QTextDocument * parent = nullptr);
+					PrismHighlighter(QTextDocument * parent = nullptr, bool darkMode = true);
 				protected:
 					// Rules
 					void setupKeyWordPatterns() override;
+					bool darkMode;
 
 				};
 			}

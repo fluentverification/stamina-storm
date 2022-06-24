@@ -5,24 +5,36 @@
 #include <QRegularExpression>
 #include <QFont>
 #include <QColor>
+#include <QPalette>
+
+#include <iostream>
 
 namespace stamina {
 namespace gui {
 namespace addons {
 namespace highlighter {
 
-PrismHighlighter::PrismHighlighter(QTextDocument * parent)
+PrismHighlighter::PrismHighlighter(QTextDocument * parent, bool darkMode)
 	: Highlighter(parent)
+	, darkMode(darkMode)
 {
 	setupKeyWordPatterns();
+// 	bool darkMode = parent()->palette().color(QPalette::AlternateBase).dark() < 100;
+// 	std::cout << "Dark for this color scheme is " << this->palette().color(QPalette::AlternateBase).dark() << std::endl;
 }
 
 void
 PrismHighlighter::setupKeyWordPatterns() {
-	ColorScheme & cs = ColorSchemes::darkMode;
+	ColorScheme * cs;
+	if (darkMode) {
+		cs = &ColorSchemes::darkMode;
+	}
+	else {
+		cs = &ColorSchemes::lightMode;
+	}
 	HighlightingRule rule;
 
-	keywordFormat.setForeground(cs.keyword);
+	keywordFormat.setForeground(cs->keyword);
 	keywordFormat.setFontWeight(QFont::Bold);
 	const QString keywordPatterns[] = {
 		QStringLiteral("\\bA\\b")
@@ -90,46 +102,46 @@ PrismHighlighter::setupKeyWordPatterns() {
 
 	// String expressions
 	classFormat.setFontWeight(QFont::Bold);
-	classFormat.setForeground(cs.string);
+	classFormat.setForeground(cs->string);
 	rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
 	rule.format = classFormat;
 	highlightingRules.append(rule);
 
 	// Numbers
 	numberFormat.setFontWeight(QFont::Bold);
-	numberFormat.setForeground(cs.number);
+	numberFormat.setForeground(cs->number);
 	rule.pattern = QRegularExpression(QStringLiteral("\\b([eE]?\\d+(\\.)?)"));
 	rule.format = numberFormat;
 	highlightingRules.append(rule);
 
 	// String literals
-	quotationFormat.setForeground(cs.string);
+	quotationFormat.setForeground(cs->string);
 	rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
 	rule.format = quotationFormat;
 	highlightingRules.append(rule);
 
 	// Functions
 	functionFormat.setFontItalic(true);
-	functionFormat.setForeground(cs.function);
+	functionFormat.setForeground(cs->function);
 	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
 	rule.format = functionFormat;
 	highlightingRules.append(rule);
 
 	// Constants
 	constFormat.setFontItalic(true);
-	constFormat.setForeground(cs.constant);
+	constFormat.setForeground(cs->constant);
 	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z_]+\\b"));
 	rule.format = constFormat;
 	highlightingRules.append(rule);
 
 	// Single line comments
-	singleLineCommentFormat.setForeground(cs.comment);
+	singleLineCommentFormat.setForeground(cs->comment);
 	rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
 	rule.format = singleLineCommentFormat;
 	highlightingRules.append(rule);
 
 	// Multiline comments
-	multiLineCommentFormat.setForeground(cs.comment);
+	multiLineCommentFormat.setForeground(cs->comment);
 
 	commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
 	commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
