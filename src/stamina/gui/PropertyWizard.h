@@ -6,6 +6,9 @@
 #include <QDialog>
 #include <QString>
 #include <cstdint>
+#include <QAbstractItemModel>
+#include <QVector>
+#include <QVariant>
 
 namespace stamina {
 	namespace gui {
@@ -14,6 +17,7 @@ namespace stamina {
 			, UNARY_OPERAND
 			, VARIABLE
 			, VALUE
+			, EMPTY
 		};
 		typedef uint8_t operandType_t;
 		struct OperandAndDescription {
@@ -75,7 +79,65 @@ namespace stamina {
 			/**
 			 * Updates the values in expressionOptions
 			 * */
-			void updateValuesInExpressionOptions();
+			void updateValuesInExpressionOptions(int oldIndex);
+		};
+
+		/* An operand item stored in the PropertyTree */
+		class OperandItem {
+		public:
+			// TODO: https://doc.qt.io/qt-5/qtwidgets-itemviews-simpletreemodel-example.html
+			explicit OperandItem(
+				const QVector<QVariant> &data
+				, OperandItem *parentItem = nullptr
+				, operandType_t opType = OPERAND_TYPE::EMPTY
+			);
+			~OperandItem();
+
+			void appendChild(OperandItem * child);
+
+			OperandItem * child(int row);
+			int childCount();
+			int columnCount();
+			QVariant data(int column);
+			int row();
+			OperandItem * parentItem();
+
+			QString createExpressionFromThisAndChildren();
+			operandType_t opType;
+		private:
+			QVector<OperandItem *> m_childItems;
+			QVector<QVariant> m_itemData;
+			OperandItem * m_parentItem;
+		};
+
+		class PropertyTreeModel : public QAbstractItemModel {
+			Q_OBJECT
+		public:
+			explicit PropertyTreeModel(const QString &data, QObject *parent = nullptr);
+			~PropertyTreeModel();
+
+			QVariant data(const QModelIndex &index, int role);
+			Qt::ItemFlags flags(const QModelIndex &index);
+			QVariant headerData(
+				int section
+				, Qt::Orientation orientation
+				, int role = Qt::DisplayRole
+			);
+			QModelIndex index(
+				int row
+				, int column
+				, const QModelIndex & parent = QModelIndex()
+			);
+			QModelIndex parent(const QModelIndex &index);
+			int rowCount(const QModelIndex &parent = QModelIndex());
+			int columnCount(const QModelIndex &parent = QModelIndex());
+
+			QString toPropertyString();
+
+		private:
+			void setupModelData(const QStringList &lines, OperandItem * parent);
+
+			OperandItem *rootItem;
 		};
 	}
 }

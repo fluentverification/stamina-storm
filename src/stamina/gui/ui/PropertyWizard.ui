@@ -95,7 +95,7 @@
     <widget class="QTreeWidget" name="propertyTree">
      <column>
       <property name="text">
-       <string notr="true">1</string>
+       <string notr="true">Property Expression Logic Tree</string>
       </property>
      </column>
     </widget>
@@ -103,28 +103,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="KComboBox" name="expressionType">
-       <item>
-        <property name="text">
-         <string>Binary Expression</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Unary Expression</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Variable</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Value</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="expressionType"/>
      </item>
      <item>
       <widget class="KComboBox" name="expressionOptions">
