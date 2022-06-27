@@ -40,16 +40,6 @@ namespace stamina {
 		typedef storm::models::sparse::Ctmc<double> Ctmc;
 		typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
-		class CompressedStatePointer {
-		public:
-			CompressedStatePointer(CompressedState * state)
-				: state(state) {}
-			// Copy Constructor
-			CompressedStatePointer(const CompressedStatePointer & other)
-			: state(other.state) {}
-			CompressedState * state;
-		};
-
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaModelBuilder {
 		public:
@@ -57,7 +47,7 @@ namespace stamina {
 			/* Sub-class for states with probabilities */
 			class ProbabilityState {
 			public:
-				CompressedStatePointer statePtr; // TODO: make this into reference
+				CompressedState & stateRef;
 				StateType index;
 				bool assignedInRemapping;
 				uint8_t iterationLastSeen;
@@ -65,12 +55,12 @@ namespace stamina {
 				bool wasPutInTerminalQueue;
 // 				ProbabilityState() : { /* Intentionally left empty */ }
 				ProbabilityState(
-					CompressedStatePointer statePtr
+					CompressedState & stateRef
 					, StateType index
 					, double pi = 0.0
 					, bool terminal = true
 					, uint8_t iterationLastSeen = 0
-				) : statePtr(statePtr)
+				) : stateRef(stateRef)
 					, index(index)
 					, pi(pi)
 					, terminal(terminal)
@@ -84,7 +74,7 @@ namespace stamina {
 				// Copy constructor
 				ProbabilityState(const ProbabilityState & other)
 					: index(other.index)
-					, statePtr(other.statePtr)
+					, stateRef(other.stateRef)
 					, pi(other.pi)
 					, terminal(other.terminal)
 					, assignedInRemapping(other.assignedInRemapping)
@@ -94,7 +84,6 @@ namespace stamina {
 				}
 
 				CompressedState & state() {
-					CompressedState & stateRef = *statePtr.state;
 					return stateRef;
 				}
 
