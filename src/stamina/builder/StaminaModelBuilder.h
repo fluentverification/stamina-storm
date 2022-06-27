@@ -47,7 +47,6 @@ namespace stamina {
 			/* Sub-class for states with probabilities */
 			class ProbabilityState {
 			public:
-				CompressedState & stateRef;
 				StateType index;
 				bool assignedInRemapping;
 				uint8_t iterationLastSeen;
@@ -55,13 +54,11 @@ namespace stamina {
 				bool wasPutInTerminalQueue;
 // 				ProbabilityState() : { /* Intentionally left empty */ }
 				ProbabilityState(
-					CompressedState & stateRef
-					, StateType index
+					StateType index
 					, double pi = 0.0
 					, bool terminal = true
 					, uint8_t iterationLastSeen = 0
-				) : stateRef(stateRef)
-					, index(index)
+				) : index(index)
 					, pi(pi)
 					, terminal(terminal)
 					, assignedInRemapping(false)
@@ -74,17 +71,12 @@ namespace stamina {
 				// Copy constructor
 				ProbabilityState(const ProbabilityState & other)
 					: index(other.index)
-					, stateRef(other.stateRef)
 					, pi(other.pi)
 					, terminal(other.terminal)
 					, assignedInRemapping(other.assignedInRemapping)
 					, isNew(other.isNew)
 				{
 					// Intentionally left empty
-				}
-
-				CompressedState & state() {
-					return stateRef;
 				}
 
 				double getPi() {
@@ -128,6 +120,22 @@ namespace stamina {
 				) const {
 					// Create a max heap on the reachability probability
 					return first->pi < second->pi;
+				}
+			};
+
+			class ProbabilityStatePair {
+			public:
+				ProbabilityState * first;
+				CompressedState second;
+			};
+
+			struct ProbabilityStatePairComparison {
+				bool operator() (
+					const ProbabilityStatePair first
+					, const ProbabilityStatePair second
+				) const {
+					// Create a max heap on the reachability probability
+					return first.first->pi < second.first->pi;
 				}
 			};
 
@@ -313,7 +321,7 @@ namespace stamina {
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 			util::StateMemoryPool<ProbabilityState> memoryPool;
 			// StatePriorityQueue statesToExplore;
-			std::deque<ProbabilityState * > statesToExplore;
+			std::deque<std::pair<ProbabilityState *, CompressedState> > statesToExplore;
 			boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 			util::StateIndexArray<StateType, ProbabilityState> stateMap;
 			// Transitions which we must add

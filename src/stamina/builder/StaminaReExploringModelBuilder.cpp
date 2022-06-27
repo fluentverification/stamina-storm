@@ -92,11 +92,11 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		currentProbabilityState = statesToExplore.front();
+		currentProbabilityState = statesToExplore.front().first;
+		currentState = statesToExplore.front().second;
 		statesToExplore.pop_front();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
-		currentState = currentProbabilityState->state();
 
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
@@ -284,20 +284,19 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			// Create a ProbabilityState for each individual state
 			ProbabilityState * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
-				CompressedStatePointer(&state)
-				, actualIndex
+				actualIndex
 				, 1.0
 				, true
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.emplace_back(initProbabilityState);
+			statesToExplore.emplace_back(std::make_pair(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
 			ProbabilityState * initProbabilityState = nextState;
 			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(initProbabilityState);
+			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		if (actualIndex == newIndex) {
@@ -317,7 +316,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statesToExplore.push_back(nextProbabilityState);
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -334,7 +333,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statesToExplore.push_back(nextProbabilityState);
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -342,15 +341,14 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
-				CompressedStatePointer(&state)
-				, actualIndex
+				actualIndex
 				, 0.0
 				, true
 			);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			statesToExplore.push_back(nextProbabilityState);
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 			enqueued = true;
 			numberTerminal++;
 		}

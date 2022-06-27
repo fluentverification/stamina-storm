@@ -103,7 +103,11 @@ namespace stamina {
 			 * */
 			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
 			/* Data members */
-			std::priority_queue<ProbabilityState *, std::vector<ProbabilityState *>, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStateComparison> statePriorityQueue;
+			std::priority_queue<
+				typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePair
+				, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePair
+				, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePairComparison
+			> statePriorityQueue;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 			double piHat;

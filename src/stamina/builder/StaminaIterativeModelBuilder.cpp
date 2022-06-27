@@ -95,11 +95,11 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
-		currentProbabilityState = statesToExplore.front();
+		currentProbabilityState = statesToExplore.front().first;
+		currentState = statesToExplore.front().second;
 		statesToExplore.pop_front();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
-		currentState = currentProbabilityState->state();
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -286,20 +286,19 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			// Create a ProbabilityState for each individual state
 			ProbabilityState * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
-				CompressedStatePointer(&state)
-				, actualIndex
+				actualIndex
 				, 1.0
 				, true
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(initProbabilityState);
+			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
 			ProbabilityState * initProbabilityState = nextState;
 			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(initProbabilityState);
+			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		if (actualIndex == newIndex) {
@@ -319,7 +318,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statesToExplore.push_back(nextProbabilityState);
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -336,7 +335,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statesToExplore.push_back(nextProbabilityState);
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -344,15 +343,14 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
-				CompressedStatePointer(&state)
-				, actualIndex
+				actualIndex
 				, 0.0
 				, true
 			);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			statesToExplore.push_back(nextProbabilityState);
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -463,9 +461,9 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
-		auto probabilityState = statesTerminatedLastIteration.front();
-		statesToExplore.emplace_back(probabilityState);
-		probabilityState->wasPutInTerminalQueue = false;
+		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		statesToExplore.emplace_back(probabilityStatePair);
+		probabilityStatePair->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
 	}
 }
@@ -478,14 +476,15 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
 	// register new states
 	while (!statesTerminatedLastIteration.empty()) {
-		auto currentProbabilityState = statesTerminatedLastIteration.front();
+		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
+		auto state = statesTerminatedLastIteration.front().second;
 // 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 		statesTerminatedLastIteration.pop_front();
 		// If the state is not marked as terminal, we've already connected it to absorbing
 		if (!currentProbabilityState->isTerminal()) {
 			continue;
 		}
-		this->connectTerminalStatesToAbsorbing(
+		this->(
 			transitionMatrixBuilder
 			, currentProbabilityState->state()
 			, currentProbabilityState->index

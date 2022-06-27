@@ -58,8 +58,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			// Create a ProbabilityState for each individual state
 			ProbabilityState * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
-				CompressedStatePointer(&state)
-				, actualIndex
+				actualIndex
 				, 1.0
 				, true
 			);
@@ -113,8 +112,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
-				CompressedStatePointer(&state)
-				, actualIndex
+				actualIndex
 				, 0.0
 				, true
 			);
@@ -279,8 +277,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 	// Perform a search through the model.
 	do {
-
-		currentProbabilityState = statePriorityQueue.top();
+		currentProbabilityState = statesToExplore.top().first;
+		currentState = statesToExplore.top().second;
 		statePriorityQueue.pop();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
