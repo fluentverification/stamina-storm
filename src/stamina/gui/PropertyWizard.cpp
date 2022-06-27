@@ -181,65 +181,14 @@ OperandItem::createExpressionFromThisAndChildren() {
 }
 
 // Implementation for PropertyTreeModel
-
 PropertyTreeModel::PropertyTreeModel(const QString &data, QObject *parent)
-    : QAbstractItemModel(parent)
+    : QStandardItemModel(parent)
 {
-	rootItem = new OperandItem({tr("Title"), tr("Summary")});
-	setupModelData(data.split('\n'), rootItem);
-}
-
-PropertyTreeModel::~PropertyTreeModel() {
-	delete rootItem;
-}
-
-QVariant
-PropertyTreeModel::data(const QModelIndex &index, int role) {
-
-}
-Qt::ItemFlags
-PropertyTreeModel::flags(const QModelIndex &index) {
-
-}
-
-QVariant
-PropertyTreeModel::headerData(
-	int section
-	, Qt::Orientation orientation
-	, int role
-) {
-
-}
-
-QModelIndex
-PropertyTreeModel::index(
-	int row
-	, int column
-	, const QModelIndex & parent
-) {
-
-}
-
-QModelIndex
-PropertyTreeModel::parent(const QModelIndex &index) {
-
-}
-int
-PropertyTreeModel::rowCount(const QModelIndex &parent) {
-
-}
-int
-PropertyTreeModel::columnCount(const QModelIndex &parent) {
-
+	// Intentionally left empty
 }
 
 QString
 PropertyTreeModel::toPropertyString() {
-
-}
-
-void
-PropertyTreeModel::setupModelData(const QStringList &lines, OperandItem * parent) {
 
 }
 

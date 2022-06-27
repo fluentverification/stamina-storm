@@ -6,7 +6,7 @@
 #include <QDialog>
 #include <QString>
 #include <cstdint>
-#include <QAbstractItemModel>
+#include <QStandardItemModel>
 #include <QVector>
 #include <QVariant>
 
@@ -110,34 +110,13 @@ namespace stamina {
 			OperandItem * m_parentItem;
 		};
 
-		class PropertyTreeModel : public QAbstractItemModel {
+		class PropertyTreeModel : public QStandardItemModel {
 			Q_OBJECT
 		public:
-			explicit PropertyTreeModel(const QString &data, QObject *parent = nullptr);
+			PropertyTreeModel(const QString &data, QObject *parent = nullptr);
 			~PropertyTreeModel();
 
-			QVariant data(const QModelIndex &index, int role);
-			Qt::ItemFlags flags(const QModelIndex &index);
-			QVariant headerData(
-				int section
-				, Qt::Orientation orientation
-				, int role = Qt::DisplayRole
-			);
-			QModelIndex index(
-				int row
-				, int column
-				, const QModelIndex & parent = QModelIndex()
-			);
-			QModelIndex parent(const QModelIndex &index);
-			int rowCount(const QModelIndex &parent = QModelIndex());
-			int columnCount(const QModelIndex &parent = QModelIndex());
-
 			QString toPropertyString();
-
-		private:
-			void setupModelData(const QStringList &lines, OperandItem * parent);
-
-			OperandItem *rootItem;
 		};
 	}
 }
