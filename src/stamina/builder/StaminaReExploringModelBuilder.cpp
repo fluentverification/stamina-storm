@@ -96,7 +96,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		statesToExplore.pop_front();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
-		currentState = currentProbabilityState->state;
+		currentState = currentProbabilityState->state();
 
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
@@ -284,7 +284,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			// Create a ProbabilityState for each individual state
 			ProbabilityState * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
-				state
+				CompressedStatePointer(&state)
 				, actualIndex
 				, 1.0
 				, true
@@ -341,7 +341,12 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 		else {
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
-			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
+			*nextProbabilityState = ProbabilityState(
+				CompressedStatePointer(&state)
+				, actualIndex
+				, 0.0
+				, true
+			);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
@@ -468,7 +473,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 // 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
-			, currentProbabilityState->state
+			, currentProbabilityState->state()
 			, currentProbabilityState->index
 			, this->terminalStateToIdCallback
 		);

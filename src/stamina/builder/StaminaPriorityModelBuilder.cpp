@@ -58,7 +58,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			// Create a ProbabilityState for each individual state
 			ProbabilityState * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
-				state
+				CompressedStatePointer(&state)
 				, actualIndex
 				, 1.0
 				, true
@@ -112,7 +112,12 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 		else {
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState * nextProbabilityState = memoryPool.allocate();
-			*nextProbabilityState = ProbabilityState(state, actualIndex, 0.0, true);
+			*nextProbabilityState = ProbabilityState(
+				CompressedStatePointer(&state)
+				, actualIndex
+				, 0.0
+				, true
+			);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
@@ -279,7 +284,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		statePriorityQueue.pop();
 		// Get the first state in the queue.
 		currentIndex = currentProbabilityState->index;
-		currentState = currentProbabilityState->state;
+		currentState = currentProbabilityState->state();
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -450,7 +455,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 		// connect to absorbing
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
-			, terminalState->state
+			, terminalState->state()
 			, terminalState->index
 			, this->terminalStateToIdCallback
 		);
