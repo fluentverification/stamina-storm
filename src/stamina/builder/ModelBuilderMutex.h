@@ -17,6 +17,7 @@ namespace stamina {
 			void setStateInUse(StateType stateId, bool inUse = true);
 		protected:
 			std::unordered_set<StateType> inUseStates; // In theory, this should never exceed close to 1e3 states even on very strongly connected models
+			std::shared_mutex write;
 		};
 	} // namespace builder
 } // namespace stamina
