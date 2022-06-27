@@ -29,11 +29,14 @@ PropertyWizard::setupActions() {
 
 void
 PropertyWizard::insertOperand(QString opString, operandType_t opType) {
-
+	QModelIndexList selectedIndecies = ui.propertyTree->selectedIndecies();
 }
 void
 PropertyWizard::deleteSelectedOperand() {
-
+	QModelIndexList selectedIndecies = ui.propertyTree->selectedIndecies();
+	for (auto index : selectedIndecies) {
+		// TODO: delete items. Can't seem to find the method in QStandardItemModel
+	}
 }
 
 void
@@ -82,64 +85,14 @@ PropertyWizard::updateValuesInExpressionOptions(int oldIndex) {
 // OperandItem implementation
 
 OperandItem::OperandItem(
-	const QVector<QVariant> &data
-	, OperandItem *parentItem
+	int rows
+	, int columns
 	, operandType_t opType
 )
-	: m_itemData(data)
-	, m_parentItem(parentItem)
+	: QStandardItem(rows, columns)
 	, opType(opType)
 {
 	// Intentionally left empty
-}
-
-OperandItem::~OperandItem() {
-	qDeleteAll(m_childItems);
-}
-
-void
-OperandItem::appendChild(OperandItem * child) {
-	m_childItems.append(child);
-}
-
-OperandItem *
-OperandItem::child(int row) {
-	if (row < 0 || row >= m_childItems.size()) {
-		return nullptr;
-	}
-	return m_childItems.at(row);
-}
-
-int
-OperandItem::childCount() {
-	return m_childItems.count();
-}
-
-int
-OperandItem::columnCount() {
-	return m_itemData.count();
-}
-
-QVariant
-OperandItem::data(int column) {
-	if (column < 0 || column >= m_itemData.size()) {
-		return QVariant();
-	}
-	return m_itemData.at(column);
-
-}
-
-int
-OperandItem::row() {
-	if (m_parentItem) {
-		return m_parentItem->m_childItems.indexOf(const_cast<OperandItem *>(this));
-	}
-	return 0;
-}
-
-OperandItem *
-OperandItem::parentItem() {
-	return m_parentItem;
 }
 
 QString
@@ -151,9 +104,9 @@ OperandItem::createExpressionFromThisAndChildren() {
 				return QString("OPERROR");
 			}
 			return QString("(  ")
-				+ m_childItems.at(0)->createExpressionFromThisAndChildren()
+				+ child(0)->createExpressionFromThisAndChildren()
 				+ ' ' + data(1).toString() + ' '
-				+ m_childItems.at(1)->createExpressionFromThisAndChildren()
+				+ child(1)->createExpressionFromThisAndChildren()
 				+ QString(" )");
 		case OPERAND_TYPE::UNARY_OPERAND:
 			if (childCount() != 1) {
@@ -161,7 +114,7 @@ OperandItem::createExpressionFromThisAndChildren() {
 				return QString("OPERROR");
 			}
 			return QString("(  ")
-				+ m_childItems.at(0)->createExpressionFromThisAndChildren()
+				+ child(0)->createExpressionFromThisAndChildren()
 				+ ' ' + data(1).toString() + ' '
 				+ QString(" )");
 		case OPERAND_TYPE::VARIABLE:
@@ -189,7 +142,9 @@ PropertyTreeModel::PropertyTreeModel(const QString &data, QObject *parent)
 
 QString
 PropertyTreeModel::toPropertyString() {
+	QString property = "[";
 
+	return property;
 }
 
 } // namespace gui

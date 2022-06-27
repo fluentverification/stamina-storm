@@ -83,38 +83,25 @@ namespace stamina {
 		};
 
 		/* An operand item stored in the PropertyTree */
-		class OperandItem {
+		class OperandItem : QStandardItem {
+			Q_OBJECT
 		public:
 			// TODO: https://doc.qt.io/qt-5/qtwidgets-itemviews-simpletreemodel-example.html
 			explicit OperandItem(
-				const QVector<QVariant> &data
-				, OperandItem *parentItem = nullptr
+				int rows
+				, int columns = 1
 				, operandType_t opType = OPERAND_TYPE::EMPTY
 			);
-			~OperandItem();
-
-			void appendChild(OperandItem * child);
-
-			OperandItem * child(int row);
-			int childCount();
-			int columnCount();
-			QVariant data(int column);
-			int row();
-			OperandItem * parentItem();
 
 			QString createExpressionFromThisAndChildren();
 			operandType_t opType;
 		private:
-			QVector<OperandItem *> m_childItems;
-			QVector<QVariant> m_itemData;
-			OperandItem * m_parentItem;
 		};
 
 		class PropertyTreeModel : public QStandardItemModel {
 			Q_OBJECT
 		public:
 			PropertyTreeModel(const QString &data, QObject *parent = nullptr);
-			~PropertyTreeModel();
 
 			QString toPropertyString();
 		};
