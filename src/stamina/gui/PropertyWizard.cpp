@@ -25,23 +25,43 @@ PropertyWizard::setupActions() {
 		, this
 		, SLOT(updateValuesInExpressionOptions(int))
 	);
+
+	connect(
+		ui.addExpression
+		, SIGNAL(clicked())
+		, this
+		, SLOT(getInfoAndInsertOperand())
+	);
 }
 
 void
 PropertyWizard::insertOperand(QString opString, operandType_t opType) {
-	QModelIndexList selectedIndecies = ui.propertyTree->selectedIndecies();
+	auto selectedItems = ui.propertyTree->selectedItems();
+	for (auto item : selectedItems) {
+		ui.propertyTree->insertTopLevelItem(
+			ui.propertyTree->currentColumn() + 1
+			, new QTreeWidgetItem(
+				ui.propertyTree
+				, item
+				, QStringList(QString(opString))
+			)
+		);
+	}
 }
 void
 PropertyWizard::deleteSelectedOperand() {
-	QModelIndexList selectedIndecies = ui.propertyTree->selectedIndecies();
-	for (auto index : selectedIndecies) {
-		// TODO: delete items. Can't seem to find the method in QStandardItemModel
-	}
+// 	QModelIndexList selectedIndecies = ui.propertyTree->selectedIndexes();
+// 	for (auto index : selectedIndecies) {
+// 		// TODO: delete items. Can't seem to find the method in QStandardItemModel
+// 		int row = index.row();
+// 		int column = index.row();
+// 	}
 }
 
 void
 PropertyWizard::getInfoAndInsertOperand() {
-
+	QString info("Some information");
+	insertOperand(info, 0);
 }
 
 void
