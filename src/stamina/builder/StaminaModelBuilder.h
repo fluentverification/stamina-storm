@@ -54,7 +54,7 @@ namespace stamina {
 				bool wasPutInTerminalQueue;
 // 				ProbabilityState() : { /* Intentionally left empty */ }
 				ProbabilityState(
-					StateType index
+					StateType index = 0
 					, double pi = 0.0
 					, bool terminal = true
 					, uint8_t iterationLastSeen = 0

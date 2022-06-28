@@ -463,7 +463,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStates
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
 		statesToExplore.emplace_back(probabilityStatePair);
-		probabilityStatePair->wasPutInTerminalQueue = false;
+		probabilityStatePair.first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
 	}
 }
@@ -484,9 +484,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 		if (!currentProbabilityState->isTerminal()) {
 			continue;
 		}
-		this->(
+		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
-			, currentProbabilityState->state()
+			, state
 			, currentProbabilityState->index
 			, this->terminalStateToIdCallback
 		);
