@@ -95,6 +95,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 	isInit = false;
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
+		auto currentProbabilityStatePair = statesToExplore.front();
 		currentProbabilityState = statesToExplore.front().first;
 		currentState = statesToExplore.front().second;
 		statesToExplore.pop_front();
@@ -140,7 +141,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// Do not connect to absorbing yet
 			// Place this in statesTerminatedLastIteration
 			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
-				statesTerminatedLastIteration.emplace_back(currentProbabilityState);
+				statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
 				currentProbabilityState->wasPutInTerminalQueue = true;
 				++currentRow;
 				++currentRowGroup;
