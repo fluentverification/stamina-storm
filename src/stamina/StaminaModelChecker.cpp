@@ -112,9 +112,10 @@ StaminaModelChecker::modelCheckProperty(
 		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
 	}
 	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
+		StaminaMessages::errorAndExit("Not fully implemented yet!");
 		// Create StaminaModelBuilder
-		auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
-		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+		// auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		// builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
 	}
 	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {
 		auto builderPointer = std::make_shared<StaminaReExploringModelBuilder<double>> (generator, modulesFile, options);
