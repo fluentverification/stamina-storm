@@ -10,3 +10,9 @@ cd build
 cmake ..
 make -j$(nproc --all)
 ```
+
+## Dependencies:
+
+- Qt (version 5+)
+	+ `uic`: The Qt UI compiler
+- KF5 (KDE Frameworks 5)
