@@ -19,7 +19,7 @@ OBJECT ExplorationThread
 
 	METHODS
 		PUBLIC PROCEDURE doExploration() -> VOID
-			DO FOREVER
+			WHILE shouldNotDie DO
 				// Weak priority on cross exploration
 				IF NOT X.empty() AND NOT X.locked() THEN
 					s := dequeue(X)

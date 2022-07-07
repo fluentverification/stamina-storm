@@ -2,8 +2,15 @@
 * Stamina Model Builder Class
 * Created by Josh Jeppson on 8/17/2021
 *
-* If you look closely, you'll see this is fairly similar to storm::builder::ExplicitModelBuilder
+* If you look closely, you'll see similarities to storm::builder::ExplicitModelBuilder.
+* However, since STAMINA has grown and morphed, stamina::builder::StaminaModelBuilder and
+* the STORM builder originally referenced, storm::builder::ExplicitModelBuilder have
+* diverged substantially. The main difference now being that stamina::builder::StaminaModelBuilder,
+* and all of its child classes, now support multithreading and asynchronous state exploration,
+* in addition to their original purpose of conditional exploration based on estimated state
+* reachability.
 * */
+
 #ifndef STAMINAMODELBUILDER_H
 #define STAMINAMODELBUILDER_H
 
@@ -32,6 +39,11 @@
 
 namespace stamina {
 	namespace builder {
+
+		// Forward-declare thread classes
+		class BaseThread;
+		class BookKeeperThread : public BaseThread;
+		class ExplorationThread : public BaseThread;
 
 		using namespace storm::builder;
 		using namespace storm::utility::prism;
@@ -313,6 +325,9 @@ namespace stamina {
 			);
 
 			/* Data Members */
+			std::shared_ptr<BookKeeperThread> workerThread;
+			std::vector<std::shared_ptr<ExplorationThread>> explorationThreads;
+
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 			storm::expressions::Expression * propertyExpression;
 			storm::expressions::ExpressionManager * expressionManager;
@@ -346,6 +361,155 @@ namespace stamina {
 			uint_fast64_t currentRowGroup;
 			uint_fast64_t currentRow;
 
+		};
+
+		/**
+		 * Base class for all threads. Automatically constructs a thread which runs
+		 * the mainLoop function.
+		 * */
+		template <typename StateType, typename ValueType>
+		class BaseThread : public std::thread {
+		public:
+			/**
+			 * Constructs a BaseThread
+			 *
+			 * @param parent The model builder who owns this thread
+			 * */
+			BaseThread(StaminaModelBuilder<ValueType, StateType=StateType> * parent);
+			/**
+			 * Pure virtual function for the main loop. When this function returns,
+			 * the thread dies.
+			 * */
+			virtual void mainLoop() = 0;
+			/**
+			 * Creates and starts this thread in the background
+			 * */
+			void startThread();
+			/**
+			 * Gets the pointer to the model builder owning this thread
+			 *
+			 * @return This thread's parent
+			 * */
+			const StaminaModelBuilder<ValueType, StateType=StateType> * getParent();
+		private:
+			const StaminaModelBuilder<ValueType, StateType=StateType> * parent;
+		};
+
+		template <typename StateType, typename ValueType>
+		class BookKeeperThread<StateType> : public BaseThread {
+		public:
+			/**
+			 * Constructor for BookKeeperThread. Primarily just calls super class constructor
+			 *
+			 * @param parent The model builder who owns this thread
+			 * @param numberExplorationThreads The number of exploration threads who will
+			 * be using this worker thread.
+			 * */
+			BookKeeperThread(
+				StaminaModelBuilder<ValueType, StateType=StateType> * parent
+				, uint8_t numberExplorationThreads
+			);
+			/**
+			 * Requests ownership of a state for a particular thread. This is intended
+			 * to be called by the thread whose index matches the second parameter in
+			 * this function. This function *locks the mutex* and so it should not be
+			 * used if we just wish to ask who owns a particular state.
+			 *
+			 * If request ownership is successful, the return value is equal to
+			 * the index of the state requesting ownership of the state. However, if it
+			 * is not successful, then the return value gives the thread which potentially
+			 * locked the mutex and got ownership first.
+			 *
+			 * @param state The state to request ownership for
+			 * @param threadIndex The thread who wants ownership of the state.
+			 * @return The thread who owns the state
+			 * */
+			uint8_t requestOwnership(CompressedState & state, uint8_t threadIndex);
+			/**
+			 * Gets the owning thread of a particular state without locking the mutex.
+			 * This allows for threads to use the many-read, one-write idea put forth
+			 * in the paper.
+			 *
+			 * @param state The state who we wonder if owns
+			 * @return The thread who owns `state`
+			 * */
+			uint8_t whoOwns(CompressedState & state);
+			/**
+			 * Requests a transition to be inserted (not necessarily in order).
+			 * These transitions are requested by the exploration threads and
+			 * are flushed to the model builder's data structure on a "when available"
+			 * basis, meaning that when this thread idles, it transfers these
+			 * transitions. Additionally, it maintains mutexes for each thread and
+			 * only locks the mutex for that particular thread to prevent mutex collisions
+			 * on the different threads requesting transition insertion.
+			 *
+			 * @param thread The index of the thread making the request
+			 * @param from The index of the state we are transitioning from
+			 * @param to The index of the state we are transitioning to
+			 * @param rate The transition rate (if CTMC) or transition probability (if DTMC)
+			 * */
+			void requestInsertTransition(
+				uint8_t thread
+				, StateType from
+				, StateType to
+				, double rate
+			);
+			/**
+			 * This thread lives for the duration of all exploration threads. It waits for
+			 * the exploration threads to all emit a "finished" signal, and then tells each
+			 * exploration thread to die.
+			 *
+			 * The main loop for this thread also flushes things to the parents' transitionsToAdd,
+			 * which is not locked or mutex'ed because there is only one worker thread to do that.
+			 * */
+			virtual void mainLoop() override;
+			// TODO: Lockable queue
+		private:
+			std::shared_mutex ownershipMutex;
+			const uint8_t numberExplorationThreads;
+		};
+
+		template <typename StateType, typename ValueType>
+		class ExplorationThread<StateType, ValueType> : public BaseThread {
+		public:
+			typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, StateType=StateType>> StateAndProbability;
+			/**
+			 * Constructor. Invokes super's constructor and stores the
+			 * thread index which cannot change for the life of the thread
+			 *
+			 * @param parent The model builder who owns this thread
+			 * @param index The index of this thread
+			 * */
+			ExplorationThread(
+				StaminaModelBuilder<ValueType, StateType=StateType>> * parent
+				, uint8_t index
+			);
+			uint8_t getIndex();
+			uint32_t getNumberOfOwnedStates();
+			bool isFinished();
+			/**
+			 * A function called by other threads to request cross exploration of
+			 * states already explored but encountered by another thread.
+			 *
+			 * @param state The state to cross explore.
+			 * @param deltaPi The difference in reachability to add to that
+			 * state and push forward to its successors.
+			 * */
+			void requestCrossExploration(CompressedState & state, double deltaPi);
+			/**
+			 * Does state exploration or idles until worker thread asks to kill it.
+			 * */
+			virtual void mainLoop() override; // doExploration
+		protected:
+			virtual void exploreState(StateAndProbability & stateProbability) = 0;
+			// Weak priority on crossExplorationQueue (superseded by mutex lock)
+			std::shared_mutex crossExplorationQueueMutex;
+			std::deque<std::pair<CompressedState, double deltaPi>> crossExplorationQueue;
+			std::deque<StateAndProbability> mainExplorationQueue;
+		private:
+			const uint8_t index;
+			uint32_t numberOfOwnedStates;
+			bool finished;
 		};
 
 		// Helper method to find in unordered_set
