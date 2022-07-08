@@ -14,7 +14,7 @@ namespace stamina {
 		namespace threads {
 
 			template <typename StateType, typename ValueType>
-			class ExplorationThread<StateType, ValueType> : public BaseThread {
+			class ExplorationThread<StateType, ValueType> : public BaseThread<ValueType, StateType> {
 			public:
 				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, StateType=StateType>> StateAndProbability;
 				/**
@@ -22,11 +22,11 @@ namespace stamina {
 				* thread index which cannot change for the life of the thread
 				*
 				* @param parent The model builder who owns this thread
-				* @param index The index of this thread
+				* @param threadIndex The index of this thread
 				* */
 				ExplorationThread(
 					StaminaModelBuilder<ValueType, StateType=StateType>> * parent
-					, uint8_t index
+					, uint8_t threadIndex
 				);
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
@@ -51,12 +51,12 @@ namespace stamina {
 				std::deque<std::pair<CompressedState, double deltaPi>> crossExplorationQueue;
 				std::deque<StateAndProbability> mainExplorationQueue;
 			private:
-				const uint8_t index;
+				const uint8_t threadIndex;
 				uint32_t numberOfOwnedStates;
 				bool finished;
 			};
-		}
-	}
-}
+		} // namespace threads
+	} // namespace builder
+} // namespace stamina
 
 #endif // STAMINA_BUILDER_THREADS_EXPLORATIONTHREAD_H

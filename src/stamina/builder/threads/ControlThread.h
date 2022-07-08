@@ -19,7 +19,7 @@ namespace stamina {
 		namespace threads {
 
 			template <typename StateType, typename ValueType>
-			class ControlThread<StateType> : public BaseThread {
+			class ControlThread<StateType> : public BaseThread<ValueType, StateType> {
 			public:
 				struct StateAndThreadIndex {
 					StateType state; // State Index
@@ -98,8 +98,8 @@ namespace stamina {
 				storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage;
 			};
 
-		}
-	}
-}
+		} // namespace threads
+	} // namespace builder
+} // namespace stamina
 
 #endif // STAMINA_BUILDER_THREADS_CONTROLTHREAD_H

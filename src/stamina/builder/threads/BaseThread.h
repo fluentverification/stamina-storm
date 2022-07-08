@@ -7,6 +7,9 @@
 #ifndef STAMINA_BUILDER_THREADS_BASETHREAD_H
 #define STAMINA_BUILDER_THREADS_BASETHREAD_H
 
+#include <thread>
+#include <shared_mutex>
+
 namespace stamina {
 	namespace builder {
 		// Forward-declare StaminaModelBuilder class
@@ -45,9 +48,9 @@ namespace stamina {
 			private:
 				const StaminaModelBuilder<ValueType, StateType=StateType> * parent;
 			};
-		}
-	}
-}
+		} // namespace threads
+	} // namespace builder
+} // namespace stamina
 
 
 #endif // STAMINA_BUILDER_THREADS_BASETHREAD_H
