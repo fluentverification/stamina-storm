@@ -1,3 +1,10 @@
+/**
+ * Exploration threads can explore a state space with other threads, and will only explore threads
+ * that it owns.
+ *
+ * Created by Josh Jeppson on Jul 8, 2022
+ * */
+
 #ifndef STAMINA_BUILDER_THREADS_EXPLORATIONTHREAD_H
 #define STAMINA_BUILDER_THREADS_EXPLORATIONTHREAD_H
 #include "BaseThread.h"

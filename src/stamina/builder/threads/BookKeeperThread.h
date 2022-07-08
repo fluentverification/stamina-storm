@@ -1,3 +1,12 @@
+/**
+ * A type of thread which maintains the following responsibilities:
+ *     1. Keeps track of which thread owns a particular state
+ *     2. Allows for asynchronous requests for ownership of new states
+ *     3. Allows for unordered and asynchronous requests for transition matrix insertion
+ *
+ * Created by Josh Jeppson on Jul 8, 2022
+ * */
+
 #ifndef STAMINA_BUILDER_THREADS_BOOKKEEPERTHREAD_H
 #define STAMINA_BUILDER_THREADS_BOOKKEEPERTHREAD_H
 

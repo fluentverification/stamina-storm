@@ -1,8 +1,18 @@
+/**
+ * Base class for all types of threads used by Stamina's model builders
+ *
+ * Created by Josh Jeppson on Jul 8, 2022
+ * */
+
 #ifndef STAMINA_BUILDER_THREADS_BASETHREAD_H
 #define STAMINA_BUILDER_THREADS_BASETHREAD_H
 
 namespace stamina {
 	namespace builder {
+		// Forward-declare StaminaModelBuilder class
+		template<typename ValueType, typename RewardModelType, typename StateType>
+		class StaminaModelBuilder;
+
 		namespace threads {
 			/**
 			* Base class for all threads. Automatically constructs a thread which runs
