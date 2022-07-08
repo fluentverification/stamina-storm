@@ -4,31 +4,31 @@ namespace stamina {
 namespace builder {
 namespace threads {
 
-template <typename StateType, typename ValueType>
-ControlThread<StateType, ValueType>::ControlThread(
-	StaminaModelBuilder<ValueType, StateType=StateType> * parent
+template <typename StateType, typename RewardModelType, typename ValueType>
+ControlThread<StateType, RewardModelType, ValueType>::ControlThread(
+	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t numberExplorationThreads
-) : BaseThread<StateType, ValueType>(parent)
+) : BaseThread<StateType, RewardModelType, ValueType>(parent)
 	, numberExplorationThreads(numberExplorationThreads)
 {
 	// Intentionally left empty
 }
 
-template <typename StateType, typename ValueType>
+template <typename StateType, typename RewardModelType, typename ValueType>
 uint8_t
-ControlThread<StateType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex) {
+ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex) {
 
 }
 
-template <typename StateType, typename ValueType>
+template <typename StateType, typename RewardModelType, typename ValueType>
 uint8_t
-ControlThread<StateType, ValueType>::whoOwns(CompressedState & state) {
+ControlThread<StateType, RewardModelType, ValueType>::whoOwns(CompressedState & state) {
 
 }
 
-template <typename StateType, typename ValueType>
+template <typename StateType, typename RewardModelType, typename ValueType>
 void
-ControlThread<StateType, ValueType>::requestInsertTransition(
+ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
 	uint8_t thread
 	, StateType from
 	, StateType to
@@ -37,9 +37,9 @@ ControlThread<StateType, ValueType>::requestInsertTransition(
 
 }
 
-template <typename StateType, typename ValueType>
+template <typename StateType, typename RewardModelType, typename ValueType>
 void
-ControlThread<StateType, ValueType>::mainLoop() {
+ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 
 }
 

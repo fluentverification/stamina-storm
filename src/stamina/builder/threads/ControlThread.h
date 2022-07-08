@@ -18,8 +18,8 @@ namespace stamina {
 	namespace builder {
 		namespace threads {
 
-			template <typename StateType, typename ValueType>
-			class ControlThread<StateType> : public BaseThread<ValueType, StateType> {
+			template <typename StateType, typename RewardModelType, typename ValueType>
+			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
 				struct StateAndThreadIndex {
 					StateType state; // State Index
@@ -33,7 +33,7 @@ namespace stamina {
 				* be using this worker thread.
 				* */
 				ControlThread(
-					StaminaModelBuilder<ValueType, StateType=StateType> * parent
+					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t numberExplorationThreads
 				);
 				/**

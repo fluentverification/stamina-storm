@@ -6,8 +6,8 @@
 namespace stamina {
 	namespace builder {
 		namespace threads {
-			template<typename ValueType, typename StateType>
-			class IterativeExplorationThread : public ExplorationThread<ValueType, StateType> {
+			template<typename ValueType, typename RewardModelType, typename StateType>
+			class IterativeExplorationThread : public ExplorationThread<ValueType, RewardModelType, StateType> {
 			public:
 
 			};

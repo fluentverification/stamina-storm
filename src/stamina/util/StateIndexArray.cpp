@@ -1,6 +1,6 @@
 #include "StateIndexArray.h"
 
-#include "../builder/StaminaModelBuilder.h"
+#include "builder/StaminaModelBuilder.h"
 
 namespace stamina {
 	namespace util {

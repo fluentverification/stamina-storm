@@ -15,10 +15,10 @@ namespace stamina {
 	namespace builder {
 		namespace threads {
 
-			template <typename StateType, typename ValueType>
-			class ExplorationThread<StateType, ValueType> : public BaseThread<ValueType, StateType> {
+			template <typename StateType, typename RewardModelType, typename ValueType>
+			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
-				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, StateType=StateType>> StateAndProbability;
+				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, RewardModelType, StateType>> StateAndProbability;
 				/**
 				* Constructor. Invokes super's constructor and stores the
 				* thread index which cannot change for the life of the thread
@@ -27,7 +27,7 @@ namespace stamina {
 				* @param threadIndex The index of this thread
 				* */
 				ExplorationThread(
-					StaminaModelBuilder<ValueType, StateType=StateType>> * parent
+					StaminaModelBuilder<ValueType, RewardModelType, StateType>> * parent
 					, uint8_t threadIndex
 					, ControlThread & controlThread
 				);
@@ -51,13 +51,13 @@ namespace stamina {
 				virtual void exploreState(StateAndProbability & stateProbability) = 0;
 				// Weak priority on crossExplorationQueue (superseded by mutex lock)
 				std::shared_mutex crossExplorationQueueMutex;
-				std::deque<std::pair<CompressedState, double deltaPi>> crossExplorationQueue;
+				std::deque<std::pair<CompressedState, double>> crossExplorationQueue;
 				std::deque<StateAndProbability> mainExplorationQueue;
 			private:
 				const uint8_t threadIndex;
 				uint32_t numberOfOwnedStates;
 				bool finished;
-				ControlThread & controlThread;
+				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
 			};
 		} // namespace threads
 	} // namespace builder

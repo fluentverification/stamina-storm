@@ -1,6 +1,6 @@
 #include "StateMemoryPool.h"
-#include "../builder/StaminaModelBuilder.h"
-#include "../StaminaMessages.h"
+#include "builder/StaminaModelBuilder.h"
+#include "core/StaminaMessages.h"
 
 /**
  * Implementation for StaminaMemoryPool methods

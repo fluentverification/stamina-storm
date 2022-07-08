@@ -10,6 +10,8 @@
 #include <thread>
 #include <shared_mutex>
 
+#include "stamina/builder/__storm_needed_for_builder.h"
+
 namespace stamina {
 	namespace builder {
 		// Forward-declare StaminaModelBuilder class
@@ -17,11 +19,12 @@ namespace stamina {
 		class StaminaModelBuilder;
 
 		namespace threads {
+			using namespace storm::builder;
 			/**
 			* Base class for all threads. Automatically constructs a thread which runs
 			* the mainLoop function.
 			* */
-			template <typename StateType, typename ValueType>
+			template <typename StateType, typename RewardModelType, typename ValueType>
 			class BaseThread {
 			public:
 				/**
@@ -29,7 +32,7 @@ namespace stamina {
 				*
 				* @param parent The model builder who owns this thread
 				* */
-				BaseThread(StaminaModelBuilder<ValueType, StateType=StateType> * parent);
+				BaseThread(StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent);
 				/**
 				* Pure virtual function for the main loop. When this function returns,
 				* the thread dies.
@@ -44,13 +47,13 @@ namespace stamina {
 				*
 				* @return This thread's parent
 				* */
-				const StaminaModelBuilder<ValueType, StateType=StateType> * getParent();
+				const StaminaModelBuilder<ValueType, RewardModelType, StateType> * getParent();
 				/**
 				 * Joins the
 				 * */
 				void join();
 			private:
-				const StaminaModelBuilder<ValueType, StateType=StateType> * parent;
+				const StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent;
 				std::thread * threadLoop;
 			};
 		} // namespace threads

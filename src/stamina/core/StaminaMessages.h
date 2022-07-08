@@ -69,6 +69,7 @@ namespace stamina {
 				"========================================================================================";
 		};
 	} // namespace core
+	typedef core::StaminaMessages StaminaMessages; // Allow users to use messages without the `core` namespace
 } // namespace stamina
 
 /* Logging and debugging messages */

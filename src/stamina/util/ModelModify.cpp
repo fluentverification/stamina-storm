@@ -19,7 +19,7 @@
 #include <stdio.h> // For remove()
 
 #include "ModelModify.h"
-#include "../StaminaMessages.h"
+#include "core/StaminaMessages.h"
 
 using namespace stamina;
 using namespace stamina::util;

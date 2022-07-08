@@ -1,6 +1,6 @@
 #include "ExplicitTruncatedModelBuilder.h"
 
-#include "../StaminaMessages.h"
+#include "core/StaminaMessages.h"
 
 #include <map>
 

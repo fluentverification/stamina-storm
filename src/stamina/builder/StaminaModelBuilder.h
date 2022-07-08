@@ -237,8 +237,8 @@ namespace stamina {
 			);
 
 			/* Data Members */
-			std::shared_ptr<BookKeeperThread> workerThread;
-			std::vector<std::shared_ptr<ExplorationThread>> explorationThreads;
+			std::shared_ptr<threads::ControlThread> workerThread;
+			std::vector<std::shared_ptr<threads::ExplorationThread>> explorationThreads;
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 			storm::expressions::Expression * propertyExpression;

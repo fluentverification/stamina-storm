@@ -4,8 +4,8 @@
 * Created by Josh Jeppson on 8/17/2021
 * */
 #include "StaminaModelBuilder.h"
-#include "../StaminaMessages.h"
-#include "../StateSpaceInformation.h"
+#include "core/StaminaMessages.h"
+#include "core/StateSpaceInformation.h"
 
 #include <functional>
 #include <sstream>
@@ -23,7 +23,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
-	, localKappa(Options::kappa)
+	, localKappa(core::Options::kappa)
 	, numberTerminal(0)
 	, iteration(0)
 	, propertyExpression(nullptr)
@@ -225,7 +225,7 @@ double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = numberTerminal * localKappa;
 	// Reduce kappa
-	localKappa /= Options::reduce_kappa;
+	localKappa /= core::Options::reduce_kappa;
 	return totalProbability;
 }
 
@@ -302,7 +302,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerator(
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
-	Options::kappa = localKappa;
+	core::Options::kappa = localKappa;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -364,7 +364,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 	if (formulaMatchesExpression) {
 		return;
 	}
-	// If we are called here, we assume that Options::no_prop_refine is false
+	// If we are called here, we assume that core::Options::no_prop_refine is false
 	std::shared_ptr<storm::expressions::Expression> pExpression(
 		// Invoke copy constructor
 		new storm::expressions::Expression(

@@ -4,23 +4,23 @@ namespace stamina {
 namespace builder {
 namespace threads {
 
-template <typename StateType, typename ValueType>
-BaseThread<StateType, ValueType>::BaseThread(
-	StaminaModelBuilder<ValueType, StateType=StateType> * parent
+template <typename StateType, typename RewardModelType, typename ValueType>
+BaseThread<StateType, RewardModelType, ValueType>::BaseThread(
+	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 ) : parent(parent)
 {
 	// Intentionally left empty
 }
 
-template <typename StateType, typename ValueType>
+template <typename StateType, typename RewardModelType, typename ValueType>
 void
-BaseThread<StateType, ValueType>::startThread() {
+BaseThread<StateType, RewardModelType, ValueType>::startThread() {
 
 }
 
-template <typename StateType, typename ValueType>
-StaminaModelBuilder<ValueType, StateType=StateType> *
-BaseThread<StateType, ValueType>::getParent() {
+template <typename StateType, typename RewardModelType, typename ValueType>
+StaminaModelBuilder<ValueType, RewardModelType, StateType> *
+BaseThread<StateType, RewardModelType, ValueType>::getParent() {
 	return parent;
 }
 
