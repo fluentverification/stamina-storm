@@ -14,29 +14,30 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCE_DIR src)
 set(SOURCE_FILES
-    # Main source files for the `stamina` namespace
+	# Main source files for the `stamina` namespace
 	src/stamina/ANSIColors.h
-    src/stamina/main.cpp
-    src/stamina/Stamina.cpp
-    src/stamina/Stamina.h
-    src/stamina/StaminaArgParse.h
-    src/stamina/StaminaModelChecker.h
-    src/stamina/StaminaModelChecker.cpp
-    src/stamina/StaminaMessages.h
-	src/stamina/StaminaMessages.cpp
-    src/stamina/Options.h
-    src/stamina/Options.cpp
-	src/stamina/StateSpaceInformation.cpp
-	src/stamina/StateSpaceInformation.h
+	src/stamina/main.cpp
+	src/stamina/Stamina.cpp
+	src/stamina/Stamina.h
+	src/stamina/StaminaArgParse.h
+	# Sources for `stamina::core` namespace
+	src/stamina/core/StaminaModelChecker.h
+	src/stamina/core/StaminaModelChecker.cpp
+	src/stamina/core/StaminaMessages.h
+	src/stamina/core/StaminaMessages.cpp
+	src/stamina/core/Options.h
+	src/stamina/core/Options.cpp
+	src/stamina/core/StateSpaceInformation.cpp
+	src/stamina/core/StateSpaceInformation.h
 	# Files for `stamina::builder` namespace
-    src/stamina/builder/StaminaModelBuilder.h
-    src/stamina/builder/StaminaModelBuilder.cpp
-    src/stamina/builder/StaminaIterativeModelBuilder.cpp
-    src/stamina/builder/StaminaIterativeModelBuilder.h
+	src/stamina/builder/StaminaModelBuilder.h
+	src/stamina/builder/StaminaModelBuilder.cpp
+	src/stamina/builder/StaminaIterativeModelBuilder.cpp
+	src/stamina/builder/StaminaIterativeModelBuilder.h
 	# src/stamina/builder/StaminaPriorityModelBuilder.cpp
-    # src/stamina/builder/StaminaPriorityModelBuilder.h
+	# src/stamina/builder/StaminaPriorityModelBuilder.h
 	src/stamina/builder/StaminaReExploringModelBuilder.cpp
-    src/stamina/builder/StaminaReExploringModelBuilder.h
+	src/stamina/builder/StaminaReExploringModelBuilder.h
 	src/stamina/builder/ExplicitTruncatedModelBuilder.h
 	src/stamina/builder/ExplicitTruncatedModelBuilder.cpp
 	# Files for `stamina::util` namespace
@@ -59,8 +60,8 @@ set(CUDD_PATH ${STORM_PATH}/storm/resources/3rdparty/cudd-3.0.0/cplusplus)
 find_package(Boost)
 if (Boost_FOUND)
 	message("BOOST found!")
-    include_directories(${Boost_INCLUDE_DIRS})
-    include_directories(${Boost_INCLUDES})
+	include_directories(${Boost_INCLUDE_DIRS})
+	include_directories(${Boost_INCLUDES})
 endif (Boost_FOUND)
 
 find_package(storm REQUIRED PATHS ${STORM_PATH})
