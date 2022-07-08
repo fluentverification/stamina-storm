@@ -7,8 +7,8 @@
  * Created by Josh Jeppson on Jul 8, 2022
  * */
 
-#ifndef STAMINA_BUILDER_THREADS_BOOKKEEPERTHREAD_H
-#define STAMINA_BUILDER_THREADS_BOOKKEEPERTHREAD_H
+#ifndef STAMINA_BUILDER_THREADS_CONTROLTHREAD_H
+#define STAMINA_BUILDER_THREADS_CONTROLTHREAD_H
 
 #include "BaseThread.h"
 
@@ -19,20 +19,20 @@ namespace stamina {
 		namespace threads {
 
 			template <typename StateType, typename ValueType>
-			class BookKeeperThread<StateType> : public BaseThread {
+			class ControlThread<StateType> : public BaseThread {
 			public:
 				struct StateAndThreadIndex {
 					StateType state; // State Index
 					uint8_t thread; // Thread index
 				};
 				/**
-				* Constructor for BookKeeperThread. Primarily just calls super class constructor
+				* Constructor for ControlThread. Primarily just calls super class constructor
 				*
 				* @param parent The model builder who owns this thread
 				* @param numberExplorationThreads The number of exploration threads who will
 				* be using this worker thread.
 				* */
-				BookKeeperThread(
+				ControlThread(
 					StaminaModelBuilder<ValueType, StateType=StateType> * parent
 					, uint8_t numberExplorationThreads
 				);
@@ -102,4 +102,4 @@ namespace stamina {
 	}
 }
 
-#endif // STAMINA_BUILDER_THREADS_BOOKKEEPERTHREAD_H
+#endif // STAMINA_BUILDER_THREADS_CONTROLTHREAD_H

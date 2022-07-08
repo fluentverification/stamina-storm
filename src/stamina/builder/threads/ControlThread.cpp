@@ -1,11 +1,11 @@
-#include "BookKeeperThread.h"
+#include "ControlThread.h"
 
 namespace stamina {
 namespace builder {
 namespace threads {
 
 template <typename StateType, typename ValueType>
-BookKeeperThread<StateType, ValueType>::BookKeeperThread(
+ControlThread<StateType, ValueType>::ControlThread(
 	StaminaModelBuilder<ValueType, StateType=StateType> * parent
 	, uint8_t numberExplorationThreads
 ) : BaseThread<StateType, ValueType>(parent)
@@ -16,19 +16,19 @@ BookKeeperThread<StateType, ValueType>::BookKeeperThread(
 
 template <typename StateType, typename ValueType>
 uint8_t
-BookKeeperThread<StateType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex) {
+ControlThread<StateType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex) {
 
 }
 
 template <typename StateType, typename ValueType>
 uint8_t
-BookKeeperThread<StateType, ValueType>::whoOwns(CompressedState & state) {
+ControlThread<StateType, ValueType>::whoOwns(CompressedState & state) {
 
 }
 
 template <typename StateType, typename ValueType>
 void
-BookKeeperThread<StateType, ValueType>::requestInsertTransition(
+ControlThread<StateType, ValueType>::requestInsertTransition(
 	uint8_t thread
 	, StateType from
 	, StateType to
@@ -39,7 +39,7 @@ BookKeeperThread<StateType, ValueType>::requestInsertTransition(
 
 template <typename StateType, typename ValueType>
 void
-BookKeeperThread<StateType, ValueType>::mainLoop() {
+ControlThread<StateType, ValueType>::mainLoop() {
 
 }
 
