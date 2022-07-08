@@ -4,8 +4,13 @@
 ## Requires STORM and boost
 ##
 
-cmake_minimum_required(VERSION 3.10)  # CMake version check
-project(sstamina)               # Create project "sstamina"
+cmake_minimum_required(VERSION 3.10)
+
+# Main STAMINA executable
+project(sstamina VERSION 2.5.0 DESCRIPTION "Main STAMINA/STORM executable")
+include_directories("src")
+include_directories("src/stamina")
+
 set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
@@ -20,6 +25,9 @@ set(SOURCE_FILES
 	src/stamina/Stamina.cpp
 	src/stamina/Stamina.h
 	src/stamina/StaminaArgParse.h
+)
+
+set(LIB_FILES
 	# Sources for `stamina::core` namespace
 	src/stamina/core/StaminaModelChecker.h
 	src/stamina/core/StaminaModelChecker.cpp
@@ -65,13 +73,25 @@ if (Boost_FOUND)
 endif (Boost_FOUND)
 
 find_package(storm REQUIRED PATHS ${STORM_PATH})
-# if (storm_FOUND)
-#	message("STORM found!")
-#else
-#	message("STORM not found! STORM required to build STAMINA!")
-#endif
+if (storm_FOUND)
+	message("STORM found!")
+else()
+	message("STORM not found! STORM required to build STAMINA!")
+endif()
 
 # Add executable target with source files listed in SOURCE_FILES variable
-add_executable(sstamina ${SOURCE_FILES})
+add_executable(sstamina ${SOURCE_FILES} ${LIB_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
 target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
+
+# STAMINA shared-object libraries project
+project(libstamina VERSION 2.5.0 DESCRIPTION "Shared objects for STAMINA usage")
+include_directories("src")
+include_directories("src/stamina")
+
+add_library(libstamina SHARED ${LIB_FILES})
+set_target_properties(libstamina PROPERTIES VERSION ${PROJECT_VERSION})
+target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
+target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
+
+# TODO: Continue cmake for lib: https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
