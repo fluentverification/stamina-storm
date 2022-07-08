@@ -2,8 +2,8 @@
 
 #include "StaminaMessages.h"
 
-using namespace stamina;
-// IMPLEMENTATION FOR Stamina::Stamina::Options
+namespace stamina {
+namespace core {
 
 bool
 Options::checkOptions() {
@@ -64,3 +64,6 @@ Options::setArgs(struct arguments * arguments) {
 	max_states = arguments->max_states;
 	method = arguments->method;
 }
+
+} // namespace core
+} // namespace stamina

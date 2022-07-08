@@ -5,7 +5,7 @@
 * */
 #include "Stamina.h"
 #include "ANSIColors.h"
-#include "StaminaMessages.h"
+#include "core/StaminaMessages.h"
 
 #include "util/ModelModify.h"
 
@@ -15,7 +15,9 @@
 #include <string_view>
 #include <sstream>
 
-using namespace stamina;
+namespace stamina {
+
+using namespace stamina::core;
 
 /* ===== IMPLEMENTATION FOR `Stamina::Stamina` Methods ===== */
 
@@ -116,3 +118,5 @@ bool stamina::endsWith(std::string full, std::string end) {
 	}
 	return true;
 }
+
+} // namespace stamina

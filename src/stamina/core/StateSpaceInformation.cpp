@@ -1,7 +1,8 @@
 #include "StateSpaceInformation.h"
 #include "StaminaMessages.h"
 
-using namespace stamina;
+namespace stamina {
+namespace core {
 
 std::string
 StateSpaceInformation::stateToString(CompressedState & state, double pi) {
@@ -93,3 +94,6 @@ StateSpaceInformation::printVariableNames() {
 	varString += "\b)";
 	std::cout << varString << std::endl;
 }
+
+} // namespace core
+} // namespace stamina

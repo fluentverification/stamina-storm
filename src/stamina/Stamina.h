@@ -5,8 +5,8 @@
 #include <ostream>
 #include <functional>
 
-#include "StaminaArgParse.h"
-#include "StaminaModelChecker.h"
+#include "core/StaminaArgParse.h"
+#include "core/StaminaModelChecker.h"
 #include "Options.h"
 
 #define VERSION_MAJOR 2
@@ -48,7 +48,7 @@ namespace stamina {
         void initialize();
 
         /* Data Members */
-        std::shared_ptr<StaminaModelChecker> modelChecker;
+        std::shared_ptr<core::StaminaModelChecker> modelChecker;
         std::shared_ptr<storm::prism::Program> modelFile;
         std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
     };

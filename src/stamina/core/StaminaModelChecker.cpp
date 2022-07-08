@@ -24,6 +24,7 @@
 #endif // USE_STAMINA_TRUNCATION
 
 namespace stamina {
+namespace core {
 
 using namespace stamina::builder;
 
@@ -320,4 +321,5 @@ StaminaModelChecker::modifyState(bool isMin) {
 	}
 }
 
+} // namespace core
 } // namespace stamina

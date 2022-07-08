@@ -9,7 +9,8 @@
 #include <sstream>
 #include <iostream>
 
-using namespace stamina;
+namespace stamina {
+namespace core {
 
 void
 StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
@@ -61,3 +62,6 @@ StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream 
 	out << "Model: " << resultInformation.numberStates << " states with " << resultInformation.numberInitial << " initial." << std::endl;
 	out << horizontalSeparator << std::endl;
 }
+
+} // namespace core
+} // namespace stamina
