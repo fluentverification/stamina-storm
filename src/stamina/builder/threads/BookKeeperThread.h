@@ -12,6 +12,8 @@
 
 #include "BaseThread.h"
 
+#include "storm/storage/BitVectorHashMap.h"
+
 namespace stamina {
 	namespace builder {
 		namespace threads {
@@ -19,6 +21,10 @@ namespace stamina {
 			template <typename StateType, typename ValueType>
 			class BookKeeperThread<StateType> : public BaseThread {
 			public:
+				struct StateAndThreadIndex {
+					StateType state; // State Index
+					uint8_t thread; // Thread index
+				};
 				/**
 				* Constructor for BookKeeperThread. Primarily just calls super class constructor
 				*
@@ -85,9 +91,11 @@ namespace stamina {
 				* */
 				virtual void mainLoop() override;
 				// TODO: Lockable queue
+				storm::storage::sparse::StateStorage<StateAndThreadIndex>& getStateStorage();
 			private:
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
+				storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage;
 			};
 
 		}
