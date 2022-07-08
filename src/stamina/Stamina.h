@@ -5,9 +5,9 @@
 #include <ostream>
 #include <functional>
 
-#include "core/StaminaArgParse.h"
+#include "StaminaArgParse.h"
 #include "core/StaminaModelChecker.h"
-#include "Options.h"
+#include "core/Options.h"
 
 #define VERSION_MAJOR 2
 #define VERSION_MINOR 2.1

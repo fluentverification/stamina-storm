@@ -22,10 +22,10 @@
 #include <cstdint>
 #include <functional>
 
-#include "../Options.h"
-#include "../StaminaMessages.h"
-#include "../util/StateIndexArray.h"
-#include "../util/StateMemoryPool.h"
+#include "core/Options.h"
+#include "core/StaminaMessages.h"
+#include "util/StateIndexArray.h"
+#include "util/StateMemoryPool.h"
 
 #include "ProbabilityState.h"
 
