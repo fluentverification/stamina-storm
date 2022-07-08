@@ -5,6 +5,7 @@
 
 namespace stamina {
 	namespace builder {
+		using namespace storm::builder;
 		/* Class for states with probabilities */
 		template <typename StateType>
 		class ProbabilityState {

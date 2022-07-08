@@ -11,8 +11,8 @@
 * reachability.
 * */
 
-#ifndef STAMINAMODELBUILDER_H
-#define STAMINAMODELBUILDER_H
+#ifndef STAMINA_BUILDER_STAMINAMODELBUILDER_H
+#define STAMINA_BUILDER_STAMINAMODELBUILDER_H
 
 #include <memory>
 #include <utility>
@@ -24,10 +24,14 @@
 
 #include "core/Options.h"
 #include "core/StaminaMessages.h"
+
 #include "util/StateIndexArray.h"
 #include "util/StateMemoryPool.h"
 
-#include "ProbabilityState.h"
+#include "builder/threads/ExplorationThread.h"
+#include "builder/threads/ControlThread.h"
+
+#include "builder/ProbabilityState.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -273,4 +277,4 @@ namespace stamina {
 		bool set_contains(std::unordered_set<StateType> current_set, StateType value);
 	}
 }
-#endif // STAMINAMODELBUILDER_H
+#endif // STAMINA_BUILDER_STAMINAMODELBUILDER_H

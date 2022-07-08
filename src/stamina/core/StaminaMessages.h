@@ -1,5 +1,5 @@
-#ifndef STAMINA_MESSAGES_H
-#define STAMINA_MESSAGES_H
+#ifndef STAMINA_CORE_STAMINAMESSAGES_H
+#define STAMINA_CORE_STAMINAMESSAGES_H
 
 #include <string>
 #include <stdint.h>
@@ -77,4 +77,4 @@ namespace stamina {
 #else
 
 #endif // DEBUG_PRINTS
-#endif // STAMINA_MESSAGES_H
+#endif // STAMINA_CORE_STAMINAMESSAGES_H

@@ -1,5 +1,5 @@
-#ifndef STAMINA
-#define STAMINA
+#ifndef STAMINA_STAMINA
+#define STAMINA_STAMINA
 
 #include <iostream>
 #include <ostream>
@@ -54,4 +54,4 @@ namespace stamina {
     };
 }
 
-#endif // STAMINA
+#endif // STAMINA_STAMINA

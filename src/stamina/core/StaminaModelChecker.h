@@ -1,5 +1,5 @@
-#ifndef STAMINA_MODEL_CHECKER_H
-#define STAMINA_MODEL_CHECKER_H
+#ifndef STAMINA_CORE_STAMINAMODELCHECKER_H
+#define STAMINA_CORE_STAMINAMODELCHECKER_H
 
 #include "Options.h"
 #include "builder/StaminaModelBuilder.h"
@@ -124,4 +124,4 @@ namespace stamina {
 	} // namespace core
 } // namespace stamina
 
-#endif // STAMINA_MODEL_CHECKER_H
+#endif // STAMINA_CORE_STAMINAMODELCHECKER_H

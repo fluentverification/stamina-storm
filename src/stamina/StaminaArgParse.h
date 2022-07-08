@@ -3,8 +3,8 @@
 *
 * Created on 8/17/2021 by Josh Jeppson
 * */
-#ifndef STAMINA_ARG_PARSE_H
-#define STAMINA_ARG_PARSE_H
+#ifndef STAMINA_STAMINAARGPARSE_H
+#define STAMINA_STAMINAARGPARSE_H
 
 #include <iostream>
 #include <fstream>
@@ -210,4 +210,4 @@ static struct argp argp = {options, parse_opt, args_doc, doc};
 
 void set_default_values(struct arguments * arguments);
 
-#endif // STAMINA_ARG_PARSE_H
+#endif // STAMINA_STAMINAARGPARSE_H

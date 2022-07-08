@@ -1,5 +1,5 @@
-#ifndef STATESPACEINFORMATION_H
-#define STATESPACEINFORMATION_H
+#ifndef STAMINA_CORE_STATESPACEINFORMATION_H
+#define STAMINA_CORE_STATESPACEINFORMATION_H
 
 #include <string>
 #include <storm/storage/BitVector.h>
@@ -22,4 +22,4 @@ namespace stamina {
 	} // namespace core
 } // namespace stamina
 
-#endif // STATESPACEINFORMATION_H
+#endif // STAMINA_CORE_STATESPACEINFORMATION_H

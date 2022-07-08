@@ -4,8 +4,8 @@
  * Modified from https://stackoverflow.com/questions/2616906/how-do-i-output-coloured-text-to-a-linux-terminal
  * */
 
-#ifndef ANSI_COLORS_H
-#define ANSI_COLORS_H
+#ifndef STAMINA_ANSI_COLORS_H
+#define STAMINA_ANSI_COLORS_H
 
 /* FOREGROUND */
 #define RST  "\x1B[0m"
@@ -28,4 +28,4 @@
 #define BOLD(x) "\x1B[1m" x RST
 #define UNDL(x) "\x1B[4m" x RST
 
-#endif // ANSI_COLORS_H
+#endif // STAMINA_ANSI_COLORS_H

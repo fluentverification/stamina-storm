@@ -1,5 +1,5 @@
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#ifndef STAMINA_CORE_OPTIONS_H
+#define STAMINA_CORE_OPTIONS_H
 
 #include <iostream>
 #include <string>
@@ -57,4 +57,4 @@ namespace stamina {
 		bool endsWith(std::string full, std::string end);
 	} // namespace core
 } // namespace stamina
-#endif // OPTIONS_H
+#endif // STAMINA_CORE_OPTIONS_H

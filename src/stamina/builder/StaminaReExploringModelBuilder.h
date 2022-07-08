@@ -1,5 +1,5 @@
-#ifndef STAMINA_RE_EXPLORING_MODEL_BUILDER_H
-#define STAMINA_RE_EXPLORING_MODEL_BUILDER_H
+#ifndef STAMINA_BUILDER_REEXPLORINGMODELBUILDER_H
+#define STAMINA_BUILDER_REEXPLORINGMODELBUILDER_H
 
 /**
  * The model builder class which implements the STAMINA 2.0 algorithm (no dynamic programming)
@@ -115,4 +115,4 @@ namespace stamina {
 		void __delete_stamina_iterative_model_builder(StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType> * t) { delete t; }
 	}
 }
-#endif // STAMINA_RE_EXPLORING_MODEL_BUILDER_H
+#endif // STAMINA_BUILDER_REEXPLORINGMODELBUILDER_H

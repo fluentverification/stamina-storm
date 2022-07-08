@@ -1,5 +1,5 @@
-#ifndef STAMINA_PRIORITY_MODEL_BUILDER_H
-#define STAMINA_PRIORITY_MODEL_BUILDER_H
+#ifndef STAMINA_BUILDER_PRIORITYMODELBUILDER_H
+#define STAMINA_BUILDER_PRIORITYMODELBUILDER_H
 
 /**
  * The model builder class which implements the STAMINA 3.0 algorithm which uses a priority queue
@@ -114,4 +114,4 @@ namespace stamina {
 		};
 	}
 }
-#endif // STAMINA_PRIORITY_MODEL_BUILDER_H
+#endif // STAMINA_BUILDER_PRIORITYMODELBUILDER_H
