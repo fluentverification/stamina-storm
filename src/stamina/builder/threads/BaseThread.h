@@ -22,7 +22,7 @@ namespace stamina {
 			* the mainLoop function.
 			* */
 			template <typename StateType, typename ValueType>
-			class BaseThread : public std::thread {
+			class BaseThread {
 			public:
 				/**
 				* Constructs a BaseThread
@@ -45,8 +45,13 @@ namespace stamina {
 				* @return This thread's parent
 				* */
 				const StaminaModelBuilder<ValueType, StateType=StateType> * getParent();
+				/**
+				 * Joins the
+				 * */
+				void join();
 			private:
 				const StaminaModelBuilder<ValueType, StateType=StateType> * parent;
+				std::thread * threadLoop;
 			};
 		} // namespace threads
 	} // namespace builder

@@ -56,10 +56,10 @@ OBJECT ExplorationThread
 END OBJECT
 ```
 
-**Worker Thread Object**
+**Control Thread Object**
 
 ```
-OBJECT WorkerThread
+OBJECT ControlThread
 	DATA MEMBERS
 		PRIVATE ownedThreads -> HashMap<state, INT>()
 		PRIVATE ownershipMutex -> SharedMutex() (Mutex that allows multiple reads but only one write)

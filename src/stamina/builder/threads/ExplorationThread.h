@@ -7,7 +7,9 @@
 
 #ifndef STAMINA_BUILDER_THREADS_EXPLORATIONTHREAD_H
 #define STAMINA_BUILDER_THREADS_EXPLORATIONTHREAD_H
+
 #include "BaseThread.h"
+#include "ControlThread.h"
 
 namespace stamina {
 	namespace builder {
@@ -27,6 +29,7 @@ namespace stamina {
 				ExplorationThread(
 					StaminaModelBuilder<ValueType, StateType=StateType>> * parent
 					, uint8_t threadIndex
+					, ControlThread & controlThread
 				);
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
@@ -54,6 +57,7 @@ namespace stamina {
 				const uint8_t threadIndex;
 				uint32_t numberOfOwnedStates;
 				bool finished;
+				ControlThread & controlThread;
 			};
 		} // namespace threads
 	} // namespace builder

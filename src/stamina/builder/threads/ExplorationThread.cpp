@@ -10,11 +10,14 @@ template <typename StateType, typename ValueType>
 ExplorationThread<StateType, ValueType>::ExplorationThread(
 	StaminaModelBuilder<ValueType, StateType=StateType>> * parent
 	, uint8_t threadIndex
+	, ControlThread & controlThread
 ) : BaseThread(parent)
 	, threadIndex(threadIndex)
+	, controlThread(controlThread)
 {
-
+	// Intentionally left empty
 }
+
 template <typename StateType, typename ValueType>
 uint8_t
 ExplorationThread<StateType, ValueType>::getIndex() {
@@ -24,7 +27,7 @@ ExplorationThread<StateType, ValueType>::getIndex() {
 template <typename StateType, typename ValueType>
 uint32_t
 ExplorationThread<StateType, ValueType>::getNumberOfOwnedStates() {
-
+	return numberOfOwnedStates;
 }
 
 template <typename StateType, typename ValueType>
