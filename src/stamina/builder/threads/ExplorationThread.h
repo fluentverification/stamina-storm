@@ -43,6 +43,7 @@ namespace stamina {
 				* state and push forward to its successors.
 				* */
 				void requestCrossExploration(CompressedState & state, double deltaPi);
+				void requestCrossExploration(StateType stateIndex, double deltaPi);
 				/**
 				* Does state exploration or idles until worker thread asks to kill it.
 				* */
@@ -54,11 +55,11 @@ namespace stamina {
 				std::shared_mutex crossExplorationQueueMutex;
 				std::deque<std::pair<CompressedState, double>> crossExplorationQueue;
 				std::deque<StateAndProbability> mainExplorationQueue;
-			private:
-				const uint8_t threadIndex;
 				uint32_t numberOfOwnedStates;
 				bool idling;
 				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
+			private:
+				const uint8_t threadIndex;
 			};
 		} // namespace threads
 	} // namespace builder

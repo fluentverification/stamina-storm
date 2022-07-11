@@ -55,7 +55,7 @@ ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
 	, StateType to
 	, double rate
 ) {
-
+	LockableDeque tQueue = transitionQueues[thread - 1];
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
@@ -79,7 +79,7 @@ ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 		for (auto q : transitionQueues) {
 			q.lockThread();
 			while (!q.empty()) {
-				// TODO: flush to transitionMatrixBuilder
+				// Request that the parent class
 				parent->createTransition(q.top());
 				q.pop();
 			}
