@@ -50,6 +50,8 @@ namespace stamina {
 		using namespace storm::utility::prism;
 		using namespace storm::generator;
 
+		using namespace core;
+
 		typedef storm::models::sparse::Ctmc<double> Ctmc;
 		typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
@@ -237,8 +239,8 @@ namespace stamina {
 			);
 
 			/* Data Members */
-			std::shared_ptr<threads::ControlThread> workerThread;
-			std::vector<std::shared_ptr<threads::ExplorationThread>> explorationThreads;
+			std::shared_ptr<threads::ControlThread<ValueType, RewardModelType, StateType>> workerThread;
+			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> explorationThreads;
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 			storm::expressions::Expression * propertyExpression;

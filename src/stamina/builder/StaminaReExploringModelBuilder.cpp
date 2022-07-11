@@ -1,5 +1,5 @@
 #include "StaminaReExploringModelBuilder.h"
-#include "../StateSpaceInformation.h"
+#include "core/StateSpaceInformation.h"
 
 #include <functional>
 #include <sstream>

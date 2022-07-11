@@ -71,11 +71,9 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyExpression;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::expressionManager;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyFormula;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::generator;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::memoryPool;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::statesToExplore;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateRemapping;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateMap;
 			// Options for next state generators
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::options;
