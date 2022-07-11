@@ -22,7 +22,7 @@ namespace stamina {
 
 			// Forward-declare the exploration thread
 			template <typename StateType, typename RewardModelType, typename ValueType>
-			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType>;
+			class ExplorationThread;
 
 			template <typename StateType, typename RewardModelType, typename ValueType>
 			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
@@ -39,10 +39,10 @@ namespace stamina {
 					 * */
 					void emplace_back(StateType from, StateType to, double rate);
 					bool empty();
-					void lock();
-					void unlock();
+					void lockThread();
+					void unlockThread();
 				private:
-					std::deque<TransitionInfo> queue;
+					std::deque<typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo> queue;
 					std::shared_mutex lock;
 				};
 				/**

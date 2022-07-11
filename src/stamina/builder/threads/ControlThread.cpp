@@ -77,13 +77,13 @@ ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 		// Make sure that we flush the queues AFTER we determine whether to exit. This prevents a
 		// thread from requesting a transition to be added
 		for (auto q : transitionQueues) {
-			q.lock();
+			q.lockThread();
 			while (!q.empty()) {
 				// TODO: flush to transitionMatrixBuilder
 				parent->createTransition(q.top());
 				q.pop();
 			}
-			q.unlock();
+			q.unlockThread();
 		}
 		if (exitThisIteration) { return; }
 	}
