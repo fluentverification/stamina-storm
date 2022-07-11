@@ -1,5 +1,7 @@
 #include "BaseThread.h"
 
+#include <thread>
+
 namespace stamina {
 namespace builder {
 namespace threads {
@@ -22,6 +24,15 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType> *
 BaseThread<StateType, RewardModelType, ValueType>::getParent() {
 	return parent;
+}
+
+template <typename StateType, typename RewardModelType, typename ValueType>
+void
+BaseThread<StateType, RewardModelType, ValueType>::startThread() {
+	std::thread me(
+
+	);
+	me.join();
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>

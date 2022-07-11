@@ -39,6 +39,8 @@ namespace stamina {
 					 * */
 					void emplace_back(StateType from, StateType to, double rate);
 					bool empty();
+					void lock();
+					void unlock();
 				private:
 					std::deque<TransitionInfo> queue;
 					std::shared_mutex lock;
@@ -67,9 +69,10 @@ namespace stamina {
 				*
 				* @param state The state to request ownership for
 				* @param threadIndex The thread who wants ownership of the state.
+				* @param requestedId The (new) stateId that a thread can request we assign a state to
 				* @return The thread who owns the state
 				* */
-				uint8_t requestOwnership(CompressedState & state, uint8_t threadIndex);
+				uint8_t requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId = 0);
 				/**
 				* Gets the owning thread of a particular state without locking the mutex.
 				* This allows for threads to use the many-read, one-write idea put forth
@@ -108,11 +111,10 @@ namespace stamina {
 				* which is not locked or mutex'ed because there is only one worker thread to do that.
 				* */
 				virtual void mainLoop() override;
-				// TODO: Lockable queue
 				storm::storage::sparse::StateStorage<StateAndThreadIndex>& getStateStorage();
 				void terminate();
 			private:
-				std::vector<LockableDeque> dequeues;
+				std::vector<LockableDeque> transitionQueues;
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage;

@@ -32,8 +32,8 @@ ExplorationThread<StateType, RewardModelType, ValueType>::getNumberOfOwnedStates
 
 template <typename StateType, typename RewardModelType, typename ValueType>
 bool
-ExplorationThread<StateType, RewardModelType, ValueType>::isFinished() {
-	return finished;
+ExplorationThread<StateType, RewardModelType, ValueType>::isIdling() {
+	return idling;
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>

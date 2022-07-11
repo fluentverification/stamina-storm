@@ -71,10 +71,11 @@ namespace stamina {
 			 * */
 			class TransitionInfo {
 			public:
-				TransitionInfo(StateType to, ValueType transition) :
-					to(to), transition(transition) { /* Intentionally left empty */ }
+				TransitionInfo(StateType from, StateType to, double transition) :
+					from(from), to(to), transition(transition) { /* Intentionally left empty */ }
+				StateType from;
 				StateType to;
-				ValueType transition;
+				double transition;
 			};
 			struct TransitionInfoComparison {
 				bool operator() (
@@ -216,6 +217,7 @@ namespace stamina {
 			 * after flushToTransitionMatrix has cleared transitionsToAdd
 			 * */
 			void createTransition(StateType from, StateType to, ValueType probability);
+			void createTransition(TransitionInfo transitionInfo);
 			/**
 			* Explores state space and truncates the model
 			*

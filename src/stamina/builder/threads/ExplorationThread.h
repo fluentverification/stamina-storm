@@ -33,7 +33,7 @@ namespace stamina {
 				);
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
-				bool isFinished();
+				bool isIdling();
 				/**
 				* A function called by other threads to request cross exploration of
 				* states already explored but encountered by another thread.
@@ -56,7 +56,7 @@ namespace stamina {
 			private:
 				const uint8_t threadIndex;
 				uint32_t numberOfOwnedStates;
-				bool finished;
+				bool idling;
 				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
 			};
 		} // namespace threads
