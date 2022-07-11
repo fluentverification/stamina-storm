@@ -175,6 +175,7 @@ namespace stamina {
 			* */
 			StateType getStateIndexOrAbsorbing(CompressedState const& state);
 		protected:
+			storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex> stateStorage();
 			/**
 			* Creates and loads the property expression from the formula
 			* */

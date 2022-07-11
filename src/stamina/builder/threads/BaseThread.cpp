@@ -15,7 +15,7 @@ BaseThread<StateType, RewardModelType, ValueType>::BaseThread(
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 BaseThread<StateType, RewardModelType, ValueType>::startThread() {
-
+	finished = false;
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
@@ -24,6 +24,11 @@ BaseThread<StateType, RewardModelType, ValueType>::getParent() {
 	return parent;
 }
 
+template <typename StateType, typename RewardModelType, typename ValueType>
+void
+BaseThread<StateType, RewardModelType, ValueType>::terminate() {
+	finished = true;
+}
 
 } // namespace threads
 } // namespace builder

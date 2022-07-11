@@ -40,7 +40,9 @@ ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
+	while (!finished) {
 
+	}
 }
 
 } // namespace threads

@@ -52,6 +52,8 @@ namespace stamina {
 				 * Joins the
 				 * */
 				void join();
+			protected:
+				bool finished;
 			private:
 				const StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent;
 				std::thread * threadLoop;

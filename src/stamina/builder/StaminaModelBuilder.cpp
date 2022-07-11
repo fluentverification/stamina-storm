@@ -19,7 +19,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
 ) : generator(generator)
-	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(generator->getStateSize())))
+// 	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(generator->getStateSize())))
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
@@ -28,7 +28,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, iteration(0)
 	, propertyExpression(nullptr)
 	, formulaMatchesExpression(true)
-	, stateRemapping(std::vector<uint_fast64_t>())
 	, modulesFile(modulesFile)
 	, options(options)
 	, terminalStateToIdCallback(

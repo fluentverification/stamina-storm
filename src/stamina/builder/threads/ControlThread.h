@@ -92,10 +92,12 @@ namespace stamina {
 				virtual void mainLoop() override;
 				// TODO: Lockable queue
 				storm::storage::sparse::StateStorage<StateAndThreadIndex>& getStateStorage();
+				void terminate();
 			private:
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage;
+
 			};
 
 		} // namespace threads
