@@ -49,7 +49,11 @@ ExplorationThread<StateType, RewardModelType, ValueType>::requestCrossExploratio
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ExplorationThread<StateType, RewardModelType, ValueType>::mainLoop() {
-
+	idling = false;
+	while (!finished) {
+		// Explore the states in the exploration queue
+		exploreStates();
+	}
 }
 
 } // namespace threads

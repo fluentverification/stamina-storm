@@ -67,6 +67,7 @@ namespace stamina {
 			* @return The components of the truncated model
 			* */
 			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() override;
+		private:
 			/*
 			 * Access to data members of parent class
 			 * */
@@ -96,7 +97,6 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
-		private:
 			/**
 			 * Connects all states which are terminal
 			 * */

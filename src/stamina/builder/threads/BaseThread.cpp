@@ -30,7 +30,8 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 void
 BaseThread<StateType, RewardModelType, ValueType>::startThread() {
 	std::thread me(
-
+		&BaseThread::mainLoop
+		, this
 	);
 	me.join();
 }

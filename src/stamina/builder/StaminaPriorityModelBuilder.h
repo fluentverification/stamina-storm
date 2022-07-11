@@ -66,6 +66,7 @@ namespace stamina {
 				, boost::optional<storm::storage::BitVector>& markovianChoices
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			) override;
+		private:
 			/*
 			 * Access to data members of parent class
 			 * */
@@ -95,7 +96,6 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
-		private:
 			/**
 			 * Connects all states which are terminal
 			 * */

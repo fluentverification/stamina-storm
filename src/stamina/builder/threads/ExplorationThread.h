@@ -48,6 +48,7 @@ namespace stamina {
 				* */
 				virtual void mainLoop() override; // doExploration
 			protected:
+				virtual void exploreStates() = 0;
 				virtual void exploreState(StateAndProbability & stateProbability) = 0;
 				// Weak priority on crossExplorationQueue (superseded by mutex lock)
 				std::shared_mutex crossExplorationQueueMutex;

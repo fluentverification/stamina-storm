@@ -1,3 +1,10 @@
+/**
+ * An implementation of the ExplorationThread abstract class which uses the STAMINA iterative (2.0/2.5)
+ * algorithm.
+ *
+ * Created by Josh Jeppson
+ * */
+
 #ifndef STAMINA_BUILDER_THREADS_ITERATIVEEXPLORATIONTHREAD_H
 #define STAMINA_BUILDER_THREADS_ITERATIVEEXPLORATIONTHREAD_H
 
@@ -9,7 +16,21 @@ namespace stamina {
 			template<typename ValueType, typename RewardModelType, typename StateType>
 			class IterativeExplorationThread : public ExplorationThread<ValueType, RewardModelType, StateType> {
 			public:
+				/**
+				* Constructor. Invokes super's constructor.
+				*
+				* @param parent The model builder who owns this thread
+				* @param threadIndex The index of this thread
+				* */
+				IterativeExplorationThread(
+					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
+					, uint8_t threadIndex
+					, ControlThread<ValueType, RewardModelType, StateType> & controlThread
+				);
 
+			protected:
+				virtual void exploreStates() override;
+				virtual void exploreState(StateAndProbability & stateProbability) override;
 			};
 		} // namespace threads
 	} // namespace builder
