@@ -14,9 +14,15 @@
 
 #include "storm/storage/BitVectorHashMap.h"
 
+#include <deque>
+
 namespace stamina {
 	namespace builder {
 		namespace threads {
+
+			// Forward-declare the exploration thread
+			template <typename StateType, typename RewardModelType, typename ValueType>
+			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType>;
 
 			template <typename StateType, typename RewardModelType, typename ValueType>
 			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
@@ -24,6 +30,18 @@ namespace stamina {
 				struct StateAndThreadIndex {
 					StateType state; // State Index
 					uint8_t thread; // Thread index
+				};
+				class LockableDeque {
+				public:
+					int size();
+					/**
+					 * Locks the queue and emplaces
+					 * */
+					void emplace_back(StateType from, StateType to, double rate);
+					bool empty();
+				private:
+					std::deque<TransitionInfo> queue;
+					std::shared_mutex lock;
 				};
 				/**
 				* Constructor for ControlThread. Primarily just calls super class constructor
@@ -94,6 +112,7 @@ namespace stamina {
 				storm::storage::sparse::StateStorage<StateAndThreadIndex>& getStateStorage();
 				void terminate();
 			private:
+				std::vector<LockableDeque> dequeues;
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage;

@@ -17,7 +17,7 @@ ControlThread<StateType, RewardModelType, ValueType>::ControlThread(
 template <typename StateType, typename RewardModelType, typename ValueType>
 uint8_t
 ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex) {
-
+	std::lock_guard<std::shared_mutex> lock(ownershipMutex);
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
@@ -40,8 +40,14 @@ ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
-	while (!finished) {
-
+	uint8_t numberFinishedThreads;
+	while (numberFinishedThreads < numberExplorationThreads) {
+		for (auto q : dequeues) {
+			while (!q.empty()) {
+				// TODO: flush to transitionMatrixBuilder
+			}
+			// If thread is finished
+		}
 	}
 }
 
