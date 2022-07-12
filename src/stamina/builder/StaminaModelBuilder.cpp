@@ -153,67 +153,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	transitionsToAdd[from].push_back(tInfo);
 }
 
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::remapStates(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder) {
-
-	// State Remapping
-	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
-
-	if (remapping.size() < numberStates) {
-		StaminaMessages::warning(
-			std::string("Remapping vector and number of explored states do not match sizes!")
-			+ "\n\tVector Size: " + std::to_string(remapping.size())
-			+ "\n\tNumber of states: " + std::to_string(numberStates)
-		);
-	}
-	else {
-		StaminaMessages::info(
-			std::string("Remapping vector and number of explored states match.")
-			+ "\n\tVector Size: " + std::to_string(remapping.size())
-			+ "\n\tNumber of states: " + std::to_string(numberStates)
-		);
-	}
-
-	// According to the STORM Folks, this is what needs to be done
-	// in order to use the state remapping:
-
-	// Fix the transition matrix with the new entries
-	transitionMatrixBuilder.replaceColumns(remapping, 0);
-
-    // Fix the initial state indecies
-    // (not sure if we need to do this since our initial state indecies are fine)
-	std::vector<typename threads::ControlThread<
-			StateType
-			, RewardModelType
-			, ValueType
-		>::StateAndThreadIndex> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
-	std::transform(
-		this->stateStorage.initialStateIndices.begin()
-		, this->stateStorage.initialStateIndices.end()
-		, newInitialStateIndices.begin()
-		, [&remapping](StateType const& state) {
-			return remapping[state];
-		}
-	);
-	std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
-	this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
-
-	// Remap stateStorage.stateToId
-	this->stateStorage.stateToId.remap(
-		[&remapping](StateType const& state) {
-			return remapping[state];
-		}
-	);
-
-	this->generator->remapStateIds(
-		[&remapping](StateType const& state) {
-			return remapping[state];
-		}
-	);
-}
-
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::printStateSpaceInformation() {

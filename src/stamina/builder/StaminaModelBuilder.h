@@ -152,12 +152,6 @@ namespace stamina {
 				, const storm::prism::Program & modulesFile
 			);
 			/**
-			* Applies the remapping in the state remapping vector to the transition matrix
-			*
-			* @param transitionMatrixBuilder The transition matrix to apply it to.
-			* */
-			void remapStates(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
-			/**
 			* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 			* and state space truncation from that state.
 			*
