@@ -254,7 +254,13 @@ namespace stamina {
 
 			// The following data members must be accessible to threads
 			util::StateIndexArray<StateType, ProbabilityState<StateType>> stateMap;
-			storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex>& stateStorage;
+			storm::storage::sparse::StateStorage<
+				typename threads::ControlThread<
+					StateType
+					, RewardModelType
+					, ValueType
+				>::StateAndThreadIndex
+			>& stateStorage;
 
 			// Remapping (not used by STAMINA)
 			boost::optional<std::vector<uint_fast64_t>> stateRemapping;

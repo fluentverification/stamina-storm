@@ -19,7 +19,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
 ) : generator(generator)
-	, stateStorage(*(new storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex>(generator->getStateSize())))
+	, stateStorage(*(new storm::storage::sparse::StateStorage<
+		typename threads::ControlThread<
+			StateType
+			, RewardModelType
+			, ValueType
+		>::StateAndThreadIndex>(generator->getStateSize())))
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
@@ -179,7 +184,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::remapStates(storm::s
 
     // Fix the initial state indecies
     // (not sure if we need to do this since our initial state indecies are fine)
-	std::vector<StateType> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
+	std::vector<typename threads::ControlThread<
+			StateType
+			, RewardModelType
+			, ValueType
+		>::StateAndThreadIndex> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
 	std::transform(
 		this->stateStorage.initialStateIndices.begin()
 		, this->stateStorage.initialStateIndices.end()
