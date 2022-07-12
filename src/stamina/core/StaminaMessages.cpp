@@ -12,6 +12,8 @@
 namespace stamina {
 namespace core {
 
+const std::string StaminaMessages::horizontalSeparator = "========================================================================================";
+
 void
 StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
 	std::cerr << BOLD(FRED("[ERROR]: "));

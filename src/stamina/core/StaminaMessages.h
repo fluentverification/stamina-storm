@@ -65,8 +65,7 @@ namespace stamina {
 	#endif
 			static void writeResults(ResultInformation resultInformation, std::ostream out);
 		protected:
-			static constexpr char * horizontalSeparator =
-				"========================================================================================";
+			static const std::string horizontalSeparator;
 		};
 	} // namespace core
 	typedef core::StaminaMessages StaminaMessages; // Allow users to use messages without the `core` namespace
