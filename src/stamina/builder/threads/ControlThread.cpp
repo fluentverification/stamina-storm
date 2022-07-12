@@ -10,6 +10,7 @@ ControlThread<StateType, RewardModelType, ValueType>::ControlThread(
 	, uint8_t numberExplorationThreads
 ) : BaseThread<StateType, RewardModelType, ValueType>(parent)
 	, numberExplorationThreads(numberExplorationThreads)
+	, stateStorage(stateStorage)
 {
 	// Intentionally left empty
 }
@@ -86,6 +87,7 @@ ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 			q.unlockThread();
 		}
 		if (exitThisIteration) { return; }
+		// TODO: de-fragmentation
 	}
 }
 

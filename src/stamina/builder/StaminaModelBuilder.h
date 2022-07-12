@@ -59,11 +59,6 @@ namespace stamina {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaModelBuilder {
 		public:
-			// Probability state typedefs
-			typedef ProbabilityState<StateType> ProbabilityState;
-			typedef ProbabilityStateComparison<StateType> ProbabilityStateComparison;
-			typedef ProbabilityStatePair<StateType> ProbabilityStatePair;
-			typedef ProbabilityStatePairComparison<StateType> ProbabilityStatePairComparison;
 
 			/**
 			 * A basic struct for out of order transitions to insert into the transition matrix.
@@ -242,24 +237,35 @@ namespace stamina {
 			);
 
 			/* Data Members */
-			std::shared_ptr<threads::ControlThread<ValueType, RewardModelType, StateType>> controlThread;
-			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> explorationThreads;
+			std::shared_ptr<threads::ControlThread<StateType, RewardModelType, ValueType>> controlThread;
+			std::vector<std::shared_ptr<threads::ExplorationThread<StateType, RewardModelType, ValueType>>> explorationThreads;
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
+
 			storm::expressions::Expression * propertyExpression;
 			storm::expressions::ExpressionManager * expressionManager;
 			std::shared_ptr<const storm::logic::Formula> propertyFormula;
+
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
-			util::StateMemoryPool<ProbabilityState> memoryPool;
-			std::deque<std::pair<ProbabilityState *, CompressedState> > statesToExplore;
-			util::StateIndexArray<StateType, ProbabilityState> stateMap;
+
+			util::StateMemoryPool<ProbabilityState<StateType>> memoryPool;
+
+			std::deque<std::pair<ProbabilityState<StateType> *, CompressedState> > statesToExplore;
+
+			// The following data members must be accessible to threads
+			util::StateIndexArray<StateType, ProbabilityState<StateType>> stateMap;
+			storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex>& stateStorage;
+
+			// Remapping (not used by STAMINA)
+			boost::optional<std::vector<uint_fast64_t>> stateRemapping;
+
 			// Transitions which we must add
 			std::vector<std::vector<TransitionInfo>> transitionsToAdd;
 			// Options for next state generators
 			storm::generator::NextStateGeneratorOptions const & options;
 			// The model builder must have access to this to create a fresh next state generator each iteration
 			storm::prism::Program const& modulesFile;
-			ProbabilityState * currentProbabilityState;
+			ProbabilityState<StateType> * currentProbabilityState;
 			CompressedState absorbingState;
 			bool absorbingWasSetUp;
 			bool isInit;

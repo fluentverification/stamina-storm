@@ -16,7 +16,7 @@ namespace stamina {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaReExploringModelBuilder : public StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
-			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
+// 			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
 			/**
 			* Constructs a StaminaReExploringModelBuilder with a given storm::generator::PrismNextStateGenerator. Invokes super's constructor
 			*
@@ -104,7 +104,7 @@ namespace stamina {
 			// Dynamic programming improvement: we keep an ordered set of the states terminated
 			// during the previous iteration (in an order that prevents needing to use a remapping
 			// vector for state indecies.
-			std::deque<std::pair<ProbabilityState *, CompressedState>> statesTerminatedLastIteration;
+			std::deque<std::pair<ProbabilityState<StateType> *, CompressedState>> statesTerminatedLastIteration;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 		};

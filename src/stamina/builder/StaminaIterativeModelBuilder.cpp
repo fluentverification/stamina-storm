@@ -285,8 +285,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 	if (isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
-			ProbabilityState * initProbabilityState = memoryPool.allocate();
-			*initProbabilityState = ProbabilityState(
+			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
+			*initProbabilityState = ProbabilityState<StateType>(
 				actualIndex
 				, 1.0
 				, true
@@ -297,7 +297,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
-			ProbabilityState * initProbabilityState = nextState;
+			ProbabilityState<StateType> * initProbabilityState = nextState;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
@@ -315,7 +315,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
@@ -331,7 +331,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
@@ -342,8 +342,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState * nextProbabilityState = memoryPool.allocate();
-			*nextProbabilityState = ProbabilityState(
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState<StateType>(
 				actualIndex
 				, 0.0
 				, true

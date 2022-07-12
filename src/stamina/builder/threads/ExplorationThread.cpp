@@ -12,10 +12,12 @@ ExplorationThread<StateType, RewardModelType, ValueType>::ExplorationThread(
 	, uint8_t threadIndex
 	, ControlThread & controlThread
 	, uint32_t stateSize
+	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 ) : BaseThread(parent)
 	, threadIndex(threadIndex)
 	, controlThread(controlThread)
 	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(stateSize)))
+	, stateMap(stateMap)
 {
 	// Intentionally left empty
 }

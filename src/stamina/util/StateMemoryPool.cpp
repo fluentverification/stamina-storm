@@ -55,11 +55,7 @@ namespace stamina {
 
 		// Forward declare
 		template class StateMemoryPool<
-			builder::StaminaModelBuilder<
-				double
-				, storm::models::sparse::StandardRewardModel<double>
-				, uint32_t
-			>::ProbabilityState
+			builder::ProbabilityState<uint32_t>
 		>;
 	}
 }

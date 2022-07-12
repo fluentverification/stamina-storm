@@ -11,12 +11,15 @@
 #include "BaseThread.h"
 #include "ControlThread.h"
 
+#include "util/StateIndexArray.h"
+#include "builder/ProbabilityState.h"
+
 namespace stamina {
 	namespace builder {
 		namespace threads {
 
 			template <typename StateType, typename RewardModelType, typename ValueType>
-			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType> {
+			class ExplorationThread : public BaseThread<StateType, RewardModelType, ValueType> {
 			public:
 				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, RewardModelType, StateType>>> StateAndProbability;
 				/**
@@ -26,12 +29,14 @@ namespace stamina {
 				* @param parent The model builder who owns this thread
 				* @param threadIndex The index of this thread
 				* @param stateSize The size of the states
+				* @param stateMap Access to the parent class's stateMap
 				* */
 				ExplorationThread(
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t threadIndex
-					, ControlThread<ValueType, RewardModelType, StateType> & controlThread
+					, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 					, uint32_t stateSize
+					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 				);
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
@@ -59,7 +64,8 @@ namespace stamina {
 				std::deque<StateAndProbability> mainExplorationQueue;
 				uint32_t numberOfOwnedStates;
 				bool idling;
-				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
+				ControlThread<StateType, RewardModelType, ValueType> & controlThread;
+				util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap;
 			private:
 				const uint8_t threadIndex;
 			};

@@ -19,7 +19,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
 ) : generator(generator)
-// 	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(generator->getStateSize())))
+	, stateStorage(*(new storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex>(generator->getStateSize())))
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
@@ -378,7 +378,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex>
-getStateStorage() {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() {
 	return this->controlThread->getStateStorage();
 }
 

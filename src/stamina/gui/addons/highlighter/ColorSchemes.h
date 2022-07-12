@@ -1,4 +1,5 @@
 #include <QColor>
+
 namespace stamina {
 	namespace gui {
 		namespace addons {

@@ -8,7 +8,7 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExplorationThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
-	, ControlThread<ValueType, RewardModelType, StateType> & controlThread
+	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 ) : ExplorationThread(parent, threadIndex, controlThread)
 {
 	// Intentionally left empty

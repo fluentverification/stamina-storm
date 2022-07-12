@@ -25,7 +25,7 @@ namespace stamina {
 			class ExplorationThread;
 
 			template <typename StateType, typename RewardModelType, typename ValueType>
-			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
+			class ControlThread : public BaseThread<StateType, RewardModelType, ValueType> {
 			public:
 				struct StateAndThreadIndex {
 					StateType state; // State Index
@@ -55,6 +55,7 @@ namespace stamina {
 				ControlThread(
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t numberExplorationThreads
+					, storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage // State storage owned by parents
 				);
 				/**
 				* Requests ownership of a state for a particular thread. This is intended

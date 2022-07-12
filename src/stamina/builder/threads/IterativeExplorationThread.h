@@ -14,7 +14,7 @@ namespace stamina {
 	namespace builder {
 		namespace threads {
 			template<typename ValueType, typename RewardModelType, typename StateType>
-			class IterativeExplorationThread : public ExplorationThread<ValueType, RewardModelType, StateType> {
+			class IterativeExplorationThread : public ExplorationThread<StateType, RewardModelType, ValueType> {
 			public:
 				/**
 				* Constructor. Invokes super's constructor.
@@ -25,7 +25,7 @@ namespace stamina {
 				IterativeExplorationThread(
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t threadIndex
-					, ControlThread<ValueType, RewardModelType, StateType> & controlThread
+					, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 				);
 
 			protected:
