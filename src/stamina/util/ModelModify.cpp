@@ -107,7 +107,7 @@ ModelModify::createModifiedProperties(
 	while (std::getline(originalPropertiesStream, str)) {
 		// Remove whitespace
 		boost::algorithm::trim(str);
-		if (str.find("P=?" , 0)) {
+		if (str.rfind("P=?" , 0)) {
 			modifiedPropertiesStream << str << std::endl;
 			continue;
 		}

@@ -42,7 +42,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 			, std::placeholders::_1
 		)
 	)
+	, currentProbabilityState(nullptr)
+	, isInit(true)
+	, isCtmc(true)
+	, numberStates(0)
+	, numberTransitions(0)
+	, currentRow(0)
+	, currentRowGroup(0)
 {
+	// Intentionally left empty
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -102,7 +110,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
-		actualIndex = stateStorage.stateToId.getValue(state);
+		actualIndex = stateStorage.stateToId.getValue(state).state;
 	}
 	else {
 		// Create new index just in case we need it
@@ -120,7 +128,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing(CompressedState const& state) {
 	if (stateStorage.stateToId.contains(state)) {
-		return stateStorage.stateToId.getValue(state);
+		return stateStorage.stateToId.getValue(state).state;
 	}
 	// This state should not exist yet and should point to the absorbing state
 	return 0;
@@ -206,11 +214,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 			StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
 		}
 		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
-		stateStorage.deadlockStateIndices.push_back(0);
+		stateStorage.deadlockStateIndices.push_back({0, 0});
 		// Check if state is already registered
-		std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+		auto actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
 
-		StateType actualIndex = actualIndexPair.first;
+		StateType actualIndex = actualIndexPair.first.state;
 		if (actualIndex != 0) {
 			StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
 		}

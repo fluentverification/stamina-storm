@@ -389,10 +389,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
 
-	// Allocator and deleters
-	std::allocator<storm::storage::SparseMatrixBuilder<ValueType>> alloc;
-	std::default_delete<storm::storage::SparseMatrixBuilder<ValueType>> del;
-
 	// Component builders
 	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(
 			0

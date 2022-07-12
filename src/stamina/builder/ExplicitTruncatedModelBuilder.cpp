@@ -392,7 +392,6 @@ storm::storage::sparse::ModelComponents<ValueType, RewardModelType> ExplicitTrun
     }
     if (generator->isPartiallyObservable()) {
         std::vector<uint32_t> classes(stateStorage.getNumberOfStates());
-        std::unordered_map<uint32_t, std::vector<std::pair<std::vector<std::string>, uint32_t>>> observationActions;
         for (auto const& bitVectorIndexPair : stateStorage.stateToId) {
             uint32_t varObservation = generator->observabilityClass(bitVectorIndexPair.first);
             classes[bitVectorIndexPair.second] = varObservation;

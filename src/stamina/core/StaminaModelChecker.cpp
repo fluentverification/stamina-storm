@@ -279,7 +279,7 @@ StaminaModelChecker::writePerimeterStates(int numRefineIteration) {
 }
 
 void
-StaminaModelChecker::printTransitionActions(std::string filename) {
+StaminaModelChecker::printTransitionActions(std::string const & filename) {
 	StaminaMessages::warning("This feature (StaminaModelChecker::printTransitionActions()) has not been implemented yet");
 }
 

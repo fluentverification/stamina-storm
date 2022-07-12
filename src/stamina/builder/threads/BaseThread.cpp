@@ -10,6 +10,8 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 BaseThread<StateType, RewardModelType, ValueType>::BaseThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 ) : parent(parent)
+	, finished(false)
+	, threadLoop(nullptr)
 {
 	// Intentionally left empty
 }

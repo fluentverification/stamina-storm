@@ -37,7 +37,6 @@ namespace stamina {
 			this->clear();
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
-			uint32_t subArrayIndex = actualNumToReserve % blockSize;
 			for (int i = 0; i < arrayIndex; i++) {
 				std::shared_ptr<ProbabilityStateType *> subArray(
 					new ProbabilityStateType *[blockSize]
