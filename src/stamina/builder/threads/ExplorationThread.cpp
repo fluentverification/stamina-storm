@@ -11,9 +11,11 @@ ExplorationThread<StateType, RewardModelType, ValueType>::ExplorationThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType>> * parent
 	, uint8_t threadIndex
 	, ControlThread & controlThread
+	, uint32_t stateSize
 ) : BaseThread(parent)
 	, threadIndex(threadIndex)
 	, controlThread(controlThread)
+	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(stateSize)))
 {
 	// Intentionally left empty
 }

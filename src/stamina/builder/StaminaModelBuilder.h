@@ -176,7 +176,7 @@ namespace stamina {
 			* */
 			StateType getStateIndexOrAbsorbing(CompressedState const& state);
 		protected:
-			storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex> stateStorage();
+			storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex> getStateStorage();
 			/**
 			* Creates and loads the property expression from the formula
 			* */
@@ -242,7 +242,7 @@ namespace stamina {
 			);
 
 			/* Data Members */
-			std::shared_ptr<threads::ControlThread<ValueType, RewardModelType, StateType>> workerThread;
+			std::shared_ptr<threads::ControlThread<ValueType, RewardModelType, StateType>> controlThread;
 			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> explorationThreads;
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;

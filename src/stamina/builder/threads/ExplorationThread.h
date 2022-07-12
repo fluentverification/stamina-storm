@@ -25,11 +25,13 @@ namespace stamina {
 				*
 				* @param parent The model builder who owns this thread
 				* @param threadIndex The index of this thread
+				* @param stateSize The size of the states
 				* */
 				ExplorationThread(
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t threadIndex
 					, ControlThread<ValueType, RewardModelType, StateType> & controlThread
+					, uint32_t stateSize
 				);
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();

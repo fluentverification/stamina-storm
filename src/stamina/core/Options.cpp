@@ -63,6 +63,7 @@ Options::setArgs(struct arguments * arguments) {
 	max_iterations = arguments->max_iterations;
 	max_states = arguments->max_states;
 	method = arguments->method;
+	threads = arguments->threads;
 }
 
 } // namespace core

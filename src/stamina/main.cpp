@@ -17,6 +17,7 @@ set_default_values(struct arguments * arguments) {
 	arguments->rank_transitions = false;
 	arguments->max_iterations = 10000;
 	arguments->method = STAMINA_METHODS::ITERATIVE_METHOD;
+	arguments->threads = 1;
 }
 
 /**

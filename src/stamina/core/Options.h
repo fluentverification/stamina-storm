@@ -18,7 +18,6 @@ namespace stamina {
 			/**
 			* Checks validity of options
 			*
-			* @param errFunc
 			* @return Whether all options are good
 			* */
 			static bool checkOptions();
@@ -47,6 +46,7 @@ namespace stamina {
 			inline static uint64_t max_iterations;
 			inline static uint64_t max_states;
 			inline static uint8_t method;
+			inline static uint8_t threads;
 		};
 		/**
 		* Tells us if a string ends with another

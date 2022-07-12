@@ -376,6 +376,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 	formulaMatchesExpression = true;
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex>
+getStateStorage() {
+	return this->controlThread->getStateStorage();
+}
+
 
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
