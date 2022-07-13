@@ -33,6 +33,10 @@ namespace stamina {
 					}
 					StateType state; // State Index
 					uint8_t thread; // Thread index
+					// Cast to StateType
+					operator StateType() const {
+						return state;
+					}
 				};
 				class LockableDeque {
 				public:
