@@ -1,6 +1,6 @@
 #include "ExplorationThread.h"
 
-#include <lock_guard>
+#include <mutex>
 
 namespace stamina {
 namespace builder {
@@ -8,15 +8,15 @@ namespace threads {
 
 template <typename StateType, typename RewardModelType, typename ValueType>
 ExplorationThread<StateType, RewardModelType, ValueType>::ExplorationThread(
-	StaminaModelBuilder<ValueType, RewardModelType, StateType>> * parent
+	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
-	, ControlThread & controlThread
+	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
-) : BaseThread(parent)
+) : BaseThread<StateType, RewardModelType, ValueType>(parent)
 	, threadIndex(threadIndex)
 	, controlThread(controlThread)
-	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(stateSize)))
+	, stateStorage(parent->getStateStorage())
 	, stateMap(stateMap)
 {
 	// Intentionally left empty
@@ -54,7 +54,7 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ExplorationThread<StateType, RewardModelType, ValueType>::mainLoop() {
 	idling = false;
-	while (!finished) {
+	while (!this->finished) {
 		// Explore the states in the exploration queue
 		exploreStates();
 	}

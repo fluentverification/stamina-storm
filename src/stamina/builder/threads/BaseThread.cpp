@@ -17,13 +17,7 @@ BaseThread<StateType, RewardModelType, ValueType>::BaseThread(
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
-void
-BaseThread<StateType, RewardModelType, ValueType>::startThread() {
-	finished = false;
-}
-
-template <typename StateType, typename RewardModelType, typename ValueType>
-StaminaModelBuilder<ValueType, RewardModelType, StateType> *
+const StaminaModelBuilder<ValueType, RewardModelType, StateType> *
 BaseThread<StateType, RewardModelType, ValueType>::getParent() {
 	return parent;
 }
@@ -31,6 +25,7 @@ BaseThread<StateType, RewardModelType, ValueType>::getParent() {
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 BaseThread<StateType, RewardModelType, ValueType>::startThread() {
+	finished = false;
 	std::thread me(
 		&BaseThread::mainLoop
 		, this

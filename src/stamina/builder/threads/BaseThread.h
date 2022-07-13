@@ -52,6 +52,7 @@ namespace stamina {
 				 * Joins the
 				 * */
 				void join();
+				void terminate();
 			protected:
 				bool finished;
 			private:

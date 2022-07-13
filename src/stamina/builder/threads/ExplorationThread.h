@@ -66,6 +66,7 @@ namespace stamina {
 				bool idling;
 				ControlThread<StateType, RewardModelType, ValueType> & controlThread;
 				util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap;
+				storm::storage::sparse::StateStorage<StateType> & stateStorage;
 			private:
 				const uint8_t threadIndex;
 			};

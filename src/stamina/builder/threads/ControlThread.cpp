@@ -20,18 +20,18 @@ ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(Compresse
 	// Test to see if a thread already owns this state.
 	// TODO: should this pre-lock even be in here?
 	if (stateThreadMap.stateToId.contains(state)) {
-		return stateThreadMap.stateToId.find(state);
+		return stateThreadMap.stateToId.getValue(state);
 	}
 	// Lock the ownership mutex
 	std::lock_guard<std::shared_mutex> lock(ownershipMutex);
 	if (stateThreadMap.stateToId.contains(state)) {
-		return stateThreadMap.stateToId.find(state);
+		return stateThreadMap.stateToId.getValue(state);
 	}
 	else {
 		// Claim ownership of state
 		stateThreadMap.stateToId.findOrAdd(
 			state
-			threadIndex)
+			, threadIndex
 		);
 	}
 	return threadIndex;
@@ -41,7 +41,7 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 uint8_t
 ControlThread<StateType, RewardModelType, ValueType>::whoOwns(CompressedState & state) {
 	if (stateThreadMap.stateToId.contains(state)) {
-		return stateThreadMap.stateToId.find(state);
+		return stateThreadMap.stateToId.getValue(state);
 	}
 	// Index 0 (the same index as the absorbing state) indicates that no thread owns this state.
 	return 0;
@@ -62,15 +62,15 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 	uint8_t numberFinishedThreads;
-	while (!finished) { // allow for this thread to be killed outside of its main loop
+	while (!this->finished) { // allow for this thread to be killed outside of its main loop
 		bool exitThisIteration = false;
 		numberFinishedThreads = 0;
-		for (auto explorationThread : parent->getExplorationThreads()) {
+		for (auto explorationThread : this->parent->getExplorationThreads()) {
 			if (explorationThread.isIdling()) {
 				++numberFinishedThreads;
 			}
 		}
-		if (numberFinishedThreads == parent->getExplorationThreads().size()) {
+		if (numberFinishedThreads == this->parent->getExplorationThreads().size()) {
 			// We have finished.
 			exitThisIteration = true;
 		}
@@ -80,7 +80,7 @@ ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 			q.lockThread();
 			while (!q.empty()) {
 				// Request that the parent class
-				parent->createTransition(q.top());
+				this->parent->createTransition(q.top());
 				q.pop();
 			}
 			q.unlockThread();
