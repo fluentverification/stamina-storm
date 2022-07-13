@@ -56,10 +56,12 @@ namespace stamina {
 		typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
 
+
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaModelBuilder {
 		public:
 
+			typedef typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex StateThreadIndex;
 			/**
 			 * A basic struct for out of order transitions to insert into the transition matrix.
 			 * This is faster than using the remapping and std::sort in the STORM API
@@ -158,7 +160,7 @@ namespace stamina {
 			* @param state Pointer to the state we are looking it
 			* @return A pair with the state id and whether or not it was already discovered
 			* */
-			virtual StateType getOrAddStateIndex(CompressedState const& state);
+			virtual StateType getOrAddStateIndex(CompressedState const& state, uint8_t threadIndex = 0);
 			/**
 			* Alterate state ID grabber. Returns state ID if exists. If it does not, returns the absorbing state
 			* This is used as an alternative callback function for terminal (perimeter) states

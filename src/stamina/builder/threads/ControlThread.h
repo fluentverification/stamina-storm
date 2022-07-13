@@ -28,6 +28,9 @@ namespace stamina {
 			class ControlThread : public BaseThread<StateType, RewardModelType, ValueType> {
 			public:
 				struct StateAndThreadIndex {
+					StateAndThreadIndex(StateType state, uint8_t thread) : state(state), thread(thread) {
+						// Intentionally left empty
+					}
 					StateType state; // State Index
 					uint8_t thread; // Thread index
 				};

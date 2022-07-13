@@ -106,7 +106,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(
+	CompressedState const& state
+	, uint8_t threadIndex
+) {
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
@@ -119,7 +122,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	auto nextState = stateMap.get(actualIndex);
 
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	stateStorage.stateToId.findOrAdd(
+		state
+		, StateThreadIndex(actualIndex, threadIndex)
+	);
 
 	return actualIndex;
 }
@@ -153,7 +159,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
-	TransitionInfo tInfo(to, probability);
+	TransitionInfo tInfo(from, to, probability);
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(from, to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
@@ -216,7 +222,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 		stateStorage.deadlockStateIndices.push_back({0, 0});
 		// Check if state is already registered
-		auto actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+		auto actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, StateThreadIndex(0, 0));
 
 		StateType actualIndex = actualIndexPair.first.state;
 		if (actualIndex != 0) {
