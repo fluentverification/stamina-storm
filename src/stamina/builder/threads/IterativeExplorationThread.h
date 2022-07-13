@@ -16,6 +16,7 @@ namespace stamina {
 			template<typename ValueType, typename RewardModelType, typename StateType>
 			class IterativeExplorationThread : public ExplorationThread<StateType, RewardModelType, ValueType> {
 			public:
+				typedef typename ExplorationThread<StateType, RewardModelType, ValueType>::StateAndProbability StateAndProbability;
 				/**
 				* Constructor. Invokes super's constructor.
 				*

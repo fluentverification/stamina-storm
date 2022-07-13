@@ -21,7 +21,11 @@ namespace stamina {
 			template <typename StateType, typename RewardModelType, typename ValueType>
 			class ExplorationThread : public BaseThread<StateType, RewardModelType, ValueType> {
 			public:
-				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, RewardModelType, StateType>>> StateAndProbability;
+// 				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, RewardModelType, StateType>>> StateAndProbability;
+				struct StateAndProbability {
+					CompressedState & state;
+					double deltaPi;
+				};
 				/**
 				* Constructor. Invokes super's constructor and stores the
 				* thread index which cannot change for the life of the thread

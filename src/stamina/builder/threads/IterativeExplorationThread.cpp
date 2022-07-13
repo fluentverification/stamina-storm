@@ -9,7 +9,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
 	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
-) : ExplorationThread(parent, threadIndex, controlThread)
+) : ExplorationThread<StateType, RewardModelType, ValueType>(parent, threadIndex, controlThread)
 {
 	// Intentionally left empty
 }
@@ -17,20 +17,20 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreStates() {
-	if (!crossExplorationQueue.empty() && !crossExplorationQueueMutex.locked()) {
-		std::lock_guard<std::shared_mutex> lockGuard(crossExplorationQueueMutex);
-		auto stateDeltaPiPair = crossExplorationQueue.top();
-		crossExplorationQueue.pop();
+	if (!this->crossExplorationQueue.empty() && !this->crossExplorationQueueMutex.locked()) {
+		std::lock_guard<std::shared_mutex> lockGuard(this->crossExplorationQueueMutex);
+		auto stateDeltaPiPair = this->crossExplorationQueue.top();
+		this->crossExplorationQueue.pop();
 		StateType s = stateDeltaPiPair.first;
 		double deltaPi = stateDeltaPiPair.second;
 		// Update the estimated reachability of s
-		auto probabilityState = parent->getStateMap().get(s);
+		auto probabilityState = this->parent->getStateMap().get(s);
 		probabilityState.pi += deltaPi;
 		exploreState(s);
 	}
-	else if (!mainExplorationQueue.empty()) {
-		auto s = mainExplorationQueue.top();
-		mainExplorationQueue.pop();
+	else if (!this->mainExplorationQueue.empty()) {
+		auto s = this->mainExplorationQueue.top();
+		this->mainExplorationQueue.pop();
 		exploreState(s);
 	}
 	else {
