@@ -20,11 +20,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, storm::generator::NextStateGeneratorOptions const & options
 ) : generator(generator)
 	, stateStorage(*(new storm::storage::sparse::StateStorage<
-		typename threads::ControlThread<
-			StateType
-			, RewardModelType
-			, ValueType
-		>::StateAndThreadIndex>(generator->getStateSize())))
+		StateType
+		>(generator->getStateSize())))
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
@@ -108,12 +105,11 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(
 	CompressedState const& state
-	, uint8_t threadIndex
 ) {
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
-		actualIndex = stateStorage.stateToId.getValue(state).state;
+		actualIndex = stateStorage.stateToId.getValue(state);
 	}
 	else {
 		// Create new index just in case we need it
@@ -124,7 +120,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(
 
 	stateStorage.stateToId.findOrAdd(
 		state
-		, StateThreadIndex(actualIndex, threadIndex)
+		, actualIndex
 	);
 
 	return actualIndex;
@@ -134,7 +130,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateIndexOrAbsorbing(CompressedState const& state) {
 	if (stateStorage.stateToId.contains(state)) {
-		return stateStorage.stateToId.getValue(state).state;
+		return stateStorage.stateToId.getValue(state);
 	}
 	// This state should not exist yet and should point to the absorbing state
 	return 0;
@@ -220,11 +216,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 			StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
 		}
 		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
-		stateStorage.deadlockStateIndices.push_back({0, 0});
+		stateStorage.deadlockStateIndices.push_back(0);
 		// Check if state is already registered
-		auto actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, StateThreadIndex(0, 0));
+		auto actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
 
-		StateType actualIndex = actualIndexPair.first.state;
+		StateType actualIndex = actualIndexPair.first;
 		if (actualIndex != 0) {
 			StaminaMessages::errorAndExit("Absorbing state should be index 0! Got " + std::to_string(actualIndex));
 		}
@@ -339,9 +335,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex>
+storm::storage::sparse::StateStorage<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() {
-	return this->controlThread->getStateStorage();
+	return this->stateStorage;
 }
 
 

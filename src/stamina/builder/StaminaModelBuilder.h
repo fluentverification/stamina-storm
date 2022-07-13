@@ -160,14 +160,14 @@ namespace stamina {
 			* @param state Pointer to the state we are looking it
 			* @return A pair with the state id and whether or not it was already discovered
 			* */
-			virtual StateType getOrAddStateIndex(CompressedState const& state, uint8_t threadIndex = 0);
+			virtual StateType getOrAddStateIndex(CompressedState const& state);
 			/**
 			* Alterate state ID grabber. Returns state ID if exists. If it does not, returns the absorbing state
 			* This is used as an alternative callback function for terminal (perimeter) states
 			* */
 			StateType getStateIndexOrAbsorbing(CompressedState const& state);
 		protected:
-			storm::storage::sparse::StateStorage<typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex> getStateStorage();
+			storm::storage::sparse::StateStorage<StateType> getStateStorage();
 			/**
 			* Creates and loads the property expression from the formula
 			* */
@@ -251,11 +251,7 @@ namespace stamina {
 			// The following data members must be accessible to threads
 			util::StateIndexArray<StateType, ProbabilityState<StateType>> stateMap;
 			storm::storage::sparse::StateStorage<
-				typename threads::ControlThread<
-					StateType
-					, RewardModelType
-					, ValueType
-				>::StateAndThreadIndex
+				StateType
 			>& stateStorage;
 
 			// Remapping (not used by STAMINA)

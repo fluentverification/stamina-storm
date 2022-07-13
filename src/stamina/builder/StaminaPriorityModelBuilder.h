@@ -77,6 +77,7 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::memoryPool;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::statesToExplore;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateMap;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			// Options for next state generators
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::options;
 			// The model builder must have access to this to create a fresh next state generator each iteration
@@ -102,9 +103,9 @@ namespace stamina {
 			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
 			/* Data members */
 			std::priority_queue<
-				typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePair
-				, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePair
-				, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePairComparison
+				ProbabilityStatePair<StateType>
+				, ProbabilityStatePair<StateType>
+				, ProbabilityStatePairComparison<StateType>
 			> statePriorityQueue;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;

@@ -56,7 +56,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 	if (isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
-			ProbabilityState * initProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
 				actualIndex
 				, 1.0
@@ -70,9 +70,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 		else {
 			StaminaMessages::errorAndExit("Initial state should not exist yet, but does!");
 		}
-		if (actualIndex == newIndex) {
-			stateRemapping.get().push_back(storm::utility::zero<StateType>());
-		}
 		return actualIndex;
 	}
 
@@ -83,7 +80,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
@@ -99,7 +96,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
@@ -110,7 +107,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState * nextProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
 				actualIndex
 				, 0.0

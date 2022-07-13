@@ -57,7 +57,7 @@ namespace stamina {
 			* @param state Pointer to the state we are looking it
 			* @return A pair with the state id and whether or not it was already discovered
 			* */
-			StateType getOrAddStateIndex(CompressedState const& state, uint8_t threadIndex = 0) override;
+			StateType getOrAddStateIndex(CompressedState const& state) override;
 			/**
 			* Explores state space and truncates the model
 			*
@@ -75,6 +75,7 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::memoryPool;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::statesToExplore;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateMap;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			// Options for next state generators
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::options;
 			// The model builder must have access to this to create a fresh next state generator each iteration

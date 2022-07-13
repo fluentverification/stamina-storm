@@ -266,7 +266,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state, uint8_t threadIndex) {
+StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
@@ -301,9 +301,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
-		}
-		if (actualIndex == newIndex) {
-			stateRemapping.get().push_back(storm::utility::zero<StateType>());
 		}
 		return actualIndex;
 	}

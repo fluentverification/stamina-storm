@@ -125,7 +125,7 @@ namespace stamina {
 				std::vector<LockableDeque> transitionQueues;
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
-				storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage;
+				storm::storage::sparse::StateStorage<uint8_t>& stateStorage;
 
 			};
 
