@@ -64,7 +64,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statePriorityQueue.push(initProbabilityState);
+			statePriorityQueue.push({initProbabilityState, state});
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
@@ -84,7 +84,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push(nextProbabilityState);
+				statePriorityQueue.push({nextProbabilityState, state});
 				enqueued = true;
 			}
 		}
@@ -101,7 +101,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push(nextProbabilityState);
+				statePriorityQueue.push({nextProbabilityState, state});
 				enqueued = true;
 			}
 		}
@@ -116,7 +116,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			statePriorityQueue.push(nextProbabilityState);
+			statePriorityQueue.push({nextProbabilityState, state});
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -270,12 +270,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 	// Perform a search through the model.
 	do {
-		currentProbabilityState = statesToExplore.top().first;
-		currentState = statesToExplore.top().second;
+		currentProbabilityState = statePriorityQueue.top().first;
+		currentState = statePriorityQueue.top().second;
 		statePriorityQueue.pop();
-		// Get the first state in the queue.
-		currentIndex = currentProbabilityState->index;
-		currentState = currentProbabilityState->state();
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -444,12 +441,13 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 	for (auto terminalStateIndex : terminalStates) {
 		auto terminalState = stateMap.get(terminalStateIndex);
 		// connect to absorbing
-		this->connectTerminalStatesToAbsorbing(
-			transitionMatrixBuilder
-			, terminalState->state()
-			, terminalState->index
-			, this->terminalStateToIdCallback
-		);
+		// TODO: figure out how to do this for Priority Model Builder
+// 		this->connectTerminalStatesToAbsorbing(
+// 			transitionMatrixBuilder
+// 			, terminalState->state()
+// 			, terminalState->index
+// 			, this->terminalStateToIdCallback
+// 		);
 	}
 }
 

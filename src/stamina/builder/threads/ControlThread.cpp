@@ -10,7 +10,6 @@ ControlThread<StateType, RewardModelType, ValueType>::ControlThread(
 	, uint8_t numberExplorationThreads
 ) : BaseThread<StateType, RewardModelType, ValueType>(parent)
 	, numberExplorationThreads(numberExplorationThreads)
-	, stateStorage(stateStorage)
 {
 	// Intentionally left empty
 }
@@ -20,19 +19,19 @@ uint8_t
 ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId) {
 	// Test to see if a thread already owns this state.
 	// TODO: should this pre-lock even be in here?
-	if (stateStorage.stateToId.contains(state)) {
-		return stateStorage.stateToId.find(state).thread;
+	if (stateThreadMap.stateToId.contains(state)) {
+		return stateThreadMap.stateToId.find(state);
 	}
 	// Lock the ownership mutex
 	std::lock_guard<std::shared_mutex> lock(ownershipMutex);
-	if (stateStorage.stateToId.contains(state)) {
-		return stateStorage.stateToId.find(state).thread;
+	if (stateThreadMap.stateToId.contains(state)) {
+		return stateThreadMap.stateToId.find(state);
 	}
 	else {
 		// Claim ownership of state
-		stateStorage.stateToId.findOrAdd(
+		stateThreadMap.stateToId.findOrAdd(
 			state
-			StateAndThreadIndex(requestedId, threadIndex)
+			threadIndex)
 		);
 	}
 	return threadIndex;
@@ -41,8 +40,8 @@ ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(Compresse
 template <typename StateType, typename RewardModelType, typename ValueType>
 uint8_t
 ControlThread<StateType, RewardModelType, ValueType>::whoOwns(CompressedState & state) {
-	if (stateStorage.stateToId.contains(state)) {
-		return stateStorage.stateToId.find(state).thread;
+	if (stateThreadMap.stateToId.contains(state)) {
+		return stateThreadMap.stateToId.find(state);
 	}
 	// Index 0 (the same index as the absorbing state) indicates that no thread owns this state.
 	return 0;

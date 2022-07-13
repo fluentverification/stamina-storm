@@ -283,7 +283,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 	if (isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
-			ProbabilityState * initProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
 				actualIndex
 				, 1.0
@@ -295,13 +295,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
-			ProbabilityState * initProbabilityState = nextState;
+			ProbabilityState<StateType> * initProbabilityState = nextState;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
-		}
-		if (actualIndex == newIndex) {
-			stateRemapping.get().push_back(storm::utility::zero<StateType>());
 		}
 		return actualIndex;
 	}
@@ -313,7 +310,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
@@ -329,7 +326,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
@@ -340,7 +337,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState * nextProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
 				actualIndex
 				, 0.0

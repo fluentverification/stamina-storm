@@ -104,7 +104,7 @@ namespace stamina {
 			/* Data members */
 			std::priority_queue<
 				ProbabilityStatePair<StateType>
-				, ProbabilityStatePair<StateType>
+				, std::vector<ProbabilityStatePair<StateType>>
 				, ProbabilityStatePairComparison<StateType>
 			> statePriorityQueue;
 			uint64_t numberOfExploredStates;
