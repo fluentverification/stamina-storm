@@ -102,6 +102,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+double
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getLocalKappa() {
+	return localKappa;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(
 	CompressedState const& state
