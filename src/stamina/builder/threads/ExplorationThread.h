@@ -24,6 +24,7 @@ namespace stamina {
 // 				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, RewardModelType, StateType>>> StateAndProbability;
 				struct StateAndProbability {
 					CompressedState & state;
+					StateType index;
 					double deltaPi;
 				};
 				/**
@@ -41,6 +42,7 @@ namespace stamina {
 					, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
+					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 				);
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
@@ -71,6 +73,8 @@ namespace stamina {
 				ControlThread<StateType, RewardModelType, ValueType> & controlThread;
 				util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap;
 				storm::storage::sparse::StateStorage<StateType> & stateStorage;
+				std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator;
+				std::deque<StateAndProbability> statesTerminatedLastIteration;
 			private:
 				const uint8_t threadIndex;
 			};

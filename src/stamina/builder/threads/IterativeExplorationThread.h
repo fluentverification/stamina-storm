@@ -29,6 +29,7 @@ namespace stamina {
 					, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
+					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 				);
 
 			protected:

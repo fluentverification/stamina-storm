@@ -11,12 +11,14 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
+	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 ) : ExplorationThread<StateType, RewardModelType, ValueType>(
 	parent
 	, threadIndex
 	, controlThread
 	, stateSize
 	, stateMap
+	, generator
 )
 {
 	// Intentionally left empty
@@ -49,6 +51,136 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreStates
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(StateAndProbability & stateProbability) {
+	auto currentProbabilityState = stateMap.get(stateProbability.index);
+
+	StateType currentIndex = stateProbability.index;
+	CompressedState & currentState = StateAndProbability.state;
+
+	// Flush deltaPi
+	currentProbabilityState.pi += stateProbability.deltaPi;
+
+	// Load this state to use
+	this->generator->load(currentState);
+
+	/*
+	 * Early termination based on property expression
+	 * */
+	if (parent->getPropertyExpression() != nullptr) {
+		storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
+		bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+		// If the property does not hold at the current state, make it absorbing in the
+		// state graph and do not explore its successors
+		if (!evaluationAtCurrentState) {
+			controlThread.requestInsertTransition(
+				this->threadIndex
+				, currentIndex
+				, 0
+				, 1.0
+			);
+			// We treat this state as terminal even though it is also absorbing and does not
+			// go to our artificial absorbing state
+			currentProbabilityState->terminal = true;
+			numberTerminal++;
+			// Do NOT place this in the deque of states we should start with next iteration
+			return;
+		}
+	}
+
+	// Do not explore if state is terminal and its reachability probability is less than kappa
+	if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
+		// Do not connect to absorbing yet
+		// Place this in statesTerminatedLastIteration
+		if ( !currentProbabilityState->wasPutInTerminalQueue ) {
+			this->statesTerminatedLastIteration.emplace_back(stateProbability);
+			currentProbabilityState->wasPutInTerminalQueue = true;
+		}
+		continue;
+	}
+
+	// We assume that if we make it here, our state is either nonterminal, or its reachability probability
+	// is greater than kappa
+	// Expand this state
+	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+
+	if (behavior.empty()) {
+		// This state needs to be made absorbing
+		controlThread.requestInsertTransition(
+			this->threadIndex
+			, currentIndex
+			, currentIndex
+			, 1.0
+		);
+	}
+
+	bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
+	// Now add all choices.
+	bool firstChoiceOfState = true;
+	for (auto const& choice : behavior) {
+		if (!firstChoiceOfState) {
+			StaminaMessages::errorAndExit("Model was not deterministic!");
+		}
+		// add the generated choice information
+// 		if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
+// 			for (auto const& label : choice.getLabels()) {
+// 				stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+//
+// 			}
+// 		}
+// 		if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
+// 			stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+// 		}
+// 		if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
+// 			if (firstChoiceOfState) {
+// 				stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
+// 			}
+// 		}
+
+		double totalRate = 0.0;
+		if (!shouldEnqueueAll && isCtmc) {
+			for (auto const & stateProbabilityPair : choice) {
+				if (stateProbabilityPair.first == 0) {
+					StaminaMessages::warning("Transition to absorbing state from API!!!");
+					return;
+				}
+				totalRate += stateProbabilityPair.second;
+			}
+		}
+		// Add the probabilistic behavior to the matrix.
+		for (auto const& stateProbabilityPair : choice) {
+			StateType sPrime = stateProbabilityPair.first;
+			if (sPrime == 0) {
+				return;
+			}
+			double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
+			// Enqueue S is handled in stateToIdCallback
+			// Update transition probability only if we should enqueue all
+			// These are next states where the previous state has a reachability
+			// greater than zero
+
+			auto nextProbabilityState = stateMap.get(sPrime);
+			if (nextProbabilityState != nullptr) {
+				if (!shouldEnqueueAll) {
+					nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
+				}
+
+				if (currentProbabilityState->isNew) {
+					this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+					numberTransitions++;
+				}
+			}
+		}
+
+		++currentRow;
+		firstChoiceOfState = false;
+	}
+
+	currentProbabilityState->isNew = false;
+
+	if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
+		numberTerminal--;
+	}
+	currentProbabilityState->setTerminal(false);
+	currentProbabilityState->setPi(0.0);
 
 }
 
