@@ -1,5 +1,7 @@
 #include "IterativeExplorationThread.h"
 
+#include "core/StaminaMessages.h"
+
 namespace stamina {
 namespace builder {
 namespace threads {
@@ -56,7 +58,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 	auto currentProbabilityState = stateMap.get(stateProbability.index);
 
 	StateType currentIndex = stateProbability.index;
-	CompressedState & currentState = StateAndProbability.state;
+	CompressedState & currentState = stateProbability.state;
 
 	// Flush deltaPi
 	currentProbabilityState.pi += stateProbability.deltaPi;
@@ -155,7 +157,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 			}
 			// Check if we own sPrime and if we don't ask the thread who does to explore it
 			uint8_t sPrimeOwner = this->controlThread.whoOwns(sPrime);
-			if (sPrimeOwner != threadIndex && sPrimeOwner != NO_THREAD) {
+			if (sPrimeOwner != this->threadIndex && sPrimeOwner != NO_THREAD) {
 				// Request cross exploration
 				this->controlThread.requestCrossExplorationFromThread(sPrimeOwner, StateAndProbability());
 				continue;
@@ -167,7 +169,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 				if (failedRequest) {
 					// request cross exploration
 
-					continue
+					continue;
 				}
 			}
 
@@ -179,7 +181,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 			// These are next states where the previous state has a reachability
 			// greater than zero
 
-			auto nextProbabilityState = stateMap.get(sPrime);
+			auto nextProbabilityState = this->stateMap.get(sPrime);
 			if (nextProbabilityState != nullptr) {
 				if (!shouldEnqueueAll) {
 					nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
@@ -187,12 +189,10 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 
 				if (currentProbabilityState->isNew) {
 					this->controlThread.requestInsertTransition(threadIndex, currentIndex, sPrime, stateProbabilityPair.second);
-					numberTransitions++;
 				}
 			}
 		}
 
-		++currentRow;
 		firstChoiceOfState = false;
 	}
 
