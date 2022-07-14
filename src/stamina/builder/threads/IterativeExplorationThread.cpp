@@ -8,18 +8,18 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExplorationThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
-	, ControlThread<StateType, RewardModelType, ValueType> & this->controlThread
+	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
-	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& this->generator
+	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) : ExplorationThread<StateType, RewardModelType, ValueType>(
 	parent
 	, threadIndex
-	, this->controlThread
+	, controlThread
 	, stateSize
 	, stateMap
-	, this->generator
+	, generator
 	, stateToIdCallback
 )
 {
@@ -62,7 +62,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 	currentProbabilityState.pi += stateProbability.deltaPi;
 
 	// Load this state to use
-	this->this->generator->load(currentState);
+	this->generator->load(currentState);
 
 	/*
 	 * Early termination based on property expression
