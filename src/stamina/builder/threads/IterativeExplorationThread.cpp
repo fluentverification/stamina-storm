@@ -71,7 +71,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 	 * */
 	if (this->parent->getPropertyExpression() != nullptr) {
 		storm::expressions::SimpleValuation valuation = this->generator->currentStateToSimpleValuation();
-		bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+		bool evaluationAtCurrentState = this->parent->getPropertyExpression()->evaluateAsBool(&valuation);
 		// If the property does not hold at the current state, make it absorbing in the
 		// state graph and do not explore its successors
 		if (!evaluationAtCurrentState) {
