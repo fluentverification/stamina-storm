@@ -8,18 +8,18 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExplorationThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
-	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
+	, ControlThread<StateType, RewardModelType, ValueType> & this->controlThread
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
-	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
+	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& this->generator
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) : ExplorationThread<StateType, RewardModelType, ValueType>(
 	parent
 	, threadIndex
-	, controlThread
+	, this->controlThread
 	, stateSize
 	, stateMap
-	, generator
+	, this->generator
 	, stateToIdCallback
 )
 {
@@ -62,18 +62,18 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 	currentProbabilityState.pi += stateProbability.deltaPi;
 
 	// Load this state to use
-	this->generator->load(currentState);
+	this->this->generator->load(currentState);
 
 	/*
 	 * Early termination based on property expression
 	 * */
-	if (parent->getPropertyExpression() != nullptr) {
-		storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
+	if (this->parent->getPropertyExpression() != nullptr) {
+		storm::expressions::SimpleValuation valuation = this->generator->currentStateToSimpleValuation();
 		bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
 		// If the property does not hold at the current state, make it absorbing in the
 		// state graph and do not explore its successors
 		if (!evaluationAtCurrentState) {
-			controlThread.requestInsertTransition(
+			this->controlThread.requestInsertTransition(
 				this->threadIndex
 				, currentIndex
 				, 0
@@ -96,17 +96,17 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 			this->statesTerminatedLastIteration.emplace_back(stateProbability);
 			currentProbabilityState->wasPutInTerminalQueue = true;
 		}
-		continue;
+		return;
 	}
 
 	// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 	// is greater than kappa
 	// Expand this state
-	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(this->stateToIdCallback);
+	storm::generator::StateBehavior<ValueType, StateType> behavior = this->generator->expand(this->stateToIdCallback);
 
 	if (behavior.empty()) {
 		// This state needs to be made absorbing
-		controlThread.requestInsertTransition(
+		this->controlThread.requestInsertTransition(
 			this->threadIndex
 			, currentIndex
 			, currentIndex
@@ -154,10 +154,10 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 				continue;
 			}
 			// Check if we own sPrime and if we don't ask the thread who does to explore it
-			uint_8_t sPrimeOwner = controlThread.whoOwns(sPrime)
+			uint8_t sPrimeOwner = this->controlThread.whoOwns(sPrime);
 			if (sPrimeOwner != threadIndex && sPrimeOwner != NO_THREAD) {
 				// Request cross exploration
-				controlThread.requestCrossExplorationFromThread(sPrimeOwner, StateAndProbability());
+				this->controlThread.requestCrossExplorationFromThread(sPrimeOwner, StateAndProbability());
 				continue;
 			}
 			else if (sPrimeOwner == NO_THREAD) {
@@ -186,7 +186,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 				}
 
 				if (currentProbabilityState->isNew) {
-					controlThread.requestInsertTransition(threadIndex, currentIndex, sPrime, stateProbabilityPair.second);
+					this->controlThread.requestInsertTransition(threadIndex, currentIndex, sPrime, stateProbabilityPair.second);
 					numberTransitions++;
 				}
 			}
