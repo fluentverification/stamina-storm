@@ -9,7 +9,15 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
 	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
-) : ExplorationThread<StateType, RewardModelType, ValueType>(parent, threadIndex, controlThread)
+	, uint32_t stateSize
+	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
+) : ExplorationThread<StateType, RewardModelType, ValueType>(
+	parent
+	, threadIndex
+	, controlThread
+	, stateSize
+	, stateMap
+)
 {
 	// Intentionally left empty
 }

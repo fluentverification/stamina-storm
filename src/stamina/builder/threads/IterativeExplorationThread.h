@@ -13,7 +13,7 @@
 namespace stamina {
 	namespace builder {
 		namespace threads {
-			template<typename ValueType, typename RewardModelType, typename StateType>
+			template <typename StateType, typename RewardModelType, typename ValueType>
 			class IterativeExplorationThread : public ExplorationThread<StateType, RewardModelType, ValueType> {
 			public:
 				typedef typename ExplorationThread<StateType, RewardModelType, ValueType>::StateAndProbability StateAndProbability;
@@ -27,6 +27,8 @@ namespace stamina {
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t threadIndex
 					, ControlThread<StateType, RewardModelType, ValueType> & controlThread
+					, uint32_t stateSize
+					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 				);
 
 			protected:

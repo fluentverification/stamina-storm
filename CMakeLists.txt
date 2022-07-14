@@ -93,12 +93,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_
 target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
 
 # STAMINA shared-object libraries project
-project(libstamina VERSION 2.5.0 DESCRIPTION "Shared objects for STAMINA usage")
+project(stamina-dev VERSION 2.5.0 DESCRIPTION "Shared objects for STAMINA usage")
 include_directories("src")
 include_directories("src/stamina")
 
-add_library(libstamina SHARED ${LIB_FILES})
-set_target_properties(libstamina PROPERTIES VERSION ${PROJECT_VERSION})
+add_library(stamina-dev SHARED ${LIB_FILES})
+set_target_properties(stamina-dev PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
 target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
 
