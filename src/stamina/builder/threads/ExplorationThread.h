@@ -66,6 +66,7 @@ namespace stamina {
 			protected:
 				virtual void exploreStates() = 0;
 				virtual void exploreState(StateAndProbability & stateProbability) = 0;
+				virtual void enqueueSuccessors(CompressedState & state) = 0; // stateToIdCallback
 				// Weak priority on crossExplorationQueue (superseded by mutex lock)
 				std::shared_mutex crossExplorationQueueMutex;
 				std::deque<std::pair<CompressedState, double>> crossExplorationQueue;

@@ -1,6 +1,7 @@
 #include "IterativeExplorationThread.h"
 
 #include "core/StaminaMessages.h"
+#include "util/StateSpaceInformation.h"
 
 namespace stamina {
 namespace builder {
@@ -26,6 +27,105 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 )
 {
 	// Intentionally left empty
+}
+
+template <typename StateType, typename RewardModelType, typename ValueType>
+void
+IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSuccessors(CompressedState & state) {
+	// Request ownership of state
+	// Check if we own sPrime and if we don't ask the thread who does to explore it
+	uint8_t sPrimeOwner = this->controlThread.whoOwns(state);
+	if (sPrimeOwner != this->threadIndex && sPrimeOwner != NO_THREAD) {
+		// Request cross exploration handled in other function
+		return 0; // TODO: another thread owns
+	}
+	else if (sPrimeOwner == NO_THREAD) {
+		// Request ownership
+
+		bool failedRequest = controlThread.requestOwnership(this->threadIndex, state) == this->threadIndex;
+		if (failedRequest) {
+			// request cross exploration
+			return 0; // TODO: another thread owns
+		}
+	}
+
+	auto nextState = stateMap.get(actualIndex);
+	bool stateIsExisting = nextState != nullptr;
+
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	// Handle conditional enqueuing
+	if (isInit) {
+		if (!stateIsExisting) {
+			// Create a ProbabilityState for each individual state
+			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
+			*initProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 1.0
+				, true
+			);
+			numberTerminal++;
+			stateMap.put(actualIndex, initProbabilityState);
+			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = iteration;
+		}
+		else {
+			ProbabilityState<StateType> * initProbabilityState = nextState;
+			stateMap.put(actualIndex, initProbabilityState);
+			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = iteration;
+		}
+		return actualIndex;
+	}
+
+	bool enqueued = false;
+
+	// This bit handles the non-initial states
+	// The previous state has reachability of 0
+	if (currentProbabilityState->getPi() == 0) {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
+				// Enqueue
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				enqueued = true;
+			}
+		}
+		else {
+			// State does not exist yet in this iteration
+			return 0;
+		}
+	}
+	else {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
+			// auto emplaced = exploredStates.emplace(actualIndex);
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
+				// Enqueue
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				enqueued = true;
+			}
+		}
+		else {
+			// This state has not been seen so create a new ProbabilityState
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 0.0
+				, true
+			);
+			stateMap.put(actualIndex, nextProbabilityState);
+			nextProbabilityState->iterationLastSeen = iteration;
+			// exploredStates.emplace(actualIndex);
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
+			numberTerminal++;
+		}
+	}
+	return actualIndex;
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
@@ -152,30 +252,23 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 		// Add the probabilistic behavior to the matrix.
 		for (auto const& stateProbabilityPair : choice) {
 			StateType sPrime = stateProbabilityPair.first;
+			double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
+
 			if (sPrime == 0) {
-				continue;
-			}
-			// Check if we own sPrime and if we don't ask the thread who does to explore it
-			uint8_t sPrimeOwner = this->controlThread.whoOwns(sPrime);
-			if (sPrimeOwner != this->threadIndex && sPrimeOwner != NO_THREAD) {
 				// Request cross exploration
-				this->controlThread.requestCrossExplorationFromThread(sPrimeOwner, StateAndProbability());
+				controlThread.requestCrossExplorationFromThread(
+					StateAndProbability(
+						// Compressed State
+						, (currentProbabilityState->getPi() * probability // deltaPi
+						, // TODO: state ID
+					)
+				);
 				continue;
 			}
-			else if (sPrimeOwner == NO_THREAD) {
-				// Request ownership
 
-				bool failedRequest;
-				if (failedRequest) {
-					// request cross exploration
-
-					continue;
-				}
-			}
 
 			// At this point we assume that we own sPrime
 
-			double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
 			// Enqueue S is handled in stateToIdCallback
 			// Update transition probability only if we should enqueue all
 			// These are next states where the previous state has a reachability
