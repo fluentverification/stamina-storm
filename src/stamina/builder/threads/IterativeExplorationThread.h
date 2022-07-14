@@ -36,6 +36,9 @@ namespace stamina {
 			protected:
 				virtual void exploreStates() override;
 				virtual void exploreState(StateAndProbability & stateProbability) override;
+			private:
+				uint32_t numberTerminal;
+				bool isCtmc;
 			};
 		} // namespace threads
 	} // namespace builder

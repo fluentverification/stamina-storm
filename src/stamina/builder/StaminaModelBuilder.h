@@ -166,6 +166,7 @@ namespace stamina {
 			* This is used as an alternative callback function for terminal (perimeter) states
 			* */
 			StateType getStateIndexOrAbsorbing(CompressedState const& state);
+			double getLocalKappa();
 		protected:
 			storm::storage::sparse::StateStorage<StateType> getStateStorage();
 			/**

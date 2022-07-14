@@ -55,7 +55,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreStates
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(StateAndProbability & stateProbability) {
-	auto currentProbabilityState = stateMap.get(stateProbability.index);
+	auto currentProbabilityState = this->stateMap.get(stateProbability.index);
 
 	StateType currentIndex = stateProbability.index;
 	CompressedState & currentState = stateProbability.state;
@@ -91,7 +91,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 	}
 
 	// Do not explore if state is terminal and its reachability probability is less than kappa
-	if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
+	if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < this->parent->getLocalKappa()) {
 		// Do not connect to absorbing yet
 		// Place this in statesTerminatedLastIteration
 		if ( !currentProbabilityState->wasPutInTerminalQueue ) {
@@ -188,7 +188,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 				}
 
 				if (currentProbabilityState->isNew) {
-					this->controlThread.requestInsertTransition(threadIndex, currentIndex, sPrime, stateProbabilityPair.second);
+					this->controlThread.requestInsertTransition(this->threadIndex, currentIndex, sPrime, stateProbabilityPair.second);
 				}
 			}
 		}
