@@ -199,7 +199,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		return;
 	}
 	if (firstIteration) {
-		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 		this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
 		bool gotVar = false;
 		for (auto variable : generator->getVariableInformation().booleanVariables) {

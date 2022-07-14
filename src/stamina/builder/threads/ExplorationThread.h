@@ -48,6 +48,7 @@ namespace stamina {
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
 				bool isIdling();
+				void setIsCtmc(bool isCtmc);
 				/**
 				* A function called by other threads to request cross exploration of
 				* states already explored but encountered by another thread.

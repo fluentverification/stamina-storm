@@ -124,20 +124,20 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 			StaminaMessages::errorAndExit("Model was not deterministic!");
 		}
 		// add the generated choice information
-// 		if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
-// 			for (auto const& label : choice.getLabels()) {
-// 				stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
-//
-// 			}
-// 		}
-// 		if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
-// 			stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
-// 		}
-// 		if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
-// 			if (firstChoiceOfState) {
-// 				stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
-// 			}
-// 		}
+		if (choice.hasLabels()) { // stateAndChoiceInformationBuilder.isBuildChoiceLabels() &&
+			for (auto const& label : choice.getLabels()) {
+				StaminaMessages::warning("stamina::builder::threads::IterativeExplorationThread does not support choice labels! The following label will not be added: " + std::to_string(label));
+
+			}
+		}
+		if (choice.hasOriginData()) { // stateAndChoiceInformationBuilder.isBuildChoiceOrigins() &&
+			StaminaMessages::warning("stamina::builder::threads::IterativeExplorationThread does not support origin data!");
+		}
+		if (choice.hasPlayerIndex()) { // stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() &&
+			if (firstChoiceOfState) {
+				StaminaMessages::warning("stamina::builder::threads::IterativeExplorationThread does not player indecies!");
+			}
+		}
 
 		double totalRate = 0.0;
 		if (!shouldEnqueueAll && isCtmc) {

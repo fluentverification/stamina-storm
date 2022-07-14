@@ -46,6 +46,12 @@ ExplorationThread<StateType, RewardModelType, ValueType>::isIdling() {
 
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
+ExplorationThread<StateType, RewardModelType, ValueType>::setIsCtmc(bool isCtmc) {
+	this->isCtmc = isCtmc;
+}
+
+template <typename StateType, typename RewardModelType, typename ValueType>
+void
 ExplorationThread<StateType, RewardModelType, ValueType>::requestCrossExploration(CompressedState & state, double deltaPi) {
 	// Lock the mutex since multiple threads will be calling this function
 	std::lock_guard<std::shared_mutex> guard(crossExplorationQueueMutex);

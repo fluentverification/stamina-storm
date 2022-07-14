@@ -33,6 +33,7 @@ namespace stamina {
 					, std::function<StateType (CompressedState const&)> stateToIdCallback
 				);
 
+
 			protected:
 				virtual void exploreStates() override;
 				virtual void exploreState(StateAndProbability & stateProbability) override;
