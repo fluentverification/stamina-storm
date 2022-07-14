@@ -30,6 +30,7 @@ namespace stamina {
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
+					, std::function<StateType (CompressedState const&)> stateToIdCallback
 				);
 
 			protected:

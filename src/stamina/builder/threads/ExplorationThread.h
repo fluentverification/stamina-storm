@@ -43,6 +43,7 @@ namespace stamina {
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
+					, std::function<StateType (CompressedState const&)> stateToIdCallback
 				);
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
@@ -75,6 +76,7 @@ namespace stamina {
 				storm::storage::sparse::StateStorage<StateType> & stateStorage;
 				std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator;
 				std::deque<StateAndProbability> statesTerminatedLastIteration;
+				std::function<StateType (CompressedState const&)> stateToIdCallback;
 			private:
 				const uint8_t threadIndex;
 			};

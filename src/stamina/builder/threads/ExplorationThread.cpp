@@ -14,12 +14,14 @@ ExplorationThread<StateType, RewardModelType, ValueType>::ExplorationThread(
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
+	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) : BaseThread<StateType, RewardModelType, ValueType>(parent)
 	, threadIndex(threadIndex)
 	, controlThread(controlThread)
 	, stateStorage(parent->getStateStorage())
 	, stateMap(stateMap)
 	, generator(generator)
+	, stateToIdCallback(stateToIdCallback)
 {
 	// Intentionally left empty
 }

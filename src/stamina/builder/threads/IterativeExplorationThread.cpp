@@ -12,6 +12,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
+	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) : ExplorationThread<StateType, RewardModelType, ValueType>(
 	parent
 	, threadIndex
@@ -19,6 +20,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 	, stateSize
 	, stateMap
 	, generator
+	, stateToIdCallback
 )
 {
 	// Intentionally left empty
@@ -100,7 +102,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 	// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 	// is greater than kappa
 	// Expand this state
-	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(this->stateToIdCallback);
 
 	if (behavior.empty()) {
 		// This state needs to be made absorbing
@@ -149,8 +151,28 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 		for (auto const& stateProbabilityPair : choice) {
 			StateType sPrime = stateProbabilityPair.first;
 			if (sPrime == 0) {
-				return;
+				continue;
 			}
+			// Check if we own sPrime and if we don't ask the thread who does to explore it
+			uint_8_t sPrimeOwner = controlThread.whoOwns(sPrime)
+			if (sPrimeOwner != threadIndex && sPrimeOwner != NO_THREAD) {
+				// Request cross exploration
+				controlThread.requestCrossExplorationFromThread(sPrimeOwner, StateAndProbability());
+				continue;
+			}
+			else if (sPrimeOwner == NO_THREAD) {
+				// Request ownership
+
+				bool failedRequest;
+				if (failedRequest) {
+					// request cross exploration
+
+					continue
+				}
+			}
+
+			// At this point we assume that we own sPrime
+
 			double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
 			// Enqueue S is handled in stateToIdCallback
 			// Update transition probability only if we should enqueue all
@@ -164,7 +186,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 				}
 
 				if (currentProbabilityState->isNew) {
-					this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+					controlThread.requestInsertTransition(threadIndex, currentIndex, sPrime, stateProbabilityPair.second);
 					numberTransitions++;
 				}
 			}
