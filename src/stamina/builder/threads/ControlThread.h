@@ -11,7 +11,6 @@
 #define STAMINA_BUILDER_THREADS_CONTROLTHREAD_H
 
 #include "BaseThread.h"
-#include "ExplorationThread.h"
 
 #include "storm/storage/BitVectorHashMap.h"
 
@@ -152,7 +151,7 @@ namespace stamina {
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::sparse::StateStorage<uint8_t>& stateThreadMap;
-				const std::vector<ExplorationThread<StateType, RewardModelType, ValueType> const> explorationThreads;
+				const std::vector<ExplorationThread<StateType, RewardModelType, ValueType>> explorationThreads;
 			};
 
 		} // namespace threads

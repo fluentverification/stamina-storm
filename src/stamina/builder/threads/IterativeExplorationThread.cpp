@@ -1,7 +1,7 @@
 #include "IterativeExplorationThread.h"
 
 #include "core/StaminaMessages.h"
-#include "util/StateSpaceInformation.h"
+#include "core/StateSpaceInformation.h"
 
 namespace stamina {
 namespace builder {
@@ -37,14 +37,14 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 	// Check if we own sPrime and if we don't ask the thread who does to explore it
 	uint8_t sPrimeOwner = this->controlThread.whoOwns(state);
 	if (sPrimeOwner != this->threadIndex && sPrimeOwner != NO_THREAD) {
-		actualIndex = controlThread.whatIsIndex(state);
+		actualIndex = this->controlThread.whatIsIndex(state);
 		// Request cross exploration handled in other function
 		this->statesToRequestCrossExploration.emplace_back({state, actualIndex, sPrimeOwner});
 		return actualIndex; // TODO: another thread owns
 	}
 	else if (sPrimeOwner == NO_THREAD) {
 		// Request ownership
-		auto threadAndStateIndecies = controlThread.requestOwnership(this->threadIndex, state);
+		auto threadAndStateIndecies = this->controlThread.requestOwnership(this->threadIndex, state);
 		bool failedRequest = threadAndStateIndecies.first != this->threadIndex;
 		actualIndex = threadAndStateIndecies.second;
 		if (failedRequest) {
@@ -54,36 +54,14 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 		}
 	}
 	else {
-		actualIndex = controlThread.whatIsIndex(state);
+		actualIndex = this->controlThread.whatIsIndex(state);
 	}
 
 	auto nextState = stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	this->parent->getStateStorage().stateToId.findOrAdd(state, actualIndex);
 	// Handle conditional enqueuing
-	if (isInit) {
-		if (!stateIsExisting) {
-			// Create a ProbabilityState for each individual state
-			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
-			*initProbabilityState = ProbabilityState<StateType>(
-				actualIndex
-				, 1.0
-				, true
-			);
-			numberTerminal++;
-			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
-			initProbabilityState->iterationLastSeen = iteration;
-		}
-		else {
-			ProbabilityState<StateType> * initProbabilityState = nextState;
-			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
-			initProbabilityState->iterationLastSeen = iteration;
-		}
-		return actualIndex;
-	}
 
 	bool enqueued = false;
 
@@ -269,7 +247,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 				// Request cross exploration
 				StateIndexAndThread stateIndexAndThread = this->statesToRequestCrossExploration.front();
 				this->statesToRequestCrossExploration.pop_front();
-				controlThread.requestCrossExplorationFromThread(
+				this->controlThread.requestCrossExplorationFromThread(
 					StateAndProbability(
 						stateIndexAndThread.state // Compressed State
 						, currentProbabilityState->getPi() * probability // deltaPi
