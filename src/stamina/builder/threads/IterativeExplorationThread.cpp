@@ -280,8 +280,6 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 
 			}
 
-
-
 			// At this point we assume that we own sPrime
 
 			// Enqueue S is handled in stateToIdCallback

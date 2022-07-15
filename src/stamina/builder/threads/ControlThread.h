@@ -11,6 +11,7 @@
 #define STAMINA_BUILDER_THREADS_CONTROLTHREAD_H
 
 #include "BaseThread.h"
+#include "ExplorationThread.h"
 
 #include "storm/storage/BitVectorHashMap.h"
 
@@ -54,6 +55,8 @@ namespace stamina {
 					std::deque<typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo> queue;
 					std::shared_mutex lock;
 				};
+
+				typedef typename ExplorationThread<StateType, RewardModelType, ValueType>::StateAndProbability StateAndProbability;
 				/**
 				* Constructor for ControlThread. Primarily just calls super class constructor
 				*
@@ -149,7 +152,7 @@ namespace stamina {
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::sparse::StateStorage<uint8_t>& stateThreadMap;
-
+				const std::vector<ExplorationThread<StateType, RewardModelType, ValueType> const> explorationThreads;
 			};
 
 		} // namespace threads
