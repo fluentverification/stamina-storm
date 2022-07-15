@@ -27,6 +27,12 @@ namespace stamina {
 					StateType index;
 					double deltaPi;
 				};
+
+				struct StateIndexAndThread {
+					CompressedState & state;
+					StateType index;
+					uint8_t threadIndex;
+				};
 				/**
 				* Constructor. Invokes super's constructor and stores the
 				* thread index which cannot change for the life of the thread
@@ -79,6 +85,8 @@ namespace stamina {
 				std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator;
 				std::deque<StateAndProbability> statesTerminatedLastIteration;
 				std::function<StateType (CompressedState const&)> stateToIdCallback;
+				// The states we should request cross exploration from
+				std::deque<StateIndexAndThread> statesToRequestCrossExploration;
 			private:
 				const uint8_t threadIndex;
 			};

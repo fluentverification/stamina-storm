@@ -58,6 +58,7 @@ ControlThread<StateType, RewardModelType, ValueType>::whoOwns(CompressedState & 
 template <typename StateType, typename RewardModelType, typename ValueType>
 StateType
 ControlThread<StateType, RewardModelType, ValueType>::whatIsIndex(CompressedState & state) {
+	// Don't need to lock it in this function
 	if (this->parent->getStateStorage().stateToId.contains(state)) {
 		return this->parent->getStateStorage().stateToId.getValue(state);
 	}
@@ -73,6 +74,15 @@ ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
 	, double rate
 ) {
 	LockableDeque tQueue = transitionQueues[thread - 1];
+}
+
+template <typename StateType, typename RewardModelType, typename ValueType>
+void
+ControlThread<StateType, RewardModelType, ValueType>::requestCrossExplorationFromThread(
+	StateAndProbability stateAndProbability
+	, double threadIndex
+) {
+	// TODO: implement
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>

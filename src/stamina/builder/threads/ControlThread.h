@@ -121,6 +121,19 @@ namespace stamina {
 					, double rate
 				);
 				/**
+				 * Requests cross exploration from a
+				 *
+				 * @param stateAndProbability A datastructure containing:
+				 *     state The state to cross explore
+				 *     deltaPi The difference in probability to add
+				 *     stateIndex The state index we found
+				 * @param threadIndex Thread index to request cross exploration from
+				 * */
+				void requestCrossExplorationFromThread(
+					StateAndProbability stateAndProbability
+					, double threadIndex
+				);
+				/**
 				* This thread lives for the duration of all exploration threads. It waits for
 				* the exploration threads to all emit a "finished" signal, and then tells each
 				* exploration thread to die.

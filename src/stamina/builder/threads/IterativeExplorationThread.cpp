@@ -37,18 +37,21 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 	// Check if we own sPrime and if we don't ask the thread who does to explore it
 	uint8_t sPrimeOwner = this->controlThread.whoOwns(state);
 	if (sPrimeOwner != this->threadIndex && sPrimeOwner != NO_THREAD) {
+		actualIndex = controlThread.whatIsIndex(state);
 		// Request cross exploration handled in other function
-		return 0; // TODO: another thread owns
+		this->statesToRequestCrossExploration.emplace_back({state, actualIndex, sPrimeOwner});
+		return actualIndex; // TODO: another thread owns
 	}
 	else if (sPrimeOwner == NO_THREAD) {
 		// Request ownership
 		auto threadAndStateIndecies = controlThread.requestOwnership(this->threadIndex, state);
 		bool failedRequest = threadAndStateIndecies.first != this->threadIndex;
+		actualIndex = threadAndStateIndecies.second;
 		if (failedRequest) {
 			// request cross exploration
-			return 0; // TODO: another thread owns
+			this->statesToRequestCrossExploration.emplace_back({state, actualIndex, sPrimeOwner});
+			return actualIndex; // TODO: another thread owns
 		}
-		actualIndex = threadAndStateIndecies.second;
 	}
 	else {
 		actualIndex = controlThread.whatIsIndex(state);
@@ -260,15 +263,21 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 			double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
 
 			if (sPrime == 0) {
+				continue;
+			}
+			else if (sPrime == this->statesToRequestCrossExploration.front().index) {
 				// Request cross exploration
+				StateIndexAndThread stateIndexAndThread = this->statesToRequestCrossExploration.front();
+				this->statesToRequestCrossExploration.pop_front();
 				controlThread.requestCrossExplorationFromThread(
 					StateAndProbability(
-						// Compressed State
-						, (currentProbabilityState->getPi() * probability // deltaPi
-						, // TODO: state ID
+						stateIndexAndThread.state // Compressed State
+						, currentProbabilityState->getPi() * probability // deltaPi
+						, stateIndexAndThread.index
 					)
+					, stateIndexAndThread.threadIndex
 				);
-				continue;
+
 			}
 
 
