@@ -43,7 +43,7 @@ namespace stamina {
 			* @param markovianChoices is set to a bit vector storing whether a choice is Markovian (is only set if the model type requires this information).
 			* @param stateValuationsBuilder if not boost::none, we insert valuations for the corresponding states
 			* */
-			void buildMatrices(
+			virtual void buildMatrices(
 				storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 				, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
 				, StateAndChoiceInformationBuilder& choiceInformationBuilder
@@ -64,7 +64,7 @@ namespace stamina {
 			* @return The components of the truncated model
 			* */
 			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() override;
-		private:
+		protected:
 			/*
 			 * Access to data members of parent class
 			 * */
