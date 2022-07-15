@@ -15,17 +15,23 @@ ControlThread<StateType, RewardModelType, ValueType>::ControlThread(
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
-uint8_t
+std::pair<uint8_t, StateType>
 ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId) {
 	// Test to see if a thread already owns this state.
 	// TODO: should this pre-lock even be in here?
 	if (stateThreadMap.stateToId.contains(state)) {
-		return stateThreadMap.stateToId.getValue(state);
+		return std::make_pair(
+			stateThreadMap.stateToId.getValue(state)
+			, this->parent->getStateStorage().stateToId.getValue(state)
+		);
 	}
 	// Lock the ownership mutex
 	std::lock_guard<std::shared_mutex> lock(ownershipMutex);
 	if (stateThreadMap.stateToId.contains(state)) {
-		return stateThreadMap.stateToId.getValue(state);
+		return std::make_pair(
+			stateThreadMap.stateToId.getValue(state)
+			, this->parent->getStateStorage().stateToId.getValue(state)
+		);
 	}
 	else {
 		// Claim ownership of state
@@ -34,7 +40,9 @@ ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(Compresse
 			, threadIndex
 		);
 	}
-	return threadIndex;
+	// Get the state index
+	StateType stateIndex = static_cast<StateType>(this->parent->getStateStorage().getNumberOfStates());
+	return std::make_pair(threadIndex, stateIndex);
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
@@ -44,6 +52,15 @@ ControlThread<StateType, RewardModelType, ValueType>::whoOwns(CompressedState & 
 		return stateThreadMap.stateToId.getValue(state);
 	}
 	// Index 0 (the same index as the absorbing state) indicates that no thread owns this state.
+	return 0;
+}
+
+template <typename StateType, typename RewardModelType, typename ValueType>
+StateType
+ControlThread<StateType, RewardModelType, ValueType>::whatIsIndex(CompressedState & state) {
+	if (this->parent->getStateStorage().stateToId.contains(state)) {
+		return this->parent->getStateStorage().stateToId.getValue(state);
+	}
 	return 0;
 }
 

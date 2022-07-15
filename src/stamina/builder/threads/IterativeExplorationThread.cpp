@@ -32,6 +32,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSuccessors(CompressedState & state) {
+	StateType actualIndex;
 	// Request ownership of state
 	// Check if we own sPrime and if we don't ask the thread who does to explore it
 	uint8_t sPrimeOwner = this->controlThread.whoOwns(state);
@@ -41,12 +42,16 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 	}
 	else if (sPrimeOwner == NO_THREAD) {
 		// Request ownership
-
-		bool failedRequest = controlThread.requestOwnership(this->threadIndex, state) == this->threadIndex;
+		auto threadAndStateIndecies = controlThread.requestOwnership(this->threadIndex, state);
+		bool failedRequest = threadAndStateIndecies.first != this->threadIndex;
 		if (failedRequest) {
 			// request cross exploration
 			return 0; // TODO: another thread owns
 		}
+		actualIndex = threadAndStateIndecies.second;
+	}
+	else {
+		actualIndex = controlThread.whatIsIndex(state);
 	}
 
 	auto nextState = stateMap.get(actualIndex);
