@@ -247,7 +247,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 			}
 			else if (sPrime == this->statesToRequestCrossExploration.front().index) {
 				// Request cross exploration
-				StateIndexAndThread stateIndexAndThread = this->statesToRequestCrossExploration.front();
+				auto stateIndexAndThread = this->statesToRequestCrossExploration.front();
 				this->statesToRequestCrossExploration.pop_front();
 				this->controlThread.requestCrossExplorationFromThread(
 					StateAndProbability(
