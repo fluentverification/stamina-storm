@@ -268,6 +268,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGloba
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+uint8_t
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getIteration() {
+	return iteration;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
@@ -343,6 +349,12 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::StateStorage<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() {
 	return this->stateStorage;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+util::StateMemoryPool<ProbabilityState<StateType>> &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getMemoryPool() {
+	return memoryPool;
 }
 
 

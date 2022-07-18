@@ -18,6 +18,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 	// Intentionally left empty
 }
 
+template<typename ValueType, typename RewardModelType, typename StateType>
 StaminaThreadedIterativeModelBuilder(
 	storm::prism::Program const& program
 	, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()

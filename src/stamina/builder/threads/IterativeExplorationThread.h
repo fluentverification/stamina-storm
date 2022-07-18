@@ -40,6 +40,7 @@ namespace stamina {
 			private:
 				uint32_t numberTerminal;
 				bool isCtmc;
+				bool currentStateHasZeroReachability;
 			};
 		} // namespace threads
 	} // namespace builder

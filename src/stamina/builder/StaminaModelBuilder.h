@@ -167,6 +167,8 @@ namespace stamina {
 			* */
 			StateType getStateIndexOrAbsorbing(CompressedState const& state);
 			double getLocalKappa();
+			uint8_t getIteration();
+			util::StateMemoryPool<ProbabilityState<StateType>> & getMemoryPool();
 		protected:
 			storm::storage::sparse::StateStorage<StateType> getStateStorage();
 			/**

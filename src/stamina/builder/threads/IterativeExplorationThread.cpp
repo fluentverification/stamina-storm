@@ -40,7 +40,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 		actualIndex = this->controlThread.whatIsIndex(state);
 		// Request cross exploration handled in other function
 		this->statesToRequestCrossExploration.emplace_back({state, actualIndex, sPrimeOwner});
-		return actualIndex; // TODO: another thread owns
+		return; // TODO: another thread owns
 	}
 	else if (sPrimeOwner == NO_THREAD) {
 		// Request ownership
@@ -50,14 +50,14 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 		if (failedRequest) {
 			// request cross exploration
 			this->statesToRequestCrossExploration.emplace_back({state, actualIndex, sPrimeOwner});
-			return actualIndex; // TODO: another thread owns
+			return; // TODO: another thread owns
 		}
 	}
 	else {
 		actualIndex = this->controlThread.whatIsIndex(state);
 	}
 
-	auto nextState = stateMap.get(actualIndex);
+	auto nextState = this->parent->getStateMap().get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
 
 	this->parent->getStateStorage().stateToId.findOrAdd(state, actualIndex);
@@ -67,20 +67,20 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 
 	// This bit handles the non-initial states
 	// The previous state has reachability of 0
-	if (currentProbabilityState->getPi() == 0) {
+	if (currentStateHasZeroReachability) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
-			if (nextProbabilityState->iterationLastSeen != iteration) {
-				nextProbabilityState->iterationLastSeen = iteration;
+			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
+				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 				// Enqueue
-				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				this->mainExplorationQueue.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
 		else {
 			// State does not exist yet in this iteration
-			return 0;
+			return;
 		}
 	}
 	else {
@@ -88,30 +88,30 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
-			if (nextProbabilityState->iterationLastSeen != iteration) {
-				nextProbabilityState->iterationLastSeen = iteration;
+			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
+				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 				// Enqueue
-				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				this->mainExplorationQueue.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * nextProbabilityState = this->parent->getMemoryPool().allocate();
 			*nextProbabilityState = ProbabilityState<StateType>(
 				actualIndex
 				, 0.0
 				, true
 			);
-			stateMap.put(actualIndex, nextProbabilityState);
-			nextProbabilityState->iterationLastSeen = iteration;
+			this->parent->getStateMap().put(actualIndex, nextProbabilityState);
+			nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 			// exploredStates.emplace(actualIndex);
-			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			this->mainExplorationQueue.push_back(std::make_pair(nextProbabilityState, state));
 			enqueued = true;
 			numberTerminal++;
 		}
 	}
-	return actualIndex;
+	return;
 }
 
 template <typename StateType, typename RewardModelType, typename ValueType>
@@ -141,7 +141,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreStates
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(StateAndProbability & stateProbability) {
-	auto currentProbabilityState = this->stateMap.get(stateProbability.index);
+	auto currentProbabilityState = this->parent->getStateMap().get(stateProbability.index);
 
 	StateType currentIndex = stateProbability.index;
 	CompressedState & currentState = stateProbability.state;
@@ -186,6 +186,8 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 		}
 		return;
 	}
+
+	currentStateHasZeroReachability = currentProbabilityState->getPi() == 0;
 
 	// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 	// is greater than kappa
