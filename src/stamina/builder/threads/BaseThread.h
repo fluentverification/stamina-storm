@@ -53,8 +53,11 @@ namespace stamina {
 				 * */
 				void join();
 				void terminate();
+				void setHold(bool hold);
+				bool isHolding();
 			protected:
 				bool finished;
+				bool hold; // Should we continue idling even if finished?
 			private:
 				const StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent;
 				std::thread * threadLoop;

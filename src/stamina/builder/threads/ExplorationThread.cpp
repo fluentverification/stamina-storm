@@ -64,7 +64,7 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ExplorationThread<StateType, RewardModelType, ValueType>::mainLoop() {
 	idling = false;
-	while (!this->finished) {
+	while (!this->finished || this->hold) {
 		// Explore the states in the exploration queue
 		exploreStates();
 	}

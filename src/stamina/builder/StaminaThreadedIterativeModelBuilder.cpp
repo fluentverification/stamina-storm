@@ -265,7 +265,10 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	}
 	
 	/*
-	 * TODO: Make it so these threads don't just stop after starting
+	 * The hold (auto set to true in thread constructor) make it so these threads don't just stop after starting.
+	 * Therefore after everything is set up, we must turn off the hold. However:
+	 *     + The threads must be STARTED in order to request cross exploration. TODO: do they?
+	 *     + Threads won't die when hold is true.
 	 */
 
 	// Start control thread
@@ -288,6 +291,13 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 			threadIndex++;
 		}
 	}
+
+	// Remove the hold on all of the worker threads
+	for (auto explorationThread : this->explorationThreads) {
+		explorationThread.setHold(false);
+	}
+
+	this->controlThread.setHold(false);
 
 }
 

@@ -12,6 +12,7 @@ BaseThread<StateType, RewardModelType, ValueType>::BaseThread(
 ) : parent(parent)
 	, finished(false)
 	, threadLoop(nullptr)
+	, hold(true)
 {
 	// Intentionally left empty
 }
@@ -37,6 +38,18 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 void
 BaseThread<StateType, RewardModelType, ValueType>::terminate() {
 	finished = true;
+}
+
+template <typename StateType, typename RewardModelType, typename ValueType>
+void 
+BaseThread<StateType, RewardModelType, ValueType>::setHold(bool hold) {
+	this->hold = hold;
+}
+
+template <typename StateType, typename RewardModelType, typename ValueType>
+bool 
+BaseThread<StateType, RewardModelType, ValueType>::isHolding() {
+	return hold;
 }
 
 } // namespace threads

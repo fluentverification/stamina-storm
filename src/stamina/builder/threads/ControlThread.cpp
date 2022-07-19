@@ -89,7 +89,7 @@ template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 	uint8_t numberFinishedThreads;
-	while (!this->finished) { // allow for this thread to be killed outside of its main loop
+	while (!this->finished || this->hold) { // allow for this thread to be killed outside of its main loop
 		bool exitThisIteration = false;
 		numberFinishedThreads = 0;
 		for (auto explorationThread : this->parent->getExplorationThreads()) {
