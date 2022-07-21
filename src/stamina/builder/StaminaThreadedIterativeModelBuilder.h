@@ -15,6 +15,7 @@
 #include "StaminaModelBuilder.h"
 
 #include "builder/threads/ControlThread.h"
+#include "builder/threads/IterativeExplorationThread.h"
 
 namespace stamina {
 	namespace builder {

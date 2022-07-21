@@ -39,6 +39,10 @@ Options::checkOptions() {
 		StaminaMessages::error("Max approx count should be greater than 0.0. Got: " + std::to_string(max_approx_count), STAMINA_ERRORS::ERR_GENERAL);
 		good = false;
 	}
+	if (threads == 0) {
+		StaminaMessages::error("Thread-count cannot be 0!");
+		good = false;
+	}
 	return good;
 }
 

@@ -178,6 +178,9 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 		case 'J':
 			arguments->method = STAMINA_METHODS::RE_EXPLORING_METHOD;
 			break;
+		case 'j':
+			arguments->threads = (uint8_t) atoi(arg);
+			break;
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file

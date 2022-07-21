@@ -108,9 +108,19 @@ StaminaModelChecker::modelCheckProperty(
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 
 	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
-		// Create StaminaModelBuilder
-		auto builderPointer = std::make_shared<StaminaIterativeModelBuilder<double>> (generator, modulesFile, options);
-		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+		// The reason that this splits into two separate classes is that when calling STAMINA
+		// as a single-threaded application there is less overhead to use just StaminaIterativeModelBuilder
+		// rather than the threaded version
+		if (Options::threads == 1) {
+			// Create StaminaModelBuilder
+			auto builderPointer = std::make_shared<StaminaIterativeModelBuilder<double>> (generator, modulesFile, options);
+			builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+		}
+		else {
+			StaminaMessages::info("Using thread-count: " + std::to_string(Options::threads));
+			auto builderPointer = std::make_shared<StaminaThreadedIterativeModelBuilder<double>> (generator, modulesFile, options);
+			builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+		}
 	}
 	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
 		StaminaMessages::errorAndExit("Not fully implemented yet!");
@@ -119,6 +129,9 @@ StaminaModelChecker::modelCheckProperty(
 		// builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
 	}
 	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {
+		if (Options::threads != 1) {
+			StaminaMessages::error("The re-exploring method (STAMINA 2.0) does not support multithreading!");
+		}
 		auto builderPointer = std::make_shared<StaminaReExploringModelBuilder<double>> (generator, modulesFile, options);
 		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
 	}
