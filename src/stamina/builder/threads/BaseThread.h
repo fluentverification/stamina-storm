@@ -15,7 +15,7 @@
 namespace stamina {
 	namespace builder {
 		// Forward-declare StaminaModelBuilder class
-		template<typename ValueType, typename RewardModelType, typename StateType>
+		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaModelBuilder;
 
 		namespace threads {

@@ -57,7 +57,7 @@ namespace stamina {
 
 
 
-		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
+		template <typename StateType, typename RewardModelType, typename ValueType>
 		class StaminaModelBuilder {
 		public:
 

@@ -42,6 +42,7 @@ namespace stamina {
 				};
 				class LockableDeque {
 				public:
+					typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo Transition;
 					int size();
 					/**
 					 * Locks the queue and emplaces
@@ -50,8 +51,10 @@ namespace stamina {
 					bool empty();
 					void lockThread();
 					void unlockThread();
+					Transition top();
+					void pop();
 				private:
-					std::deque<typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo> queue;
+					std::deque<Transition> queue;
 					std::shared_mutex lock;
 				};
 
