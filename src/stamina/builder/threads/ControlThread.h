@@ -55,7 +55,7 @@ namespace stamina {
 					std::shared_mutex lock;
 				};
 
-				typedef typename ExplorationThread<StateType, RewardModelType, ValueType>::StateAndProbability StateAndProbability;
+				typedef typename ExplorationThread<StateType, RewardModelType, ValueType>::StateAndProbability StateProbability;
 				/**
 				* Constructor for ControlThread. Primarily just calls super class constructor
 				*
@@ -132,7 +132,7 @@ namespace stamina {
 				 * @param threadIndex Thread index to request cross exploration from
 				 * */
 				void requestCrossExplorationFromThread(
-					StateAndProbability stateAndProbability
+					StateProbability stateAndProbability
 					, double threadIndex
 				);
 				/**

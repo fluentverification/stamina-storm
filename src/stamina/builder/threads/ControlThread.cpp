@@ -79,7 +79,7 @@ ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
 template <typename StateType, typename RewardModelType, typename ValueType>
 void
 ControlThread<StateType, RewardModelType, ValueType>::requestCrossExplorationFromThread(
-	StateAndProbability stateAndProbability
+	StateProbability stateAndProbability
 	, double threadIndex
 ) {
 	// TODO: implement
@@ -116,6 +116,8 @@ ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 		// TODO: de-fragmentation
 	}
 }
+
+template class ControlThread<uint32_t, storm::models::sparse::StandardRewardModel<double>, double>;
 
 } // namespace threads
 } // namespace builder

@@ -292,6 +292,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 
 }
 
+template class IterativeExplorationThread<uint32_t, storm::models::sparse::StandardRewardModel<double>, double>;
 
 } // namespace threads
 } // namespace builder

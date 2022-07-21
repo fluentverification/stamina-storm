@@ -70,6 +70,8 @@ ExplorationThread<StateType, RewardModelType, ValueType>::mainLoop() {
 	}
 }
 
+template class ExplorationThread<uint32_t, storm::models::sparse::StandardRewardModel<double>, double>;
+
 } // namespace threads
 } // namespace builder
 } // namespace stamina

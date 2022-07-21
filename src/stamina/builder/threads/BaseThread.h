@@ -58,8 +58,8 @@ namespace stamina {
 			protected:
 				bool finished;
 				bool hold; // Should we continue idling even if finished?
-			private:
 				const StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent;
+			private:
 				std::thread * threadLoop;
 			};
 		} // namespace threads

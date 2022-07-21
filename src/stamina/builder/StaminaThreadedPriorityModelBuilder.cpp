@@ -30,5 +30,7 @@ StaminaThreadedPriorityModelBuilder(
 	// Intentionally left empty
 }
 
+template class StaminaThreadedPriorityModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
+
 } // namespace builder
 } // namespace stamina
