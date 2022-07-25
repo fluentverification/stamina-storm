@@ -13,7 +13,7 @@ namespace threads {
 
 // Your code here
 
-}
+} // namespace threads
 } // namespace builder
 } // namespace stamina
 ```
