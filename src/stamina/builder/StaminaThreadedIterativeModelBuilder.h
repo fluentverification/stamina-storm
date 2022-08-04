@@ -57,7 +57,7 @@ namespace stamina {
 				, StateAndChoiceInformationBuilder& choiceInformationBuilder
 				, boost::optional<storm::storage::BitVector>& markovianChoices
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
-			) override;
+			);
 		private:
 			threads::ControlThread<StateType, RewardModelType, ValueType> controlThread;
 			std::vector<typename threads::IterativeExplorationThread<StateType, RewardModelType, ValueType>> explorationThreads;
