@@ -16,7 +16,7 @@ namespace stamina {
 			template <typename ValueType, typename RewardModelType, typename StateType>
 			class IterativeExplorationThread : public ExplorationThread<ValueType, RewardModelType, StateType> {
 			public:
-				typedef typename ExplorationThread<ValueType, RewardModelType, StateType>::StateAndProbability StateAndProbability;
+				typedef StateAndProbability<ValueType, RewardModelType, StateType> StateProbability;
 				/**
 				* Constructor. Invokes super's constructor.
 				*
@@ -36,7 +36,7 @@ namespace stamina {
 				virtual void enqueueSuccessors(CompressedState & state) override;
 			protected:
 				virtual void exploreStates() override;
-				virtual void exploreState(StateAndProbability & stateProbability) override;
+				virtual void exploreState(StateProbability & stateProbability) override;
 			private:
 				uint32_t numberTerminal;
 				bool isCtmc;

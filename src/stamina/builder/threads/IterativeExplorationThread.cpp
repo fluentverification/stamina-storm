@@ -140,7 +140,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(StateAndProbability & stateProbability) {
+IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(StateProbability & stateProbability) {
 	auto currentProbabilityState = this->parent->getStateMap().get(stateProbability.index);
 
 	StateType currentIndex = stateProbability.index;
@@ -250,7 +250,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 				auto stateIndexAndThread = this->statesToRequestCrossExploration.front();
 				this->statesToRequestCrossExploration.pop_front();
 				this->controlThread.requestCrossExplorationFromThread(
-					StateAndProbability(
+					StateProbability(
 						stateIndexAndThread.state // Compressed State
 						, currentProbabilityState->getPi() * probability // deltaPi
 						, stateIndexAndThread.index

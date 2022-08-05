@@ -17,22 +17,23 @@
 namespace stamina {
 	namespace builder {
 		namespace threads {
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			struct StateAndProbability {
+				CompressedState & state;
+				StateType index;
+				double deltaPi;
+			};
 
 			template <typename ValueType, typename RewardModelType, typename StateType>
 			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
-// 				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, RewardModelType, StateType>>> StateAndProbability;
-				struct StateAndProbability {
-					CompressedState & state;
-					StateType index;
-					double deltaPi;
-				};
-
+				typedef StateAndProbability<ValueType, RewardModelType, StateType> StateProbability;
 				struct StateIndexAndThread {
 					CompressedState & state;
 					StateType index;
 					uint8_t threadIndex;
 				};
+
 				/**
 				* Constructor. Invokes super's constructor and stores the
 				* thread index which cannot change for the life of the thread
@@ -71,19 +72,19 @@ namespace stamina {
 				virtual void mainLoop() override; // doExploration
 			protected:
 				virtual void exploreStates() = 0;
-				virtual void exploreState(StateAndProbability & stateProbability) = 0;
+				virtual void exploreState(StateProbability & stateProbability) = 0;
 				virtual void enqueueSuccessors(CompressedState & state) = 0; // stateToIdCallback
 				// Weak priority on crossExplorationQueue (superseded by mutex lock)
 				std::shared_mutex crossExplorationQueueMutex;
 				std::deque<std::pair<CompressedState, double>> crossExplorationQueue;
-				std::deque<StateAndProbability> mainExplorationQueue;
+				std::deque<StateProbability> mainExplorationQueue;
 				uint32_t numberOfOwnedStates;
 				bool idling;
 				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
 				util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap;
 				storm::storage::sparse::StateStorage<StateType> & stateStorage;
 				std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator;
-				std::deque<StateAndProbability> statesTerminatedLastIteration;
+				std::deque<StateProbability> statesTerminatedLastIteration;
 				std::function<StateType (CompressedState const&)> stateToIdCallback;
 				// The states we should request cross exploration from
 				std::deque<StateIndexAndThread> statesToRequestCrossExploration;

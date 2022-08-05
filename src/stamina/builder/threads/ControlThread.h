@@ -26,9 +26,21 @@ namespace stamina {
 			template <typename ValueType, typename RewardModelType, typename StateType>
 			class ExplorationThread;
 
+			// Forward declare StateAndProbability
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class StateAndProbability;
+
+			// Forward declare StaminaTransitionInfo
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class StaminaTransitionInfo;
+
 			template <typename ValueType, typename RewardModelType, typename StateType>
 			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
+
+				typedef StateAndProbability<ValueType, RewardModelType, StateType> StateProbability;
+				typedef StaminaTransitionInfo<ValueType, RewardModelType, StateType> Transition;
+
 				struct StateAndThreadIndex {
 					StateAndThreadIndex(StateType state, uint8_t thread) : state(state), thread(thread) {
 						// Intentionally left empty
@@ -42,7 +54,6 @@ namespace stamina {
 				};
 				class LockableDeque {
 				public:
-					typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo Transition;
 					int size();
 					/**
 					 * Locks the queue and emplaces
@@ -58,7 +69,6 @@ namespace stamina {
 					std::shared_mutex lock;
 				};
 
-				typedef typename ExplorationThread<ValueType, RewardModelType, StateType>::StateAndProbability StateProbability;
 				/**
 				* Constructor for ControlThread. Primarily just calls super class constructor
 				*
