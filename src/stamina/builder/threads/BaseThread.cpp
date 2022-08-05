@@ -6,8 +6,8 @@ namespace stamina {
 namespace builder {
 namespace threads {
 
-template <typename StateType, typename RewardModelType, typename ValueType>
-BaseThread<StateType, RewardModelType, ValueType>::BaseThread(
+template <typename ValueType, typename RewardModelType, typename StateType>
+BaseThread<ValueType, RewardModelType, StateType>::BaseThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 ) : parent(parent)
 	, finished(false)
@@ -17,15 +17,15 @@ BaseThread<StateType, RewardModelType, ValueType>::BaseThread(
 	// Intentionally left empty
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 const StaminaModelBuilder<ValueType, RewardModelType, StateType> *
-BaseThread<StateType, RewardModelType, ValueType>::getParent() {
+BaseThread<ValueType, RewardModelType, StateType>::getParent() {
 	return parent;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-BaseThread<StateType, RewardModelType, ValueType>::startThread() {
+BaseThread<ValueType, RewardModelType, StateType>::startThread() {
 	finished = false;
 	std::thread me(
 		&BaseThread::mainLoop
@@ -34,25 +34,25 @@ BaseThread<StateType, RewardModelType, ValueType>::startThread() {
 	me.join();
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-BaseThread<StateType, RewardModelType, ValueType>::terminate() {
+BaseThread<ValueType, RewardModelType, StateType>::terminate() {
 	finished = true;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void 
-BaseThread<StateType, RewardModelType, ValueType>::setHold(bool hold) {
+BaseThread<ValueType, RewardModelType, StateType>::setHold(bool hold) {
 	this->hold = hold;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 bool 
-BaseThread<StateType, RewardModelType, ValueType>::isHolding() {
+BaseThread<ValueType, RewardModelType, StateType>::isHolding() {
 	return hold;
 }
 
-template class BaseThread<uint32_t, storm::models::sparse::StandardRewardModel<double>, double>;
+template class BaseThread<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 } // namespace threads
 } // namespace builder

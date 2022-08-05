@@ -13,10 +13,10 @@
 namespace stamina {
 	namespace builder {
 		namespace threads {
-			template <typename StateType, typename RewardModelType, typename ValueType>
-			class IterativeExplorationThread : public ExplorationThread<StateType, RewardModelType, ValueType> {
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class IterativeExplorationThread : public ExplorationThread<ValueType, RewardModelType, StateType> {
 			public:
-				typedef typename ExplorationThread<StateType, RewardModelType, ValueType>::StateAndProbability StateAndProbability;
+				typedef typename ExplorationThread<ValueType, RewardModelType, StateType>::StateAndProbability StateAndProbability;
 				/**
 				* Constructor. Invokes super's constructor.
 				*
@@ -26,7 +26,7 @@ namespace stamina {
 				IterativeExplorationThread(
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t threadIndex
-					, ControlThread<StateType, RewardModelType, ValueType> & controlThread
+					, ControlThread<ValueType, RewardModelType, StateType> & controlThread
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator

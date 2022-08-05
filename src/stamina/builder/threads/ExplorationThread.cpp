@@ -6,16 +6,16 @@ namespace stamina {
 namespace builder {
 namespace threads {
 
-template <typename StateType, typename RewardModelType, typename ValueType>
-ExplorationThread<StateType, RewardModelType, ValueType>::ExplorationThread(
+template <typename ValueType, typename RewardModelType, typename StateType>
+ExplorationThread<ValueType, RewardModelType, StateType>::ExplorationThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
-	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
+	, ControlThread<ValueType, RewardModelType, StateType> & controlThread
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
-) : BaseThread<StateType, RewardModelType, ValueType>(parent)
+) : BaseThread<ValueType, RewardModelType, StateType>(parent)
 	, threadIndex(threadIndex)
 	, controlThread(controlThread)
 	, stateStorage(parent->getStateStorage())
@@ -26,33 +26,33 @@ ExplorationThread<StateType, RewardModelType, ValueType>::ExplorationThread(
 	// Intentionally left empty
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 uint8_t
-ExplorationThread<StateType, RewardModelType, ValueType>::getIndex() {
+ExplorationThread<ValueType, RewardModelType, StateType>::getIndex() {
 	return threadIndex;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 uint32_t
-ExplorationThread<StateType, RewardModelType, ValueType>::getNumberOfOwnedStates() {
+ExplorationThread<ValueType, RewardModelType, StateType>::getNumberOfOwnedStates() {
 	return numberOfOwnedStates;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 bool
-ExplorationThread<StateType, RewardModelType, ValueType>::isIdling() {
+ExplorationThread<ValueType, RewardModelType, StateType>::isIdling() {
 	return idling;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-ExplorationThread<StateType, RewardModelType, ValueType>::setIsCtmc(bool isCtmc) {
+ExplorationThread<ValueType, RewardModelType, StateType>::setIsCtmc(bool isCtmc) {
 	this->isCtmc = isCtmc;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-ExplorationThread<StateType, RewardModelType, ValueType>::requestCrossExploration(CompressedState & state, double deltaPi) {
+ExplorationThread<ValueType, RewardModelType, StateType>::requestCrossExploration(CompressedState & state, double deltaPi) {
 	// Lock the mutex since multiple threads will be calling this function
 	std::lock_guard<std::shared_mutex> guard(crossExplorationQueueMutex);
 	crossExplorationQueue.emplace_back(
@@ -60,9 +60,9 @@ ExplorationThread<StateType, RewardModelType, ValueType>::requestCrossExploratio
 	);
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-ExplorationThread<StateType, RewardModelType, ValueType>::mainLoop() {
+ExplorationThread<ValueType, RewardModelType, StateType>::mainLoop() {
 	idling = false;
 	while (!this->finished || this->hold) {
 		// Explore the states in the exploration queue
@@ -70,7 +70,7 @@ ExplorationThread<StateType, RewardModelType, ValueType>::mainLoop() {
 	}
 }
 
-template class ExplorationThread<uint32_t, storm::models::sparse::StandardRewardModel<double>, double>;
+template class ExplorationThread<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 } // namespace threads
 } // namespace builder

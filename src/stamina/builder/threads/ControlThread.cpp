@@ -4,19 +4,19 @@ namespace stamina {
 namespace builder {
 namespace threads {
 
-template <typename StateType, typename RewardModelType, typename ValueType>
-ControlThread<StateType, RewardModelType, ValueType>::ControlThread(
+template <typename ValueType, typename RewardModelType, typename StateType>
+ControlThread<ValueType, RewardModelType, StateType>::ControlThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t numberExplorationThreads
-) : BaseThread<StateType, RewardModelType, ValueType>(parent)
+) : BaseThread<ValueType, RewardModelType, StateType>(parent)
 	, numberExplorationThreads(numberExplorationThreads)
 {
 	// Intentionally left empty
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 std::pair<uint8_t, StateType>
-ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId) {
+ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId) {
 	// Test to see if a thread already owns this state.
 	// TODO: should this pre-lock even be in here?
 	if (stateThreadMap.stateToId.contains(state)) {
@@ -45,9 +45,9 @@ ControlThread<StateType, RewardModelType, ValueType>::requestOwnership(Compresse
 	return std::make_pair(threadIndex, stateIndex);
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 uint8_t
-ControlThread<StateType, RewardModelType, ValueType>::whoOwns(CompressedState & state) {
+ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & state) {
 	if (stateThreadMap.stateToId.contains(state)) {
 		return stateThreadMap.stateToId.getValue(state);
 	}
@@ -55,9 +55,9 @@ ControlThread<StateType, RewardModelType, ValueType>::whoOwns(CompressedState & 
 	return 0;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-ControlThread<StateType, RewardModelType, ValueType>::whatIsIndex(CompressedState & state) {
+ControlThread<ValueType, RewardModelType, StateType>::whatIsIndex(CompressedState & state) {
 	// Don't need to lock it in this function
 	if (this->parent->getStateStorage().stateToId.contains(state)) {
 		return this->parent->getStateStorage().stateToId.getValue(state);
@@ -65,9 +65,9 @@ ControlThread<StateType, RewardModelType, ValueType>::whatIsIndex(CompressedStat
 	return 0;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
+ControlThread<ValueType, RewardModelType, StateType>::requestInsertTransition(
 	uint8_t thread
 	, StateType from
 	, StateType to
@@ -76,18 +76,18 @@ ControlThread<StateType, RewardModelType, ValueType>::requestInsertTransition(
 	LockableDeque tQueue = transitionQueues[thread - 1];
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-ControlThread<StateType, RewardModelType, ValueType>::requestCrossExplorationFromThread(
+ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFromThread(
 	StateProbability stateAndProbability
 	, double threadIndex
 ) {
 	// TODO: implement
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
+ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 	uint8_t numberFinishedThreads;
 	while (!this->finished || this->hold) { // allow for this thread to be killed outside of its main loop
 		bool exitThisIteration = false;
@@ -117,7 +117,7 @@ ControlThread<StateType, RewardModelType, ValueType>::mainLoop() {
 	}
 }
 
-template class ControlThread<uint32_t, storm::models::sparse::StandardRewardModel<double>, double>;
+template class ControlThread<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 } // namespace threads
 } // namespace builder

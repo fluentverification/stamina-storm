@@ -23,11 +23,11 @@ namespace stamina {
 			const uint8_t NO_THREAD = 0;
 
 			// Forward-declare the exploration thread
-			template <typename StateType, typename RewardModelType, typename ValueType>
+			template <typename ValueType, typename RewardModelType, typename StateType>
 			class ExplorationThread;
 
-			template <typename StateType, typename RewardModelType, typename ValueType>
-			class ControlThread : public BaseThread<StateType, RewardModelType, ValueType> {
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
 				struct StateAndThreadIndex {
 					StateAndThreadIndex(StateType state, uint8_t thread) : state(state), thread(thread) {
@@ -58,7 +58,7 @@ namespace stamina {
 					std::shared_mutex lock;
 				};
 
-				typedef typename ExplorationThread<StateType, RewardModelType, ValueType>::StateAndProbability StateProbability;
+				typedef typename ExplorationThread<ValueType, RewardModelType, StateType>::StateAndProbability StateProbability;
 				/**
 				* Constructor for ControlThread. Primarily just calls super class constructor
 				*
@@ -154,7 +154,7 @@ namespace stamina {
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::sparse::StateStorage<uint8_t>& stateThreadMap;
-				const std::vector<ExplorationThread<StateType, RewardModelType, ValueType>> explorationThreads;
+				const std::vector<ExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
 			};
 
 		} // namespace threads

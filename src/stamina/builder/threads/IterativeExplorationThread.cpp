@@ -7,16 +7,16 @@ namespace stamina {
 namespace builder {
 namespace threads {
 
-template <typename StateType, typename RewardModelType, typename ValueType>
-IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExplorationThread(
+template <typename ValueType, typename RewardModelType, typename StateType>
+IterativeExplorationThread<ValueType, RewardModelType, StateType>::IterativeExplorationThread(
 	StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 	, uint8_t threadIndex
-	, ControlThread<StateType, RewardModelType, ValueType> & controlThread
+	, ControlThread<ValueType, RewardModelType, StateType> & controlThread
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
-) : ExplorationThread<StateType, RewardModelType, ValueType>(
+) : ExplorationThread<ValueType, RewardModelType, StateType>(
 	parent
 	, threadIndex
 	, controlThread
@@ -29,9 +29,9 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::IterativeExpl
 	// Intentionally left empty
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSuccessors(CompressedState & state) {
+IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSuccessors(CompressedState & state) {
 	StateType actualIndex;
 	// Request ownership of state
 	// Check if we own sPrime and if we don't ask the thread who does to explore it
@@ -114,9 +114,9 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::enqueueSucces
 	return;
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreStates() {
+IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates() {
 	if (!this->crossExplorationQueue.empty() && !this->crossExplorationQueueMutex.locked()) {
 		std::lock_guard<std::shared_mutex> lockGuard(this->crossExplorationQueueMutex);
 		auto stateDeltaPiPair = this->crossExplorationQueue.top();
@@ -138,9 +138,9 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreStates
 	}
 }
 
-template <typename StateType, typename RewardModelType, typename ValueType>
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
-IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(StateAndProbability & stateProbability) {
+IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(StateAndProbability & stateProbability) {
 	auto currentProbabilityState = this->parent->getStateMap().get(stateProbability.index);
 
 	StateType currentIndex = stateProbability.index;
@@ -292,7 +292,7 @@ IterativeExplorationThread<StateType, RewardModelType, ValueType>::exploreState(
 
 }
 
-template class IterativeExplorationThread<uint32_t, storm::models::sparse::StandardRewardModel<double>, double>;
+template class IterativeExplorationThread<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 } // namespace threads
 } // namespace builder

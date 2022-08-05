@@ -18,8 +18,8 @@ namespace stamina {
 	namespace builder {
 		namespace threads {
 
-			template <typename StateType, typename RewardModelType, typename ValueType>
-			class ExplorationThread : public BaseThread<StateType, RewardModelType, ValueType> {
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
 // 				typedef std::pair<CompressedState &, std::shared_ptr<StaminaModelBuilder<ValueType, RewardModelType, StateType>>> StateAndProbability;
 				struct StateAndProbability {
@@ -45,7 +45,7 @@ namespace stamina {
 				ExplorationThread(
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t threadIndex
-					, ControlThread<StateType, RewardModelType, ValueType> & controlThread
+					, ControlThread<ValueType, RewardModelType, StateType> & controlThread
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
@@ -79,7 +79,7 @@ namespace stamina {
 				std::deque<StateAndProbability> mainExplorationQueue;
 				uint32_t numberOfOwnedStates;
 				bool idling;
-				ControlThread<StateType, RewardModelType, ValueType> & controlThread;
+				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
 				util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap;
 				storm::storage::sparse::StateStorage<StateType> & stateStorage;
 				std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator;

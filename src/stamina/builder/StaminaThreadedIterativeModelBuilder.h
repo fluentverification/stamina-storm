@@ -59,8 +59,8 @@ namespace stamina {
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			) override;
 		private:
-			threads::ControlThread<StateType, RewardModelType, ValueType> controlThread;
-			std::vector<typename threads::IterativeExplorationThread<StateType, RewardModelType, ValueType>> explorationThreads;
+			threads::ControlThread<ValueType, RewardModelType, StateType> controlThread;
+			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
 		};
 		// "Custom" deleter (which actually is not custom) to allow for polymorphic shared pointers
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>

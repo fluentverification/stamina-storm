@@ -24,7 +24,7 @@ namespace stamina {
 			* Base class for all threads. Automatically constructs a thread which runs
 			* the mainLoop function.
 			* */
-			template <typename StateType, typename RewardModelType, typename ValueType>
+			template <typename ValueType, typename RewardModelType, typename StateType>
 			class BaseThread {
 			public:
 				/**

@@ -57,11 +57,11 @@ namespace stamina {
 
 
 
-		template <typename StateType, typename RewardModelType, typename ValueType>
+		template <typename ValueType, typename RewardModelType, typename StateType>
 		class StaminaModelBuilder {
 		public:
 
-			typedef typename threads::ControlThread<StateType, RewardModelType, ValueType>::StateAndThreadIndex StateThreadIndex;
+			typedef typename threads::ControlThread<ValueType, RewardModelType, StateType>::StateAndThreadIndex StateThreadIndex;
 			/**
 			 * A basic struct for out of order transitions to insert into the transition matrix.
 			 * This is faster than using the remapping and std::sort in the STORM API
@@ -236,8 +236,8 @@ namespace stamina {
 			);
 
 			/* Data Members */
-			std::shared_ptr<threads::ControlThread<StateType, RewardModelType, ValueType>> controlThread;
-			std::vector<std::shared_ptr<threads::ExplorationThread<StateType, RewardModelType, ValueType>>> explorationThreads;
+			std::shared_ptr<threads::ControlThread<ValueType, RewardModelType, StateType>> controlThread;
+			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> explorationThreads;
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 
