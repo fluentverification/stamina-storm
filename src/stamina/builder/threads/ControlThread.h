@@ -12,6 +12,8 @@
 
 #include "BaseThread.h"
 
+#include "stamina/builder/StaminaModelBuilder.h"
+
 #include "storm/storage/BitVectorHashMap.h"
 
 #include <deque>
