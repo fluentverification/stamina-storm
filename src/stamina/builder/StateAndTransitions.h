@@ -29,8 +29,8 @@ namespace stamina {
 		};
 
 		template <typename StateType>
-		struct StateAndThreadIndex {
-			StateAndThreadIndex(StateType state, uint8_t thread) : state(state), thread(thread) {
+		struct StaminaStateAndThreadIndex {
+			StaminaStateAndThreadIndex(StateType state, uint8_t thread) : state(state), thread(thread) {
 				// Intentionally left empty
 			}
 			StateType state; // State Index

@@ -41,7 +41,7 @@ namespace stamina {
 
 				typedef StateAndProbability<ValueType, RewardModelType, StateType> StateProbability;
 				typedef StaminaTransitionInfo<StateType> Transition;
-				typedef StateAndThreadIndex<StateType> StateAndThreadIndex;
+				typedef StaminaStateAndThreadIndex<StateType> StateAndThreadIndex;
 
 				class LockableDeque {
 				public:
