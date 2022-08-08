@@ -350,7 +350,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::storage::sparse::StateStorage<StateType>
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() const {
 	return this->stateStorage;
 }
 
@@ -360,6 +360,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getMemoryPool() {
 	return memoryPool;
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>>
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getGenerator() {
+	return generator;
+}
 
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

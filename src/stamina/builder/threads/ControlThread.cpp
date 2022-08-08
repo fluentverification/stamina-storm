@@ -10,6 +10,7 @@ ControlThread<ValueType, RewardModelType, StateType>::ControlThread(
 	, uint8_t numberExplorationThreads
 ) : BaseThread<ValueType, RewardModelType, StateType>(parent)
 	, numberExplorationThreads(numberExplorationThreads)
+	, stateThreadMap(*(new storm::storage::sparse::StateStorage<uint8_t>(parent->getGenerator()->getStateSize())))
 {
 	// Intentionally left empty
 }

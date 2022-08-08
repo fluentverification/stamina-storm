@@ -148,8 +148,9 @@ namespace stamina {
 			double getLocalKappa();
 			uint8_t getIteration();
 			util::StateMemoryPool<ProbabilityState<StateType>> & getMemoryPool();
+			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> getGenerator();
+			storm::storage::sparse::StateStorage<StateType> getStateStorage() const;
 		protected:
-			storm::storage::sparse::StateStorage<StateType> getStateStorage();
 			/**
 			* Creates and loads the property expression from the formula
 			* */
