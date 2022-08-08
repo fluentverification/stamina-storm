@@ -4,7 +4,19 @@ Since the JAVA version appeared to have no consistency in coding style, I figure
 
 ## Prototyping classes and functions
 
-In the header file (`.h` and *not* `.hpp` or `.hh`), all STAMINA related objects should be within `namespace stamina`. Within the `.cpp` files, rather than adding `namespace stamina { /* code */ }`, at the beginning of the file, we should add the line `using namespace stamina;`.
+In the header file (`.h` and *not* `.hpp` or `.hh`), all STAMINA related objects should be within `namespace stamina`. Within the `.cpp` files, rather than adding `namespace stamina { /* code */ }`, at the beginning of the file and indenting like we would in the header, DO NOT INDENT THE NAMESPACE DECLARATIONS:
+
+```cpp
+namespace stamina {
+namespace builder {
+namespace threads {
+
+// Your code here
+
+} // namespace threads
+} // namespace builder
+} // namespace stamina
+```
 
 ### Function prototypes should look as follows:
 Either (A)
