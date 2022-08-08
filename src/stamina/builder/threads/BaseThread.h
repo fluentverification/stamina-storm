@@ -62,6 +62,14 @@ namespace stamina {
 			private:
 				std::thread * threadLoop;
 			};
+
+			// Forward declare inherited classes
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ExplorationThread;
+
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ControlThread;
+
 		} // namespace threads
 	} // namespace builder
 } // namespace stamina

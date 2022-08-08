@@ -28,8 +28,7 @@
 #include "util/StateIndexArray.h"
 #include "util/StateMemoryPool.h"
 
-#include "builder/threads/ExplorationThread.h"
-#include "builder/threads/ControlThread.h"
+#include "builder/threads/BaseThread.h"
 
 #include "builder/ProbabilityState.h"
 #include "builder/StateAndTransitions.h"
@@ -56,13 +55,11 @@ namespace stamina {
 		typedef storm::models::sparse::Ctmc<double> Ctmc;
 		typedef storm::modelchecker::SparseCtmcCslModelChecker<Ctmc> CtmcModelChecker;
 
-
-
 		template <typename ValueType, typename RewardModelType, typename StateType>
 		class StaminaModelBuilder {
 		public:
 
-			typedef typename threads::ControlThread<ValueType, RewardModelType, StateType>::StateAndThreadIndex StateThreadIndex;
+			typedef StaminaStateAndThreadIndex<StateType> StateThreadIndex;
 			typedef StaminaTransitionInfo<StateType> TransitionInfo;
 			typedef StaminaTransitionInfoComparison<StateType> TransitionInfoComparison;
 			/**

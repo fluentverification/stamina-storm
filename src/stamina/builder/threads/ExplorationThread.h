@@ -9,7 +9,6 @@
 #define STAMINA_BUILDER_THREADS_EXPLORATIONTHREAD_H
 
 #include "BaseThread.h"
-#include "ControlThread.h"
 
 #include "util/StateIndexArray.h"
 #include "builder/ProbabilityState.h"

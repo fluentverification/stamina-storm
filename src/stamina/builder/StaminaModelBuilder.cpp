@@ -7,6 +7,9 @@
 #include "core/StaminaMessages.h"
 #include "core/StateSpaceInformation.h"
 
+#include "builder/threads/ControlThread.h"
+#include "builder/threads/ExplorationThread.h"
+
 #include <functional>
 #include <sstream>
 
