@@ -41,6 +41,12 @@ namespace stamina {
 			}
 		};
 
+		template <typename StateType>
+		struct StateAndProbability {
+			CompressedState & state;
+			StateType index;
+			double deltaPi;
+		};
 
 	} // namespace builder
 } // namespace stamina

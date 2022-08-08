@@ -18,16 +18,9 @@ namespace stamina {
 	namespace builder {
 		namespace threads {
 			template <typename ValueType, typename RewardModelType, typename StateType>
-			struct StateAndProbability {
-				CompressedState & state;
-				StateType index;
-				double deltaPi;
-			};
-
-			template <typename ValueType, typename RewardModelType, typename StateType>
 			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
-				typedef StateAndProbability<ValueType, RewardModelType, StateType> StateProbability;
+				typedef StateAndProbability<StateType> StateProbability;
 				struct StateIndexAndThread {
 					CompressedState & state;
 					StateType index;
