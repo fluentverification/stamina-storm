@@ -355,7 +355,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() co
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> & 
+std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const & 
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
 	return explorationThreads;
 }

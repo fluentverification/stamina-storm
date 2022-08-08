@@ -150,7 +150,7 @@ namespace stamina {
 			util::StateMemoryPool<ProbabilityState<StateType>> & getMemoryPool();
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> getGenerator();
 			storm::storage::sparse::StateStorage<StateType> getStateStorage() const;
-			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> & getExplorationThreads() const;
+			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const & getExplorationThreads() const;
 		protected:
 			/**
 			* Creates and loads the property expression from the formula
