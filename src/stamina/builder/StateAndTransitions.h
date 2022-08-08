@@ -1,8 +1,11 @@
 #ifndef STAMINA_BUILDER_STATETYPES_H
 #define STAMINA_BUILDER_STATETYPES_H
 
+#include "__storm_needed_for_builder.h"
+
 namespace stamina {
 	namespace builder {
+		typedef storm::storage::BitVector CompressedState;
 
 		template <typename StateType>
 		/**

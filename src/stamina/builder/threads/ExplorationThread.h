@@ -21,6 +21,7 @@ namespace stamina {
 			class ExplorationThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
 				typedef StateAndProbability<StateType> StateProbability;
+
 				struct StateIndexAndThread {
 					CompressedState & state;
 					StateType index;

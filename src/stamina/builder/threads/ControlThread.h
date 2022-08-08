@@ -31,15 +31,11 @@ namespace stamina {
 			template <typename ValueType, typename RewardModelType, typename StateType>
 			class ExplorationThread;
 
-			// Forward declare StateAndProbability
-			template <typename ValueType, typename RewardModelType, typename StateType>
-			class StateAndProbability;
-
 			template <typename ValueType, typename RewardModelType, typename StateType>
 			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
 
-				typedef StateAndProbability<ValueType, RewardModelType, StateType> StateProbability;
+				typedef StateAndProbability<StateType> StateProbability;
 				typedef StaminaTransitionInfo<StateType> Transition;
 				typedef StaminaStateAndThreadIndex<StateType> StateAndThreadIndex;
 
