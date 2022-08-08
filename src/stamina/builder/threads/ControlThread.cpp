@@ -1,5 +1,7 @@
 #include "ControlThread.h"
 
+#include "builder/threads/ExplorationThread.h"
+
 namespace stamina {
 namespace builder {
 namespace threads {
@@ -94,7 +96,7 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 		bool exitThisIteration = false;
 		numberFinishedThreads = 0;
 		for (auto explorationThread : this->parent->getExplorationThreads()) {
-			if (explorationThread.isIdling()) {
+			if (explorationThread->isIdling()) {
 				++numberFinishedThreads;
 			}
 		}
@@ -115,6 +117,7 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 		}
 		if (exitThisIteration) { return; }
 		// TODO: de-fragmentation
+		// TODO: LRU Cache
 	}
 }
 
