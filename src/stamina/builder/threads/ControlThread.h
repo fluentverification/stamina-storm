@@ -12,7 +12,10 @@
 
 #include "BaseThread.h"
 
+#include "stamina/builder/StateAndTransitions.h"
+
 #include "stamina/builder/StaminaModelBuilder.h"
+#include "stamina/builder/StateAndTransitions.h"
 
 #include "storm/storage/BitVectorHashMap.h"
 
@@ -37,19 +40,9 @@ namespace stamina {
 			public:
 
 				typedef StateAndProbability<ValueType, RewardModelType, StateType> StateProbability;
-				typedef StaminaTransitionInfo<ValueType, RewardModelType, StateType> Transition;
+				typedef StaminaTransitionInfo<StateType> Transition;
+				typedef StateAndThreadIndex<StateType> StateAndThreadIndex;
 
-				struct StateAndThreadIndex {
-					StateAndThreadIndex(StateType state, uint8_t thread) : state(state), thread(thread) {
-						// Intentionally left empty
-					}
-					StateType state; // State Index
-					uint8_t thread; // Thread index
-					// Cast to StateType
-					operator StateType() const {
-						return state;
-					}
-				};
 				class LockableDeque {
 				public:
 					int size();

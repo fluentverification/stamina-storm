@@ -32,6 +32,7 @@
 #include "builder/threads/ControlThread.h"
 
 #include "builder/ProbabilityState.h"
+#include "builder/StateAndTransitions.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
@@ -62,27 +63,8 @@ namespace stamina {
 		public:
 
 			typedef typename threads::ControlThread<ValueType, RewardModelType, StateType>::StateAndThreadIndex StateThreadIndex;
-			/**
-			 * A basic struct for out of order transitions to insert into the transition matrix.
-			 * This is faster than using the remapping and std::sort in the STORM API
-			 * */
-			class TransitionInfo {
-			public:
-				TransitionInfo(StateType from, StateType to, double transition) :
-					from(from), to(to), transition(transition) { /* Intentionally left empty */ }
-				StateType from;
-				StateType to;
-				double transition;
-			};
-			struct TransitionInfoComparison {
-				bool operator() (
-					const TransitionInfo * first
-					, const TransitionInfo * second
-				) const {
-					return first->to > second->to;
-				}
-			};
-
+			typedef StaminaTransitionInfo<StateType> TransitionInfo;
+			typedef StaminaTransitionInfoComparison<StateType> TransitionInfoComparison;
 			/**
 			* Constructs a StaminaModelBuilder with a given storm::generator::PrismNextStateGenerator
 			*
