@@ -74,7 +74,7 @@ ControlThread<ValueType, RewardModelType, StateType>::requestInsertTransition(
 	, StateType to
 	, double rate
 ) {
-	LockableDeque tQueue = transitionQueues[thread - 1];
+	LockableDeque & tQueue = transitionQueues[thread - 1];
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

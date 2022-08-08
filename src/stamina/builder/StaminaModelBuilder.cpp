@@ -355,6 +355,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() co
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> & 
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
+	return explorationThreads;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
 util::StateMemoryPool<ProbabilityState<StateType>> &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getMemoryPool() {
 	return memoryPool;
