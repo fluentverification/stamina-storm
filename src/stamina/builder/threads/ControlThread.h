@@ -47,7 +47,7 @@ namespace stamina {
 
 					LockableDeque(const LockableDeque & other) {
 						queue = other.queue;
-						lock = other.lock;
+						// We don't need to copy the lock, just the queue
 					}
 					int size();
 					/**
