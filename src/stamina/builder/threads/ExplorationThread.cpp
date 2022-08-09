@@ -1,4 +1,5 @@
 #include "ExplorationThread.h"
+#include "builder/StaminaModelBuilder.h"
 
 #include <mutex>
 
