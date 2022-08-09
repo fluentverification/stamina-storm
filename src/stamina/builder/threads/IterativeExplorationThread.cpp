@@ -120,20 +120,20 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates() {
-	if (!this->crossExplorationQueue.empty() && !this->crossExplorationQueueMutex.locked()) {
-		std::lock_guard<std::shared_mutex> lockGuard(this->crossExplorationQueueMutex);
-		auto stateDeltaPiPair = this->crossExplorationQueue.top();
-		this->crossExplorationQueue.pop();
-		StateType s = stateDeltaPiPair.first;
+	if (!this->crossExplorationQueue.empty() && !this->xLock.owns_lock()) {
+		std::lock_guard<decltype(xLock)> lockGuard(this->xLock);
+		auto stateDeltaPiPair = this->crossExplorationQueue.front();
+		this->crossExplorationQueue.pop_front();
+		auto s = stateDeltaPiPair.first;
 		double deltaPi = stateDeltaPiPair.second;
 		// Update the estimated reachability of s
 		auto probabilityState = this->parent->getStateMap().get(s);
-		probabilityState.pi += deltaPi;
+		probabilityState->pi += deltaPi;
 		exploreState(s);
 	}
 	else if (!this->mainExplorationQueue.empty()) {
-		auto s = this->mainExplorationQueue.top();
-		this->mainExplorationQueue.pop();
+		auto s = this->mainExplorationQueue.front();
+		this->mainExplorationQueue.pop_front();
 		exploreState(s);
 	}
 	else {
@@ -217,7 +217,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 		// add the generated choice information
 		if (choice.hasLabels()) { // stateAndChoiceInformationBuilder.isBuildChoiceLabels() &&
 			for (auto const& label : choice.getLabels()) {
-				StaminaMessages::warning("stamina::builder::threads::IterativeExplorationThread does not support choice labels! The following label will not be added: " + std::to_string(label));
+				StaminaMessages::warning("stamina::builder::threads::IterativeExplorationThread does not support choice labels!");
 
 			}
 		}

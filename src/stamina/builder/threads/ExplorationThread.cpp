@@ -23,6 +23,7 @@ ExplorationThread<ValueType, RewardModelType, StateType>::ExplorationThread(
 	, stateMap(stateMap)
 	, generator(generator)
 	, stateToIdCallback(stateToIdCallback)
+	, xLock(crossExplorationQueueMutex, std::defer_lock)
 {
 	// Intentionally left empty
 }
