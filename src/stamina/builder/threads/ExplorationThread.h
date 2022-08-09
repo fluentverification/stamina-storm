@@ -12,6 +12,7 @@
 
 #include "util/StateIndexArray.h"
 #include "builder/ProbabilityState.h"
+#include "builder/StateAndTransitions.h"
 
 namespace stamina {
 	namespace builder {
@@ -83,6 +84,7 @@ namespace stamina {
 				std::deque<StateIndexAndThread> statesToRequestCrossExploration;
 			private:
 				const uint8_t threadIndex;
+				bool isCtmc;
 			};
 		} // namespace threads
 	} // namespace builder
