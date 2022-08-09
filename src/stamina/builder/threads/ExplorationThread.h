@@ -82,7 +82,7 @@ namespace stamina {
 				std::function<StateType (CompressedState const&)> stateToIdCallback;
 				// The states we should request cross exploration from
 				std::deque<StateIndexAndThread> statesToRequestCrossExploration;
-			private:
+			protected:
 				const uint8_t threadIndex;
 				bool isCtmc;
 			};

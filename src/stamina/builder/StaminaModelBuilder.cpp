@@ -349,13 +349,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-storm::storage::sparse::StateStorage<StateType>
+storm::storage::sparse::StateStorage<StateType> &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() const {
 	return this->stateStorage;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const & 
+std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
 	return explorationThreads;
 }

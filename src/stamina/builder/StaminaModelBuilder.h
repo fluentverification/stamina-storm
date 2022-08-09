@@ -149,7 +149,7 @@ namespace stamina {
 			uint8_t getIteration();
 			util::StateMemoryPool<ProbabilityState<StateType>> & getMemoryPool();
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> getGenerator();
-			storm::storage::sparse::StateStorage<StateType> getStateStorage() const;
+			storm::storage::sparse::StateStorage<StateType> & getStateStorage() const;
 			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const & getExplorationThreads() const;
 			/**
 			 * Inserts a TransitionInfo into transitionsToAdd. This method must NOT be called

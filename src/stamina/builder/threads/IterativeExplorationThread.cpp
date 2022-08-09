@@ -1,5 +1,6 @@
 #include "IterativeExplorationThread.h"
 
+#include "builder/threads/ControlThread.h"
 #include "core/StaminaMessages.h"
 #include "core/StateSpaceInformation.h"
 
@@ -44,7 +45,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 	}
 	else if (sPrimeOwner == NO_THREAD) {
 		// Request ownership
-		auto threadAndStateIndecies = this->controlThread.requestOwnership(this->threadIndex, state);
+		auto threadAndStateIndecies = this->controlThread.requestOwnership(state, this->threadIndex);
 		bool failedRequest = threadAndStateIndecies.first != this->threadIndex;
 		actualIndex = threadAndStateIndecies.second;
 		if (failedRequest) {
@@ -267,7 +268,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 			// These are next states where the previous state has a reachability
 			// greater than zero
 
-			auto nextProbabilityState = this->stateMap.get(sPrime);
+			auto nextProbabilityState = this->stateMap->get(sPrime);
 			if (nextProbabilityState != nullptr) {
 				if (!shouldEnqueueAll) {
 					nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);

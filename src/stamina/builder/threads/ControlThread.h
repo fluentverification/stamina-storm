@@ -24,8 +24,6 @@
 namespace stamina {
 	namespace builder {
 		namespace threads {
-			// The thread index of no exploration thread
-			const uint8_t NO_THREAD = 0;
 
 			// Forward-declare the exploration thread
 			template <typename ValueType, typename RewardModelType, typename StateType>

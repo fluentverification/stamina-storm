@@ -20,6 +20,10 @@ namespace stamina {
 
 		namespace threads {
 			using namespace storm::builder;
+
+			// The thread index of no exploration thread
+			const uint8_t NO_THREAD = 0;
+
 			/**
 			* Base class for all threads. Automatically constructs a thread which runs
 			* the mainLoop function.
