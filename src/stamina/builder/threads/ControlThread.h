@@ -41,6 +41,14 @@ namespace stamina {
 
 				class LockableDeque {
 				public:
+					LockableDeque() {
+						// Intentionally left empty
+					}
+
+					LockableDeque(const LockableDeque & other) {
+						queue = other.queue;
+						lock = other.lock;
+					}
 					int size();
 					/**
 					 * Locks the queue and emplaces
@@ -53,7 +61,7 @@ namespace stamina {
 					void pop();
 				private:
 					std::deque<Transition> queue;
-					std::shared_mutex lock;
+					mutable std::shared_mutex lock;
 				};
 
 				/**
