@@ -39,8 +39,9 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 	uint8_t sPrimeOwner = this->controlThread.whoOwns(state);
 	if (sPrimeOwner != this->threadIndex && sPrimeOwner != NO_THREAD) {
 		actualIndex = this->controlThread.whatIsIndex(state);
+		StateIndexAndThread sThreadIndex(state, actualIndex, sPrimeOwner);
 		// Request cross exploration handled in other function
-		this->statesToRequestCrossExploration.emplace_back({state, actualIndex, sPrimeOwner});
+		this->statesToRequestCrossExploration.emplace_back(sThreadIndex);
 		return; // TODO: another thread owns
 	}
 	else if (sPrimeOwner == NO_THREAD) {
@@ -49,8 +50,9 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 		bool failedRequest = threadAndStateIndecies.first != this->threadIndex;
 		actualIndex = threadAndStateIndecies.second;
 		if (failedRequest) {
+			StateIndexAndThread sThreadIndex(state, actualIndex, sPrimeOwner);
 			// request cross exploration
-			this->statesToRequestCrossExploration.emplace_back({state, actualIndex, sPrimeOwner});
+			this->statesToRequestCrossExploration.emplace_back(sThreadIndex);
 			return; // TODO: another thread owns
 		}
 	}
@@ -148,7 +150,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 	CompressedState & currentState = stateProbability.state;
 
 	// Flush deltaPi
-	currentProbabilityState.pi += stateProbability.deltaPi;
+	currentProbabilityState->pi += stateProbability.deltaPi;
 
 	// Load this state to use
 	this->generator->load(currentState);

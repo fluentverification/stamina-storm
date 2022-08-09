@@ -50,7 +50,30 @@ namespace stamina {
 			StateType index;
 			double deltaPi;
 		};
+		namespace threads {
 
+			template <typename StateType>
+			struct StaminaStateIndexAndThread {
+				StaminaStateIndexAndThread(
+					CompressedState & state
+					, StateType index
+					, uint8_t threadIndex
+				) : state(state)
+					, index(index)
+					, threadIndex(threadIndex)
+				{}
+				StaminaStateIndexAndThread(const StaminaStateIndexAndThread & other)
+				 : state(other.state)
+					, index(other.index)
+					, threadIndex(other.threadIndex)
+
+				{}
+				CompressedState & state;
+				StateType index;
+				uint8_t threadIndex;
+			};
+
+		} // namespace threads
 	} // namespace builder
 } // namespace stamina
 

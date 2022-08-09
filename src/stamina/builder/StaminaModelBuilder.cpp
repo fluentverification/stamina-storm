@@ -372,6 +372,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getGenerator() {
 	return generator;
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+util::StateIndexArray<StateType, ProbabilityState<StateType>> &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateMap() {
+	return this->stateMap;
+}
+
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 

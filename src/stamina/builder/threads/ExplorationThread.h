@@ -22,12 +22,7 @@ namespace stamina {
 			public:
 				typedef StateAndProbability<StateType> StateProbability;
 
-				struct StateIndexAndThread {
-					CompressedState & state;
-					StateType index;
-					uint8_t threadIndex;
-				};
-
+				typedef StaminaStateIndexAndThread<StateType> StateIndexAndThread;
 				/**
 				* Constructor. Invokes super's constructor and stores the
 				* thread index which cannot change for the life of the thread

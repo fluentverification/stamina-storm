@@ -158,6 +158,7 @@ namespace stamina {
 			void createTransition(StateType from, StateType to, ValueType probability);
 			void createTransition(TransitionInfo transitionInfo);
 
+			util::StateIndexArray<StateType, ProbabilityState<StateType>> & getStateMap();
 		protected:
 			/**
 			* Creates and loads the property expression from the formula

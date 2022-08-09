@@ -17,6 +17,7 @@ namespace stamina {
 			class IterativeExplorationThread : public ExplorationThread<ValueType, RewardModelType, StateType> {
 			public:
 				typedef StateAndProbability<StateType> StateProbability;
+				typedef StaminaStateIndexAndThread<StateType> StateIndexAndThread;
 				/**
 				* Constructor. Invokes super's constructor.
 				*
