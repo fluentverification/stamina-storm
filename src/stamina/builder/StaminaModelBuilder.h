@@ -151,6 +151,13 @@ namespace stamina {
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> getGenerator();
 			storm::storage::sparse::StateStorage<StateType> getStateStorage() const;
 			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const & getExplorationThreads() const;
+			/**
+			 * Inserts a TransitionInfo into transitionsToAdd. This method must NOT be called
+			 * after flushToTransitionMatrix has cleared transitionsToAdd
+			 * */
+			void createTransition(StateType from, StateType to, ValueType probability);
+			void createTransition(TransitionInfo transitionInfo);
+
 		protected:
 			/**
 			* Creates and loads the property expression from the formula
@@ -187,12 +194,6 @@ namespace stamina {
 			 * @param transitionMatrixBuilder The transition matrix builder
 			 * */
 			void flushToTransitionMatrix(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
-			/**
-			 * Inserts a TransitionInfo into transitionsToAdd. This method must NOT be called
-			 * after flushToTransitionMatrix has cleared transitionsToAdd
-			 * */
-			void createTransition(StateType from, StateType to, ValueType probability);
-			void createTransition(TransitionInfo transitionInfo);
 			/**
 			* Explores state space and truncates the model
 			*
