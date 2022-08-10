@@ -77,7 +77,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 				// Enqueue
-				this->mainExplorationQueue.push_back(std::make_pair(nextProbabilityState, state));
+				this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -94,7 +94,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 				// Enqueue
-				this->mainExplorationQueue.push_back(std::make_pair(nextProbabilityState, state));
+				this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -109,7 +109,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			this->parent->getStateMap().put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 			// exploredStates.emplace(actualIndex);
-			this->mainExplorationQueue.push_back(std::make_pair(nextProbabilityState, state));
+			this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state));
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -121,19 +121,29 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates() {
 	if (!this->crossExplorationQueue.empty() && !this->xLock.owns_lock()) {
-		std::lock_guard<decltype(xLock)> lockGuard(this->xLock);
+		std::lock_guard<decltype(this->xLock)> lockGuard(this->xLock);
 		auto stateDeltaPiPair = this->crossExplorationQueue.front();
 		this->crossExplorationQueue.pop_front();
 		auto s = stateDeltaPiPair.first;
 		double deltaPi = stateDeltaPiPair.second;
+		StateType stateIndex = this->parent->getStateIndexOrAbsorbing(s);
+		StateProbability stateProbability(
+			s            // State values
+			, stateIndex // State Index
+			, deltaPi    // Delta Pi
+		);
+
 		// Update the estimated reachability of s
-		auto probabilityState = this->parent->getStateMap().get(s);
-		probabilityState->pi += deltaPi;
-		exploreState(s);
+		// auto probabilityState = this->parent->getStateMap().get(stateIndex);
+		// probabilityState->pi += deltaPi;
+		exploreState(stateProbability);
 	}
 	else if (!this->mainExplorationQueue.empty()) {
+		// If we are dequeuing from the main exploration queue, then
+		// the state we are enqueuing doesn't have a delta pi
 		auto s = this->mainExplorationQueue.front();
 		this->mainExplorationQueue.pop_front();
+
 		exploreState(s);
 	}
 	else {

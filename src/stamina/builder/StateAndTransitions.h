@@ -45,7 +45,17 @@ namespace stamina {
 		};
 
 		template <typename StateType>
-		struct StateAndProbability {
+		class StateAndProbability {
+		public:
+			StateAndProbability(
+				CompressedState & state
+				, StateType index
+				, double deltaPi
+
+			) : state(state)
+				, index(index)
+				, deltaPi(deltaPi)
+			{}
 			CompressedState & state;
 			StateType index;
 			double deltaPi;
