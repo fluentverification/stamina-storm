@@ -50,7 +50,7 @@ namespace stamina {
 			StateAndProbability(
 				CompressedState & state
 				, StateType index
-				, double deltaPi
+				, double deltaPi = 0
 			) : state(state)
 				, index(index)
 				, deltaPi(deltaPi)

@@ -143,8 +143,11 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
 		// the state we are enqueuing doesn't have a delta pi
 		auto s = this->mainExplorationQueue.front();
 		this->mainExplorationQueue.pop_front();
-
-		exploreState(s);
+		StateProbability stateProbability(
+			s.second
+			, s.first->index
+		);
+		exploreState(stateProbability);
 	}
 	else {
 		this->idling = true;
