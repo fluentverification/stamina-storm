@@ -51,10 +51,15 @@ namespace stamina {
 				CompressedState & state
 				, StateType index
 				, double deltaPi
-
 			) : state(state)
 				, index(index)
 				, deltaPi(deltaPi)
+			{}
+			// Copy constructor
+			StateAndProbability(const StateAndProbability & other)
+				: state(other.state)
+				, index(other.index)
+				, deltaPi(other.deltaPi)
 			{}
 			CompressedState & state;
 			StateType index;
