@@ -12,7 +12,7 @@
 #ifndef STAMINA_BUILDER_STAMINATHREADEDITERATIVEMODELBUILDER_H
 #define STAMINA_BUILDER_STAMINATHREADEDITERATIVEMODELBUILDER_H
 
-#include "StaminaModelBuilder.h"
+#include "StaminaIterativeModelBuilder.h"
 
 #include "builder/threads/ControlThread.h"
 #include "builder/threads/IterativeExplorationThread.h"

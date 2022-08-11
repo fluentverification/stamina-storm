@@ -8,7 +8,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 	std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
-) : StaminaIterativeModelBuilder(
+) : StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>(
 		generator
 		, modulesFile
 		, options
@@ -41,12 +41,12 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 ) {
 	// Get initial states
-	fresh = false;
-	numberTransitions = 0;
+	this->fresh = false;
+	this->numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
-	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
-		stateAndChoiceInformationBuilder.stateValuationsBuilder() = generator->initializeStateValuationsBuilder();
+	if (choiceInformationBuilder.isBuildStateValuations()) {
+		choiceInformationBuilder.stateValuationsBuilder() = this->generator->initializeStateValuationsBuilder();
 	}
 
 	this->loadPropertyExpressionFromFormula();
@@ -58,30 +58,30 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		, std::placeholders::_1
 	);
 
-	if (firstIteration) {
+	if (this->firstIteration) {
 		// Create absorbing state
 		this->setUpAbsorbingState(
 			transitionMatrixBuilder
 			, rewardModelBuilders
-			, stateAndChoiceInformationBuilder
+			, choiceInformationBuilder
 			, markovianChoices
 			, stateValuationsBuilder
 		);
-		isInit = true;
+		this->isInit = true;
 		// Let the generator create all initial states.
-		this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+		this->stateStorage.initialStateIndices = this->generator->getInitialStates(stateToIdCallback);
 		if (this->stateStorage.initialStateIndices.empty()) {
 			StaminaMessages::errorAndExit("Initial states are empty!");
 		}
-		currentRowGroup = 1;
-		currentRow = 1;
-		firstIteration = false;
+		this->currentRowGroup = 1;
+		this->currentRow = 1;
+		this->firstIteration = false;
 	}
 	else {
 		// Flush the previously early-terminated states into statesToExplore FIRST
-		flushStatesTerminated();
+		this->flushStatesTerminated();
 	}
-	numberOfExploredStatesSinceLastMessage = 0;
+	this->numberOfExploredStatesSinceLastMessage = 0;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
@@ -89,15 +89,15 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	StateType currentIndex;
 	CompressedState currentState;
 
-	isInit = false;
+	this->isInit = false;
 	// Perform a search through the model.
-	while (!statesToExplore.empty() && numberTerminal < Options::threads) {
-		auto currentProbabilityStatePair = statesToExplore.front();
-		currentProbabilityState = statesToExplore.front().first;
+	while (!this->statesToExplore.empty() && this->numberTerminal < Options::threads) {
+		auto currentProbabilityStatePair = this->statesToExplore.front();
+		this->currentProbabilityState = statesToExplore.front().first;
 		currentState = statesToExplore.front().second;
 		statesToExplore.pop_front();
 		// Get the first state in the queue.
-		currentIndex = currentProbabilityState->index;
+		currentIndex = this->currentProbabilityState->index;
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -109,24 +109,24 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
 
-		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
-			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
+		if (choiceInformationBuilder.isBuildStateValuations()) {
+			this->generator->addStateValuation(currentIndex, choiceInformationBuilder.stateValuationsBuilder());
 		}
 
 		// Load state for us to use
-		generator->load(currentState);
+		this->generator->load(currentState);
 
-		if (propertyExpression != nullptr) {
-			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
-			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+		if (this->propertyExpression != nullptr) {
+			storm::expressions::SimpleValuation valuation = this->generator->currentStateToSimpleValuation();
+			bool evaluationAtCurrentState = this->propertyExpression->evaluateAsBool(&valuation);
 			// If the property does not hold at the current state, make it absorbing in the
 			// state graph and do not explore its successors
 			if (!evaluationAtCurrentState) {
-				transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+				transitionMatrixBuilder.addNextValue(this->currentRow, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
-				numberTerminal++;
+				this->numberTerminal++;
 				// Do NOT place this in the deque of states we should start with next iteration
 				continue;
 			}
@@ -134,14 +134,14 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
+		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < this->localKappa) {
 			// Do not connect to absorbing yet
 			// Place this in statesTerminatedLastIteration
 			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
-				statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
+				this->statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
 				currentProbabilityState->wasPutInTerminalQueue = true;
-				++currentRow;
-				++currentRowGroup;
+				++this->currentRow;
+				++this->currentRowGroup;
 			}
 			continue;
 		}
@@ -149,7 +149,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
-		storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
+		storm::generator::StateBehavior<ValueType, StateType> behavior = this->generator->expand(stateToIdCallback);
 
 		auto stateRewardIt = behavior.getStateRewards().begin();
 		for (auto& rewardModelBuilder : rewardModelBuilders) {
@@ -161,7 +161,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+			transitionMatrixBuilder.addNextValue(this->currentRow, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -174,23 +174,23 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 				StaminaMessages::errorAndExit("Model was not deterministic!");
 			}
 			// add the generated choice information
-			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
+			if (choiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
-					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+					choiceInformationBuilder.addChoiceLabel(label, this->currentRow);
 
 				}
 			}
-			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
-				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+			if (choiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
+				choiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
 			}
-			if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
+			if (choiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
 				if (firstChoiceOfState) {
-					stateAndChoiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), currentRowGroup);
+					choiceInformationBuilder.addStatePlayerIndication(choice.getPlayerIndex(), this->currentRowGroup);
 				}
 			}
 
 			double totalRate = 0.0;
-			if (!shouldEnqueueAll && isCtmc) {
+			if (!shouldEnqueueAll && this->isCtmc) {
 				for (auto const & stateProbabilityPair : choice) {
 					if (stateProbabilityPair.first == 0) {
 						StaminaMessages::warning("Transition to absorbing state from API!!!");
@@ -205,13 +205,13 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 				if (sPrime == 0) {
 					continue;
 				}
-				double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
+				double probability = this->isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
 				// These are next states where the previous state has a reachability
 				// greater than zero
 
-				auto nextProbabilityState = stateMap.get(sPrime);
+				auto nextProbabilityState = this->stateMap.get(sPrime);
 				if (nextProbabilityState != nullptr) {
 					if (!shouldEnqueueAll) {
 						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
@@ -219,27 +219,27 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 					if (currentProbabilityState->isNew) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
-						numberTransitions++;
+						this->numberTransitions++;
 					}
 				}
 			}
 
-			++currentRow;
+			++this->currentRow;
 			firstChoiceOfState = false;
 		}
 
 		currentProbabilityState->isNew = false;
 
-		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
-			numberTerminal--;
+		if (currentProbabilityState->isTerminal() && this->numberTerminal > 0) {
+			this->numberTerminal--;
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
 
-		++currentRowGroup;
+		++this->currentRowGroup;
 
 		if (generator->getOptions().isShowProgressSet()) {
-			++numberOfExploredStatesSinceLastMessage;
+			++this->numberOfExploredStatesSinceLastMessage;
 
 			auto now = std::chrono::high_resolution_clock::now();
 			auto durationSinceLastMessage = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfLastMessage).count();
@@ -255,15 +255,15 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		}
 
 	}
-	iteration++;
-	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
-	
+	this->iteration++;
+	this->numberStates = this->stateStorage.stateToId.size(); // numberOfExploredStates;
+
 	// Create threads and explore initial states
 	// If numberTerminal is less than the number of threads, we are under-utilizing threads
-	if (numberTerminal < Options::threads) {
-		StaminaMessages::warning("The number of threads that will be utilized (" + std::to_string(numberTerminal) + ") is less than the number created! ( " + std::to_string(Options::threads) + ")");
+	if (this->numberTerminal < Options::threads) {
+		StaminaMessages::warning("The number of threads that will be utilized (" + std::to_string(this->numberTerminal) + ") is less than the number created! ( " + std::to_string(Options::threads) + ")");
 	}
-	
+
 	/*
 	 * The hold (auto set to true in thread constructor) make it so these threads don't just stop after starting.
 	 * Therefore after everything is set up, we must turn off the hold. However:
@@ -282,7 +282,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	auto terminalStatesVector = this->getTerminalStates();
 	uint8_t threadIndex = 1;
 	for (auto terminalState : terminalStatesVector) {
-		auto explorationThread = this->explorationThreads[i];
+		auto explorationThread = this->explorationThreads[threadIndex];
 		// TODO: ask for cross exploration from thread at that index
 		if (threadIndex == Options::threads) {
 			threadIndex = 1;

@@ -49,6 +49,7 @@ set(LIB_FILES
 	src/stamina/builder/StaminaModelBuilder.cpp
 	src/stamina/builder/StaminaIterativeModelBuilder.cpp
 	src/stamina/builder/StaminaIterativeModelBuilder.h
+	src/stamina/builder/StaminaThreadedIterativeModelBuilder.cpp
 	src/stamina/builder/StaminaPriorityModelBuilder.cpp
 	src/stamina/builder/StaminaPriorityModelBuilder.h
 	src/stamina/builder/StaminaReExploringModelBuilder.cpp
