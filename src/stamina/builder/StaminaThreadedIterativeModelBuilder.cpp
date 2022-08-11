@@ -250,7 +250,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 					"Explored " + std::to_string(this->numberOfExploredStatesSinceLastMessage) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
 				);
 				timeOfLastMessage = std::chrono::high_resolution_clock::now();
-				numberOfExploredStatesSinceLastMessage = 0;
+				this->numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
 
@@ -272,11 +272,11 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	 */
 
 	// Start control thread
-	this->controlThread.start();
+	this->controlThread.startThread();
 
 	// Start all of the worker threads
 	for (auto explorationThread : this->explorationThreads) {
-		explorationThread.start();
+		explorationThread.startThread();
 	}
 
 	auto terminalStatesVector = this->getTerminalStates();
