@@ -277,14 +277,14 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	this->controlThread.startThread();
 
 	// Start all of the worker threads
-	for (auto explorationThread : this->explorationThreads) {
+	for (auto & explorationThread : this->explorationThreads) {
 		explorationThread.startThread();
 	}
 
 	auto terminalStatesVector = this->getTerminalStates();
 	uint8_t threadIndex = 1;
-	for (auto terminalState : terminalStatesVector) {
-		auto explorationThread = this->explorationThreads[threadIndex];
+	for (auto & terminalState : terminalStatesVector) {
+		auto & explorationThread = this->explorationThreads[threadIndex];
 		// TODO: ask for cross exploration from thread at that index
 		if (threadIndex == Options::threads) {
 			threadIndex = 1;
@@ -295,7 +295,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	}
 
 	// Remove the hold on all of the worker threads
-	for (auto explorationThread : this->explorationThreads) {
+	for (auto & explorationThread : this->explorationThreads) {
 		explorationThread.setHold(false);
 	}
 

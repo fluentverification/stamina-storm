@@ -41,6 +41,12 @@ namespace stamina {
 					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
 					, std::function<StateType (CompressedState const&)> stateToIdCallback
 				);
+
+				/*
+				 * No copy constructor is allowed since this thread contains a std::mutex
+				 * which cannot be copied.
+				 * */
+
 				uint8_t getIndex();
 				uint32_t getNumberOfOwnedStates();
 				bool isIdling();
