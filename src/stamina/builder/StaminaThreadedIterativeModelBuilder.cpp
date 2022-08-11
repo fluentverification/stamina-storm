@@ -93,9 +93,9 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	// Perform a search through the model.
 	while (!this->statesToExplore.empty() && this->numberTerminal < Options::threads) {
 		auto currentProbabilityStatePair = this->statesToExplore.front();
-		this->currentProbabilityState = statesToExplore.front().first;
-		currentState = statesToExplore.front().second;
-		statesToExplore.pop_front();
+		this->currentProbabilityState = this->statesToExplore.front().first;
+		currentState = this->statesToExplore.front().second;
+		this->statesToExplore.pop_front();
 		// Get the first state in the queue.
 		currentIndex = this->currentProbabilityState->index;
 		if (currentIndex == 0) {
@@ -125,7 +125,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 				transitionMatrixBuilder.addNextValue(this->currentRow, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
-				currentProbabilityState->terminal = true;
+				this->currentProbabilityState->terminal = true;
 				this->numberTerminal++;
 				// Do NOT place this in the deque of states we should start with next iteration
 				continue;
@@ -134,12 +134,12 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < this->localKappa) {
+		if (this->currentProbabilityState->isTerminal() && this->currentProbabilityState->getPi() < this->localKappa) {
 			// Do not connect to absorbing yet
 			// Place this in statesTerminatedLastIteration
-			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
+			if ( !this->currentProbabilityState->wasPutInTerminalQueue ) {
 				this->statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
-				currentProbabilityState->wasPutInTerminalQueue = true;
+				this->currentProbabilityState->wasPutInTerminalQueue = true;
 				++this->currentRow;
 				++this->currentRowGroup;
 			}
@@ -166,7 +166,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
-		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
+		bool shouldEnqueueAll = this->currentProbabilityState->getPi() == 0.0;
 		// Now add all choices.
 		bool firstChoiceOfState = true;
 		for (auto const& choice : behavior) {
@@ -181,7 +181,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 				}
 			}
 			if (choiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
-				choiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+				choiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), this->currentRow);
 			}
 			if (choiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
 				if (firstChoiceOfState) {
@@ -214,10 +214,10 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 				auto nextProbabilityState = this->stateMap.get(sPrime);
 				if (nextProbabilityState != nullptr) {
 					if (!shouldEnqueueAll) {
-						nextProbabilityState->addToPi(currentProbabilityState->getPi() * probability);
+						nextProbabilityState->addToPi(this->currentProbabilityState->getPi() * probability);
 					}
 
-					if (currentProbabilityState->isNew) {
+					if (this->currentProbabilityState->isNew) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						this->numberTransitions++;
 					}
@@ -228,26 +228,26 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 			firstChoiceOfState = false;
 		}
 
-		currentProbabilityState->isNew = false;
+		this->currentProbabilityState->isNew = false;
 
-		if (currentProbabilityState->isTerminal() && this->numberTerminal > 0) {
+		if (this->currentProbabilityState->isTerminal() && this->numberTerminal > 0) {
 			this->numberTerminal--;
 		}
-		currentProbabilityState->setTerminal(false);
-		currentProbabilityState->setPi(0.0);
+		this->currentProbabilityState->setTerminal(false);
+		this->currentProbabilityState->setPi(0.0);
 
 		++this->currentRowGroup;
 
-		if (generator->getOptions().isShowProgressSet()) {
+		if (this->generator->getOptions().isShowProgressSet()) {
 			++this->numberOfExploredStatesSinceLastMessage;
 
 			auto now = std::chrono::high_resolution_clock::now();
 			auto durationSinceLastMessage = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfLastMessage).count();
-			if (static_cast<uint64_t>(durationSinceLastMessage) >= generator->getOptions().getShowProgressDelay()) {
-				auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
+			if (static_cast<uint64_t>(durationSinceLastMessage) >= this->generator->getOptions().getShowProgressDelay()) {
+				auto statesPerSecond = this->numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
 				auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfStart).count();
 				StaminaMessages::info(
-					"Explored " + std::to_string(numberOfExploredStatesSinceLastMessage) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
+					"Explored " + std::to_string(this->numberOfExploredStatesSinceLastMessage) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
 				);
 				timeOfLastMessage = std::chrono::high_resolution_clock::now();
 				numberOfExploredStatesSinceLastMessage = 0;
