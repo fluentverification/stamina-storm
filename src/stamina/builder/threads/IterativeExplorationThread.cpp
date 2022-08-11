@@ -77,7 +77,9 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 				// Enqueue
-				this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state));
+				/* this->mainExplorationQueue.emplace_back(
+					std::make_pair(nextProbabilityState, state)
+				); */
 				enqueued = true;
 			}
 		}
@@ -94,7 +96,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 				// Enqueue
-				this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state));
+				/* this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state)); */
 				enqueued = true;
 			}
 		}
@@ -109,7 +111,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			this->parent->getStateMap().put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 			// exploredStates.emplace(actualIndex);
-			this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state));
+			/* this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state)); */
 			enqueued = true;
 			numberTerminal++;
 		}

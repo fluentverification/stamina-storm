@@ -68,7 +68,7 @@ namespace stamina {
 				// The lock that locks our mutex
 				std::unique_lock<std::shared_mutex> xLock;
 				std::deque<std::pair<CompressedState, double>> crossExplorationQueue;
-				std::deque<std::pair<std::shared_ptr<ProbabilityState<StateType>>, CompressedState &>> mainExplorationQueue;
+				std::deque<std::pair<ProbabilityState<StateType> *, CompressedState &>> mainExplorationQueue;
 				uint32_t numberOfOwnedStates;
 				bool idling;
 				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
