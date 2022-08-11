@@ -13,6 +13,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 		, modulesFile
 		, options
 	)
+	, controlThread(this, Options::threads)
 
 {
 	// Intentionally left empty
@@ -22,10 +23,11 @@ template<typename ValueType, typename RewardModelType, typename StateType>
 StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::StaminaThreadedIterativeModelBuilder(
 	storm::prism::Program const& program
 	, storm::generator::NextStateGeneratorOptions const& generatorOptions
-) : StaminaThreadedIterativeModelBuilder(
+) : StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>(
 		program
 		, generatorOptions
 	)
+	, controlThread(this, Options::threads)
 {
 	// Intentionally left empty
 }
