@@ -281,7 +281,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		explorationThread.startThread();
 	}
 
-	auto terminalStatesVector = this->getTerminalStates();
+	auto terminalStatesVector = this->getPerimeterStates(); // TODO: should this be all T states
 	uint8_t threadIndex = 1;
 	for (auto & terminalState : terminalStatesVector) {
 		auto & explorationThread = this->explorationThreads[threadIndex];
