@@ -7,7 +7,6 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Main STAMINA executable
-project(sstamina VERSION 2.5.0 DESCRIPTION "Main STAMINA/STORM executable")
 include_directories("src")
 include_directories("src/stamina")
 
@@ -15,8 +14,7 @@ set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
 
-# Add main.cpp file of project root directory as source file
-
+# Source files for the main STAMINA CLI
 set(SOURCE_DIR src)
 set(SOURCE_FILES
 	# Main source files for the `stamina` namespace
@@ -27,6 +25,7 @@ set(SOURCE_FILES
 	src/stamina/StaminaArgParse.h
 )
 
+# STAMINA library files for linking
 set(LIB_FILES
 	# Files for `stamina::core` namespace
 	src/stamina/core/StaminaModelChecker.h
@@ -88,11 +87,6 @@ else()
 	message("STORM not found! STORM required to build STAMINA!")
 endif()
 
-# Add executable target with source files listed in SOURCE_FILES variable
-add_executable(sstamina ${SOURCE_FILES} ${LIB_FILES})
-target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
-target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
-
 # STAMINA shared-object libraries project
 project(stamina-dev VERSION 2.5.0 DESCRIPTION "Shared objects for STAMINA usage")
 include_directories("src")
@@ -104,3 +98,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_
 target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
 
 # TODO: Continue cmake for lib: https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
+
+# Add executable target with source files listed in SOURCE_FILES variable
+project(sstamina VERSION 2.5.0 DESCRIPTION "Main STAMINA/STORM executable")
+add_executable(sstamina ${SOURCE_FILES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
+target_link_libraries(${PROJECT_NAME} PUBLIC stamina-dev storm storm-parsers)
+
+
