@@ -121,6 +121,53 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 	}
 }
 
+// Lockable Deque methods
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+int
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::size() {
+	return queue.size();
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::emplace_back(
+	StateType from
+	, StateType to
+	, double rate
+) {
+
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+bool
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::empty() {
+	return queue.empty();
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::lockThread() {
+	// TODO: Implement
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::unlockThread() {
+	// TODO: Implement
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+typename ControlThread<ValueType, RewardModelType, StateType>::Transition
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::top() {
+	return queue.front();
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::pop() {
+	queue.pop_front();
+}
+
 template class ControlThread<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 
 } // namespace threads
