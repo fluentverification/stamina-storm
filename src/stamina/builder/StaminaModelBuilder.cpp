@@ -174,6 +174,19 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(
+	typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo transitionInfo
+) {
+	// Create an element for both from and to
+	while (transitionsToAdd.size() <= std::max(transitionInfo.from, transitionInfo.to)) {
+		transitionsToAdd.push_back(std::vector<TransitionInfo>());
+	}
+	transitionsToAdd[transitionInfo.from].push_back(transitionInfo);
+
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::printStateSpaceInformation() {
 	StaminaMessages::info("Finished state space truncation.\n\tExplored " + std::to_string(numberStates) + " states in total.\n\tGot " + std::to_string(numberTransitions) + " transitions.");
 }
