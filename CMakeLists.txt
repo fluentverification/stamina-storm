@@ -103,6 +103,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
 project(sstamina VERSION 2.5.0 DESCRIPTION "Main STAMINA/STORM executable")
 add_executable(sstamina ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
-target_link_libraries(${PROJECT_NAME} PUBLIC stamina-dev storm storm-parsers)
+target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers stamina-dev)
 
 
