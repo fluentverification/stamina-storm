@@ -175,16 +175,3 @@ template class ControlThread<double, storm::models::sparse::StandardRewardModel<
 } // namespace builder
 } // namespace stamina
 
-// Instantiations of STORM templated types not instantiated in STORM
-namespace storm {
-namespace storage {
-
-template class storm::storage::Murmur3BitVectorHash<uint8_t>;
-template class BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<uint8_t>>;
-
-namespace sparse {
-template class StateStorage<uint8_t>;
-
-} // namespace sparse
-} // namespace storage
-} // namespace storm
