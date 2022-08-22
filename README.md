@@ -2,9 +2,14 @@
 
 # STAMINA (STORM Integration)
 
-C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm]. This version is different from the [Java version](https://github.com/fluentverification/stamina ), and is **still under development**.
+C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm](https://github.com/moves-rwth/storm). This version is different from the [Java version](https://github.com/fluentverification/stamina ), and is under active development. STAMINA/STORM is now both usable and blazing fast, thanks to our integration with STORM as well as our own improvements over STAMINA/PRISM.
+
+**STAMINA NOW HAS A WEBSITE!**
+
+Check out our website at [https://staminachecker.org](https://staminachecker.org) or view the [website's source code](https://github.com/fluentverification/staminachecker.org) on GitHub.
 
 ## To compile:
+(Please see our [wiki page](https://staminachecker.org/documentation/wiki/install-sstamina.html) for more information)
 ### On Linux and Mac:
 ```
 git clone https://github.com/fluentverification/stamina-cplusplus
