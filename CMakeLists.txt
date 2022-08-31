@@ -88,12 +88,12 @@ else()
 endif()
 
 # STAMINA shared-object libraries project
-project(stamina-dev VERSION 2.5.0 DESCRIPTION "Shared objects for STAMINA usage")
+project(stamina VERSION 2.5.0 DESCRIPTION "Shared objects for STAMINA usage")
 include_directories("src")
 include_directories("src/stamina")
 
-add_library(stamina-dev SHARED ${LIB_FILES})
-set_target_properties(stamina-dev PROPERTIES VERSION ${PROJECT_VERSION})
+add_library(stamina SHARED ${LIB_FILES})
+set_target_properties(stamina PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
 target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
 
@@ -103,6 +103,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
 project(sstamina VERSION 2.5.0 DESCRIPTION "Main STAMINA/STORM executable")
 add_executable(sstamina ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
-target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers stamina-dev)
+target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers stamina)
 
 
