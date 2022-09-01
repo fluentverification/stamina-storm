@@ -72,7 +72,7 @@ namespace stamina {
 				ControlThread(
 					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t numberExplorationThreads
-// 					, storm::storage::sparse::StateStorage<uint8_t>& stateThreadMap // State storage owned by parents
+// 					, storm::storage::BitVectorHashMap<uint8_t>& stateThreadMap // State storage owned by parents
 				);
 				/**
 				* Requests ownership of a state for a particular thread. This is intended
@@ -150,13 +150,12 @@ namespace stamina {
 				* which is not locked or mutex'ed because there is only one worker thread to do that.
 				* */
 				virtual void mainLoop() override;
-				storm::storage::sparse::StateStorage<StateAndThreadIndex>& getStateStorage();
 				void terminate();
 			private:
 				std::vector<LockableDeque> transitionQueues;
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
-				storm::storage::sparse::StateStorage<uint8_t>& stateThreadMap;
+				storm::storage::BitVectorHashMap<uint8_t>& stateThreadMap;
 				const std::vector<ExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
 			};
 

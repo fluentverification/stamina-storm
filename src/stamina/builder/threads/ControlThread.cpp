@@ -13,7 +13,7 @@ ControlThread<ValueType, RewardModelType, StateType>::ControlThread(
 	, uint8_t numberExplorationThreads
 ) : BaseThread<ValueType, RewardModelType, StateType>(parent)
 	, numberExplorationThreads(numberExplorationThreads)
-	, stateThreadMap(*(new storm::storage::sparse::StateStorage<uint8_t>(parent->getGenerator()->getStateSize())))
+	, stateThreadMap(*(new storm::storage::BitVectorHashMap<uint8_t>(parent->getGenerator()->getStateSize())))
 {
 	// Intentionally left empty
 }
@@ -23,23 +23,23 @@ std::pair<uint8_t, StateType>
 ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId) {
 	// Test to see if a thread already owns this state.
 	// TODO: should this pre-lock even be in here?
-	if (stateThreadMap.stateToId.contains(state)) {
+	if (stateThreadMap.contains(state)) {
 		return std::make_pair(
-			stateThreadMap.stateToId.getValue(state)
+			stateThreadMap.getValue(state)
 			, this->parent->getStateStorage().stateToId.getValue(state)
 		);
 	}
 	// Lock the ownership mutex
 	std::lock_guard<std::shared_mutex> lock(ownershipMutex);
-	if (stateThreadMap.stateToId.contains(state)) {
+	if (stateThreadMap.contains(state)) {
 		return std::make_pair(
-			stateThreadMap.stateToId.getValue(state)
+			stateThreadMap.getValue(state)
 			, this->parent->getStateStorage().stateToId.getValue(state)
 		);
 	}
 	else {
 		// Claim ownership of state
-		stateThreadMap.stateToId.findOrAdd(
+		stateThreadMap.findOrAdd(
 			state
 			, threadIndex
 		);
@@ -52,8 +52,8 @@ ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(Compresse
 template <typename ValueType, typename RewardModelType, typename StateType>
 uint8_t
 ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & state) {
-	if (stateThreadMap.stateToId.contains(state)) {
-		return stateThreadMap.stateToId.getValue(state);
+	if (stateThreadMap.contains(state)) {
+		return stateThreadMap.getValue(state);
 	}
 	// Index 0 (the same index as the absorbing state) indicates that no thread owns this state.
 	return 0;
