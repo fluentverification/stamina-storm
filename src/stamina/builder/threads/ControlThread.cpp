@@ -13,7 +13,7 @@ ControlThread<ValueType, RewardModelType, StateType>::ControlThread(
 	, uint8_t numberExplorationThreads
 ) : BaseThread<ValueType, RewardModelType, StateType>(parent)
 	, numberExplorationThreads(numberExplorationThreads)
-	, stateThreadMap(*(new storm::storage::BitVectorHashMap<uint8_t>(parent->getGenerator()->getStateSize())))
+	, stateThreadMap(*(new storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>>(parent->getGenerator()->getStateSize())))
 {
 	// Intentionally left empty
 }
@@ -175,3 +175,9 @@ template class ControlThread<double, storm::models::sparse::StandardRewardModel<
 } // namespace builder
 } // namespace stamina
 
+// Explicitly instantiate templated versions of STORM classes we use
+namespace storm {
+namespace storage {
+template class BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<uint32_t>>;
+} // namespace storage
+} // namespace storm
