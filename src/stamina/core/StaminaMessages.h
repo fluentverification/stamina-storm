@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-// #define DEBUG_PRINTS
+#define DEBUG_PRINTS
 // #define DEBUG_PRINTS_VERBOSE
 
 #ifdef DEBUG_PRINTS_VERBOSE
@@ -16,7 +16,9 @@
 // Efficient debug printing method to std::cout that can be easily turned off without having to get
 // rid of all instances of StaminaMessages::debugPrint("Some message") or whatever
 #ifdef DEBUG_PRINTS
-	#define STAMINA_DEBUG_MESSAGE(x) std::cout << x << std::endl;
+	#define STAMINA_DEBUG_MESSAGE(x); std::cout << x << std::endl;
+#else
+	#define STAMINA_DEBUG_MESSAGE(x);
 #endif // DEBUG_PRINTS
 
 namespace stamina {

@@ -1,6 +1,8 @@
 #include "ExplorationThread.h"
 #include "builder/StaminaModelBuilder.h"
 
+#include "core/StaminaMessages.h"
+
 #include <mutex>
 
 namespace stamina {
@@ -65,6 +67,7 @@ ExplorationThread<ValueType, RewardModelType, StateType>::requestCrossExploratio
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ExplorationThread<ValueType, RewardModelType, StateType>::mainLoop() {
+	STAMINA_DEBUG_MESSAGE("Starting exploration thread: " << this->threadIndex);
 	idling = false;
 	while (!this->finished || this->hold) {
 		// Explore the states in the exploration queue

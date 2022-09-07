@@ -42,7 +42,7 @@ namespace stamina {
 				storm::prism::Program const& program
 				, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 			);
-						/**
+			/**
 			* Builds transition matrix of truncated state space for the given program.
 			*
 			* @param transitionMatrixBuilder The builder of the transition matrix.
@@ -60,7 +60,8 @@ namespace stamina {
 			);
 		private:
 			threads::ControlThread<ValueType, RewardModelType, StateType> controlThread;
-			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
+			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> &> explorationThreads;
+			bool controlThreadsCreated;
 		};
 		// "Custom" deleter (which actually is not custom) to allow for polymorphic shared pointers
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>

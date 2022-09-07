@@ -1,6 +1,8 @@
 #include "ControlThread.h"
 #include "builder/__storm_needed_for_builder.h"
 
+#include "core/StaminaMessages.h"
+
 #include "builder/threads/ExplorationThread.h"
 
 namespace stamina {
@@ -92,6 +94,7 @@ ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFro
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
+	STAMINA_DEBUG_MESSAGE("Starting control thread.");
 	uint8_t numberFinishedThreads;
 	while (!this->finished || this->hold) { // allow for this thread to be killed outside of its main loop
 		bool exitThisIteration = false;
@@ -116,7 +119,10 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 			}
 			q.unlockThread();
 		}
-		if (exitThisIteration) { return; }
+		if (exitThisIteration) {
+			STAMINA_DEBUG_MESSAGE("Exiting control thread main loop because all threads are finished");
+			return;
+		}
 		// TODO: de-fragmentation
 		// TODO: LRU Cache
 	}

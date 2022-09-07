@@ -1,4 +1,5 @@
 #include "BaseThread.h"
+#include "core/StaminaMessages.h"
 
 #include <thread>
 
@@ -41,13 +42,13 @@ BaseThread<ValueType, RewardModelType, StateType>::terminate() {
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-void 
+void
 BaseThread<ValueType, RewardModelType, StateType>::setHold(bool hold) {
 	this->hold = hold;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-bool 
+bool
 BaseThread<ValueType, RewardModelType, StateType>::isHolding() {
 	return hold;
 }

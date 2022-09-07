@@ -14,6 +14,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 		, options
 	)
 	, controlThread(this, Options::threads)
+	, controlThreadsCreated(false)
 
 {
 	// Intentionally left empty
@@ -28,6 +29,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 		, generatorOptions
 	)
 	, controlThread(this, Options::threads)
+	, controlThreadsCreated(false)
 {
 	// Intentionally left empty
 }
@@ -59,6 +61,24 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		, this
 		, std::placeholders::_1
 	);
+
+	// Create exploration threads
+	if (!controlThreadsCreated) {
+		uint8_t threadIndex = 1;
+		while (explorationThreads.size() < Options::threads) {
+			explorationThreads.append(threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>(
+				this // parent
+				, threadIndex // Thread index
+				, this->controlThread // Control Thread
+				, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
+				, this->getStateMap()
+				, this->getGenerator()
+				, stateToIdCallback
+			));
+			threadIndex++;
+		}
+		controlThreadsCreated = true;
+	}
 
 	if (this->firstIteration) {
 		// Create absorbing state
@@ -265,6 +285,9 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	if (this->numberTerminal < Options::threads) {
 		StaminaMessages::warning("The number of threads that will be utilized (" + std::to_string(this->numberTerminal) + ") is less than the number created! ( " + std::to_string(Options::threads) + ")");
 	}
+	else {
+		STAMINA_DEBUG_MESSAGE("All threads in use");
+	}
 
 	/*
 	 * The hold (auto set to true in thread constructor) make it so these threads don't just stop after starting.
@@ -276,6 +299,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	// Start control thread
 	this->controlThread.startThread();
 
+	STAMINA_DEBUG_MESSAGE("The size of exploration threads is " << this->explorationThreads.size());
 	// Start all of the worker threads
 	for (auto & explorationThread : this->explorationThreads) {
 		explorationThread.startThread();
