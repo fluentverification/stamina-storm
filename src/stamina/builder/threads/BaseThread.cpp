@@ -28,6 +28,16 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 BaseThread<ValueType, RewardModelType, StateType>::startThread() {
 	finished = false;
+	this->threadLoop = new std::thread(
+		&BaseThread::mainLoop
+		, this
+	);
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+BaseThread<ValueType, RewardModelType, StateType>::startThreadAndWait() {
+	finished = false;
 	std::thread me(
 		&BaseThread::mainLoop
 		, this
@@ -39,6 +49,13 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 BaseThread<ValueType, RewardModelType, StateType>::terminate() {
 	finished = true;
+	hold = false;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+BaseThread<ValueType, RewardModelType, StateType>::join() {
+	this->threadLoop->join();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

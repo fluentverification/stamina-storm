@@ -104,7 +104,7 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 				++numberFinishedThreads;
 			}
 		}
-		if (numberFinishedThreads == this->parent->getExplorationThreads().size()) {
+		if (numberFinishedThreads == this->parent->getExplorationThreads().size() && !this->hold) {
 			// We have finished.
 			exitThisIteration = true;
 		}
@@ -121,6 +121,10 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 		}
 		if (exitThisIteration) {
 			STAMINA_DEBUG_MESSAGE("Exiting control thread main loop because all threads are finished");
+			for (auto explorationThread : this->parent->getExplorationThreads()) {
+				explorationThread->terminate();
+			}
+
 			return;
 		}
 		// TODO: de-fragmentation

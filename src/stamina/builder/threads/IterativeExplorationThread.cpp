@@ -123,6 +123,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates() {
 	if (!this->crossExplorationQueue.empty() && !this->xLock.owns_lock()) {
+		STAMINA_DEBUG_MESSAGE("Exploring from the cross exploration queue");
 		std::lock_guard<decltype(this->xLock)> lockGuard(this->xLock);
 		auto stateDeltaPiPair = this->crossExplorationQueue.front();
 		this->crossExplorationQueue.pop_front();
@@ -141,6 +142,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
 		exploreState(stateProbability);
 	}
 	else if (!this->mainExplorationQueue.empty()) {
+		STAMINA_DEBUG_MESSAGE("Exploring from main exploration queue");
 		// If we are dequeuing from the main exploration queue, then
 		// the state we are enqueuing doesn't have a delta pi
 		auto s = this->mainExplorationQueue.front();
@@ -152,6 +154,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
 		exploreState(stateProbability);
 	}
 	else {
+		// STAMINA_DEBUG_MESSAGE("Thread " << this->threadIndex << " is idling...");
 		this->idling = true;
 	}
 }

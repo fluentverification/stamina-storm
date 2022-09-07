@@ -46,6 +46,7 @@ namespace stamina {
 				* Creates and starts this thread in the background
 				* */
 				void startThread();
+				void startThreadAndWait();
 				/**
 				* Gets the pointer to the model builder owning this thread
 				*

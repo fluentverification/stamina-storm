@@ -327,6 +327,10 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 	this->controlThread.setHold(false);
 
+	this->controlThread.join();
+	for (auto explorationThread : this->explorationThreads) {
+		explorationThread->join();
+	}
 }
 
 template class StaminaThreadedIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
