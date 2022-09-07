@@ -67,7 +67,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		uint8_t threadIndex = 1;
 		while (explorationThreads.size() < Options::threads) {
 			explorationThreads.push_back(
-				std::ref(threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>(
+				new threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>(
 					this // parent
 					, threadIndex // Thread index
 					, this->controlThread // Control Thread
@@ -75,7 +75,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 					, & this->getStateMap()
 					, this->getGenerator()
 					, stateToIdCallback
-				))
+				)
 			);
 			threadIndex++;
 		}
@@ -304,7 +304,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	STAMINA_DEBUG_MESSAGE("The size of exploration threads is " << this->explorationThreads.size());
 	// Start all of the worker threads
 	for (auto & explorationThread : this->explorationThreads) {
-		explorationThread.startThread();
+		explorationThread->startThread();
 	}
 
 	auto terminalStatesVector = this->getPerimeterStates(); // TODO: should this be all T states
@@ -322,7 +322,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 	// Remove the hold on all of the worker threads
 	for (auto & explorationThread : this->explorationThreads) {
-		explorationThread.setHold(false);
+		explorationThread->setHold(false);
 	}
 
 	this->controlThread.setHold(false);

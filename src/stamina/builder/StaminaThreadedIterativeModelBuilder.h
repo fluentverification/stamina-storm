@@ -60,7 +60,7 @@ namespace stamina {
 			);
 		private:
 			threads::ControlThread<ValueType, RewardModelType, StateType> controlThread;
-			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> &> explorationThreads;
+			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;
 			bool controlThreadsCreated;
 		};
 		// "Custom" deleter (which actually is not custom) to allow for polymorphic shared pointers
