@@ -124,8 +124,9 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 			for (auto explorationThread : this->parent->getExplorationThreads()) {
 				explorationThread->terminate();
 			}
-
-			return;
+			this->finished = true;
+			this->hold = false;
+			// this->terminate();
 		}
 		// TODO: de-fragmentation
 		// TODO: LRU Cache

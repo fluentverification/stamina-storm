@@ -1,5 +1,8 @@
 #include "StaminaThreadedIterativeModelBuilder.h"
 
+#include "core/StaminaMessages.h"
+
+
 namespace stamina {
 namespace builder {
 
@@ -328,8 +331,10 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	this->controlThread.setHold(false);
 
 	this->controlThread.join();
+	STAMINA_DEBUG_MESSAGE("Control thread finished");
 	for (auto explorationThread : this->explorationThreads) {
 		explorationThread->join();
+		STAMINA_DEBUG_MESSAGE("Exploration thread finished");
 	}
 }
 
