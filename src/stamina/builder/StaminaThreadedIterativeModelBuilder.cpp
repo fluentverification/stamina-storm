@@ -66,15 +66,17 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	if (!controlThreadsCreated) {
 		uint8_t threadIndex = 1;
 		while (explorationThreads.size() < Options::threads) {
-			explorationThreads.append(threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>(
-				this // parent
-				, threadIndex // Thread index
-				, this->controlThread // Control Thread
-				, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
-				, this->getStateMap()
-				, this->getGenerator()
-				, stateToIdCallback
-			));
+			explorationThreads.push_back(
+				std::ref(threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>(
+					this // parent
+					, threadIndex // Thread index
+					, this->controlThread // Control Thread
+					, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
+					, & this->getStateMap()
+					, this->getGenerator()
+					, stateToIdCallback
+				))
+			);
 			threadIndex++;
 		}
 		controlThreadsCreated = true;
