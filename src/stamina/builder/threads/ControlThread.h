@@ -12,19 +12,56 @@
 
 #include "BaseThread.h"
 
+#include "stamina/builder/StateAndTransitions.h"
+
+#include "stamina/builder/StaminaModelBuilder.h"
+#include "stamina/builder/StateAndTransitions.h"
+
 #include "storm/storage/BitVectorHashMap.h"
+
+#include <deque>
 
 namespace stamina {
 	namespace builder {
 		namespace threads {
 
-			template <typename StateType, typename ValueType>
-			class ControlThread<StateType> : public BaseThread<ValueType, StateType> {
+			// Forward-declare the exploration thread
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ExplorationThread;
+
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ControlThread : public BaseThread<ValueType, RewardModelType, StateType> {
 			public:
-				struct StateAndThreadIndex {
-					StateType state; // State Index
-					uint8_t thread; // Thread index
+
+				typedef StateAndProbability<StateType> StateProbability;
+				typedef StaminaTransitionInfo<StateType> Transition;
+				typedef StaminaStateAndThreadIndex<StateType> StateAndThreadIndex;
+
+				class LockableDeque {
+				public:
+					LockableDeque() {
+						// Intentionally left empty
+					}
+
+					LockableDeque(const LockableDeque & other) {
+						queue = other.queue;
+						// We don't need to copy the lock, just the queue
+					}
+					int size();
+					/**
+					 * Locks the queue and emplaces
+					 * */
+					void emplace_back(StateType from, StateType to, double rate);
+					bool empty();
+					void lockThread();
+					void unlockThread();
+					Transition top();
+					void pop();
+				private:
+					std::deque<Transition> queue;
+					mutable std::shared_mutex lock;
 				};
+
 				/**
 				* Constructor for ControlThread. Primarily just calls super class constructor
 				*
@@ -33,8 +70,9 @@ namespace stamina {
 				* be using this worker thread.
 				* */
 				ControlThread(
-					StaminaModelBuilder<ValueType, StateType=StateType> * parent
+					StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent
 					, uint8_t numberExplorationThreads
+// 					, storm::storage::BitVectorHashMap<uint8_t>& stateThreadMap // State storage owned by parents
 				);
 				/**
 				* Requests ownership of a state for a particular thread. This is intended
@@ -49,9 +87,10 @@ namespace stamina {
 				*
 				* @param state The state to request ownership for
 				* @param threadIndex The thread who wants ownership of the state.
-				* @return The thread who owns the state
+				* @param requestedId The (new) stateId that a thread can request we assign a state to
+				* @return The thread who owns the state and the new state index
 				* */
-				uint8_t requestOwnership(CompressedState & state, uint8_t threadIndex);
+				std::pair<uint8_t, StateType> requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId = 0);
 				/**
 				* Gets the owning thread of a particular state without locking the mutex.
 				* This allows for threads to use the many-read, one-write idea put forth
@@ -61,6 +100,14 @@ namespace stamina {
 				* @return The thread who owns `state`
 				* */
 				uint8_t whoOwns(CompressedState & state);
+				/**
+				 * Gets the index of a state which already exists. If the state does not
+				 * exist, returns 0.
+				 *
+				 * @param state The state to look up
+				 * @return The state index
+				 * */
+				StateType whatIsIndex(CompressedState & state);
 				/**
 				* Requests a transition to be inserted (not necessarily in order).
 				* These transitions are requested by the exploration threads and
@@ -82,6 +129,19 @@ namespace stamina {
 					, double rate
 				);
 				/**
+				 * Requests cross exploration from a
+				 *
+				 * @param stateAndProbability A datastructure containing:
+				 *     state The state to cross explore
+				 *     deltaPi The difference in probability to add
+				 *     stateIndex The state index we found
+				 * @param threadIndex Thread index to request cross exploration from
+				 * */
+				void requestCrossExplorationFromThread(
+					StateProbability stateAndProbability
+					, double threadIndex
+				);
+				/**
 				* This thread lives for the duration of all exploration threads. It waits for
 				* the exploration threads to all emit a "finished" signal, and then tells each
 				* exploration thread to die.
@@ -90,12 +150,13 @@ namespace stamina {
 				* which is not locked or mutex'ed because there is only one worker thread to do that.
 				* */
 				virtual void mainLoop() override;
-				// TODO: Lockable queue
-				storm::storage::sparse::StateStorage<StateAndThreadIndex>& getStateStorage();
+				void terminate();
 			private:
+				std::vector<LockableDeque> transitionQueues;
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
-				storm::storage::sparse::StateStorage<StateAndThreadIndex>& stateStorage;
+				storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>>& stateThreadMap;
+				const std::vector<ExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
 			};
 
 		} // namespace threads

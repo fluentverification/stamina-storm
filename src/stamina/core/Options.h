@@ -1,5 +1,5 @@
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#ifndef STAMINA_CORE_OPTIONS_H
+#define STAMINA_CORE_OPTIONS_H
 
 #include <iostream>
 #include <string>
@@ -18,7 +18,6 @@ namespace stamina {
 			/**
 			* Checks validity of options
 			*
-			* @param errFunc
 			* @return Whether all options are good
 			* */
 			static bool checkOptions();
@@ -47,6 +46,7 @@ namespace stamina {
 			inline static uint64_t max_iterations;
 			inline static uint64_t max_states;
 			inline static uint8_t method;
+			inline static uint8_t threads;
 		};
 		/**
 		* Tells us if a string ends with another
@@ -57,4 +57,4 @@ namespace stamina {
 		bool endsWith(std::string full, std::string end);
 	} // namespace core
 } // namespace stamina
-#endif // OPTIONS_H
+#endif // STAMINA_CORE_OPTIONS_H

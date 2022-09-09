@@ -1,9 +1,10 @@
-#ifndef STAMINA_MODEL_CHECKER_H
-#define STAMINA_MODEL_CHECKER_H
+#ifndef STAMINA_CORE_STAMINAMODELCHECKER_H
+#define STAMINA_CORE_STAMINAMODELCHECKER_H
 
 #include "Options.h"
 #include "builder/StaminaModelBuilder.h"
 #include "builder/StaminaIterativeModelBuilder.h"
+#include "builder/StaminaThreadedIterativeModelBuilder.h"
 // #include "builder/StaminaPriorityModelBuilder.h"
 #include "builder/StaminaReExploringModelBuilder.h"
 
@@ -63,9 +64,11 @@ namespace stamina {
 				/**
 				* Constructor. Defaults to 0.0 / ""
 				* */
-				Result() {
-					result = 0.0;
-					explanation = "";
+				Result()
+					: result(0.0)
+					, explanation("")
+				{
+					// Intentionally left empty
 				}
 				/**
 				* Gets string representation
@@ -100,7 +103,7 @@ namespace stamina {
 			/**
 			* Prints all of the transition actions to a file.
 			* */
-			void printTransitionActions(std::string filename);
+			void printTransitionActions(std::string const & filename);
 			/**
 			* Writes the min and max results to a file
 			*
@@ -124,4 +127,4 @@ namespace stamina {
 	} // namespace core
 } // namespace stamina
 
-#endif // STAMINA_MODEL_CHECKER_H
+#endif // STAMINA_CORE_STAMINAMODELCHECKER_H

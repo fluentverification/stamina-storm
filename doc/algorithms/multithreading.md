@@ -23,6 +23,7 @@ OBJECT ExplorationThread
 				// Weak priority on cross exploration
 				IF NOT X.empty() AND NOT X.locked() THEN
 					s := dequeue(X)
+					Add to s reachability probability
 					explore(s)
 				ELSE IF NOT S.empty() THEN
 					s := dequeue(S)
@@ -145,3 +146,8 @@ OBJECT ModelBuilder
 	END METHODS
 END OBJECT
 ```
+
+
+## METHODS TODO TO IMPLEMENT
+
++ `StaminaModelBuilder::getStateMap`

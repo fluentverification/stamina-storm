@@ -45,7 +45,7 @@ int main (int argc, char *argv[])
 	parser.process(app);
 	aboutData.processCommandLine(&parser);
 
-	stamina::gui::MainWindow* window = new stamina::gui::MainWindow();
+	stamina::gui::MainWindow * window = new stamina::gui::MainWindow();
 	window->show();
 
 	return app.exec();

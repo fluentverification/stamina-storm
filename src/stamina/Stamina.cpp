@@ -103,7 +103,7 @@ Stamina::initialize() {
 
 /* ===== IMPLEMENTATION FOR OTHER CLASSES IN THE `stamina` NAMESPACE ===== */
 
-bool stamina::endsWith(std::string full, std::string end) {
+bool stamina::core::endsWith(std::string full, std::string end) {
 	int i = end.size();
 	int j = full.size();
 	if (i > j) {

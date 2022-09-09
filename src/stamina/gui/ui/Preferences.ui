@@ -26,7 +26,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -379,6 +379,20 @@
         <widget class="QCheckBox" name="checkBox_3">
          <property name="text">
           <string>Export Perimeter States</string>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="1">
+        <widget class="QSpinBox" name="numberThreads">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Number of threads to use</string>
          </property>
         </widget>
        </item>

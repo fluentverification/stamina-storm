@@ -1,8 +1,11 @@
 #ifndef STAMINA_BUILDER_PROBABILITYSTATE_H
 #define STAMINA_BUILDER_PROBABILITYSTATE_H
 
+#include "__storm_needed_for_builder.h"
+
 namespace stamina {
 	namespace builder {
+		using namespace storm::builder;
 		/* Class for states with probabilities */
 		template <typename StateType>
 		class ProbabilityState {

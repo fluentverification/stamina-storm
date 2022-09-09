@@ -1,12 +1,12 @@
-#ifndef STAMINA_MESSAGES_H
-#define STAMINA_MESSAGES_H
+#ifndef STAMINA_CORE_STAMINAMESSAGES_H
+#define STAMINA_CORE_STAMINAMESSAGES_H
 
 #include <string>
 #include <stdint.h>
 #include <fstream>
 #include <iostream>
 
-// #define DEBUG_PRINTS
+#define DEBUG_PRINTS
 // #define DEBUG_PRINTS_VERBOSE
 
 #ifdef DEBUG_PRINTS_VERBOSE
@@ -16,7 +16,9 @@
 // Efficient debug printing method to std::cout that can be easily turned off without having to get
 // rid of all instances of StaminaMessages::debugPrint("Some message") or whatever
 #ifdef DEBUG_PRINTS
-	#define STAMINA_DEBUG_MESSAGE(x) std::cout << x << std::endl;
+	#define STAMINA_DEBUG_MESSAGE(x); std::cout << x << std::endl;
+#else
+	#define STAMINA_DEBUG_MESSAGE(x);
 #endif // DEBUG_PRINTS
 
 namespace stamina {
@@ -65,10 +67,10 @@ namespace stamina {
 	#endif
 			static void writeResults(ResultInformation resultInformation, std::ostream out);
 		protected:
-			static constexpr char * horizontalSeparator =
-				"========================================================================================";
+			static const std::string horizontalSeparator;
 		};
 	} // namespace core
+	typedef core::StaminaMessages StaminaMessages; // Allow users to use messages without the `core` namespace
 } // namespace stamina
 
 /* Logging and debugging messages */
@@ -77,4 +79,4 @@ namespace stamina {
 #else
 
 #endif // DEBUG_PRINTS
-#endif // STAMINA_MESSAGES_H
+#endif // STAMINA_CORE_STAMINAMESSAGES_H

@@ -1,5 +1,5 @@
-#ifndef STAMINA_RE_EXPLORING_MODEL_BUILDER_H
-#define STAMINA_RE_EXPLORING_MODEL_BUILDER_H
+#ifndef STAMINA_BUILDER_REEXPLORINGMODELBUILDER_H
+#define STAMINA_BUILDER_REEXPLORINGMODELBUILDER_H
 
 /**
  * The model builder class which implements the STAMINA 2.0 algorithm (no dynamic programming)
@@ -16,7 +16,7 @@ namespace stamina {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaReExploringModelBuilder : public StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
-			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
+// 			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
 			/**
 			* Constructs a StaminaReExploringModelBuilder with a given storm::generator::PrismNextStateGenerator. Invokes super's constructor
 			*
@@ -67,18 +67,18 @@ namespace stamina {
 			* @return The components of the truncated model
 			* */
 			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() override;
+		private:
 			/*
 			 * Access to data members of parent class
 			 * */
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyExpression;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::expressionManager;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyFormula;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::generator;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::memoryPool;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::statesToExplore;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateRemapping;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateMap;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			// Options for next state generators
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::options;
 			// The model builder must have access to this to create a fresh next state generator each iteration
@@ -98,7 +98,6 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
-		private:
 			/**
 			 * Connects all states which are terminal
 			 * */
@@ -106,7 +105,7 @@ namespace stamina {
 			// Dynamic programming improvement: we keep an ordered set of the states terminated
 			// during the previous iteration (in an order that prevents needing to use a remapping
 			// vector for state indecies.
-			std::deque<std::pair<ProbabilityState *, CompressedState>> statesTerminatedLastIteration;
+			std::deque<std::pair<ProbabilityState<StateType> *, CompressedState>> statesTerminatedLastIteration;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 		};
@@ -115,4 +114,4 @@ namespace stamina {
 		void __delete_stamina_iterative_model_builder(StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType> * t) { delete t; }
 	}
 }
-#endif // STAMINA_RE_EXPLORING_MODEL_BUILDER_H
+#endif // STAMINA_BUILDER_REEXPLORINGMODELBUILDER_H

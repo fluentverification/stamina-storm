@@ -3,8 +3,8 @@
 *
 * Created on 8/17/2021 by Josh Jeppson
 * */
-#ifndef STAMINA_ARG_PARSE_H
-#define STAMINA_ARG_PARSE_H
+#ifndef STAMINA_STAMINAARGPARSE_H
+#define STAMINA_STAMINAARGPARSE_H
 
 #include <iostream>
 #include <fstream>
@@ -67,6 +67,8 @@ static struct argp_option options[] = {
 		"Use the STAMINA 3.0 method (priority)"}
 	, {"reExploring", 'J', 0, 0,
 		"Use the STAMINA 2.0 method (the method in STAMINA/PRISM)"}
+	, {"threads", 'j', "int", 0,
+		"Number of threads to use for state exploration (default 1)"}
 	, { 0 }
 };
 
@@ -93,6 +95,7 @@ struct arguments {
 	uint64_t max_iterations;
 	uint64_t max_states;
 	uint8_t method;
+	uint8_t threads;
 };
 
 /**
@@ -175,6 +178,9 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 		case 'J':
 			arguments->method = STAMINA_METHODS::RE_EXPLORING_METHOD;
 			break;
+		case 'j':
+			arguments->threads = (uint8_t) atoi(arg);
+			break;
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file
@@ -210,4 +216,4 @@ static struct argp argp = {options, parse_opt, args_doc, doc};
 
 void set_default_values(struct arguments * arguments);
 
-#endif // STAMINA_ARG_PARSE_H
+#endif // STAMINA_STAMINAARGPARSE_H

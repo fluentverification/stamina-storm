@@ -1,16 +1,16 @@
-#ifndef STAMINA
-#define STAMINA
+#ifndef STAMINA_STAMINA
+#define STAMINA_STAMINA
 
 #include <iostream>
 #include <ostream>
 #include <functional>
 
-#include "core/StaminaArgParse.h"
+#include "StaminaArgParse.h"
 #include "core/StaminaModelChecker.h"
-#include "Options.h"
+#include "core/Options.h"
 
 #define VERSION_MAJOR 2
-#define VERSION_MINOR 2.1
+#define VERSION_MINOR 2.5
 
 #include <storm/api/storm.h>
 #include <storm-parsers/api/storm-parsers.h>
@@ -54,4 +54,4 @@ namespace stamina {
     };
 }
 
-#endif // STAMINA
+#endif // STAMINA_STAMINA

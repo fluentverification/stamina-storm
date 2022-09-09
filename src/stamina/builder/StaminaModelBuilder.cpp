@@ -4,8 +4,11 @@
 * Created by Josh Jeppson on 8/17/2021
 * */
 #include "StaminaModelBuilder.h"
-#include "../StaminaMessages.h"
-#include "../StateSpaceInformation.h"
+#include "core/StaminaMessages.h"
+#include "core/StateSpaceInformation.h"
+
+#include "builder/threads/ControlThread.h"
+#include "builder/threads/ExplorationThread.h"
 
 #include <functional>
 #include <sstream>
@@ -19,16 +22,17 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, storm::prism::Program const& modulesFile
 	, storm::generator::NextStateGeneratorOptions const & options
 ) : generator(generator)
-	, stateStorage(*(new storm::storage::sparse::StateStorage<StateType>(generator->getStateSize())))
+	, stateStorage(*(new storm::storage::sparse::StateStorage<
+		StateType
+		>(generator->getStateSize())))
 	, absorbingWasSetUp(false)
 	, fresh(true)
 	, firstIteration(true)
-	, localKappa(Options::kappa)
+	, localKappa(core::Options::kappa)
 	, numberTerminal(0)
 	, iteration(0)
 	, propertyExpression(nullptr)
 	, formulaMatchesExpression(true)
-	, stateRemapping(std::vector<uint_fast64_t>())
 	, modulesFile(modulesFile)
 	, options(options)
 	, terminalStateToIdCallback(
@@ -38,7 +42,15 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 			, std::placeholders::_1
 		)
 	)
+	, currentProbabilityState(nullptr)
+	, isInit(true)
+	, isCtmc(true)
+	, numberStates(0)
+	, numberTransitions(0)
+	, currentRow(0)
+	, currentRowGroup(0)
 {
+	// Intentionally left empty
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -93,8 +105,16 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates()
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+double
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getLocalKappa() {
+	return localKappa;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(
+	CompressedState const& state
+) {
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
@@ -107,7 +127,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(C
 
 	auto nextState = stateMap.get(actualIndex);
 
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	stateStorage.stateToId.findOrAdd(
+		state
+		, actualIndex
+	);
 
 	return actualIndex;
 }
@@ -141,7 +164,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
-	TransitionInfo tInfo(to, probability);
+	TransitionInfo tInfo(from, to, probability);
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(from, to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
@@ -149,61 +172,17 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	transitionsToAdd[from].push_back(tInfo);
 }
 
-
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-StaminaModelBuilder<ValueType, RewardModelType, StateType>::remapStates(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder) {
-
-	// State Remapping
-	std::vector<uint_fast64_t> const& remapping = stateRemapping.get();
-
-	if (remapping.size() < numberStates) {
-		StaminaMessages::warning(
-			std::string("Remapping vector and number of explored states do not match sizes!")
-			+ "\n\tVector Size: " + std::to_string(remapping.size())
-			+ "\n\tNumber of states: " + std::to_string(numberStates)
-		);
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(
+	typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo transitionInfo
+) {
+	// Create an element for both from and to
+	while (transitionsToAdd.size() <= std::max(transitionInfo.from, transitionInfo.to)) {
+		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
-	else {
-		StaminaMessages::info(
-			std::string("Remapping vector and number of explored states match.")
-			+ "\n\tVector Size: " + std::to_string(remapping.size())
-			+ "\n\tNumber of states: " + std::to_string(numberStates)
-		);
-	}
+	transitionsToAdd[transitionInfo.from].push_back(transitionInfo);
 
-	// According to the STORM Folks, this is what needs to be done
-	// in order to use the state remapping:
-
-	// Fix the transition matrix with the new entries
-	transitionMatrixBuilder.replaceColumns(remapping, 0);
-
-    // Fix the initial state indecies
-    // (not sure if we need to do this since our initial state indecies are fine)
-	std::vector<StateType> newInitialStateIndices(this->stateStorage.initialStateIndices.size());
-	std::transform(
-		this->stateStorage.initialStateIndices.begin()
-		, this->stateStorage.initialStateIndices.end()
-		, newInitialStateIndices.begin()
-		, [&remapping](StateType const& state) {
-			return remapping[state];
-		}
-	);
-	std::sort(newInitialStateIndices.begin(), newInitialStateIndices.end());
-	this->stateStorage.initialStateIndices = std::move(newInitialStateIndices);
-
-	// Remap stateStorage.stateToId
-	this->stateStorage.stateToId.remap(
-		[&remapping](StateType const& state) {
-			return remapping[state];
-		}
-	);
-
-	this->generator->remapStateIds(
-		[&remapping](StateType const& state) {
-			return remapping[state];
-		}
-	);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -225,7 +204,7 @@ double
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::accumulateProbabilities() {
 	double totalProbability = numberTerminal * localKappa;
 	// Reduce kappa
-	localKappa /= Options::reduce_kappa;
+	localKappa /= core::Options::reduce_kappa;
 	return totalProbability;
 }
 
@@ -242,7 +221,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		return;
 	}
 	if (firstIteration) {
-		stateRemapping.get().push_back(storm::utility::zero<StateType>());
 		this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
 		bool gotVar = false;
 		for (auto variable : generator->getVariableInformation().booleanVariables) {
@@ -261,7 +239,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 		stateStorage.deadlockStateIndices.push_back(0);
 		// Check if state is already registered
-		std::pair<StateType, std::size_t> actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
+		auto actualIndexPair = stateStorage.stateToId.findOrAddAndGetBucket(absorbingState, 0);
 
 		StateType actualIndex = actualIndexPair.first;
 		if (actualIndex != 0) {
@@ -302,7 +280,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setGenerator(
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::setLocalKappaToGlobal() {
-	Options::kappa = localKappa;
+	core::Options::kappa = localKappa;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+uint8_t
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getIteration() {
+	return iteration;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -364,7 +348,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 	if (formulaMatchesExpression) {
 		return;
 	}
-	// If we are called here, we assume that Options::no_prop_refine is false
+	// If we are called here, we assume that core::Options::no_prop_refine is false
 	std::shared_ptr<storm::expressions::Expression> pExpression(
 		// Invoke copy constructor
 		new storm::expressions::Expression(
@@ -377,6 +361,35 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 	formulaMatchesExpression = true;
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+storm::storage::sparse::StateStorage<StateType> &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() const {
+	return this->stateStorage;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
+	return explorationThreads;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+util::StateMemoryPool<ProbabilityState<StateType>> &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getMemoryPool() {
+	return memoryPool;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>>
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getGenerator() {
+	return generator;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+util::StateIndexArray<StateType, ProbabilityState<StateType>> &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateMap() {
+	return this->stateMap;
+}
 
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

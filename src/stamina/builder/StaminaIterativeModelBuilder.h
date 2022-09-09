@@ -1,5 +1,5 @@
-#ifndef STAMINA_ITERATIVE_MODEL_BUILDER_H
-#define STAMINA_ITERATIVE_MODEL_BUILDER_H
+#ifndef STAMINA_BUILDER_ITERATIVEMODELBUILDER_H
+#define STAMINA_BUILDER_ITERATIVEMODELBUILDER_H
 
 /**
  * The model builder class which implements the STAMINA 2.5 algorithm (STAMINA 2.0/2.1 with dynamic programming)
@@ -14,7 +14,6 @@ namespace stamina {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaIterativeModelBuilder : public StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
-			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
 			/**
 			* Constructs a StaminaIterativeModelBuilder with a given storm::generator::PrismNextStateGenerator. Invokes super's constructor
 			*
@@ -44,13 +43,13 @@ namespace stamina {
 			* @param markovianChoices is set to a bit vector storing whether a choice is Markovian (is only set if the model type requires this information).
 			* @param stateValuationsBuilder if not boost::none, we insert valuations for the corresponding states
 			* */
-			void buildMatrices(
+			virtual void buildMatrices(
 				storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 				, std::vector<RewardModelBuilder<typename RewardModelType::ValueType>>& rewardModelBuilders
 				, StateAndChoiceInformationBuilder& choiceInformationBuilder
 				, boost::optional<storm::storage::BitVector>& markovianChoices
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
-			) override;
+			);
 			/**
 			* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 			* and state space truncation from that state.
@@ -58,25 +57,25 @@ namespace stamina {
 			* @param state Pointer to the state we are looking it
 			* @return A pair with the state id and whether or not it was already discovered
 			* */
-			StateType getOrAddStateIndex(CompressedState const& state) override;
+			virtual StateType getOrAddStateIndex(CompressedState const& state) override;
 			/**
 			* Explores state space and truncates the model
 			*
 			* @return The components of the truncated model
 			* */
 			storm::storage::sparse::ModelComponents<ValueType, RewardModelType> buildModelComponents() override;
+		protected:
 			/*
 			 * Access to data members of parent class
 			 * */
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyExpression;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::expressionManager;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyFormula;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::generator;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::memoryPool;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::statesToExplore;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateRemapping;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateMap;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			// Options for next state generators
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::options;
 			// The model builder must have access to this to create a fresh next state generator each iteration
@@ -96,7 +95,6 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
-		private:
 			/**
 			 * Flushes the states terminated into statesToExplore
 			 * */
@@ -108,7 +106,7 @@ namespace stamina {
 			// Dynamic programming improvement: we keep an ordered set of the states terminated
 			// during the previous iteration (in an order that prevents needing to use a remapping
 			// vector for state indecies.
-			std::deque<std::pair<ProbabilityState *, CompressedState>> statesTerminatedLastIteration;
+			std::deque<std::pair<ProbabilityState<StateType> *, CompressedState>> statesTerminatedLastIteration;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 		};
@@ -117,4 +115,4 @@ namespace stamina {
 		void __delete_stamina_iterative_model_builder(StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType> * t) { delete t; }
 	}
 }
-#endif // STAMINA_ITERATIVE_MODEL_BUILDER_H
+#endif // STAMINA_BUILDER_ITERATIVEMODELBUILDER_H

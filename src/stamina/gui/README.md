@@ -16,3 +16,15 @@ make -j$(nproc --all)
 - Qt (version 5+)
 	+ `uic`: The Qt UI compiler
 - KF5 (KDE Frameworks 5)
+
+### Packages by Distro
+
+**Debian and Ubuntu**:
+```
+sudo apt install build-essential extra-cmake-modules qt5-default
+```
+
+**Arch Linux/Manjaro/EndeavorOS/etc.**
+```
+sudo pacman -S base-devel qt5 kf5
+```

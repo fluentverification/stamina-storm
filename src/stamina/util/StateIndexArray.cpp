@@ -1,6 +1,6 @@
 #include "StateIndexArray.h"
 
-#include "../builder/StaminaModelBuilder.h"
+#include "builder/StaminaModelBuilder.h"
 
 namespace stamina {
 	namespace util {
@@ -37,7 +37,6 @@ namespace stamina {
 			this->clear();
 			uint32_t actualNumToReserve = sizeToActualSize(numToReserve);
 			uint16_t arrayIndex = actualNumToReserve / blockSize;
-			uint32_t subArrayIndex = actualNumToReserve % blockSize;
 			for (int i = 0; i < arrayIndex; i++) {
 				std::shared_ptr<ProbabilityStateType *> subArray(
 					new ProbabilityStateType *[blockSize]
@@ -114,7 +113,7 @@ namespace stamina {
 		// Forward-declare
 		template class StateIndexArray<
 			uint32_t
-			, builder::StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>::ProbabilityState
+			, builder::ProbabilityState<uint32_t>
 		>;
 	}
 }

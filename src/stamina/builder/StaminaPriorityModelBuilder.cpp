@@ -1,5 +1,5 @@
 #include "StaminaPriorityModelBuilder.h"
-#include "../StateSpaceInformation.h"
+#include "core/StateSpaceInformation.h"
 
 #include <functional>
 #include <sstream>
@@ -56,7 +56,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 	if (isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
-			ProbabilityState * initProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState(
 				actualIndex
 				, 1.0
@@ -64,14 +64,11 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statePriorityQueue.push(initProbabilityState);
+			statePriorityQueue.push({initProbabilityState, state});
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
 			StaminaMessages::errorAndExit("Initial state should not exist yet, but does!");
-		}
-		if (actualIndex == newIndex) {
-			stateRemapping.get().push_back(storm::utility::zero<StateType>());
 		}
 		return actualIndex;
 	}
@@ -83,11 +80,11 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push(nextProbabilityState);
+				statePriorityQueue.push({nextProbabilityState, state});
 				enqueued = true;
 			}
 		}
@@ -99,18 +96,18 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 	else {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
-			ProbabilityState * nextProbabilityState = nextState;
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push(nextProbabilityState);
+				statePriorityQueue.push({nextProbabilityState, state});
 				enqueued = true;
 			}
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState * nextProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
 				actualIndex
 				, 0.0
@@ -119,7 +116,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			statePriorityQueue.push(nextProbabilityState);
+			statePriorityQueue.push({nextProbabilityState, state});
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -157,10 +154,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 	stateAndChoiceInformationBuilder.setBuildStateValuations(generator->getOptions().isBuildStateValuationsSet());
 
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
-
-	// Allocator and deleters
-	std::allocator<storm::storage::SparseMatrixBuilder<ValueType>> alloc;
-	std::default_delete<storm::storage::SparseMatrixBuilder<ValueType>> del;
 
 	// Component builders
 	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(
@@ -277,12 +270,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 	// Perform a search through the model.
 	do {
-		currentProbabilityState = statesToExplore.top().first;
-		currentState = statesToExplore.top().second;
+		currentProbabilityState = statePriorityQueue.top().first;
+		currentState = statePriorityQueue.top().second;
 		statePriorityQueue.pop();
-		// Get the first state in the queue.
-		currentIndex = currentProbabilityState->index;
-		currentState = currentProbabilityState->state();
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
@@ -451,12 +441,13 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 	for (auto terminalStateIndex : terminalStates) {
 		auto terminalState = stateMap.get(terminalStateIndex);
 		// connect to absorbing
-		this->connectTerminalStatesToAbsorbing(
-			transitionMatrixBuilder
-			, terminalState->state()
-			, terminalState->index
-			, this->terminalStateToIdCallback
-		);
+		// TODO: figure out how to do this for Priority Model Builder
+// 		this->connectTerminalStatesToAbsorbing(
+// 			transitionMatrixBuilder
+// 			, terminalState->state()
+// 			, terminalState->index
+// 			, this->terminalStateToIdCallback
+// 		);
 	}
 }
 

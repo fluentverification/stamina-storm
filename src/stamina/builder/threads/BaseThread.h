@@ -10,18 +10,25 @@
 #include <thread>
 #include <shared_mutex>
 
+#include "stamina/builder/__storm_needed_for_builder.h"
+
 namespace stamina {
 	namespace builder {
 		// Forward-declare StaminaModelBuilder class
-		template<typename ValueType, typename RewardModelType, typename StateType>
+		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaModelBuilder;
 
 		namespace threads {
+			using namespace storm::builder;
+
+			// The thread index of no exploration thread
+			const uint8_t NO_THREAD = 0;
+
 			/**
 			* Base class for all threads. Automatically constructs a thread which runs
 			* the mainLoop function.
 			* */
-			template <typename StateType, typename ValueType>
+			template <typename ValueType, typename RewardModelType, typename StateType>
 			class BaseThread {
 			public:
 				/**
@@ -29,7 +36,7 @@ namespace stamina {
 				*
 				* @param parent The model builder who owns this thread
 				* */
-				BaseThread(StaminaModelBuilder<ValueType, StateType=StateType> * parent);
+				BaseThread(StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent);
 				/**
 				* Pure virtual function for the main loop. When this function returns,
 				* the thread dies.
@@ -39,20 +46,35 @@ namespace stamina {
 				* Creates and starts this thread in the background
 				* */
 				void startThread();
+				void startThreadAndWait();
 				/**
 				* Gets the pointer to the model builder owning this thread
 				*
 				* @return This thread's parent
 				* */
-				const StaminaModelBuilder<ValueType, StateType=StateType> * getParent();
+				const StaminaModelBuilder<ValueType, RewardModelType, StateType> * getParent();
 				/**
 				 * Joins the
 				 * */
 				void join();
+				void terminate();
+				void setHold(bool hold);
+				bool isHolding();
+			protected:
+				bool finished;
+				bool hold; // Should we continue idling even if finished?
+				StaminaModelBuilder<ValueType, RewardModelType, StateType> * parent;
 			private:
-				const StaminaModelBuilder<ValueType, StateType=StateType> * parent;
 				std::thread * threadLoop;
 			};
+
+			// Forward declare inherited classes
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ExplorationThread;
+
+			template <typename ValueType, typename RewardModelType, typename StateType>
+			class ControlThread;
+
 		} // namespace threads
 	} // namespace builder
 } // namespace stamina

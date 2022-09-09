@@ -19,7 +19,7 @@
 #include <stdio.h> // For remove()
 
 #include "ModelModify.h"
-#include "../StaminaMessages.h"
+#include "core/StaminaMessages.h"
 
 using namespace stamina;
 using namespace stamina::util;
@@ -107,7 +107,7 @@ ModelModify::createModifiedProperties(
 	while (std::getline(originalPropertiesStream, str)) {
 		// Remove whitespace
 		boost::algorithm::trim(str);
-		if (str.find("P=?" , 0)) {
+		if (str.rfind("P=?" , 0)) {
 			modifiedPropertiesStream << str << std::endl;
 			continue;
 		}

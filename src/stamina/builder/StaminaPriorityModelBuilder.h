@@ -1,5 +1,5 @@
-#ifndef STAMINA_PRIORITY_MODEL_BUILDER_H
-#define STAMINA_PRIORITY_MODEL_BUILDER_H
+#ifndef STAMINA_BUILDER_PRIORITYMODELBUILDER_H
+#define STAMINA_BUILDER_PRIORITYMODELBUILDER_H
 
 /**
  * The model builder class which implements the STAMINA 3.0 algorithm which uses a priority queue
@@ -15,7 +15,7 @@ namespace stamina {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
 		class StaminaPriorityModelBuilder : public StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
-			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
+// 			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
 			/**
 			* Constructs a StaminaPriorityModelBuilder with a given storm::generator::PrismNextStateGenerator. Invokes super's constructor
 			*
@@ -66,18 +66,18 @@ namespace stamina {
 				, boost::optional<storm::storage::BitVector>& markovianChoices
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			) override;
+		private:
 			/*
 			 * Access to data members of parent class
 			 * */
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyExpression;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::expressionManager;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyFormula;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::generator;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::memoryPool;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::statesToExplore;
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateRemapping;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateMap;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::stateStorage;
 			// Options for next state generators
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::options;
 			// The model builder must have access to this to create a fresh next state generator each iteration
@@ -97,16 +97,15 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
-		private:
 			/**
 			 * Connects all states which are terminal
 			 * */
 			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
 			/* Data members */
 			std::priority_queue<
-				typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePair
-				, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePair
-				, typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityStatePairComparison
+				ProbabilityStatePair<StateType>
+				, std::vector<ProbabilityStatePair<StateType>>
+				, ProbabilityStatePairComparison<StateType>
 			> statePriorityQueue;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
@@ -114,4 +113,4 @@ namespace stamina {
 		};
 	}
 }
-#endif // STAMINA_PRIORITY_MODEL_BUILDER_H
+#endif // STAMINA_BUILDER_PRIORITYMODELBUILDER_H
