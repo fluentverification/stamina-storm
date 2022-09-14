@@ -315,6 +315,8 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	for (auto & terminalState : terminalStatesVector) {
 		auto & explorationThread = this->explorationThreads[threadIndex];
 		// TODO: ask for cross exploration from thread at that index
+		auto state = this->stateMap.get(terminalState);
+		explorationThread->requestCrossExploration(terminalState.state, 0.0);
 		if (threadIndex == Options::threads) {
 			threadIndex = 1;
 		}
@@ -330,12 +332,15 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 	this->controlThread.setHold(false);
 
-	this->controlThread.join();
-	STAMINA_DEBUG_MESSAGE("Control thread finished");
 	for (auto explorationThread : this->explorationThreads) {
 		explorationThread->join();
 		STAMINA_DEBUG_MESSAGE("Exploration thread finished");
 	}
+	// Control thread must be the one to terminate the other threads, so it must be alive when they all
+	// are joined
+	this->controlThread.join();
+	STAMINA_DEBUG_MESSAGE("Control thread finished");
+
 }
 
 template class StaminaThreadedIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
