@@ -58,10 +58,28 @@ namespace stamina {
 				, boost::optional<storm::storage::BitVector>& markovianChoices
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			);
+			/**
+			 * Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
+			 * and state space truncation from that state. The reason this one is different
+			 *
+			 * @param state Pointer to the state we are looking it
+			 * @return A pair with the state id and whether or not it was already discovered
+			 * */
+			StateType getOrAddStateIndexAndTrackTerminal(CompressedState const& state);
 		private:
 			threads::ControlThread<ValueType, RewardModelType, StateType> controlThread;
 			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;
 			bool controlThreadsCreated;
+			/*
+			 * Some explaination:
+			 *     This is a fast way to keep track of the terminal states without having to use "getTerminalStates"
+			 *     which can be slow and inefficient. Any new state that is marked as terminal is placed in this
+			 *     deque, and every time we explore a state, we remove the front of the deque (corresponding to
+			 *     that state). If we have a state which we keep terminal, it is dequed and re-enqueued.
+			 *
+			 *     Therefore, this will NOT store the terminal states in the order they are explored.
+			 * */
+			std::deque<CompressedState const &> fastTerminalStates;
 		};
 		// "Custom" deleter (which actually is not custom) to allow for polymorphic shared pointers
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>

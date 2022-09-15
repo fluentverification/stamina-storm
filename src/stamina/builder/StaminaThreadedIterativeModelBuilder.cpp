@@ -64,6 +64,13 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		, this
 		, std::placeholders::_1
 	);
+	
+	// Another callback function to keep track of terminal states
+	std::function<StateType (CompressedState const&)> stateToIdCallbackWithTerminalTracking = std::bind(
+		&StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndexAndTrackTerminal
+		, this
+		, std::placeholders::_1
+	);
 
 	// Create exploration threads
 	if (!controlThreadsCreated) {
@@ -96,7 +103,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		);
 		this->isInit = true;
 		// Let the generator create all initial states.
-		this->stateStorage.initialStateIndices = this->generator->getInitialStates(stateToIdCallback);
+		this->stateStorage.initialStateIndices = this->generator->getInitialStates(stateToIdCallbackWithTerminalTracking);
 		if (this->stateStorage.initialStateIndices.empty()) {
 			StaminaMessages::errorAndExit("Initial states are empty!");
 		}
@@ -117,16 +124,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	CompressedState currentState;
 
 	this->isInit = false;
-	/*
-	 * Some explaination:
-	 *     This is a fast way to keep track of the terminal states without having to use "getTerminalStates"
-	 *     which can be slow and inefficient. Any new state that is marked as terminal is placed in this
-	 *     deque, and every time we explore a state, we remove the front of the deque (corresponding to
-	 *     that state). If we have a state which we keep terminal, it is dequed and re-enqueued.
-	 *
-	 *     Therefore, this will NOT store the terminal states in the order they are explored.
-	 * */
-	std::deque<CompressedState &> fastTerminalStates;
+
 	// Put all initial states in fastTerminalStates
 	// If this doesn't work, change to a while loop that re-enqueues
 	for (auto initProbabilityStatePair : this->statesToExplore) {
@@ -194,10 +192,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
-		// TODO: We need "CompressedState"s for the fastTerminalStates data structure, which are
-		// only accessible within stateToIdCallback. I'm not sure if I need to create a custom
-		// "getOrAddStateIndex" for this class or what?
-		storm::generator::StateBehavior<ValueType, StateType> behavior = this->generator->expand(stateToIdCallback);
+		storm::generator::StateBehavior<ValueType, StateType> behavior = this->generator->expand(stateToIdCallbackWithTerminalTracking);
 
 		auto stateRewardIt = behavior.getStateRewards().begin();
 		for (auto& rewardModelBuilder : rewardModelBuilders) {
@@ -331,9 +326,8 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		explorationThread->startThread();
 	}
 
-	auto terminalStatesVector = this->getPerimeterStates(); // TODO: should this be all T states
 	uint8_t threadIndex = 1;
-	for (auto & terminalState : terminalStatesVector) {
+	for (auto & terminalState : this->fastTerminalStates) {
 		auto & explorationThread = this->explorationThreads[threadIndex];
 		// TODO: ask for cross exploration from thread at that index
 		auto state = this->stateMap.get(terminalState);
@@ -362,6 +356,102 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	this->controlThread.join();
 	STAMINA_DEBUG_MESSAGE("Control thread finished");
 
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+StateType
+StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndexAndTrackTerminal(CompressedState const& state) {
+	StateType actualIndex;
+	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
+	if (stateStorage.stateToId.contains(state)) {
+		actualIndex = stateStorage.stateToId.getValue(state);
+	}
+	else {
+		// Create new index just in case we need it
+		actualIndex = newIndex;
+	}
+	
+	auto nextState = stateMap.get(actualIndex);
+	bool stateIsExisting = nextState != nullptr;
+	
+	stateStorage.stateToId.findOrAdd(state, actualIndex);
+	// Handle conditional enqueuing
+	if (isInit) {
+		if (!stateIsExisting) {
+			// Create a ProbabilityState for each individual state
+			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
+			*initProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 1.0
+				, true
+			);
+			// Add to fast terminal states
+			fastTerminalStates.emplace_back(state);
+			numberTerminal++;
+			stateMap.put(actualIndex, initProbabilityState);
+			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = iteration;
+		}
+		else {
+			ProbabilityState<StateType> * initProbabilityState = nextState;
+			stateMap.put(actualIndex, initProbabilityState);
+			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = iteration;
+		}
+		return actualIndex;
+	}
+	
+	bool enqueued = false;
+	
+	// This bit handles the non-initial states
+	// The previous state has reachability of 0
+	if (currentProbabilityState->getPi() == 0) {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
+				// Enqueue
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				enqueued = true;
+			}
+		}
+		else {
+			// State does not exist yet in this iteration
+			return 0;
+		}
+	}
+	else {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
+			// auto emplaced = exploredStates.emplace(actualIndex);
+			if (nextProbabilityState->iterationLastSeen != iteration) {
+				nextProbabilityState->iterationLastSeen = iteration;
+				// Enqueue
+				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				enqueued = true;
+			}
+		}
+		else {
+			// This state has not been seen so create a new ProbabilityState
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 0.0
+				, true
+			);
+			// Add to fast terminal states
+			fastTerminalStates.emplace_back(state);
+			stateMap.put(actualIndex, nextProbabilityState);
+			nextProbabilityState->iterationLastSeen = iteration;
+			// exploredStates.emplace(actualIndex);
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
+			numberTerminal++;
+		}
+	}
+	return actualIndex;
 }
 
 template class StaminaThreadedIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
