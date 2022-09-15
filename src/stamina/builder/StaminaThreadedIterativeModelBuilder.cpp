@@ -117,12 +117,28 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	CompressedState currentState;
 
 	this->isInit = false;
+	/*
+	 * Some explaination:
+	 *     This is a fast way to keep track of the terminal states without having to use "getTerminalStates"
+	 *     which can be slow and inefficient. Any new state that is marked as terminal is placed in this
+	 *     deque, and every time we explore a state, we remove the front of the deque (corresponding to
+	 *     that state). If we have a state which we keep terminal, it is dequed and re-enqueued.
+	 *
+	 *     Therefore, this will NOT store the terminal states in the order they are explored.
+	 * */
+	std::deque<CompressedState &> fastTerminalStates;
+	// Put all initial states in fastTerminalStates
+	// If this doesn't work, change to a while loop that re-enqueues
+	for (auto initProbabilityStatePair : this->statesToExplore) {
+		fastTerminalStates.emplace_back(initProbabilityStatePair.second;
+	}
 	// Perform a search through the model.
 	while (!this->statesToExplore.empty() && this->numberTerminal < Options::threads) {
 		auto currentProbabilityStatePair = this->statesToExplore.front();
 		this->currentProbabilityState = this->statesToExplore.front().first;
 		currentState = this->statesToExplore.front().second;
 		this->statesToExplore.pop_front();
+		fastTerminalStates.pop_front();
 		// Get the first state in the queue.
 		currentIndex = this->currentProbabilityState->index;
 		if (currentIndex == 0) {
@@ -170,12 +186,17 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 				++this->currentRow;
 				++this->currentRowGroup;
 			}
+			// Add to fastTerminal
+			fastTerminalStates.emplace_back(currentState);
 			continue;
 		}
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
+		// TODO: We need "CompressedState"s for the fastTerminalStates data structure, which are
+		// only accessible within stateToIdCallback. I'm not sure if I need to create a custom
+		// "getOrAddStateIndex" for this class or what?
 		storm::generator::StateBehavior<ValueType, StateType> behavior = this->generator->expand(stateToIdCallback);
 
 		auto stateRewardIt = behavior.getStateRewards().begin();
@@ -316,7 +337,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		auto & explorationThread = this->explorationThreads[threadIndex];
 		// TODO: ask for cross exploration from thread at that index
 		auto state = this->stateMap.get(terminalState);
-		explorationThread->requestCrossExploration(terminalState.state, 0.0);
+		// explorationThread->requestCrossExploration(terminalState.state, 0.0);
 		if (threadIndex == Options::threads) {
 			threadIndex = 1;
 		}
