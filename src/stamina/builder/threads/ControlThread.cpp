@@ -123,12 +123,16 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 		}
 		if (exitThisIteration) {
 			STAMINA_DEBUG_MESSAGE("Exiting control thread main loop because all threads are finished");
+			STAMINA_DEBUG_MESSAGE("Sanity check: there are the following number of exploration threads: " << this->parent->getExplorationThreads().size());
 			for (auto explorationThread : this->parent->getExplorationThreads()) {
+				STAMINA_DEBUG_MESSAGE("Killing exploration thread");
 				explorationThread->terminate();
 			}
 			this->finished = true;
 			this->hold = false;
 			// this->terminate();
+			STAMINA_DEBUG_MESSAGE("Ending this iteration now!");
+			return;
 		}
 		// TODO: de-fragmentation
 		// TODO: LRU Cache

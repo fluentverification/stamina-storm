@@ -70,6 +70,7 @@ ExplorationThread<ValueType, RewardModelType, StateType>::mainLoop() {
 	STAMINA_DEBUG_MESSAGE("Starting exploration thread: " << this->threadIndex);
 	idling = false;
 	while (!this->finished || this->hold) {
+		// STAMINA_DEBUG_MESSAGE("Finished is " << this->finished << " and hold is " << this->hold);
 		// Explore the states in the exploration queue
 		exploreStates();
 	}

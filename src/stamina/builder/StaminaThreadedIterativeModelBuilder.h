@@ -66,6 +66,7 @@ namespace stamina {
 			 * @return A pair with the state id and whether or not it was already discovered
 			 * */
 			StateType getOrAddStateIndexAndTrackTerminal(CompressedState const& state);
+			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> *> & getExplorationThreads();
 		private:
 			threads::ControlThread<ValueType, RewardModelType, StateType> controlThread;
 			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;

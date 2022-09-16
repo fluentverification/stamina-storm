@@ -331,6 +331,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		auto & explorationThread = this->explorationThreads[threadIndex];
 		// TODO: ask for cross exploration from thread at that index
 		// auto state = this->stateMap.get(terminalState);
+		STAMINA_DEBUG_MESSAGE("Requesting cross exploration of state to thread " << threadIndex);
 		explorationThread->requestCrossExploration(terminalState, 0.0);
 		if (threadIndex == Options::threads) {
 			threadIndex = 1;
@@ -452,6 +453,11 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::get
 		}
 	}
 	return actualIndex;
+}
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> *> &
+StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() {
+	return explorationThreads;
 }
 
 template class StaminaThreadedIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
