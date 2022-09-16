@@ -459,7 +459,7 @@ std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, Stat
 StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
 	std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> currentExplorationThreads;
 	for (auto thread : explorationThreads) {
-		currentExplorationThreads.emplace_back(thread);
+		currentExplorationThreads.push_back(thread);
 	}
 	return currentExplorationThreads;
 }
