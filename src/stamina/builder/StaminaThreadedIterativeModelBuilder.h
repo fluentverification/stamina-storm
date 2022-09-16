@@ -79,7 +79,7 @@ namespace stamina {
 			 *
 			 *     Therefore, this will NOT store the terminal states in the order they are explored.
 			 * */
-			std::deque<CompressedState const &> fastTerminalStates;
+			std::deque<CompressedState> fastTerminalStates;
 		};
 		// "Custom" deleter (which actually is not custom) to allow for polymorphic shared pointers
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>

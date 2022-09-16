@@ -64,7 +64,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		, this
 		, std::placeholders::_1
 	);
-	
+
 	// Another callback function to keep track of terminal states
 	std::function<StateType (CompressedState const&)> stateToIdCallbackWithTerminalTracking = std::bind(
 		&StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndexAndTrackTerminal
@@ -128,7 +128,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	// Put all initial states in fastTerminalStates
 	// If this doesn't work, change to a while loop that re-enqueues
 	for (auto initProbabilityStatePair : this->statesToExplore) {
-		fastTerminalStates.emplace_back(initProbabilityStatePair.second;
+		fastTerminalStates.emplace_back(initProbabilityStatePair.second);
 	}
 	// Perform a search through the model.
 	while (!this->statesToExplore.empty() && this->numberTerminal < Options::threads) {
@@ -330,8 +330,8 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	for (auto & terminalState : this->fastTerminalStates) {
 		auto & explorationThread = this->explorationThreads[threadIndex];
 		// TODO: ask for cross exploration from thread at that index
-		auto state = this->stateMap.get(terminalState);
-		// explorationThread->requestCrossExploration(terminalState.state, 0.0);
+		// auto state = this->stateMap.get(terminalState);
+		explorationThread->requestCrossExploration(terminalState, 0.0);
 		if (threadIndex == Options::threads) {
 			threadIndex = 1;
 		}
@@ -362,24 +362,24 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndexAndTrackTerminal(CompressedState const& state) {
 	StateType actualIndex;
-	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
-	if (stateStorage.stateToId.contains(state)) {
-		actualIndex = stateStorage.stateToId.getValue(state);
+	StateType newIndex = static_cast<StateType>(this->stateStorage.getNumberOfStates());
+	if (this->stateStorage.stateToId.contains(state)) {
+		actualIndex = this->stateStorage.stateToId.getValue(state);
 	}
 	else {
 		// Create new index just in case we need it
 		actualIndex = newIndex;
 	}
-	
-	auto nextState = stateMap.get(actualIndex);
+
+	auto nextState = this->stateMap.get(actualIndex);
 	bool stateIsExisting = nextState != nullptr;
-	
-	stateStorage.stateToId.findOrAdd(state, actualIndex);
+
+	this->stateStorage.stateToId.findOrAdd(state, actualIndex);
 	// Handle conditional enqueuing
-	if (isInit) {
+	if (this->isInit) {
 		if (!stateIsExisting) {
 			// Create a ProbabilityState for each individual state
-			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * initProbabilityState = this->memoryPool.allocate();
 			*initProbabilityState = ProbabilityState<StateType>(
 				actualIndex
 				, 1.0
@@ -387,32 +387,32 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::get
 			);
 			// Add to fast terminal states
 			fastTerminalStates.emplace_back(state);
-			numberTerminal++;
-			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
-			initProbabilityState->iterationLastSeen = iteration;
+			this->numberTerminal++;
+			this->stateMap.put(actualIndex, initProbabilityState);
+			this->statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = this->iteration;
 		}
 		else {
 			ProbabilityState<StateType> * initProbabilityState = nextState;
-			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
-			initProbabilityState->iterationLastSeen = iteration;
+			this->stateMap.put(actualIndex, initProbabilityState);
+			this->statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = this->iteration;
 		}
 		return actualIndex;
 	}
-	
+
 	bool enqueued = false;
-	
+
 	// This bit handles the non-initial states
 	// The previous state has reachability of 0
-	if (currentProbabilityState->getPi() == 0) {
+	if (this->currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
 			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
-			if (nextProbabilityState->iterationLastSeen != iteration) {
-				nextProbabilityState->iterationLastSeen = iteration;
+			if (nextProbabilityState->iterationLastSeen != this->iteration) {
+				nextProbabilityState->iterationLastSeen = this->iteration;
 				// Enqueue
-				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				this->statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -426,16 +426,16 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::get
 			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
-			if (nextProbabilityState->iterationLastSeen != iteration) {
-				nextProbabilityState->iterationLastSeen = iteration;
+			if (nextProbabilityState->iterationLastSeen != this->iteration) {
+				nextProbabilityState->iterationLastSeen = this->iteration;
 				// Enqueue
-				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				this->statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
-			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			ProbabilityState<StateType> * nextProbabilityState = this->memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState<StateType>(
 				actualIndex
 				, 0.0
@@ -443,12 +443,12 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::get
 			);
 			// Add to fast terminal states
 			fastTerminalStates.emplace_back(state);
-			stateMap.put(actualIndex, nextProbabilityState);
-			nextProbabilityState->iterationLastSeen = iteration;
+			this->stateMap.put(actualIndex, nextProbabilityState);
+			nextProbabilityState->iterationLastSeen = this->iteration;
 			// exploredStates.emplace(actualIndex);
-			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			this->statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 			enqueued = true;
-			numberTerminal++;
+			this->numberTerminal++;
 		}
 	}
 	return actualIndex;
