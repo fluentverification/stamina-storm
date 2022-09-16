@@ -368,8 +368,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() co
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const &
+std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
+	StaminaMessages::warning("Using base class implementation of getExplorationThreads()! This is almost certainly a mistake!");
 	return explorationThreads;
 }
 

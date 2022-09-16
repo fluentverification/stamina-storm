@@ -455,9 +455,13 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::get
 	return actualIndex;
 }
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> *> &
-StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() {
-	return explorationThreads;
+std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const &
+StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
+	std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> currentExplorationThreads;
+	for (auto thread : explorationThreads) {
+		currentExplorationThreads.emplace_back(thread);
+	}
+	return currentExplorationThreads;
 }
 
 template class StaminaThreadedIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

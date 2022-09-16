@@ -150,7 +150,7 @@ namespace stamina {
 			util::StateMemoryPool<ProbabilityState<StateType>> & getMemoryPool();
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> getGenerator();
 			storm::storage::sparse::StateStorage<StateType> & getStateStorage() const;
-			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const & getExplorationThreads() const;
+			virtual std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const & getExplorationThreads() const;
 			/**
 			 * Inserts a TransitionInfo into transitionsToAdd. This method must NOT be called
 			 * after flushToTransitionMatrix has cleared transitionsToAdd
@@ -220,7 +220,7 @@ namespace stamina {
 
 			/* Data Members */
 			std::shared_ptr<threads::ControlThread<ValueType, RewardModelType, StateType>> controlThread;
-			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> explorationThreads;
+			std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 
