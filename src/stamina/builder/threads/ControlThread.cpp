@@ -102,7 +102,10 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 		bool exitThisIteration = false;
 		numberFinishedThreads = 0;
 		for (auto explorationThread : this->parent->getExplorationThreads()) {
-			if (explorationThread->isIdling()) {
+			if (!explorationThread) {
+				StaminaMessages::warning("Somehow this exploration thread is null!");
+			}
+			else if (explorationThread->isIdling()) {
 				++numberFinishedThreads;
 			}
 		}
