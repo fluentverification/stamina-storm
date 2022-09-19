@@ -152,16 +152,19 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
 		);
 		exploreState(stateProbability);
 	}
-	else {
-		// STAMINA_DEBUG_MESSAGE("Size of cross exploration queue: " << this->crossExplorationQueue.size());
-		// STAMINA_DEBUG_MESSAGE("Thread " << this->threadIndex << " is idling...");
-		// if (!this->crossExplorationQueue.empty() && !this->xLock.owns_lock()) {
-		// 	STAMINA_DEBUG_MESSAGE("Cross-exploration queue is not emply, but lock has not been achieved.");
-		// }
-		// else if (this->mainExplorationQueue.empty()) {
-		// 	// STAMINA_DEBUG_MESSAGE("Both main and cross exploration queue are empty");
-		// }
+	else if (!this->xLock.owns_lock()) {
+		STAMINA_DEBUG_MESSAGE("Size of cross exploration queue: " << this->crossExplorationQueue.size());
+		STAMINA_DEBUG_MESSAGE("Thread " << this->threadIndex << " is idling...");
+		if (!this->crossExplorationQueue.empty() && !this->xLock.owns_lock()) {
+			STAMINA_DEBUG_MESSAGE("Cross-exploration queue is not emply, but lock has not been achieved.");
+		}
+		else if (this->mainExplorationQueue.empty()) {
+			// STAMINA_DEBUG_MESSAGE("Both main and cross exploration queue are empty");
+		}
 		this->idling = true;
+	}
+	else {
+		this->idling = false;
 	}
 }
 
