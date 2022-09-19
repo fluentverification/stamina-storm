@@ -69,7 +69,7 @@ namespace stamina {
 			std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const & getExplorationThreads() const override;
 		private:
 			threads::ControlThread<ValueType, RewardModelType, StateType> controlThread;
-			std::vector<typename threads::IterativeExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;
+			std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;
 			bool controlThreadsCreated;
 			/*
 			 * Some explaination:

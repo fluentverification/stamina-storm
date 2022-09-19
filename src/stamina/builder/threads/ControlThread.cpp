@@ -98,10 +98,12 @@ void
 ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 	STAMINA_DEBUG_MESSAGE("Starting control thread.");
 	uint8_t numberFinishedThreads;
+	auto explorationThreads = this->parent->getExplorationThreads();
 	while (!this->finished || this->hold) { // allow for this thread to be killed outside of its main loop
 		bool exitThisIteration = false;
 		numberFinishedThreads = 0;
-		for (auto explorationThread : this->parent->getExplorationThreads()) {
+
+		for (auto explorationThread : explorationThreads) {
 			if (!explorationThread) {
 				StaminaMessages::warning("Somehow this exploration thread is null!");
 			}
