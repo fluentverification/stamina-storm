@@ -74,12 +74,12 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 	// Create exploration threads
 	if (!controlThreadsCreated) {
-		uint8_t threadIndex = 1;
+		uint8_t currentThreadIndex = 1;
 		while (explorationThreads.size() < Options::threads) {
 			explorationThreads.push_back(
 				new threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>(
 					this // parent
-					, threadIndex // Thread index
+					, currentThreadIndex // Thread index
 					, this->controlThread // Control Thread
 					, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
 					, & this->getStateMap()
@@ -87,7 +87,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 					, stateToIdCallback
 				)
 			);
-			threadIndex++;
+			currentThreadIndex++;
 		}
 		controlThreadsCreated = true;
 	}
@@ -328,7 +328,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 	uint8_t threadIndex = 1;
 	for (auto & terminalState : this->fastTerminalStates) {
-		auto & explorationThread = this->explorationThreads[threadIndex];
+		auto & explorationThread = this->explorationThreads[threadIndex - 1];
 		// TODO: ask for cross exploration from thread at that index
 		// auto state = this->stateMap.get(terminalState);
 		STAMINA_DEBUG_MESSAGE("Requesting cross exploration of state to thread " << threadIndex);
@@ -348,14 +348,15 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 
 	this->controlThread.setHold(false);
 
-	for (auto explorationThread : this->explorationThreads) {
-		explorationThread->join();
-		STAMINA_DEBUG_MESSAGE("Exploration thread finished");
-	}
-	// Control thread must be the one to terminate the other threads, so it must be alive when they all
-	// are joined
 	this->controlThread.join();
 	STAMINA_DEBUG_MESSAGE("Control thread finished");
+
+	// for (auto explorationThread : this->explorationThreads) {
+	// 	explorationThread->join();
+	// 	STAMINA_DEBUG_MESSAGE("Exploration thread finished");
+	// }
+	// Control thread must be the one to terminate the other threads, so it must be alive when they all
+	// are joined
 
 }
 
