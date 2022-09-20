@@ -53,7 +53,7 @@ ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(Compresse
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 uint8_t
-ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & state) {
+ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & state) const {
 	if (stateThreadMap.contains(state)) {
 		return stateThreadMap.getValue(state);
 	}
@@ -80,6 +80,9 @@ ControlThread<ValueType, RewardModelType, StateType>::requestInsertTransition(
 	, double rate
 ) {
 	LockableDeque & tQueue = transitionQueues[thread - 1];
+	tQueue.lockThread();
+	tQueue.emplace_back(from, to, rate);
+	tQueue.unlockThread();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -89,7 +92,12 @@ ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFro
 	, double threadIndex
 ) {
 	// TODO: implement
-	// auto explorationThread = this->explorationThreads[threadIndex - 1];
+	// Pointer black magic because you can't have a reference or variable of an abstract class
+	auto explorationThread = &(this->explorationThreads[threadIndex - 1]);
+	explorationThread->requestCrossExploration(
+		stateAndProbability.state
+		, stateAndProbability.deltaPi
+	);
 	// explorationThread(stateAndProbability.state, stateAndProbability.probability);
 }
 

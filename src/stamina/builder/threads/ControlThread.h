@@ -99,7 +99,7 @@ namespace stamina {
 				* @param state The state who we wonder if owns
 				* @return The thread who owns `state`
 				* */
-				uint8_t whoOwns(CompressedState & state);
+				uint8_t whoOwns(CompressedState & state) const;
 				/**
 				 * Gets the index of a state which already exists. If the state does not
 				 * exist, returns 0.
