@@ -93,7 +93,7 @@ ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFro
 ) {
 	// TODO: implement
 	// Pointer black magic because you can't have a reference or variable of an abstract class
-	auto const explorationThread = &(this->explorationThreads[threadIndex - 1]);
+	auto explorationThread = &(this->explorationThreads[threadIndex - 1]);
 	explorationThread->requestCrossExploration(
 		stateAndProbability.state
 		, stateAndProbability.deltaPi
@@ -123,17 +123,7 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 			// We have finished.
 			exitThisIteration = true;
 		}
-		// Make sure that we flush the queues AFTER we determine whether to exit. This prevents a
-		// thread from requesting a transition to be added
-		for (auto q : transitionQueues) {
-			q.lockThread();
-			while (!q.empty()) {
-				// Request that the parent class
-				this->parent->createTransition(q.top());
-				q.pop();
-			}
-			q.unlockThread();
-		}
+		registerTransitions();
 		if (exitThisIteration) {
 			STAMINA_DEBUG_MESSAGE("Exiting control thread main loop because all threads are finished");
 			STAMINA_DEBUG_MESSAGE("Sanity check: there are the following number of exploration threads: " << this->parent->getExplorationThreads().size());
@@ -145,6 +135,7 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 			this->hold = false;
 			// this->terminate();
 			STAMINA_DEBUG_MESSAGE("Ending this iteration now!");
+			registerTransitions();
 			return;
 		}
 		// TODO: de-fragmentation
@@ -152,6 +143,22 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 	}
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+ControlThread<ValueType, RewardModelType, StateType>::registerTransitions() {
+		// Make sure that we flush the queues AFTER we determine whether to exit. This prevents a
+		// thread from requesting a transition to be added
+		for (auto q : transitionQueues) {
+			q.lockThread();
+			while (!q.empty()) {
+				// Request that the parent class
+				this->parent->createTransition(q.top());
+				q.pop();
+			}
+			q.unlockThread();
+		}
+
+}
 // Lockable Deque methods
 
 template <typename ValueType, typename RewardModelType, typename StateType>

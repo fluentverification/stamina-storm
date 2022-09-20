@@ -151,6 +151,8 @@ namespace stamina {
 				* */
 				virtual void mainLoop() override;
 				void terminate();
+			protected:
+				void registerTransitions();
 			private:
 				std::vector<LockableDeque> transitionQueues;
 				std::shared_mutex ownershipMutex;
