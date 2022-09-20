@@ -93,7 +93,7 @@ ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFro
 ) {
 	// TODO: implement
 	// Pointer black magic because you can't have a reference or variable of an abstract class
-	auto explorationThread = &(this->explorationThreads[threadIndex - 1]);
+	auto const explorationThread = &(this->explorationThreads[threadIndex - 1]);
 	explorationThread->requestCrossExploration(
 		stateAndProbability.state
 		, stateAndProbability.deltaPi

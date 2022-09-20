@@ -156,7 +156,7 @@ namespace stamina {
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>>& stateThreadMap;
-				const std::vector<ExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
+				std::vector<ExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
 			};
 
 		} // namespace threads
