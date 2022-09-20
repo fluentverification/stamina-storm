@@ -2,6 +2,8 @@
 
 # STAMINA (STORM Integration)
 
+[![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus)
+
 C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm](https://github.com/moves-rwth/storm). This version is different from the [Java version](https://github.com/fluentverification/stamina ), and is under active development. STAMINA/STORM is now both usable and blazing fast, thanks to our integration with STORM as well as our own improvements over STAMINA/PRISM.
 
 **STAMINA NOW HAS A WEBSITE!**
