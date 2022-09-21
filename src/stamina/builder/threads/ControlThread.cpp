@@ -130,6 +130,7 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 			for (auto explorationThread : this->parent->getExplorationThreads()) {
 				STAMINA_DEBUG_MESSAGE("Killing exploration thread");
 				explorationThread->terminate();
+				explorationThread->join();
 			}
 			this->finished = true;
 			this->hold = false;

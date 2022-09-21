@@ -351,10 +351,10 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	this->controlThread.join();
 	STAMINA_DEBUG_MESSAGE("Control thread finished");
 
-	// for (auto explorationThread : this->explorationThreads) {
-	// 	explorationThread->join();
-	// 	STAMINA_DEBUG_MESSAGE("Exploration thread finished");
-	// }
+	for (auto explorationThread : this->explorationThreads) {
+		explorationThread->join();
+		STAMINA_DEBUG_MESSAGE("Exploration thread finished");
+	}
 	// Control thread must be the one to terminate the other threads, so it must be alive when they all
 	// are joined
 
