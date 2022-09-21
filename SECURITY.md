@@ -8,7 +8,7 @@ The following versions are supported with security updates:
 | ------- | ------------------ | ----------- |
 | 2.5.0 (Future Release)   | ✅ | TBD  |
 | 2.2.5   | :white_check_mark: | TBD |
-| 2.1.0   | :white_check_mark: | August 2022 |
+| 2.1.0   | :x: | August 2022 |
 | 2.1.0 (PRISM)   | :white_check_mark: | January 2023 |
 | 0.0.1&alpha;   | :x: | June 2022 |
 | 1.0 (PRISM)   | :x: | August 2021 |
