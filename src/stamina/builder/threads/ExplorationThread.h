@@ -73,7 +73,7 @@ namespace stamina {
 				std::shared_mutex crossExplorationQueueMutex;
 				// The lock that locks our mutex
 				std::unique_lock<std::shared_mutex> xLock;
-				volatile std::deque<std::pair<CompressedState, double>> crossExplorationQueue;
+				std::deque<std::pair<CompressedState, double>> crossExplorationQueue;
 				std::deque<std::pair<ProbabilityState<StateType> *, CompressedState &>> mainExplorationQueue;
 				uint32_t numberOfOwnedStates;
 				bool idling;
