@@ -83,7 +83,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 					, this->controlThread // Control Thread
 					, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
 					, & this->getStateMap()
-					, this->getGenerator()
+					, this->getGenerator() // We need to either make the generator threadsafe, or create copies
 					, stateToIdCallback
 				)
 			);
@@ -340,18 +340,19 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 			threadIndex++;
 		}
 	}
+	this->controlThread.setHold(false);
 
 	// Remove the hold on all of the worker threads
 	for (auto & explorationThread : this->explorationThreads) {
 		explorationThread->setHold(false);
 	}
 
-	this->controlThread.setHold(false);
 
 	this->controlThread.join();
 	STAMINA_DEBUG_MESSAGE("Control thread finished");
 
 	for (auto explorationThread : this->explorationThreads) {
+		explorationThread->terminate();
 		explorationThread->join();
 		STAMINA_DEBUG_MESSAGE("Exploration thread finished");
 	}
