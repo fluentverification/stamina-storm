@@ -154,6 +154,7 @@ ControlThread<ValueType, RewardModelType, StateType>::registerTransitions() {
 				// Request that the parent class
 				this->parent->createTransition(q.top());
 				q.pop();
+				STAMINA_DEBUG_MESSAGE("Creating a transition for a state");
 			}
 			q.unlockThread();
 		}

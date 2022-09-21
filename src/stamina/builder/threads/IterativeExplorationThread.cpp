@@ -121,9 +121,9 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates() {
-	if (!this->crossExplorationQueue.empty() && this->xLock.owns_lock()) {
+	if (!this->crossExplorationQueue.empty() && this->xLock.try_lock()) {
 		STAMINA_DEBUG_MESSAGE("Exploring from the cross exploration queue");
-		std::lock_guard<decltype(this->xLock)> lockGuard(this->xLock);
+		// std::lock_guard<decltype(this->xLock)> lockGuard(this->xLock);
 		auto stateDeltaPiPair = this->crossExplorationQueue.front();
 		this->crossExplorationQueue.pop_front();
 		auto s = stateDeltaPiPair.first;
@@ -139,6 +139,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
 		// auto probabilityState = this->parent->getStateMap().get(stateIndex);
 		// probabilityState->pi += deltaPi;
 		exploreState(stateProbability);
+		this->xLock.unlock();
 	}
 	else if (!this->mainExplorationQueue.empty()) {
 		STAMINA_DEBUG_MESSAGE("Exploring from main exploration queue");
