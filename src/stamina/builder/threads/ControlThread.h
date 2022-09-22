@@ -166,7 +166,9 @@ namespace stamina {
 				 * */
 				void requestCrossExplorationFromThread(
 					StateProbability stateAndProbability
-					, double threadIndex
+					, uint8_t threadIndex
+					, StateType fromIndex
+					, ValueType transitionRate
 				);
 				/**
 				* This thread lives for the duration of all exploration threads. It waits for

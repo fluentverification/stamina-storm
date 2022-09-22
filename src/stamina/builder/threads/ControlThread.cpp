@@ -92,7 +92,9 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFromThread(
 	StateProbability stateAndProbability
-	, double threadIndex
+	, uint8_t threadIndex
+	, StateType fromIndex
+	, ValueType transitionRate
 ) {
 	// TODO: implement
 	// Pointer black magic because you can't have a reference or variable of an abstract class
@@ -100,6 +102,12 @@ ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFro
 	explorationThread->requestCrossExploration(
 		stateAndProbability.state
 		, stateAndProbability.deltaPi
+	);
+	requestInsertTransition(
+		threadIndex
+		, fromIndex
+		, stateAndProbability.index
+		, transitionRate
 	);
 	// explorationThread(stateAndProbability.state, stateAndProbability.probability);
 }

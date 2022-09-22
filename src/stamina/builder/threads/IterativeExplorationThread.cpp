@@ -287,6 +287,8 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 						, stateIndexAndThread.index
 					)
 					, stateIndexAndThread.threadIndex
+					, currentIndex
+					, probability
 				);
 
 			}
