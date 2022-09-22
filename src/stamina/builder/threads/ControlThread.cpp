@@ -17,7 +17,10 @@ ControlThread<ValueType, RewardModelType, StateType>::ControlThread(
 	, numberExplorationThreads(numberExplorationThreads)
 	, stateThreadMap(*(new storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>>(parent->getGenerator()->getStateSize())))
 {
-	// Intentionally left empty
+	// Create transition queues
+	for (int i = 0; i < Options::threads; i++) {
+		transitionQueues.push_back(LockableDeque());
+	}
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -149,8 +152,10 @@ void
 ControlThread<ValueType, RewardModelType, StateType>::registerTransitions() {
 		// Make sure that we flush the queues AFTER we determine whether to exit. This prevents a
 		// thread from requesting a transition to be added
+		STAMINA_DEBUG_MESSAGE("Size of transition queues: " << transitionQueues.size());
 		for (auto q : transitionQueues) {
 			q.lockThread();
+			STAMINA_DEBUG_MESSAGE("Queue size: " << q.size());
 			while (!q.empty()) {
 				// Request that the parent class
 				this->parent->createTransition(q.top());
@@ -189,13 +194,11 @@ ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::empty() con
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::lockThread() {
-	// TODO: Implement
 	lock.lock();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::unlockThread() {
-	// TODO: Implement
 	lock.unlock();
 }
 
