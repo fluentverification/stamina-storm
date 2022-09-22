@@ -18,6 +18,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 	)
 	, controlThread(this, Options::threads)
 	, controlThreadsCreated(false)
+	, generators(nullptr)
 
 {
 	// Intentionally left empty
@@ -33,6 +34,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 	)
 	, controlThread(this, Options::threads)
 	, controlThreadsCreated(false)
+	, generators(nullptr)
 {
 	// Intentionally left empty
 }
