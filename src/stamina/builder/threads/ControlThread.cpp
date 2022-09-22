@@ -165,7 +165,7 @@ ControlThread<ValueType, RewardModelType, StateType>::registerTransitions() {
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 int
-ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::size() {
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::size() const {
 	return queue.size();
 }
 
@@ -176,12 +176,13 @@ ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::emplace_bac
 	, StateType to
 	, double rate
 ) {
-
+	Transition t(from, to, rate);
+	queue.emplace_back(t);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
-ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::empty() {
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::empty() const {
 	return queue.empty();
 }
 
@@ -189,16 +190,18 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::lockThread() {
 	// TODO: Implement
+	lock.lock();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::unlockThread() {
 	// TODO: Implement
+	lock.unlock();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 typename ControlThread<ValueType, RewardModelType, StateType>::Transition
-ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::top() {
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::top() const {
 	return queue.front();
 }
 

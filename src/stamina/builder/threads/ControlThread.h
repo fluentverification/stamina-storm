@@ -39,21 +39,19 @@ namespace stamina {
 
 				class LockableDeque {
 				public:
-					LockableDeque() :
-						guard(this->lock)
+					LockableDeque()
+						// : guard(this->lock)
 					{
 						// Intentionally left empty
 					}
 
-					LockableDeque(const LockableDeque & other) :
-						guard(this->lock)
-						, queue(other.queue)
+					LockableDeque(const LockableDeque & other)
+						// : guard(this->lock)
+						: queue(other.queue)
 					{
 						// We don't need to copy the lock, just the queue
 					}
-					int size() const {
-						return queue.size();
-					}
+					int size() const;
 					/**
 					 * Locks the queue and emplaces an element
 					 *
@@ -61,10 +59,7 @@ namespace stamina {
 					 * @param to The state the transition goes to
 					 * @param rate The transition rate of this transition
 					 * */
-					void emplace_back(StateType from, StateType to, double rate) {
-						Transition t(from, to, rate);
-						queue.emplace_back(t);
-					}
+					void emplace_back(StateType from, StateType to, double rate);
 					/**
 					 * Determines whether the internal queue is empty. This method is
 					 * const as it does not change anything about the internals of this
@@ -72,36 +67,26 @@ namespace stamina {
 					 *
 					 * @return whether the internal queue is empty
 					 * */
-					bool empty() const {
-						return queue.empty();
-					}
+					bool empty() const;
 					/**
 					 * Locks the mutex with a std::lock_guard and leaves it locked
 					 * */
-					void lockThread() {
-						guard.lock();
-					}
+					void lockThread();
 					/**
 					 * Unlocks the std::lock_guard guarding the mutex
 					 * */
-					void unlockThread() {
-						guard.unlock();
-					}
+					void unlockThread();
 					/**
 					 * Gets the top element (or front element) of the internal queue.
 					 *
 					 * @return The first transition
 					 * */
-					Transition top() const {
-						return queue.front();
-					}
-					void pop() {
-						queue.pop_front();
-					}
+					Transition top() const;
+					void pop();
 				private:
 					std::deque<Transition> queue;
 					mutable std::shared_mutex lock;
-					std::lock_guard guard;
+					// std::lock_guard<std::shared_mutex> guard;
 				};
 
 				/**
