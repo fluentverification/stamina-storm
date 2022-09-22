@@ -38,6 +38,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 	// Check if we own sPrime and if we don't ask the thread who does to explore it
 	uint8_t sPrimeOwner = this->controlThread.whoOwns(state);
 	if (sPrimeOwner != this->threadIndex && sPrimeOwner != NO_THREAD) {
+		STAMINA_DEBUG_MESSAGE("This state is owned by " << sPrimeOwner);
 		actualIndex = this->controlThread.whatIsIndex(state);
 		StateIndexAndThread sThreadIndex(state, actualIndex, sPrimeOwner);
 		// Request cross exploration handled in other function
@@ -45,6 +46,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 		return; // TODO: another thread owns
 	}
 	else if (sPrimeOwner == NO_THREAD) {
+		STAMINA_DEBUG_MESSAGE("No thread owns this state");
 		// Request ownership
 		auto threadAndStateIndecies = this->controlThread.requestOwnership(state, this->threadIndex);
 		bool failedRequest = threadAndStateIndecies.first != this->threadIndex;
@@ -57,6 +59,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 		}
 	}
 	else {
+		STAMINA_DEBUG_MESSAGE("This state is owned by this thread");
 		actualIndex = this->controlThread.whatIsIndex(state);
 	}
 
@@ -76,10 +79,11 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
+				std::pair<ProbabilityState<StateType> *, CompressedState &> toEnqueue(nextProbabilityState, state);
 				// Enqueue
-				/* this->mainExplorationQueue.emplace_back(
-					std::make_pair(nextProbabilityState, state)
-				); */
+				this->mainExplorationQueue.emplace_back(
+					toEnqueue
+				);
 				enqueued = true;
 			}
 		}
@@ -95,8 +99,10 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
+				std::pair<ProbabilityState<StateType> *, CompressedState &> toEnqueue(nextProbabilityState, state);
+
 				// Enqueue
-				/* this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state)); */
+				this->mainExplorationQueue.emplace_back(toEnqueue);
 				enqueued = true;
 			}
 		}
@@ -111,7 +117,9 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			this->parent->getStateMap().put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 			// exploredStates.emplace(actualIndex);
-			/* this->mainExplorationQueue.emplace_back(std::make_pair(nextProbabilityState, state)); */
+			std::pair<ProbabilityState<StateType> *, CompressedState &> toEnqueue(nextProbabilityState, state);
+
+			this->mainExplorationQueue.emplace_back(toEnqueue);
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -192,6 +200,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 		// If the property does not hold at the current state, make it absorbing in the
 		// state graph and do not explore its successors
 		if (!evaluationAtCurrentState) {
+			STAMINA_DEBUG_MESSAGE("Truncating state based on property");
 			this->controlThread.requestInsertTransition(
 				this->threadIndex
 				, currentIndex
@@ -209,6 +218,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 
 	// Do not explore if state is terminal and its reachability probability is less than kappa
 	if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < this->parent->getLocalKappa()) {
+		STAMINA_DEBUG_MESSAGE("Terminating state because kappa is greater than pi(s)");
 		// Do not connect to absorbing yet
 		// Place this in statesTerminatedLastIteration
 		if ( !currentProbabilityState->wasPutInTerminalQueue ) {
@@ -217,7 +227,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 		}
 		return;
 	}
-
+	STAMINA_DEBUG_MESSAGE("Not terminating state");
 	currentStateHasZeroReachability = currentProbabilityState->getPi() == 0;
 
 	// We assume that if we make it here, our state is either nonterminal, or its reachability probability

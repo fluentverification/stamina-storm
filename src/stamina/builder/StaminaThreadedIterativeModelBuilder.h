@@ -67,7 +67,12 @@ namespace stamina {
 			 * */
 			StateType getOrAddStateIndexAndTrackTerminal(CompressedState const& state);
 			std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const & getExplorationThreads() const override;
+			/**
+			 * Sets a vector of generators for the threads
+			 * */
+			void setGeneratorsVector(std::vector<std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>>> & generators);
 		private:
+			std::vector<std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>>> * generators;
 			threads::ControlThread<ValueType, RewardModelType, StateType> controlThread;
 			std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;
 			bool controlThreadsCreated;

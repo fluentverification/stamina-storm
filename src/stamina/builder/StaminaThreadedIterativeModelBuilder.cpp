@@ -83,7 +83,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 					, this->controlThread // Control Thread
 					, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
 					, & this->getStateMap()
-					, this->getGenerator() // We need to either make the generator threadsafe, or create copies
+					, this->generators->at(currentThreadIndex - 1)
 					, stateToIdCallback
 				)
 			);
@@ -465,6 +465,18 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::get
 	// 	currentExplorationThreads.push_back(thread);
 	// }
 	// return currentExplorationThreads;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::setGeneratorsVector(
+	std::vector<std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>>> & generators
+) {
+	// Check the size
+	if (generators.size() != Options::threads) {
+		StaminaMessages::errorAndExit("Generators vector size does not match thread count!");
+	}
+	this->generators = &generators;
 }
 
 template class StaminaThreadedIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

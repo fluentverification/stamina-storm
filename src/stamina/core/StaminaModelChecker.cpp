@@ -120,6 +120,12 @@ StaminaModelChecker::modelCheckProperty(
 			StaminaMessages::info("Using thread-count: " + std::to_string(Options::threads));
 			auto builderPointer = std::make_shared<StaminaThreadedIterativeModelBuilder<double>> (generator, modulesFile, options);
 			builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+			std::vector<std::shared_ptr<storm::generator::PrismNextStateGenerator<double, uint32_t>>> generators;
+			for (int i = 0; i < Options::threads; i++) {
+				generators.push_back(std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options));
+			}
+			// Give to model builder
+
 		}
 	}
 	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
