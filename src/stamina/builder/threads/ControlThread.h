@@ -39,27 +39,69 @@ namespace stamina {
 
 				class LockableDeque {
 				public:
-					LockableDeque() {
+					LockableDeque() :
+						guard(this->lock)
+					{
 						// Intentionally left empty
 					}
 
-					LockableDeque(const LockableDeque & other) {
-						queue = other.queue;
+					LockableDeque(const LockableDeque & other) :
+						guard(this->lock)
+						, queue(other.queue)
+					{
 						// We don't need to copy the lock, just the queue
 					}
-					int size();
+					int size() const {
+						return queue.size();
+					}
 					/**
-					 * Locks the queue and emplaces
+					 * Locks the queue and emplaces an element
+					 *
+					 * @param from The state we are going from
+					 * @param to The state the transition goes to
+					 * @param rate The transition rate of this transition
 					 * */
-					void emplace_back(StateType from, StateType to, double rate);
-					bool empty();
-					void lockThread();
-					void unlockThread();
-					Transition top();
-					void pop();
+					void emplace_back(StateType from, StateType to, double rate) {
+						Transition t(from, to, rate);
+						queue.emplace_back(t);
+					}
+					/**
+					 * Determines whether the internal queue is empty. This method is
+					 * const as it does not change anything about the internals of this
+					 * datastructure
+					 *
+					 * @return whether the internal queue is empty
+					 * */
+					bool empty() const {
+						return queue.empty();
+					}
+					/**
+					 * Locks the mutex with a std::lock_guard and leaves it locked
+					 * */
+					void lockThread() {
+						guard.lock();
+					}
+					/**
+					 * Unlocks the std::lock_guard guarding the mutex
+					 * */
+					void unlockThread() {
+						guard.unlock();
+					}
+					/**
+					 * Gets the top element (or front element) of the internal queue.
+					 *
+					 * @return The first transition
+					 * */
+					Transition top() const {
+						return queue.front();
+					}
+					void pop() {
+						queue.pop_front();
+					}
 				private:
 					std::deque<Transition> queue;
 					mutable std::shared_mutex lock;
+					std::lock_guard guard;
 				};
 
 				/**
