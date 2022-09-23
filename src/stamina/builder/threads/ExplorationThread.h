@@ -52,15 +52,6 @@ namespace stamina {
 				bool isIdling();
 				void setIsCtmc(bool isCtmc);
 				/**
-				* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
-				* and state space truncation from that state.
-				*
-				* @param state Pointer to the state we are looking it
-				* @return A pair with the state id and whether or not it was already discovered
-				* */
-				virtual StateType getOrAddStateIndex(CompressedState const& state) = 0;
-
-				/**
 				* A function called by other threads to request cross exploration of
 				* states already explored but encountered by another thread.
 				*
