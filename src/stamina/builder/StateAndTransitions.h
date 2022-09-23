@@ -48,7 +48,7 @@ namespace stamina {
 		class StateAndProbability {
 		public:
 			StateAndProbability(
-				CompressedState & state
+				CompressedState const & state
 				, StateType index
 				, double deltaPi = 0
 			) : state(state)
@@ -61,7 +61,7 @@ namespace stamina {
 				, index(other.index)
 				, deltaPi(other.deltaPi)
 			{}
-			CompressedState & state;
+			CompressedState const & state;
 			StateType index;
 			double deltaPi;
 		};
@@ -70,7 +70,7 @@ namespace stamina {
 			template <typename StateType>
 			struct StaminaStateIndexAndThread {
 				StaminaStateIndexAndThread(
-					CompressedState & state
+					CompressedState const & state
 					, StateType index
 					, uint8_t threadIndex
 				) : state(state)
@@ -83,7 +83,7 @@ namespace stamina {
 					, threadIndex(other.threadIndex)
 
 				{}
-				CompressedState & state;
+				CompressedState const & state;
 				StateType index;
 				uint8_t threadIndex;
 			};
