@@ -39,7 +39,7 @@ namespace stamina {
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
-					, std::function<StateType (CompressedState const&)> stateToIdCallback
+					// , std::function<StateType (CompressedState const&)> stateToIdCallback
 				);
 
 				/*
@@ -68,7 +68,7 @@ namespace stamina {
 			protected:
 				virtual void exploreStates() = 0;
 				virtual void exploreState(StateProbability & stateProbability) = 0;
-				virtual void enqueueSuccessors(CompressedState & state) = 0; // stateToIdCallback
+				virtual StateType enqueueSuccessors(CompressedState & state) = 0; // stateToIdCallback
 				// Weak priority on crossExplorationQueue (superseded by mutex lock)
 				std::shared_mutex crossExplorationQueueMutex;
 				// The lock that locks our mutex

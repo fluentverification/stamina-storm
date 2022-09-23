@@ -16,7 +16,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::IterativeExpl
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
-	, std::function<StateType (CompressedState const&)> stateToIdCallback
+	// , std::function<StateType (CompressedState const&)> stateToIdCallback
 ) : ExplorationThread<ValueType, RewardModelType, StateType>(
 	parent
 	, threadIndex
@@ -24,14 +24,22 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::IterativeExpl
 	, stateSize
 	, stateMap
 	, generator
-	, stateToIdCallback
-)
+	)
+	// , stateToIdCallback
+
 {
-	// Intentionally left empty
+	// create a binding for index requests
+	this->stateToIdCallback =
+		std::bind(
+			&IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
+			, this
+			, std::placeholders::_1
+		);
+
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-void
+StateType
 IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSuccessors(CompressedState & state) {
 	StateType actualIndex;
 	// Request ownership of state
@@ -43,7 +51,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 		StateIndexAndThread sThreadIndex(state, actualIndex, sPrimeOwner);
 		// Request cross exploration handled in other function
 		this->statesToRequestCrossExploration.emplace_back(sThreadIndex);
-		return; // TODO: another thread owns
+		return 0; // TODO: another thread owns
 	}
 	else if (sPrimeOwner == NO_THREAD) {
 		STAMINA_DEBUG_MESSAGE("No thread owns this state");
@@ -55,7 +63,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			StateIndexAndThread sThreadIndex(state, actualIndex, sPrimeOwner);
 			// request cross exploration
 			this->statesToRequestCrossExploration.emplace_back(sThreadIndex);
-			return; // TODO: another thread owns
+			return 0; // TODO: another thread owns
 		}
 	}
 	else {
@@ -89,7 +97,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 		}
 		else {
 			// State does not exist yet in this iteration
-			return;
+			return actualIndex;
 		}
 	}
 	else {
@@ -124,6 +132,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			numberTerminal++;
 		}
 	}
+	return actualIndex;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

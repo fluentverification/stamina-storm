@@ -86,7 +86,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 					, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
 					, & this->getStateMap()
 					, this->generators->at(currentThreadIndex - 1)
-					, stateToIdCallback
+					// , stateToIdCallback
 				)
 			);
 			currentThreadIndex++;

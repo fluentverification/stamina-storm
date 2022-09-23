@@ -31,10 +31,10 @@ namespace stamina {
 					, uint32_t stateSize
 					, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 					, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
-					, std::function<StateType (CompressedState const&)> stateToIdCallback
+					// , std::function<StateType (CompressedState const&)> stateToIdCallback
 				);
 
-				virtual void enqueueSuccessors(CompressedState & state) override;
+				virtual StateType enqueueSuccessors(CompressedState & state) override;
 			protected:
 				virtual void exploreStates() override;
 				virtual void exploreState(StateProbability & stateProbability) override;
