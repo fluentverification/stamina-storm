@@ -124,8 +124,12 @@ StaminaModelChecker::modelCheckProperty(
 			for (int i = 0; i < Options::threads; i++) {
 				generators.push_back(std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options));
 			}
-			// Give to model builder
-
+			// Give to model builder.
+			//
+			// This must be builderPointer because when we pointer-cast to a
+			// std::shared_ptr<StaminaModelBuilder> we lose the knowledge that this is a
+			// StaminaThreadedIterativeModelBuilder, which has this method.
+			builderPointer->setGeneratorsVector(generators);
 		}
 	}
 	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
