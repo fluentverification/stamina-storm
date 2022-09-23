@@ -293,7 +293,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-	, CompressedState & terminalState
+	, CompressedState const & terminalState
 	, StateType stateId
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) {

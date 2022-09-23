@@ -5,7 +5,7 @@ namespace stamina {
 namespace core {
 
 std::string
-StateSpaceInformation::stateToString(CompressedState & state, double pi) {
+StateSpaceInformation::stateToString(CompressedState const & state, double pi) {
 	std::string varString = "(";
 	auto integerVariables  = variableInformation.integerVariables;
 	auto booleanVariables  = variableInformation.booleanVariables;
@@ -45,17 +45,17 @@ StateSpaceInformation::stateToString(CompressedState & state, double pi) {
 }
 
 std::string
-StateSpaceInformation::stateToBase64String(CompressedState & state, double pi) {
+StateSpaceInformation::stateToBase64String(CompressedState const & state, double pi) {
 	std::string stateString = stateToString(state, pi);
 }
 
 void
-StateSpaceInformation::printStateAsString(CompressedState & state, double pi) {
+StateSpaceInformation::printStateAsString(CompressedState const & state, double pi) {
 	std::cout << stateToString(state, pi) << std::endl;
 }
 
 void
-StateSpaceInformation::printStateAsBase64String(CompressedState & state, double pi) {
+StateSpaceInformation::printStateAsBase64String(CompressedState const & state, double pi) {
 	std::cout << stateToBase64String(state, pi) << std::endl;
 }
 

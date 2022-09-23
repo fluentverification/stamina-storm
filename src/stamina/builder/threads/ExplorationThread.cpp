@@ -17,21 +17,14 @@ ExplorationThread<ValueType, RewardModelType, StateType>::ExplorationThread(
 	, uint32_t stateSize
 	, util::StateIndexArray<StateType, ProbabilityState<StateType>> * stateMap
 	, std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> const& generator
-	// , std::function<StateType (CompressedState const&)> stateToIdCallback
+	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) : BaseThread<ValueType, RewardModelType, StateType>(parent)
 	, threadIndex(threadIndex)
 	, controlThread(controlThread)
 	, stateStorage(parent->getStateStorage())
 	, stateMap(stateMap)
 	, generator(generator)
-	/*, stateToIdCallback(
-		// create a binding for index requests
-		std::bind(
-			&ExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
-			, this
-			, std::placeholders::_1
-		)
-	) */
+	, stateToIdCallback(stateToIdCallback)
 	, xLock(crossExplorationQueueMutex, std::defer_lock)
 {
 	// Intentionally left empty
@@ -64,7 +57,7 @@ ExplorationThread<ValueType, RewardModelType, StateType>::setIsCtmc(bool isCtmc)
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ExplorationThread<ValueType, RewardModelType, StateType>::requestCrossExploration(
-	CompressedState & state
+	CompressedState const & state
 	, double deltaPi
 ) {
 	// Lock the mutex since multiple threads will be calling this function

@@ -25,7 +25,7 @@ ControlThread<ValueType, RewardModelType, StateType>::ControlThread(
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::pair<uint8_t, StateType>
-ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId) {
+ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(CompressedState const & state, uint8_t threadIndex, StateType requestedId) {
 	// Test to see if a thread already owns this state.
 	// TODO: should this pre-lock even be in here?
 	if (stateThreadMap.contains(state)) {
@@ -56,7 +56,7 @@ ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(Compresse
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 uint8_t
-ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & state) const {
+ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState const & state) const {
 	if (stateThreadMap.contains(state)) {
 		return stateThreadMap.getValue(state);
 	}
@@ -66,7 +66,7 @@ ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & 
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-ControlThread<ValueType, RewardModelType, StateType>::whatIsIndex(CompressedState & state) {
+ControlThread<ValueType, RewardModelType, StateType>::whatIsIndex(CompressedState const & state) {
 	// Don't need to lock it in this function
 	if (this->parent->getStateStorage().stateToId.contains(state)) {
 		return this->parent->getStateStorage().stateToId.getValue(state);

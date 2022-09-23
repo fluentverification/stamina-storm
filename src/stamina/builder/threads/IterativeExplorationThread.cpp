@@ -24,23 +24,18 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::IterativeExpl
 	, stateSize
 	, stateMap
 	, generator
+	, std::bind(
+		&IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSuccessors
+		, this
+		, std::placeholders::_1
 	)
-	// , stateToIdCallback
-
-{
-	// create a binding for index requests
-	this->stateToIdCallback =
-		std::bind(
-			&IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreStates
-			, this
-			, std::placeholders::_1
-		);
-
+) {
+	// Intentionally left empty
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSuccessors(CompressedState & state) {
+IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSuccessors(CompressedState const & state) {
 	StateType actualIndex;
 	// Request ownership of state
 	// Check if we own sPrime and if we don't ask the thread who does to explore it
@@ -87,7 +82,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
-				std::pair<ProbabilityState<StateType> *, CompressedState &> toEnqueue(nextProbabilityState, state);
+				std::pair<ProbabilityState<StateType> *, CompressedState const &> toEnqueue(nextProbabilityState, state);
 				// Enqueue
 				this->mainExplorationQueue.emplace_back(
 					toEnqueue
@@ -107,7 +102,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != this->parent->getIteration()) {
 				nextProbabilityState->iterationLastSeen = this->parent->getIteration();
-				std::pair<ProbabilityState<StateType> *, CompressedState &> toEnqueue(nextProbabilityState, state);
+				std::pair<ProbabilityState<StateType> *, CompressedState const &> toEnqueue(nextProbabilityState, state);
 
 				// Enqueue
 				this->mainExplorationQueue.emplace_back(toEnqueue);
@@ -125,7 +120,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::enqueueSucces
 			this->parent->getStateMap().put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = this->parent->getIteration();
 			// exploredStates.emplace(actualIndex);
-			std::pair<ProbabilityState<StateType> *, CompressedState &> toEnqueue(nextProbabilityState, state);
+			std::pair<ProbabilityState<StateType> *, CompressedState const &> toEnqueue(nextProbabilityState, state);
 
 			this->mainExplorationQueue.emplace_back(toEnqueue);
 			enqueued = true;
@@ -192,7 +187,7 @@ IterativeExplorationThread<ValueType, RewardModelType, StateType>::exploreState(
 	auto currentProbabilityState = this->parent->getStateMap().get(stateProbability.index);
 
 	StateType currentIndex = stateProbability.index;
-	CompressedState & currentState = stateProbability.state;
+	CompressedState const & currentState = stateProbability.state;
 
 	// Flush deltaPi
 	currentProbabilityState->pi += stateProbability.deltaPi;

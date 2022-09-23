@@ -169,7 +169,7 @@ namespace stamina {
 			* */
 			void connectTerminalStatesToAbsorbing(
 				storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-				, CompressedState & terminalState
+				, CompressedState const & terminalState
 				, StateType stateId
 				, std::function<StateType (CompressedState const&)> stateToIdCallback
 			);
