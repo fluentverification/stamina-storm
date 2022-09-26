@@ -30,6 +30,8 @@ namespace stamina {
 				) const override;
 			private:
 				std::mutex variableInformationMutex;
+				// Variable information should be set up *before* calls to expand()
+				bool varInfoWasSetUp;
 			};
 		} // namespace generator
 	} // namespace threadsafe

@@ -1,5 +1,8 @@
 #include "ThreadsafePrismNextStateGenerator.h"
 
+
+#include "core/StaminaMessages.h"
+
 namespace stamina {
 namespace threadsafe {
 namespace generator {
@@ -10,6 +13,7 @@ ThreadsafePrismNextStateGenerator<ValueType, StateType>::ThreadsafePrismNextStat
 	, storm::generator::NextStateGeneratorOptions const& options = NextStateGeneratorOptions()
 	, std::shared_ptr<ActionMask<ValueType, StateType>> const& = nullptr
 ) : PrismNextStateGenerator<ValueType, StateType>(program, options)
+	, varInfoWasSetUp(false)
 {
 	// intentionally left empty
 }
@@ -17,7 +21,9 @@ ThreadsafePrismNextStateGenerator<ValueType, StateType>::ThreadsafePrismNextStat
 template<typename ValueType, typename StateType = uint32_t>
 storm::storage::sparse::StateValuations
 ThreadsafePrismNextStateGenerator<ValueType, StateType>::makeObservationValuation() const {
-
+	if (varInfoWasSetUp) {
+		StaminaMessages::warning("Cannot make observation valuation");
+	}
 }
 
 template<typename ValueType, typename StateType = uint32_t>
