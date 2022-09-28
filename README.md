@@ -2,7 +2,7 @@
 
 # STAMINA (STORM Integration)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-storm/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-storm)
+[![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-storm)
 ![Language](https://img.shields.io/github/languages/top/fluentverification/stamina-storm)
 ![License](https://img.shields.io/github/license/fluentverification/stamina-storm)
 ![Downloads](https://img.shields.io/github/downloads/fluentverification/stamina-storm/total)
