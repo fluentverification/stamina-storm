@@ -2,7 +2,7 @@
 
 # STAMINA (STORM Integration)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-storm)
+[![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-storm/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-storm)
 ![Language](https://img.shields.io/github/languages/top/fluentverification/stamina-storm)
 ![License](https://img.shields.io/github/license/fluentverification/stamina-storm)
 ![Downloads](https://img.shields.io/github/downloads/fluentverification/stamina-storm/total)
@@ -18,7 +18,7 @@ Check out our website at [https://staminachecker.org](https://staminachecker.org
 (Please see our [wiki page](https://staminachecker.org/documentation/wiki/install-sstamina.html) for more information)
 ### On Linux and Mac:
 ```
-git clone https://github.com/fluentverification/stamina-cplusplus
+git clone https://github.com/fluentverification/stamina-storm
 cd bin
 cmake .. -DSTORM_PATH=<PATH TO STORM DIRECTORY> -DCMAKE_CXX_COMPILER=/usr/bin/clang-cpp
 make
