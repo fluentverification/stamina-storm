@@ -272,6 +272,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	do {
 		currentProbabilityState = statePriorityQueue.top().first;
 		currentState = statePriorityQueue.top().second;
+		currentIndex = currentProbabilityState->index;
 		statePriorityQueue.pop();
 		if (currentIndex == 0) {
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
