@@ -274,9 +274,11 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	CompressedState currentState;
 
 	isInit = false;
+	
+	bool hold = true;
 	// Perform a search through the model.
-	do {
-
+	while (hold || !statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) {
+		hold = false;
 		auto currentProbabilityStatePair = statePriorityQueue.top();
 		currentProbabilityState = statePriorityQueue.top().first;
 		currentState = statePriorityQueue.top().second;
@@ -451,7 +453,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		std::cout << "while condition: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
 		std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
 		std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
-	} while (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor));
+	}
 	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
 
 	this->printStateSpaceInformation();
