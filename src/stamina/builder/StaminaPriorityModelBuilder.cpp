@@ -164,16 +164,15 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 			, false // All models are deterministic
 			, 0
 		);
-	// Builds matrices and truncates state space
-	buildMatrices(
-		transitionMatrixBuilder
-		, rewardModelBuilders
-		, stateAndChoiceInformationBuilder
-		, markovianStates
-		, stateValuationsBuilder
-	);
 
-// 	StaminaMessages::errorAndExit("Exit");
+		// Builds matrices and truncates state space
+		buildMatrices(
+			transitionMatrixBuilder
+			, rewardModelBuilders
+			, stateAndChoiceInformationBuilder
+			, markovianStates
+			, stateValuationsBuilder
+		);
 
 	// No remapping is necessary
 	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
@@ -242,23 +241,30 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		, std::placeholders::_1
 	);
 
-	// Create absorbing state
-	this->setUpAbsorbingState(
-		transitionMatrixBuilder
-		, rewardModelBuilders
-		, stateAndChoiceInformationBuilder
-		, markovianChoices
-		, stateValuationsBuilder
-	);
-	isInit = true;
-	// Let the generator create all initial states.
-	this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
-	if (this->stateStorage.initialStateIndices.empty()) {
-		StaminaMessages::errorAndExit("Initial states are empty!");
+	if (firstIteration) {
+		// Create absorbing state
+		this->setUpAbsorbingState(
+			transitionMatrixBuilder
+			, rewardModelBuilders
+			, stateAndChoiceInformationBuilder
+			, markovianChoices
+			, stateValuationsBuilder
+		);
+		isInit = true;
+		// Let the generator create all initial states.
+		this->stateStorage.initialStateIndices = generator->getInitialStates(stateToIdCallback);
+		if (this->stateStorage.initialStateIndices.empty()) {
+			StaminaMessages::errorAndExit("Initial states are empty!");
+		}
+		currentRowGroup = 1;
+		currentRow = 1;
+		firstIteration = false;
+		numberOfExploredStates = 0;
 	}
-	currentRowGroup = 1;
-	currentRow = 1;
-	numberOfExploredStates = 0;
+	else {
+		// Flush the previously early-terminated states into statesToExplore FIRST
+		flushStatesTerminated();
+	}
 	numberOfExploredStatesSinceLastMessage = 0;
 
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
@@ -270,6 +276,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 	// Perform a search through the model.
 	do {
+
+		auto currentProbabilityStatePair = statePriorityQueue.top();
 		currentProbabilityState = statePriorityQueue.top().first;
 		currentState = statePriorityQueue.top().second;
 		currentIndex = currentProbabilityState->index;
@@ -303,6 +311,20 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				// Do NOT place this in the deque of states we should start with next iteration
 				continue;
 			}
+		}
+
+		// Add the state rewards to the corresponding reward models.
+		// Do not explore if state is terminal and its reachability probability is less than kappa
+		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
+			// Do not connect to absorbing yet
+			// Place this in statesTerminatedLastIteration
+			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
+				statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
+				currentProbabilityState->wasPutInTerminalQueue = true;
+				++currentRow;
+				++currentRowGroup;
+			}
+			continue;
 		}
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
@@ -423,14 +445,29 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
-		std::cout << piHat << " >=? " << Options::prob_win / Options::approx_factor << std::endl;
+		std::cout << piHat << " <=? " << Options::prob_win / Options::approx_factor << std::endl;
 		std::cout << "statePriorityQueue size is " << statePriorityQueue.size() << std::endl;
 		std::cout << "At this iteration, piHat = " << piHat << " and numberTerminal is " << numberTerminal << std::endl;
-	} while (!statePriorityQueue.empty() && (piHat > Options::prob_win) / Options::approx_factor);
-	numberStates = numberOfExploredStates;
+		std::cout << "while condition: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
+		std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
+		std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
+	} while (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor));
+	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
 
 	this->printStateSpaceInformation();
 	StaminaMessages::info("Perimeter reachability is " + std::to_string(piHat));
+
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
+	while (!statesTerminatedLastIteration.empty()) {
+		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		statePriorityQueue.push(probabilityStatePair);
+		probabilityStatePair.first->wasPutInTerminalQueue = false;
+		statesTerminatedLastIteration.pop_front();
+	}
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

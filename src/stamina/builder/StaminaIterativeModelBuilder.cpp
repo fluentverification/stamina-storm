@@ -297,10 +297,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
-			ProbabilityState<StateType> * initProbabilityState = nextState;
-			stateMap.put(actualIndex, initProbabilityState);
-			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
-			initProbabilityState->iterationLastSeen = iteration;
+			StaminaMessages::errorAndExit("Initial state should not exist yet, but does!");
 		}
 		return actualIndex;
 	}

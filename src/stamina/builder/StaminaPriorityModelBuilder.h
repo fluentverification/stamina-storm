@@ -67,6 +67,8 @@ namespace stamina {
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			) override;
 		private:
+			std::deque<ProbabilityStatePair<StateType>> statesTerminatedLastIteration;
+			void flushStatesTerminated();
 			/*
 			 * Access to data members of parent class
 			 * */
