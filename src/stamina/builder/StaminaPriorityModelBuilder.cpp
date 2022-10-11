@@ -274,10 +274,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	CompressedState currentState;
 
 	isInit = false;
-	
+
 	bool hold = true;
 	// Perform a search through the model.
-	while (hold || !statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) {
+	while (hold || (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor))) {
 		hold = false;
 		auto currentProbabilityStatePair = statePriorityQueue.top();
 		currentProbabilityState = statePriorityQueue.top().first;
@@ -317,17 +317,17 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
-		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
-			// Do not connect to absorbing yet
-			// Place this in statesTerminatedLastIteration
-			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
-				statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
-				currentProbabilityState->wasPutInTerminalQueue = true;
-				++currentRow;
-				++currentRowGroup;
-			}
-			continue;
-		}
+		// if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
+		// 	// Do not connect to absorbing yet
+		// 	// Place this in statesTerminatedLastIteration
+		// 	if ( !currentProbabilityState->wasPutInTerminalQueue ) {
+		// 		statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
+		// 		currentProbabilityState->wasPutInTerminalQueue = true;
+		// 		++currentRow;
+		// 		++currentRowGroup;
+		// 	}
+		// 	continue;
+		// }
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -454,6 +454,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
 		std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
 	}
+	std::cout << "while condition at termination: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
+	std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
+	std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
+
 	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
 
 	this->printStateSpaceInformation();
