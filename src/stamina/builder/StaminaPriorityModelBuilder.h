@@ -69,6 +69,7 @@ namespace stamina {
 		private:
 			std::deque<ProbabilityStatePair<StateType>> statesTerminatedLastIteration;
 			void flushStatesTerminated();
+			void flushFromPriorityQueueToStatesTerminated();
 			/*
 			 * Access to data members of parent class
 			 * */

@@ -315,20 +315,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 			}
 		}
 
-		// Add the state rewards to the corresponding reward models.
-		// Do not explore if state is terminal and its reachability probability is less than kappa
-		// if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
-		// 	// Do not connect to absorbing yet
-		// 	// Place this in statesTerminatedLastIteration
-		// 	if ( !currentProbabilityState->wasPutInTerminalQueue ) {
-		// 		statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
-		// 		currentProbabilityState->wasPutInTerminalQueue = true;
-		// 		++currentRow;
-		// 		++currentRowGroup;
-		// 	}
-		// 	continue;
-		// }
-
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
@@ -454,6 +440,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
 		std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
 	}
+	this->flushFromPriorityQueueToStatesTerminated();
 	std::cout << "while condition at termination: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
 	std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
 	std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
@@ -478,21 +465,41 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesT
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPriorityQueueToStatesTerminated() {
+	// Terminal states are any remaining states in the state transition queue
+	while (!statePriorityQueue.empty()) {
+		auto currentProbabilityStatePair = statePriorityQueue.top();
+		auto currentProbabilityState = statePriorityQueue.top().first;
+		auto currentState = statePriorityQueue.top().second;
+		statePriorityQueue.pop();
+		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
+	}
+}
+
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
 ) {
-	auto terminalStates = stateMap.getPerimeterStates();
-	for (auto terminalStateIndex : terminalStates) {
-		auto terminalState = stateMap.get(terminalStateIndex);
-		// connect to absorbing
-		// TODO: figure out how to do this for Priority Model Builder
-// 		this->connectTerminalStatesToAbsorbing(
-// 			transitionMatrixBuilder
-// 			, terminalState->state()
-// 			, terminalState->index
-// 			, this->terminalStateToIdCallback
-// 		);
+	// Terminal states are any remaining states in the state transition queue
+	while (!statesTerminatedLastIteration.empty()) {
+		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
+		auto state = statesTerminatedLastIteration.front().second;
+		statesTerminatedLastIteration.pop_front();
+		// If the state is not marked as terminal, we've already connected it to absorbing
+		if (!currentProbabilityState->isTerminal()) {
+			continue;
+		}
+		this->connectTerminalStatesToAbsorbing(
+			transitionMatrixBuilder
+			, state
+			, currentProbabilityState->index
+			, this->terminalStateToIdCallback
+		);
+		currentProbabilityState->setTerminal(false);
 	}
+
 }
 
 template class StaminaPriorityModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
