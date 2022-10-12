@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <sstream>
+#include <cmath>
 
 namespace stamina {
 namespace builder {
@@ -276,11 +277,13 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 
 	bool hold = true;
+	double windowPower = pow(Options::prob_win, 5);
 	// Perform a search through the model.
-	while (hold || (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor))) {
+	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
 		hold = false;
 		auto currentProbabilityStatePair = statePriorityQueue.top();
 		currentProbabilityState = statePriorityQueue.top().first;
+		// std::cout << "Current pi: " << currentProbabilityState->pi << std::endl;
 		currentState = statePriorityQueue.top().second;
 		currentIndex = currentProbabilityState->index;
 		statePriorityQueue.pop();
@@ -385,9 +388,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						double piToAdd = currentProbabilityState->getPi() * probability;
 						nextProbabilityState->addToPi(piToAdd);
 						if (nextProbabilityState->isTerminal()) {
-							std::cout << "Adding " << piToAdd << " to pi" << std::endl;
+							// std::cout << "Adding " << piToAdd << " to pi" << std::endl;
 							piHat += piToAdd;
-							std::cout << "Now piHat is " << piHat << std::endl;
+							// std::cout << "Now piHat is " << piHat << std::endl;
 						}
 					}
 
@@ -407,10 +410,13 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
-			std::cout << "Before editing piHat, it is " << piHat << std::endl;
-			std::cout << "Subtracting " << currentProbabilityState->getPi() <<  " from piHat" << std::endl;
+			// std::cout << "Before editing piHat, it is " << piHat << std::endl;
+			// std::cout << "Subtracting " << currentProbabilityState->getPi() <<  " from piHat" << std::endl;
 			piHat -= currentProbabilityState->getPi();
-			std::cout << "Now piHat is " << piHat << std::endl;
+			// std::cout << "Now piHat is " << piHat << std::endl;
+		}
+		else if (currentProbabilityState->isTerminal()) {
+			StaminaMessages::error("numberTerminal is equal to " + std::to_string(numberTerminal));
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
@@ -433,17 +439,17 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
-		std::cout << piHat << " <=? " << Options::prob_win / Options::approx_factor << std::endl;
-		std::cout << "statePriorityQueue size is " << statePriorityQueue.size() << std::endl;
-		std::cout << "At this iteration, piHat = " << piHat << " and numberTerminal is " << numberTerminal << std::endl;
-		std::cout << "while condition: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
-		std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
-		std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
+		// std::cout << piHat << " <=? " << Options::prob_win / Options::approx_factor << std::endl;
+		// std::cout << "statePriorityQueue size is " << statePriorityQueue.size() << std::endl;
+		// std::cout << "At this iteration, piHat = " << piHat << " and numberTerminal is " << numberTerminal << std::endl;
+		// std::cout << "while condition: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
+		// std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
+		// std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
 	}
 	this->flushFromPriorityQueueToStatesTerminated();
-	std::cout << "while condition at termination: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
-	std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
-	std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
+	// std::cout << "while condition at termination: " << (!statePriorityQueue.empty() && (piHat > Options::prob_win / Options::approx_factor)) << std::endl;
+	// std::cout << "From: \n !statePriorityQueue.empty() = " << !statePriorityQueue.empty() << std::endl;
+	// std::cout << "(piHat > Options::prob_win / Options::approx_factor) = " << (piHat > (Options::prob_win / Options::approx_factor)) << std::endl;
 
 	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
 
