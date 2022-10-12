@@ -11,3 +11,9 @@ storm
 *.txt
 notes.md
 modelFiles.sh
+
+# Compiled UI Files
+src/stamina/gui/ui/ui_About.h
+src/stamina/gui/ui/ui_MainWindow.h
+src/stamina/gui/ui/ui_Preferences.h
+src/stamina/gui/ui/ui_PropertyWizard.h
