@@ -397,6 +397,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 					if (currentProbabilityState->isNew) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+						std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
 						numberTransitions++;
 					}
 				}

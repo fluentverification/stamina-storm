@@ -11,6 +11,9 @@
 #include <string>
 #include <argp.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+#define BUILD_INFO ""
 
 enum STAMINA_METHODS {
 	ITERATIVE_METHOD = 0          // STAMINA 2.5
@@ -69,7 +72,15 @@ static struct argp_option options[] = {
 		"Use the STAMINA 2.0 method (the method in STAMINA/PRISM)"}
 	, {"threads", 'j', "int", 0,
 		"Number of threads to use for state exploration (default 1)"}
+	, {"version", 'v', 0, 0,
+		"Print STAMINA Version information"}
 	, { 0 }
+};
+
+struct version {
+	static const uint8_t version_major = 0;
+	static const uint8_t version_minor = 2;
+	static const uint8_t version_sub_minor = 5;
 };
 
 /**
@@ -181,6 +192,15 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 		case 'j':
 			arguments->threads = (uint8_t) atoi(arg);
 			break;
+		case 'v':
+			printf(
+					"STAMINA - STochiastic Approximate Model-checker for INfinite-state Analysis\n\tVersion %d.%d.%d\n\tBuild:%s\n"
+				, version::version_major
+				, version::version_minor
+				, version::version_sub_minor
+				, BUILD_INFO
+			);
+			exit(0);
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file
