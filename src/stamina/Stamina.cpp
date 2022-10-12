@@ -61,7 +61,7 @@ Stamina::run() {
 
 void
 Stamina::initialize() {
-	StaminaMessages::info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
+	StaminaMessages::info("Stamina version is: " + std::to_string(version::version_major) + "." + std::to_string(version::version_minor) + "." + std::to_string(version::version_sub_minor));
 	try {
 		std::allocator<StaminaModelChecker> alloc;
 		// Initialize as shared pointer
