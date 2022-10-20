@@ -65,7 +65,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
-			statePriorityQueue.push({initProbabilityState, state});
+			ProbabilityStatePair<StateType> initProbabilityStatePair(initProbabilityState, state);
+			orderedNextStates.emplace_back(initProbabilityStatePair);
+			// statePriorityQueue.push({initProbabilityState, state});
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
@@ -85,7 +87,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push({nextProbabilityState, state});
+				// statePriorityQueue.push({nextProbabilityState, state});
+				ProbabilityStatePair<StateType> nextProbabilityStatePair(nextProbabilityState, state);
+				orderedNextStates.emplace_back(nextProbabilityStatePair);
 				enqueued = true;
 			}
 		}
@@ -102,7 +106,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push({nextProbabilityState, state});
+				// statePriorityQueue.push({nextProbabilityState, state});
+				ProbabilityStatePair<StateType> nextProbabilityStatePair(nextProbabilityState, state);
+				orderedNextStates.emplace_back(nextProbabilityStatePair);
+
 				enqueued = true;
 			}
 		}
@@ -117,7 +124,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			statePriorityQueue.push({nextProbabilityState, state});
+			// statePriorityQueue.push({nextProbabilityState, state});
+			ProbabilityStatePair<StateType> nextProbabilityStatePair(nextProbabilityState, state);
+			orderedNextStates.emplace_back(nextProbabilityStatePair);
+
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -301,7 +311,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 		// Load state for us to use
 		generator->load(currentState);
-
+		// Clear orderedNextStates before expanding
+		orderedNextStates.clear();
 		if (propertyExpression != nullptr) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
 			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
@@ -394,11 +405,16 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						}
 					}
 
-
-					if (currentProbabilityState->isNew) {
+					auto nextProbabilityStatePair = orderedNextStates.front();
+					orderedNextStates.pop_front();
+					if (currentProbabilityState->isNew && nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor ) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
 						numberTransitions++;
+						statePriorityQueue.push(nextProbabilityStatePair);
+					}
+					else if (nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor) {
+						statePriorityQueue.push(nextProbabilityStatePair);
 					}
 				}
 			}

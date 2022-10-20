@@ -68,6 +68,7 @@ namespace stamina {
 			) override;
 		private:
 			std::deque<ProbabilityStatePair<StateType>> statesTerminatedLastIteration;
+			std::deque<ProbabilityStatePair<StateType>> orderedNextStates;
 			void flushStatesTerminated();
 			void flushFromPriorityQueueToStatesTerminated();
 			/*
