@@ -425,6 +425,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						// Lookahead and terminate state
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						this->createTransition(sPrime, 0, 1.0);
+						statesTerminatedLastIteration.emplace_back(
+							nextProbabilityStatePair
+						);
 					}
 				}
 				else {
@@ -506,8 +509,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 	// Terminal states are any remaining states in the state transition queue
 	while (!statePriorityQueue.empty()) {
 		auto currentProbabilityStatePair = statePriorityQueue.top();
-		auto currentProbabilityState = statePriorityQueue.top().first;
-		auto currentState = statePriorityQueue.top().second;
 		statePriorityQueue.pop();
 		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
 	}
