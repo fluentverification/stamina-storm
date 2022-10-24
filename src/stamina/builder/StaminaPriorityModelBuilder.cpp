@@ -286,6 +286,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 	isInit = false;
 
+	uint32_t numberExpandedNotIncluded = 0;
+
 	bool hold = true;
 	double windowPower = pow(Options::prob_win, 5);
 	// Perform a search through the model.
@@ -406,17 +408,29 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 					}
 
 					auto nextProbabilityStatePair = orderedNextStates.front();
-					if (currentProbabilityState->isNew && nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor ) {
+					bool noPreTerminate = nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor;
+					if (currentProbabilityState->isNew && noPreTerminate) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
-						std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
+						// std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
 						numberTransitions++;
 						statePriorityQueue.push(nextProbabilityStatePair);
 						orderedNextStates.pop_front();
 					}
-					else if (nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor) {
+					else if (noPreTerminate) {
 						statePriorityQueue.push(nextProbabilityStatePair);
+						orderedNextStates.pop_front();
+					}
+					else {
+						numberExpandedNotIncluded++;
+						// Lookahead and terminate state
+						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+						this->createTransition(sPrime, 0, 1.0);
 					}
 				}
+				else {
+					StaminaMessages::warning("Next state is null!");
+				}
+
 			}
 
 			++currentRow;
