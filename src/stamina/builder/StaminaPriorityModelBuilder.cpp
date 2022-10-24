@@ -354,6 +354,13 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
 		// Now add all choices.
 		bool firstChoiceOfState = true;
+
+		// Temporary code for analysis
+		int behaviorSize = 0;
+		for (auto const & choice : behavior) {
+			behaviorSize++;
+		}
+		std::cout << "Behavior size: " << behaviorSize << std::endl;
 		for (auto const& choice : behavior) {
 			if (!firstChoiceOfState) {
 				StaminaMessages::errorAndExit("Model was not deterministic!");
