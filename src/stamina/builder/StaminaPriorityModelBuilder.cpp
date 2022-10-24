@@ -103,7 +103,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
-			if (nextProbabilityState->iterationLastSeen != iteration) {
+			// if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				// statePriorityQueue.push({nextProbabilityState, state});
@@ -111,7 +111,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 				orderedNextStates.emplace_back(nextProbabilityStatePair);
 
 				enqueued = true;
-			}
+			// }
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
@@ -313,8 +313,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 		// Load state for us to use
 		generator->load(currentState);
-		// Clear orderedNextStates before expanding
-		orderedNextStates.clear();
 		if (propertyExpression != nullptr) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
 			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
@@ -330,6 +328,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				continue;
 			}
 		}
+
+		// Clear orderedNextStates before expanding
+		orderedNextStates.clear();
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -383,6 +384,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 					totalRate += stateProbabilityPair.second;
 				}
 			}
+			std::cout << "Choice size: " << choice.size() << std::endl;
+			std::cout << "Ordered next states' vector size: " << orderedNextStates.size() << std::endl;
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
@@ -409,16 +412,15 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 					auto nextProbabilityStatePair = orderedNextStates.front();
 					bool noPreTerminate = nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor;
+					orderedNextStates.pop_front();
 					if (currentProbabilityState->isNew && noPreTerminate) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						// std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
 						numberTransitions++;
 						statePriorityQueue.push(nextProbabilityStatePair);
-						orderedNextStates.pop_front();
 					}
 					else if (noPreTerminate) {
 						statePriorityQueue.push(nextProbabilityStatePair);
-						orderedNextStates.pop_front();
 					}
 					else {
 						numberExpandedNotIncluded++;
