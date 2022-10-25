@@ -428,7 +428,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						continue;
 					}
 
-					bool noPreTerminate = nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor;
+					bool noPreTerminate = true; // nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor;
 					if (currentProbabilityState->isNew && noPreTerminate) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						// std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
