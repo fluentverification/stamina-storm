@@ -129,7 +129,18 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(ProbabilityStatePair<StateType> probabilityStatePair) {
-	statePriorityQueue.push(probabilityStatePair);
+	auto stateReachability = probabilityStatePair.first->getPi();
+	auto state = probabilityStatePair.second;
+	// Our state is not a pre-terminated state but should be
+	// TODO: Figure out a way to prevent double hashing
+	if (stateReachability < windowPower / numberOfExploredStates && !preTerminatedStates.contains(state) && preTerminatedStates.getValue(state)) {
+		preTerminatedStates.findOrAdd(state, true);
+	}
+	// If it is preterminated but should be un-preterminated
+	else if (preTerminatedStates.contains(state)) {
+		preTerminatedStates.erase(state);
+		statePriorityQueue.push(probabilityStatePair);
+	}
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -284,7 +295,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 
 	bool hold = true;
-	double windowPower = 0; // Always explore at least the first state
+	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
 	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
 		hold = false;
@@ -488,6 +499,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 		auto currentState = statePriorityQueue.top().second;
 		statePriorityQueue.pop();
 		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
+	}
+	// flush from the preterminated states
+	for (auto const & preTerminatedState : preTerminatedStates) {
+		// TODO: Create transition
 	}
 }
 

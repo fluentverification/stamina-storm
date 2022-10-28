@@ -119,7 +119,8 @@ namespace stamina {
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 			double piHat;
-			// storm::storage::BitVectorHashMap<uint8_t> preTerminatedStates;
+			double windowPower;
+			storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>> preTerminatedStates;
 		};
 	}
 }
