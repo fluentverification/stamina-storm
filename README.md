@@ -8,7 +8,13 @@
 ![Downloads](https://img.shields.io/github/downloads/fluentverification/stamina-storm/total)
 ![Issues](https://img.shields.io/github/issues/fluentverification/stamina-storm)
 
-C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm](https://github.com/moves-rwth/storm). This version is different from the [Java version](https://github.com/fluentverification/stamina ), and is under active development. STAMINA/STORM is now both usable and blazing fast, thanks to our integration with STORM as well as our own improvements over STAMINA/PRISM.
+## Parent Repository
+
+To get both STAMINA/PRISM and STAMINA/STORM, please clone the parent repository, at [https://github.com/fluentverification/stamina-prism](https://github.com/fluentverification/stamina-prism)
+
+## Description
+
+C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm](https://github.com/moves-rwth/storm). This version is different from the [Java version](https://github.com/fluentverification/stamina-prism), and is under active development. STAMINA/STORM is now both usable and blazing fast, thanks to our integration with STORM as well as our own improvements over STAMINA/PRISM.
 
 **STAMINA NOW HAS A WEBSITE!**
 
