@@ -65,6 +65,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
+			// Explicitly enqueue the initial state--do not use enqueue()
 			statePriorityQueue.push({initProbabilityState, state});
 			initProbabilityState->iterationLastSeen = iteration;
 		}
@@ -85,7 +86,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push({nextProbabilityState, state});
+				enqueue({nextProbabilityState, state});
 				enqueued = true;
 			}
 		}
@@ -102,7 +103,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				statePriorityQueue.push({nextProbabilityState, state});
+				enqueue({nextProbabilityState, state});
 				enqueued = true;
 			}
 		}
@@ -117,12 +118,18 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			statePriorityQueue.push({nextProbabilityState, state});
+			enqueue({nextProbabilityState, state});
 			enqueued = true;
 			numberTerminal++;
 		}
 	}
 	return actualIndex;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(ProbabilityStatePair<StateType> probabilityStatePair) {
+	statePriorityQueue.push(probabilityStatePair);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -277,7 +284,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	isInit = false;
 
 	bool hold = true;
-	double windowPower = pow(Options::prob_win, 5);
+	double windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
 	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
 		hold = false;
@@ -425,7 +432,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		++currentRowGroup;
 
 		++numberOfExploredStates;
-		windowPower = pow(Options::prob_win, std::log10(numberOfExploredStates) + 2);
+		windowPower = pow(Options::prob_win, std::log10(numberOfExploredStates) + 1);
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
 

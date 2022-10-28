@@ -66,6 +66,12 @@ namespace stamina {
 				, boost::optional<storm::storage::BitVector>& markovianChoices
 				, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 			) override;
+			/**
+			 * Enqueues a state in the statePriorityQueue or pre-terminates it
+			 *
+			 * @param probabilityState The state to either conditionally enqueue or pre-terminate
+			 * */
+			void enqueue(ProbabilityStatePair<StateType> probabilityStatePair);
 		private:
 			std::deque<ProbabilityStatePair<StateType>> statesTerminatedLastIteration;
 			void flushStatesTerminated();
@@ -113,6 +119,7 @@ namespace stamina {
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 			double piHat;
+			// storm::storage::BitVectorHashMap<uint8_t> preTerminatedStates;
 		};
 	}
 }
