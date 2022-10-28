@@ -10,7 +10,7 @@
 
 ## Parent Repository
 
-To get both STAMINA/PRISM and STAMINA/STORM, please clone the parent repository, at [https://github.com/fluentverification/stamina-prism](https://github.com/fluentverification/stamina-prism)
+To get both STAMINA/PRISM and STAMINA/STORM, please clone the parent repository, at [https://github.com/fluentverification/stamina](https://github.com/fluentverification/stamina)
 
 ## Description
 
