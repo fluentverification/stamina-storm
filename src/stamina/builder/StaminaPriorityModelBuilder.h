@@ -16,6 +16,7 @@ namespace stamina {
 		class StaminaPriorityModelBuilder : public StaminaModelBuilder<ValueType, RewardModelType, StateType> {
 		public:
 // 			typedef typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::ProbabilityState ProbabilityState;
+			typedef StaminaTransitionInfo<StateType> TransitionInfo;
 			/**
 			* Constructs a StaminaPriorityModelBuilder with a given storm::generator::PrismNextStateGenerator. Invokes super's constructor
 			*
@@ -120,7 +121,14 @@ namespace stamina {
 			uint64_t numberOfExploredStatesSinceLastMessage;
 			double piHat;
 			double windowPower;
-			storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>> preTerminatedStates;
+			/**
+			 * Should this be a std::unordered_set or std::unordered_map?
+			 * */
+			std::unordered_map<
+				CompressedState // the state values are the key
+				, std::vector<TransitionInfo> // the list of preterminated transitions
+				, storm::storage::Murmur3BitVectorHash<StateType> // The hash provided by Storm
+			> preTerminatedStates;
 		};
 	}
 }

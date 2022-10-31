@@ -132,14 +132,18 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(Prob
 	auto stateReachability = probabilityStatePair.first->getPi();
 	auto state = probabilityStatePair.second;
 	// Our state is not a pre-terminated state but should be
-	// TODO: Figure out a way to prevent double hashing
-	if (stateReachability < windowPower / numberOfExploredStates && !preTerminatedStates.contains(state) && preTerminatedStates.getValue(state)) {
-		preTerminatedStates.findOrAdd(state, true);
+	// Only call find() once
+	auto preTerminatedTransitions = preTerminatedStates.find(state);
+	if (stateReachability < windowPower / numberOfExploredStates && preTerminatedTransitions == preTerminatedStates.end()) {
+		preTerminatedStates.insert({state, /* TODO: Vector of transitions */});
 	}
 	// If it is preterminated but should be un-preterminated
-	else if (preTerminatedStates.contains(state)) {
-		preTerminatedStates.erase(state);
+	else if (preTerminatedTransitions != preTerminatedStates.end()) {
+		preTerminatedStates.remove(state);
 		statePriorityQueue.push(probabilityStatePair);
+		for (auto & transition : preTerminatedTransitions) {
+			this->parent->createTransition(transition);
+		}
 	}
 }
 
