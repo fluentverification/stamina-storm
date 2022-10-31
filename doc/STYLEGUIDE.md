@@ -20,7 +20,7 @@ namespace threads {
 
 ### Function prototypes should look as follows:
 Either (A)
-```
+```cpp
 return_type functionName(
     param_type param1
     , param_type param2
@@ -29,7 +29,7 @@ return_type functionName(
 
 ```
 Or, if the return type is particularly long:
-```
+```cpp
 some_namespace::some_namespace::some_namespace::return_type
 functionName(
     param_type param1
@@ -41,7 +41,7 @@ functionName(
 
 ### Function implementations should look as follows
 
-```
+```cpp
 return_type
 ClassName::functionName(
     param_type param1
@@ -53,7 +53,7 @@ ClassName::functionName(
 
 ```
 OR (for short lists of params)
-```
+```cpp
 return_type
 ClassName::functionName(param_type param1, param_type param2) {
     /* Code here */
@@ -63,7 +63,7 @@ ClassName::functionName(param_type param1, param_type param2) {
 ## Brackets and Indentation
 
 For loops, if statements, class definitions and namespaces, the following bracket style will be used:
-```
+```cpp
 namespace stamina {
     class SomeClass {
     public:
@@ -77,7 +77,7 @@ namespace stamina {
     };
 }
 ```
-```
+```cpp
 void functionName() {
     while (condition) {
         if (condition) {

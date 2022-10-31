@@ -2,13 +2,19 @@
 
 # STAMINA (STORM Integration)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus)
-![Language](https://img.shields.io/github/languages/top/fluentverification/stamina-cplusplus)
-![License](https://img.shields.io/github/license/fluentverification/stamina-cplusplus)
-![Downloads](https://img.shields.io/github/downloads/fluentverification/stamina-cplusplus/total)
-![Issues](https://img.shields.io/github/issues/fluentverification/stamina-cplusplus)
+[![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-storm)
+![Language](https://img.shields.io/github/languages/top/fluentverification/stamina-storm)
+![License](https://img.shields.io/github/license/fluentverification/stamina-storm)
+![Downloads](https://img.shields.io/github/downloads/fluentverification/stamina-storm/total)
+![Issues](https://img.shields.io/github/issues/fluentverification/stamina-storm)
 
-C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm](https://github.com/moves-rwth/storm). This version is different from the [Java version](https://github.com/fluentverification/stamina ), and is under active development. STAMINA/STORM is now both usable and blazing fast, thanks to our integration with STORM as well as our own improvements over STAMINA/PRISM.
+## Parent Repository
+
+To get both STAMINA/PRISM and STAMINA/STORM, please clone the parent repository, at [https://github.com/fluentverification/stamina](https://github.com/fluentverification/stamina)
+
+## Description
+
+C++ version of `stamina` integrating with the `storm` probabilistic model checker at [https://github.com/moves-rwth/storm](https://github.com/moves-rwth/storm). This version is different from the [Java version](https://github.com/fluentverification/stamina-prism), and is under active development. STAMINA/STORM is now both usable and blazing fast, thanks to our integration with STORM as well as our own improvements over STAMINA/PRISM.
 
 **STAMINA NOW HAS A WEBSITE!**
 
@@ -18,7 +24,7 @@ Check out our website at [https://staminachecker.org](https://staminachecker.org
 (Please see our [wiki page](https://staminachecker.org/documentation/wiki/install-sstamina.html) for more information)
 ### On Linux and Mac:
 ```
-git clone https://github.com/fluentverification/stamina-cplusplus
+git clone https://github.com/fluentverification/stamina-storm
 cd bin
 cmake .. -DSTORM_PATH=<PATH TO STORM DIRECTORY> -DCMAKE_CXX_COMPILER=/usr/bin/clang-cpp
 make
