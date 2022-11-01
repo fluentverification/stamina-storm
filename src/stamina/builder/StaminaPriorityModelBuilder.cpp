@@ -137,12 +137,15 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(Prob
 	auto probabilityState = probabilityStatePair.first;
 	auto stateReachability = probabilityStatePair.first->getPi();
 	auto state = probabilityStatePair.second;
-	bool preTerminateThisIteration = stateReachability < windowPower / numberOfExploredStates;
-	// Our state is not a pre-terminated state but should be
-	if (// We are not pre-terminated and don't need to be
-			(!probabilityState->isPreTerminated() && !preTerminateThisIteration)
-			// We are pre-terminated and don't need to change status
-			|| (probabilityState->isPreTerminated() && preTerminateThisIteration)) {
+	// TODO: we should be somewhat conscious of next iteration's pi value. Should I add the current state's reachability to this value?
+	bool preTerminateThisIteration = stateReachability > 0 && stateReachability < windowPower / numberOfExploredStates;
+	// Our state is not pre-terminated, and should not be
+	if (!probabilityState->isPreTerminated() && !preTerminateThisIteration) {
+		statePriorityQueue.push(probabilityStatePair);
+		return;
+	}
+	// Our state is preterminated and should stay that way
+	else if (probabilityState->isPreTerminated() && preTerminateThisIteration) {
 		return;
 	}
 	// Only call find() once
