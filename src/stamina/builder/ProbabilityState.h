@@ -2,6 +2,7 @@
 #define STAMINA_BUILDER_PROBABILITYSTATE_H
 
 #include "__storm_needed_for_builder.h"
+#include "StateAndTransitions.h"
 
 namespace stamina {
 	namespace builder {
@@ -16,6 +17,7 @@ namespace stamina {
 			bool isNew;
 			bool wasPutInTerminalQueue;
 			bool preTerminated;
+			std::shared_ptr<std::vector<StaminaTransitionInfo<StateType>>> preTerminatedTransitions; // the list of preterminated transitions
 			ProbabilityState(
 				StateType index = 0
 				, double pi = 0.0
@@ -29,6 +31,7 @@ namespace stamina {
 				, isNew(true)
 				, wasPutInTerminalQueue(false)
 				, preTerminated(false)
+				, preTerminatedTransitions(nullptr)
 			{
 				// Intentionally left empty
 			}
@@ -40,6 +43,7 @@ namespace stamina {
 				, assignedInRemapping(other.assignedInRemapping)
 				, isNew(other.isNew)
 				, preTerminated(other.preTerminated)
+				, preTerminatedTransitions(other.preTerminatedTransitions)
 			{
 				// Intentionally left empty
 			}

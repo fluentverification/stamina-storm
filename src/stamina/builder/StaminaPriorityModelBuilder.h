@@ -124,9 +124,8 @@ namespace stamina {
 			/**
 			 * Should this be a std::unordered_set or std::unordered_map?
 			 * */
-			std::unordered_map<
+			std::unordered_set<
 				CompressedState // the state values are the key
-				, std::shared_ptr<std::vector<TransitionInfo>> // the list of preterminated transitions
 				, storm::storage::Murmur3BitVectorHash<StateType> // The hash provided by Storm
 			> preTerminatedStates;
 		};

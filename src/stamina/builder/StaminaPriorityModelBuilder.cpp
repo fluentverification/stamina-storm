@@ -146,20 +146,23 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(Prob
 		return;
 	}
 	// Only call find() once
-	auto preTerminatedTransitions = preTerminatedStates.find(state);
-	if (preTerminateThisIteration && preTerminatedTransitions == preTerminatedStates.end()) {
+	auto inPreTerminatedSet = preTerminatedStates.find(state) != preTerminatedStates.end();
+	if (preTerminateThisIteration && !inPreTerminatedSet) {
 		// It is the main loop's responsibility to insert the transition
-		preTerminatedStates.insert({state, std::make_shared(new std::vector<TransitionInfo>)});
-		probabilityState.setPreTerminated(true);
+		preTerminatedStates.insert(state);
+		std::shared_ptr<std::vector<TransitionInfo>> transitionVector(new std::vector<TransitionInfo>());
+		probabilityState->preTerminatedTransitions = transitionVector;
+		probabilityState->setPreTerminated(true);
 	}
 	// If it is preterminated but should be un-preterminated
-	else if (preTerminatedTransitions != preTerminatedStates.end()) {
-		preTerminatedStates.remove(state);
-		probabilityState.setPreTerminated(false);
+	else if (inPreTerminatedSet) {
+		preTerminatedStates.erase(state);
+		probabilityState->setPreTerminated(false);
 		statePriorityQueue.push(probabilityStatePair);
-		for (auto & transition : preTerminatedTransitions) {
-			this->parent->createTransition(transition);
+		for (auto transition : *probabilityState->preTerminatedTransitions) {
+			this->createTransition(transition);
 		}
+		probabilityState->preTerminatedTransitions = nullptr;
 	}
 }
 
@@ -441,12 +444,11 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 							numberTransitions++;
 						}
 						else {
-							auto preTerminatedTransitions = preTerminatedStates.find(state);
-							if (preTerminatedTransitions == preTerminatedStates.end()) {
+							if (!nextProbabilityState->preTerminatedTransitions) {
 								StaminaMessages::error("Error with set of preterminated states!");
 							}
 							// Our state is preterminated and we must keep track of the transition we would have inserted in case we un-preterminate it
-							preTerminatedTransitions->emplace_back({currentIndex, sPrime, stateProbabilityPair.second});
+							nextProbabilityState->preTerminatedTransitions->emplace_back(TransitionInfo(currentIndex, sPrime, stateProbabilityPair.second));
 						}
 					}
 				}
