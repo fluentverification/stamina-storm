@@ -137,8 +137,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(Prob
 	auto probabilityState = probabilityStatePair.first;
 	auto stateReachability = probabilityStatePair.first->getPi();
 	auto state = probabilityStatePair.second;
-	// TODO: we should be somewhat conscious of next iteration's pi value. Should I add the current state's reachability to this value?
-	bool preTerminateThisIteration = stateReachability > 0 && stateReachability < Options::prob_win / (double) numberOfExploredStates;
+	// We should be somewhat conscious of the reachability that may get added
+	double halfNextReachability = stateReachability + this->currentProbabilityState->getPi() / 2;
+	bool preTerminateThisIteration = false; // halfNextReachability < windowPower / (double) numberOfExploredStates;
 	// Our state is not pre-terminated, and should not be
 	if (!probabilityState->isPreTerminated() && !preTerminateThisIteration) {
 		statePriorityQueue.push(probabilityStatePair);
