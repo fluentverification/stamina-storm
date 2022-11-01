@@ -537,7 +537,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
 	}
 	// flush from the preterminated states
+	uint32_t numberOfPreTerminatedStates = 0;
+	uint32_t numberOfPreTerminatedTransitions = 0;
 	for (auto const & [stateValues, stateId] : preTerminatedStates) {
+		numberOfPreTerminatedStates++;
 		auto transitions = stateMap.get(stateId)->preTerminatedTransitions;
 		if (!transitions) {
 			StaminaMessages::errorAndExit("Preterminated transition vector was null!");
@@ -546,8 +549,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 		for (auto const & transition : *transitions) {
 			// actually create the transition
 			this->createTransition(transition.from, 0, transition.transition);
+			numberOfPreTerminatedTransitions++;
 		}
 	}
+	StaminaMessages::info(std::to_string(numberOfPreTerminatedStates) + " states were pre-terminated, eliminating " + std::to_string(numberOfPreTerminatedTransitions) + " transitions.");
 }
 
 
