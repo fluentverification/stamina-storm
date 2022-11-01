@@ -5,6 +5,9 @@
 #include <sstream>
 #include <cmath>
 
+// Pre-load factor for hash-map
+#define PRE_LOAD 1000000
+
 namespace stamina {
 namespace builder {
 
@@ -19,6 +22,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 		, modulesFile
 		, options
 	)
+	, preTerminatedStates(PRE_LOAD) // pre-size our hashmap
 {
 	// Intentionally left empty
 }
@@ -32,6 +36,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 		program
 		, generatorOptions
 	)
+	, preTerminatedStates(PRE_LOAD) // pre-size our hashmap
 {
 	// Intentionally left empty
 }
@@ -129,17 +134,28 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(ProbabilityStatePair<StateType> probabilityStatePair) {
+	auto probabilityState = probabilityStatePair.first;
 	auto stateReachability = probabilityStatePair.first->getPi();
 	auto state = probabilityStatePair.second;
+	bool preTerminateThisIteration = stateReachability < windowPower / numberOfExploredStates;
 	// Our state is not a pre-terminated state but should be
+	if (// We are not pre-terminated and don't need to be
+			(!probabilityState->isPreTerminated() && !preTerminateThisIteration)
+			// We are pre-terminated and don't need to change status
+			|| (probabilityState->isPreTerminated() && preTerminateThisIteration)) {
+		return;
+	}
 	// Only call find() once
 	auto preTerminatedTransitions = preTerminatedStates.find(state);
-	if (stateReachability < windowPower / numberOfExploredStates && preTerminatedTransitions == preTerminatedStates.end()) {
-		preTerminatedStates.insert({state, /* TODO: Vector of transitions */});
+	if (preTerminateThisIteration && preTerminatedTransitions == preTerminatedStates.end()) {
+		// It is the main loop's responsibility to insert the transition
+		preTerminatedStates.insert({state, std::make_shared(new std::vector<TransitionInfo>)});
+		probabilityState.setPreTerminated(true);
 	}
 	// If it is preterminated but should be un-preterminated
 	else if (preTerminatedTransitions != preTerminatedStates.end()) {
 		preTerminatedStates.remove(state);
+		probabilityState.setPreTerminated(false);
 		statePriorityQueue.push(probabilityStatePair);
 		for (auto & transition : preTerminatedTransitions) {
 			this->parent->createTransition(transition);
@@ -418,9 +434,20 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 
 					if (currentProbabilityState->isNew) {
-						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
-						// std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
-						numberTransitions++;
+						if (!nextProbabilityState->isPreTerminated()) {
+							// Our state is not pre-terminated
+							this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+							// std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
+							numberTransitions++;
+						}
+						else {
+							auto preTerminatedTransitions = preTerminatedStates.find(state);
+							if (preTerminatedTransitions == preTerminatedStates.end()) {
+								StaminaMessages::error("Error with set of preterminated states!");
+							}
+							// Our state is preterminated and we must keep track of the transition we would have inserted in case we un-preterminate it
+							preTerminatedTransitions->emplace_back({currentIndex, sPrime, stateProbabilityPair.second});
+						}
 					}
 				}
 			}
@@ -507,6 +534,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 	// flush from the preterminated states
 	for (auto const & preTerminatedState : preTerminatedStates) {
 		// TODO: Create transition
+		// Loop over each transition in the terminated vector
+		for (auto const & transition : /* TODO */) {
+			// TODO : actually create the transition
+		}
 	}
 }
 

@@ -15,6 +15,7 @@ namespace stamina {
 			bool assignedInRemapping;
 			bool isNew;
 			bool wasPutInTerminalQueue;
+			bool preTerminated;
 			ProbabilityState(
 				StateType index = 0
 				, double pi = 0.0
@@ -27,6 +28,7 @@ namespace stamina {
 				, iterationLastSeen(iterationLastSeen)
 				, isNew(true)
 				, wasPutInTerminalQueue(false)
+				, preTerminated(false)
 			{
 				// Intentionally left empty
 			}
@@ -37,6 +39,7 @@ namespace stamina {
 				, terminal(other.terminal)
 				, assignedInRemapping(other.assignedInRemapping)
 				, isNew(other.isNew)
+				, preTerminated(other.preTerminated)
 			{
 				// Intentionally left empty
 			}
@@ -55,6 +58,12 @@ namespace stamina {
 			}
 			void setTerminal(bool term) {
 				terminal = term;
+			}
+			bool isPreTerminated() {
+				return preTerminated;
+			}
+			void setPreTerminated(bool preTerm) {
+				preTerminated = preTerm;
 			}
 			inline bool operator==(const ProbabilityState & rhs) const {
 				return index == rhs.index;
