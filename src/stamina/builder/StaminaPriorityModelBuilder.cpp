@@ -149,7 +149,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(Prob
 	auto inPreTerminatedSet = preTerminatedStates.find(state) != preTerminatedStates.end();
 	if (preTerminateThisIteration && !inPreTerminatedSet) {
 		// It is the main loop's responsibility to insert the transition
-		preTerminatedStates.insert(state);
+		preTerminatedStates.insert({state, probabilityState->index});
 		std::shared_ptr<std::vector<TransitionInfo>> transitionVector(new std::vector<TransitionInfo>());
 		probabilityState->preTerminatedTransitions = transitionVector;
 		probabilityState->setPreTerminated(true);
@@ -534,11 +534,15 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
 	}
 	// flush from the preterminated states
-	for (auto const & preTerminatedState : preTerminatedStates) {
-		// TODO: Create transition
+	for (auto const & [stateValues, stateId] : preTerminatedStates) {
+		auto transitions = stateMap.get(stateId)->preTerminatedTransitions;
+		if (!transitions) {
+			StaminaMessages::errorAndExit("Preterminated transition vector was null!");
+		}
 		// Loop over each transition in the terminated vector
-		for (auto const & transition : /* TODO */) {
-			// TODO : actually create the transition
+		for (auto const & transition : *transitions) {
+			// actually create the transition
+			this->createTransition(transition.from, 0, transition.transition);
 		}
 	}
 }

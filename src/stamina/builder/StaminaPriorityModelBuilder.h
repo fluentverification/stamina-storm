@@ -124,8 +124,9 @@ namespace stamina {
 			/**
 			 * Should this be a std::unordered_set or std::unordered_map?
 			 * */
-			std::unordered_set<
+			std::unordered_map<
 				CompressedState // the state values are the key
+				, StateType // So we can access the ProbabilityState when we are done
 				, storm::storage::Murmur3BitVectorHash<StateType> // The hash provided by Storm
 			> preTerminatedStates;
 		};
