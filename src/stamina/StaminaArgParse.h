@@ -37,6 +37,8 @@ static struct argp_option options[] = {
 		"Reduction factor for Reachability Threshold (kappa) during the refinement step (default 2.0)"}
 	, {"approxFactor", 'f', "double", 0,
 		"Factor to estimate how far off our reachability predictions will be (default: 2.0)"}
+	, {"fudge", 'F', "double", 0,
+		"\"Aggressiveness\" (fudge) factor for priority method (default 1.0). Higher means more aggressive (more states explored), and lower means less aggressive (fewer states explored)"}
 	, {"probWin", 'w', "double", 0,
 		"Probability window between lower and upperbound for termination (default: 1.0e-3)"}
 	, {"maxApproxCount", 'n', "int", 0,
@@ -94,6 +96,7 @@ struct arguments {
 	double kappa;
 	double reduce_kappa;
 	double approx_factor; // Analagous to "misprediction factor" in the Java version
+	double fudge_factor;
 	double prob_win;
 	uint64_t max_approx_count;
 	bool no_prop_refine;
@@ -131,6 +134,10 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 		// approx factor
 		case 'f':
 			arguments->approx_factor = (double) atof(arg);
+			break;
+		// fudge factor (aggressive factor)
+		case 'F':
+			arguments->fudge_factor = (double) atof(arg);
 			break;
 		// probability window (difference between Pmin and Pmax)
 		case 'w':

@@ -487,7 +487,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		++currentRowGroup;
 
 		++numberOfExploredStates;
-		windowPower = pow(Options::prob_win, std::log10(numberOfExploredStates) + 1);
+		windowPower = pow(Options::prob_win, Options::fudge_factor * (std::log10(numberOfExploredStates) + 1));
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
 

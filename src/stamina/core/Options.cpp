@@ -69,6 +69,7 @@ Options::setArgs(struct arguments * arguments) {
 	method = arguments->method;
 	threads = arguments->threads;
 	preterminate = arguments->preterminate;
+	fudge_factor = arguments->fudge_factor;
 }
 
 } // namespace core

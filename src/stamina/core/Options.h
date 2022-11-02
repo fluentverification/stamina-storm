@@ -32,6 +32,7 @@ namespace stamina {
 			inline static double kappa;
 			inline static double reduce_kappa;
 			inline static double approx_factor; // Misprediction factor
+			inline static double fudge_factor; // Only applies to priority method
 			inline static double prob_win;
 			inline static uint64_t max_approx_count;
 			inline static bool no_prop_refine;
