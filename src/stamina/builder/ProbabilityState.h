@@ -104,10 +104,10 @@ namespace stamina {
 		class ProbabilityStatePair {
 		public:
 			ProbabilityState<StateType> * first;
-			const CompressedState & second;
+			CompressedState second;
 			ProbabilityStatePair(
 				ProbabilityState<StateType> * first
-				, const CompressedState & second
+				, CompressedState second
 			) : first(first)
 				, second(second)
 			{ /* Intentionally Left Empty */ }
@@ -115,6 +115,9 @@ namespace stamina {
 				: first(other.first)
 				, second(other.second)
 			{ /* Intentionally left empty */ }
+			~ProbabilityStatePair() {
+				// Intentionally left empty
+			}
 		};
 
 		template <typename StateType>
