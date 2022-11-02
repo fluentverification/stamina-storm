@@ -71,7 +71,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			// Explicitly enqueue the initial state--do not use enqueue()
-			statePriorityQueue.push({initProbabilityState, state});
+			statePriorityQueue.push(ProbabilityStatePair<StateType>(initProbabilityState, state));
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
@@ -91,7 +91,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				enqueue({nextProbabilityState, state});
+				enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -108,7 +108,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				enqueue({nextProbabilityState, state});
+				enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, state));
 				enqueued = true;
 			}
 		}
@@ -123,7 +123,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			enqueue({nextProbabilityState, state});
+			enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, state));
 			enqueued = true;
 			numberTerminal++;
 		}
