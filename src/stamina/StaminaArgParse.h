@@ -55,7 +55,7 @@ static struct argp_option options[] = {
 		"Specify a certain property to check in a model file that contains many"}
 	, {"const", 'c', "\"C1=VAL,C2=VAL,C3=VAL\"", 0,
 		"Comma separated values for constants"}
-	, {"exportTrans", 't', "filename", 0,
+	, {"exportTrans", 'a', "filename", 0,
 		"Export the list of transitions and actions to a specified file name, or to trans.txt if no file name is specified.\nTransitions are exported in the format <Source State Index> <Destination State Index> <Action Label>"}
 	/* Additional options. GNU argp shows args alphabetically */
 	, {"rankTransitions", 'T', 0, 0,
@@ -74,6 +74,8 @@ static struct argp_option options[] = {
 		"Number of threads to use for state exploration (default 1)"}
 	, {"version", 'v', 0, 0,
 		"Print STAMINA Version information"}
+	, {"preterminate", 't', 0, 0,
+		"Allow states to be \"preterminated\" if reachability is low enough (only applies to priority method)"}
 	, { 0 }
 };
 
@@ -107,6 +109,7 @@ struct arguments {
 	uint64_t max_states;
 	uint8_t method;
 	uint8_t threads;
+	bool preterminate;
 };
 
 /**
@@ -166,7 +169,7 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			arguments->consts = std::string(arg);
 			break;
 		// export transitions
-		case 't':
+		case 'a':
 			arguments->export_trans = std::string(arg);
 			break;
 		// use rank transitions before expanding
@@ -191,6 +194,9 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			break;
 		case 'j':
 			arguments->threads = (uint8_t) atoi(arg);
+			break;
+		case 't':
+			arguments->preterminate = true;
 			break;
 		case 'v':
 			printf(

@@ -22,7 +22,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 		, modulesFile
 		, options
 	)
-	, preTerminatedStates(PRE_LOAD) // pre-size our hashmap
+	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
 	// Intentionally left empty
 }
@@ -36,7 +36,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 		program
 		, generatorOptions
 	)
-	, preTerminatedStates(PRE_LOAD) // pre-size our hashmap
+	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
 	// Intentionally left empty
 }
@@ -139,7 +139,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(Prob
 	auto state = probabilityStatePair.second;
 	// We should be somewhat conscious of the reachability that may get added
 	double halfNextReachability = stateReachability + this->currentProbabilityState->getPi() / 2;
-	bool preTerminateThisIteration = false; // halfNextReachability < windowPower / (double) numberOfExploredStates;
+
+	// Do not preterminate
+	if (!Options::preterminate) {
+		statePriorityQueue.push(probabilityStatePair);
+		return;
+	}
+
+	bool preTerminateThisIteration = halfNextReachability < windowPower / (double) numberOfExploredStates;
 	// Our state is not pre-terminated, and should not be
 	if (!probabilityState->isPreTerminated() && !preTerminateThisIteration) {
 		statePriorityQueue.push(probabilityStatePair);
@@ -540,6 +547,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 	// flush from the preterminated states
 	uint32_t numberOfPreTerminatedStates = 0;
 	uint32_t numberOfPreTerminatedTransitions = 0;
+	if (!Options::preterminate) {
+		return;
+	}
 	for (auto const & [stateValues, stateId] : preTerminatedStates) {
 		numberOfPreTerminatedStates++;
 		auto transitions = stateMap.get(stateId)->preTerminatedTransitions;

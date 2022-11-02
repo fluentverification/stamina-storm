@@ -47,6 +47,7 @@ namespace stamina {
 			inline static uint64_t max_states;
 			inline static uint8_t method;
 			inline static uint8_t threads;
+			inline static bool preterminate;
 		};
 		/**
 		* Tells us if a string ends with another
