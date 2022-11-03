@@ -130,6 +130,18 @@ namespace stamina {
 				return first.first->pi < second.first->pi;
 			}
 		};
+
+		template <typename StateType>
+		struct ProbabilityStatePairPointerComparison {
+			bool operator() (
+				const std::shared_ptr<ProbabilityStatePair<StateType>> first
+				, const std::shared_ptr<ProbabilityStatePair<StateType>> second
+			) const {
+				// Create a max heap on the reachability probability
+				return first->first->pi < second->first->pi;
+			}
+		};
+
 	} // namespace builder
 } // namespace stamina
 
