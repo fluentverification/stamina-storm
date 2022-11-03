@@ -134,17 +134,18 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(ProbabilityStatePair<StateType> probabilityStatePair) {
+	// Do not preterminate
+	if (!Options::preterminate) {
+		statePriorityQueue.push(probabilityStatePair);
+		return;
+	}
+
 	auto probabilityState = probabilityStatePair.first;
 	auto stateReachability = probabilityStatePair.first->getPi();
 	auto state = probabilityStatePair.second;
 	// We should be somewhat conscious of the reachability that may get added
 	double halfNextReachability = stateReachability + this->currentProbabilityState->getPi() / 2;
 
-	// Do not preterminate
-	if (!Options::preterminate) {
-		statePriorityQueue.push(probabilityStatePair);
-		return;
-	}
 
 	bool preTerminateThisIteration = halfNextReachability < windowPower / (double) numberOfExploredStates;
 	// Our state is not pre-terminated, and should not be
@@ -560,6 +561,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 		for (auto const & transition : *transitions) {
 			// actually create the transition
 			this->createTransition(transition.from, 0, transition.transition);
+			// Make preterminated state have a self loop
+			this->createTransition(transition.to, transition.to, 1.0);
 			numberOfPreTerminatedTransitions++;
 		}
 	}
