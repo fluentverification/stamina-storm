@@ -77,7 +77,7 @@ The following options are allowed (these are *slightly* different than in the Ja
   -w, --probWin=double       Probability window between lower and upperbound
                              for termination (default: 1.0e-3)
   -?, --help                 Give this help list
-      --usage                Give a short usage message
+      --usage               Give a short usage message
 ```
 
 ## GUI (Work in Progress)
