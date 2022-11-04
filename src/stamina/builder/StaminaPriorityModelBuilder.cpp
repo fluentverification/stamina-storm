@@ -71,7 +71,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			// Explicitly enqueue the initial state--do not use enqueue()
-			statePriorityQueue.push(ProbabilityStatePair<StateType>(initProbabilityState, state));
+			statePriorityQueue.push(ProbabilityStatePair<StateType>(initProbabilityState, &state));
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
@@ -91,7 +91,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, state));
+				enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, &state));
 				enqueued = true;
 			}
 		}
@@ -108,7 +108,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
-				enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, state));
+				enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, &state));
 				enqueued = true;
 			}
 		}
@@ -123,7 +123,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
-			enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, state));
+			enqueue(ProbabilityStatePair<StateType>(nextProbabilityState, &state));
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -142,7 +142,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(Prob
 
 	auto probabilityState = probabilityStatePair.first;
 	auto stateReachability = probabilityStatePair.first->getPi();
-	auto state = probabilityStatePair.second;
+	auto state = *probabilityStatePair.second;
 	// We should be somewhat conscious of the reachability that may get added
 	double halfNextReachability = stateReachability + this->currentProbabilityState->getPi() / 2;
 
@@ -337,7 +337,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		auto currentProbabilityStatePair = statePriorityQueue.top();
 		currentProbabilityState = statePriorityQueue.top().first;
 		// std::cout << "Current pi: " << currentProbabilityState->pi << std::endl;
-		currentState = statePriorityQueue.top().second;
+		currentState = *statePriorityQueue.top().second;
 		currentIndex = currentProbabilityState->index;
 		statePriorityQueue.pop();
 		if (currentIndex == 0) {
@@ -541,7 +541,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 	while (!statePriorityQueue.empty()) {
 		auto currentProbabilityStatePair = statePriorityQueue.top();
 		auto currentProbabilityState = statePriorityQueue.top().first;
-		auto currentState = statePriorityQueue.top().second;
+		auto currentState = *statePriorityQueue.top().second;
 		statePriorityQueue.pop();
 		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
 	}
@@ -578,7 +578,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 	// Terminal states are any remaining states in the state transition queue
 	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
-		auto state = statesTerminatedLastIteration.front().second;
+		auto state = *statesTerminatedLastIteration.front().second;
 		statesTerminatedLastIteration.pop_front();
 		// If the state is not marked as terminal, we've already connected it to absorbing
 		if (!currentProbabilityState->isTerminal()) {
