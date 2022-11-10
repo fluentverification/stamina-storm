@@ -1,4 +1,4 @@
-from movesrwth/storm:latest
+from movesrwth/storm:ci-release
 
 RUN apt-get update && apt-get install -y build-essential libboost-all-dev git cmake clang 
 
