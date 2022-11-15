@@ -104,10 +104,10 @@ namespace stamina {
 		class ProbabilityStatePair {
 		public:
 			ProbabilityState<StateType> * first;
-			CompressedState second;
+			std::reference_wrapper<CompressedState> second;
 			ProbabilityStatePair(
 				ProbabilityState<StateType> * first
-				, CompressedState second
+				, std::reference_wrapper<CompressedState> second
 			) : first(first)
 				, second(second)
 			{ /* Intentionally Left Empty */ }
