@@ -222,6 +222,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
 
+	if (!firstIteration) {
+		StaminaMessages::errorAndExit("Could not acquire a satisfactory result!\n\tMore Info: Multiple iterations are currently not supported in the Priority method.\n\tTry again with a higher fudge factor (-F)");
+	}
 	// Component builders
 	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(
 			0
