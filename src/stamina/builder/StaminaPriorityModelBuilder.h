@@ -72,9 +72,9 @@ namespace stamina {
 			 *
 			 * @param probabilityState The state to either conditionally enqueue or pre-terminate
 			 * */
-			void enqueue(ProbabilityStatePair<StateType> probabilityStatePair);
+			void enqueue(std::shared_ptr<ProbabilityStatePair<StateType>> probabilityStatePair);
 		private:
-			std::deque<ProbabilityStatePair<StateType>> statesTerminatedLastIteration;
+			std::deque<std::shared_ptr<ProbabilityStatePair<StateType>>> statesTerminatedLastIteration;
 			void flushStatesTerminated();
 			void flushFromPriorityQueueToStatesTerminated();
 			/*
@@ -113,9 +113,9 @@ namespace stamina {
 			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
 			/* Data members */
 			std::priority_queue<
-				ProbabilityStatePair<StateType>
-				, std::vector<ProbabilityStatePair<StateType>>
-				, ProbabilityStatePairComparison<StateType>
+				std::shared_ptr<ProbabilityStatePair<StateType>>
+				, std::vector<std::shared_ptr<ProbabilityStatePair<StateType>>>
+				, ProbabilityStatePairPointerComparison<StateType>
 			> statePriorityQueue;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
