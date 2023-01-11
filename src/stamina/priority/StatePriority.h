@@ -15,15 +15,21 @@
 #include "builder/ProbabilityState.h"
 #include "builder/StateAndTransitions.h"
 
-template <typename StateType>
-class StatePriority {
-public:
-	virtual static float priority(std::shared_ptr<ProbabilityStatePair<StateType>> state) = 0;
-	virtual bool operatorValue(
-		const std::shared_ptr<ProbabilityStatePair<StateType>> first
-		, const std::shared_ptr<ProbabilityStatePair<StateType>> second
-	) = 0;
-	static StatePriority<StateType> statePriority;
-};
+namespace stamina {
+	namespace priority {
+		template <typename StateType>
+		class StatePriority {
+		public:
+			virtual static float priority(std::shared_ptr<ProbabilityStatePair<StateType>> state) = 0;
+			virtual bool operatorValue(
+				const std::shared_ptr<ProbabilityStatePair<StateType>> first
+				, const std::shared_ptr<ProbabilityStatePair<StateType>> second
+			) = 0;
+			static void setupStatePriority();
+			/* Data members */
+			static StatePriority<StateType> statePriority;
+		};
+	} // namespace priority
+} // namespace stamina
 
 #endif // STAMINA_PRIORITY_STATE_PRIORITY_H
