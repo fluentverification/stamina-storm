@@ -1,3 +1,8 @@
+/**
+ * Implementations for Event State Priority
+ *
+ * Created by Josh Jeppson on 1/11/2023
+ * */
 #include "EventStatePriority.h"
 
 namespace stamina {
