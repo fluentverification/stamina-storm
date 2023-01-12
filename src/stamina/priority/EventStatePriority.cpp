@@ -130,9 +130,27 @@ PriorityTree::operatorNode::accumulate(CompressedState & state) {
 
 /* Implementation for PriorityTree::PrimitiveNode */
 
+template <typename ValueType>
 float
-PriorityTree::PrimitiveNode::accumulate(CompressedState & state) {
+PriorityTree::PrimitiveNode<ValueType>::accumulate(CompressedState & state) {
+	return value;
+}
 
+/* Implementation for PriorityTree::IntegerVariableNode */
+
+float
+PriorityTree::IntegerVariableNode::accumulate(CompressedState & state) {
+	uint_fast64_t bitOffset = variable.bitOffset;
+	uint16_t bitWidth = variable.bitWidth;
+	return (float) state.getAsInt(bitOffset + 1, bitWidth - 1);
+}
+
+/* Implementation for PriorityTree::BooleanVariableNode */
+
+float
+PriorityTree::BooleanVariableNode::accumulate(CompressedState & state) {
+	uint_fast64_t offset = variable.bitWidth;
+	return 1.0 ? state.get(offset) : 0.0;
 }
 
 /* Implementation for PriorityTree */

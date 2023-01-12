@@ -55,10 +55,38 @@ namespace stamina {
 			private:
 				const operator_t m_operator;
 			}
+			/**
+			 * Holds a primitive value
+			 * */
+			template <typename ValueType>
 			class PrimitiveNode : public Node {
 			public:
 				PrimitiveNode() = default;
+				PrimitiveNode(ValueType value) : value(value);
 				virtual float accumulate(CompressedState & state);
+				ValueType value;
+			}
+			/**
+			 * Holds an integer variable value
+			 * */
+			class IntegerVariableNode : public Node {
+			public:
+				IntegerVariableNode(storm::variables::IntegerVariable variable)
+					: variable(variable) {}
+				/* Note: converts the value to a float */
+				virtual float accumulate(CompressedState & state);
+				storm::variables::IntegerVariable & variable;
+			}
+			/**
+			 * Holds a boolean variable value
+			 * */
+			class BooleanVariableNode : public Node {
+			public:
+				BooleanVariableNode(storm::variables::BooleanVariable variable)
+					: variable(variable) {}
+				/* Converts false to 0.0 and true to 1.0 */
+				virtual float accumulate(CompressedState & state);
+				storm::variables::BooleanVariable & variable;
 			}
 			PriorityTree() : root(nullptr) {}
 			/**
