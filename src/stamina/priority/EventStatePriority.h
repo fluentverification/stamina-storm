@@ -32,10 +32,13 @@ namespace stamina {
 
 		class PriorityTree {
 		public:
-			typedef operand_t uint8_t;
-			enum OPERANDS {
+			typedef operator_t uint8_t;
+			enum OPERATORS {
 				LESS_THAN_EQ = 0;
 				GREATER_THAN_EQ = 1;
+				AND = 2;
+				OR = 3;
+				NOT = 4;
 			}
 			class Node {
 			public:
@@ -45,12 +48,12 @@ namespace stamina {
 			protected:
 				std::vector<std::shared_ptr<Node>> children;
 			}
-			class OperandNode : public Node {
+			class operatorNode : public Node {
 			public:
-				OperandNode(operand_t operand) : operand(operand) {}
+				operatorNode(operator_t operator) : operator(operator) {}
 				virtual float accumulate(CompressedState & state);
 			private:
-				const operand_t operand;
+				const operator_t m_operator;
 			}
 			class PrimitiveNode : public Node {
 			public:
