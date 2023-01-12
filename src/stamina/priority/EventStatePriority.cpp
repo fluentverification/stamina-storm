@@ -33,6 +33,8 @@ EventStatePriority<StateType>::operatorValue(
 	 * first->first is the probability information of the first pair
 	 * second->first is the probability information of the second pair
 	 * */
+	// TODO: change to make it so these are calculated ONCE (when the state is
+	// first encountered) and stored
 	float distanceFirst = tree.distance(first->second);
 	float distanceSecond = tree.distance(second->second);
 	// TODO: should invert based on rare event? Or invert at the PrimitiveNode level
@@ -76,8 +78,8 @@ PriorityTree::operatorNode::accumulate(CompressedState & state) {
 		 *       var
 		 * since we want a higher d for a lower var
 		 * */
-		float var = children[0].accumulate();
-		float val = children[1].accumulate();
+		float var = children[0]->accumulate();
+		float val = children[1]->accumulate();
 		return val / std::max(var, 0.0001);
 	}
 	else if (m_operator == OPERATORS::GREATER_THAN_EQ) {
@@ -92,25 +94,37 @@ PriorityTree::operatorNode::accumulate(CompressedState & state) {
 		 *       val
 		 * since we want a higher d for a lower var
 		 * */
-		float var = children[0].accumulate();
-		float val = children[1].accumulate();
+		float var = children[0]->accumulate();
+		float val = children[1]->accumulate();
 		return var / std::max(val, 0.0001);
 	}
 	else if (m_operator == OPERATORS::AND) {
-
+		// For the "and" operator, we can chain all of the distances of the children
+		// together using multiplication
+		float distance = 1;
+		for (auto child : children) {
+			distance *= child->accumulate();
+		}
+		return distance;
 	}
 	else if (m_operator == OPERATORS::OR) {
-
+		// For the "or" operator, we also chain the distances of the children using
+		// the addition operator
+		float distance = 0;
+		for (auto child : children) {
+			distance += child->accumulate();
+		}
+		return distance / children.size(); // TODO: Normalize or not?
 	}
 	else if (m_operator == OPERATORS::NOT) {
 		// For this, we just invert the first operator
 		if (children.size() != 1) {
 			StaminaMessages::errorAndExit("! operator requires only one operand! Got " + std::to_string(children.size()));
 		}
-		return 1 / children[0].accumulate();
+		return 1 / children[0]->accumulate();
 	}
 	else {
-		// TODO: Handle error
+		StaminaMessages::errorAndExit("Unknown operator! (integer value " + std::to_string(m_operator) + ")");
 	}
 }
 
