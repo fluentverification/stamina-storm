@@ -15,6 +15,8 @@
 #include "builder/ProbabilityState.h"
 #include "builder/StateAndTransitions.h"
 
+#include <storm/jani/Property.h>
+
 namespace stamina {
 	namespace priority {
 		template <typename StateType>
@@ -24,10 +26,11 @@ namespace stamina {
 			virtual bool operatorValue(
 				const std::shared_ptr<ProbabilityStatePair<StateType>> first
 				, const std::shared_ptr<ProbabilityStatePair<StateType>> second
-			) = 0;
+			);
 			static void setupStatePriority();
 			/* Data members */
 			static StatePriority<StateType> statePriority;
+			static storm::jani::Property * property = nullptr;
 		};
 	} // namespace priority
 } // namespace stamina

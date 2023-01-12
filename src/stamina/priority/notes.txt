@@ -1,0 +1,3 @@
+Use storm::storage::Expression from storm::*::Label and then getOperator and getOperand() functions.
+	- Also use reduceNesting()
+	- Use isVariable() and gatherVariables()
