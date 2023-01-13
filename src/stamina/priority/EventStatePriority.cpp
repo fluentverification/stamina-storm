@@ -166,6 +166,8 @@ void
 PriorityTree::initialize(storm::jani::Property * property) {
 	// Create root node
 	auto expression = property->getExpression();
+	auto simplifiedExpression = expression.simplify();
+	auto nonNestedExpression = simplifiedExpression.reduceNesting();
 	// createNodeFromExpression is recursive
 	this->root = createNodeFromExpression(expression);
 }
@@ -185,6 +187,28 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	 *         append result as child of OperatorNode
 	 *     return the OperatorNode
 	 * */
+	if (expression.hasNumericalType()) {
+
+	}
+	else if (expression.hasBooleanType()) {
+
+	}
+	else if (expression.isVariable()) {
+		// Create variable node from variable
+		auto vars = expression.getVariables();
+		auto var = // TODO: vars should only have one element
+		std::shared_ptr<VariableNode> vNode(new VariableNode(var));
+		return vNode;
+	}
+	else if (expression.isFunctionApplication()) {
+		auto op = expression.getOperator();
+		std::shared_ptr<OperatorNode> opNode( /* TODO: Constructor*/ );
+		for (auto ex : ) {
+			auto child = createNodeFromExpression(ex);
+			opNode->addChild(child);
+		}
+		return opNode;
+	}
 }
 
 } // namespace priority
