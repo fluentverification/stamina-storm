@@ -8,6 +8,8 @@
 namespace stamina {
 namespace priority {
 
+const float SMALL_VALUE = 0.0001;
+
 /* Implementation for EventStatePriority */
 
 template <typename StateType>
@@ -40,8 +42,8 @@ EventStatePriority<StateType>::operatorValue(
 	// TODO: should invert based on rare event? Or invert at the PrimitiveNode level
 	if (rareEvent) {
 		// Prevent division by zero errors
-		distanceFirst = 1 / std::max(distanceFirst, 0.0001);
-		distanceSecond = 1 / std::max(distanceSecond, 0.0001);
+		distanceFirst = 1 / std::max(distanceFirst, SMALL_VALUE);
+		distanceSecond = 1 / std::max(distanceSecond, SMALL_VALUE);
 	}
 	float compositeFirst = distanceFirst * first->first->pi;
 	float compositeSecond = distanceSecond * second->first->pi;
@@ -65,8 +67,8 @@ PriorityTree::Node::addChild(std::shared_ptr<Node> child) {
 /* Implementation for PriorityTree::operatorNode */
 
 float
-PriorityTree::operatorNode::accumulate(CompressedState & state) {
-	if (operator == OPERATORS::LESS_THAN_EQ) {
+PriorityTree::OperatorNode::accumulate(CompressedState & state) {
+	if (m_operator == OPERATORS::LESS_THAN_EQ) {
 		// Require only 2 operands
 		if (children.size() != 2) {
 			StaminaMessages::errorAndExit("< or <= operator should have two operand! Got " + std::to_string(children.size()));
@@ -80,7 +82,7 @@ PriorityTree::operatorNode::accumulate(CompressedState & state) {
 		 * */
 		float var = children[0]->accumulate();
 		float val = children[1]->accumulate();
-		return val / std::max(var, 0.0001);
+		return val / std::max(var, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::GREATER_THAN_EQ) {
 		// Require only 2 operands
@@ -96,7 +98,7 @@ PriorityTree::operatorNode::accumulate(CompressedState & state) {
 		 * */
 		float var = children[0]->accumulate();
 		float val = children[1]->accumulate();
-		return var / std::max(val, 0.0001);
+		return var / std::max(val, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::AND) {
 		// For the "and" operator, we can chain all of the distances of the children
@@ -162,9 +164,28 @@ PriorityTree::distance(CompressedState & state) {
 
 void
 PriorityTree::initialize(storm::jani::Property * property) {
-	// TODO
+	// Create root node
+	auto expression = property->getExpression();
+	// createNodeFromExpression is recursive
+	this->root = createNodeFromExpression(expression);
 }
 
+std::shared_ptr<Node>
+PriorityTree::createNodeFromExpression(storm::expressions::Expression & expression) {
+	// Determine what type
+	// TODO
+	/* If the expression is a primitive
+	 *     Create and return a PrimitiveNode
+	 * Else if it is a variable
+	 *     Create and return a VariableNode
+	 * Else:
+	 *     Create an OperatorNode
+	 *     For each operand:
+	 *         call createNodeFromExpression
+	 *         append result as child of OperatorNode
+	 *     return the OperatorNode
+	 * */
+}
 
 } // namespace priority
 } // namespace stamina

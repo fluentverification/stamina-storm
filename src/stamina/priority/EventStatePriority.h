@@ -104,6 +104,8 @@ namespace stamina {
 			 * */
 			void initialize(storm::jani::Property * property);
 			bool wasInitialized() { return root != nullptr; }
+		protected:
+			std::shared_ptr<Node> createNodeFromExpression(storm::expressions::Expression & expression);
 		private:
 			std::shared_ptr<Node> root;
 		}
