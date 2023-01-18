@@ -5,6 +5,8 @@
  * */
 #include "EventStatePriority.h"
 
+#include "core/StateSpaceInformation.h"
+
 namespace stamina {
 namespace priority {
 
@@ -166,8 +168,9 @@ PriorityTree::distance(CompressedState & state) {
 
 void
 PriorityTree::initialize(storm::jani::Property * property) {
+	auto expressionManager = property->getRawFormula()->getAtomicExpressionFormulas()[0]->getExpression().getManager();
 	// Create root node
-	auto expression = property->getExpression();
+	auto expression = property->getRawFormula()->asStateFormula().toExpression(expressionManager); // TODO: Get the state formula as an expression
 	auto simplifiedExpression = expression.simplify();
 	auto nonNestedExpression = simplifiedExpression.reduceNesting();
 	// createNodeFromExpression is recursive
@@ -207,15 +210,17 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 				+ "\n\tCount: " + std::to_string(vars.size())
 			);
 		}
-		auto var = *vars.begin(); // TODO: vars should only have one element
+		auto var = *vars.begin();
 		if (var.getType().isIntegerType()) {
-			// TODO: how to get the variable information from here?
-			std::shared_ptr<PriorityTree::IntegerVariableNode> vNode(new PriorityTree::IntegerVariableNode(var));
+			// get the variable information from variable
+			auto integerVariableInformation = core::StateSpaceInformation::getInformationOnIntegerVariable(var);
+			std::shared_ptr<PriorityTree::IntegerVariableNode> vNode(new PriorityTree::IntegerVariableNode(integerVariableInformation));
 			return vNode;
 		}
 		else if (var.getType().isBooleanType()) {
-			// TODO also how to get the variable information from here?
-			std::shared_ptr<PriorityTree::BooleanVariableNode> vNode(new PriorityTree::BooleanVariableNode(var));
+			// get the variable information from variable
+			auto booleanVariableInformation = core::StateSpaceInformation::getInformationOnBooleanVariable(var);
+			std::shared_ptr<PriorityTree::BooleanVariableNode> vNode(new PriorityTree::BooleanVariableNode(booleanVariableInformation));
 			return vNode;
 		}
 		else {
