@@ -18,10 +18,10 @@ namespace stamina {
 		class EventStatePriority : public StatePriority<StateType> {
 		public:
 			EventStatePriority(bool rareEvent) : rareEvent(rareEvent) {}
-			virtual static float priority(std::shared_ptr<ProbabilityStatePair<StateType>> state);
+			virtual float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state);
 			virtual bool operatorValue(
-				const std::shared_ptr<ProbabilityStatePair<StateType>> first
-				, const std::shared_ptr<ProbabilityStatePair<StateType>> second
+				const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
+				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
 			);
 			void initializePriorityTree(storm::jani::Property * property);
 			const bool isRareEvent() { return rareEvent; }
@@ -32,14 +32,14 @@ namespace stamina {
 
 		class PriorityTree {
 		public:
-			typedef operator_t uint8_t;
+			typedef uint8_t operator_t;
 			enum OPERATORS {
-				LESS_THAN_EQ = 0;
-				GREATER_THAN_EQ = 1;
-				AND = 2;
-				OR = 3;
-				NOT = 4;
-			}
+				LESS_THAN_EQ = 0
+				, GREATER_THAN_EQ = 1
+				, AND = 2
+				, OR = 3
+				, NOT = 4
+			};
 			class Node {
 			public:
 				Node() = default;

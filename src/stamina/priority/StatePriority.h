@@ -15,17 +15,17 @@
 #include "builder/ProbabilityState.h"
 #include "builder/StateAndTransitions.h"
 
-#include <storm/jani/Property.h>
+#include <storm/storage/jani/Property.h>
 
 namespace stamina {
 	namespace priority {
 		template <typename StateType>
 		class StatePriority {
 		public:
-			virtual static float priority(std::shared_ptr<ProbabilityStatePair<StateType>> state) = 0;
+			virtual float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state) = 0;
 			virtual bool operatorValue(
-				const std::shared_ptr<ProbabilityStatePair<StateType>> first
-				, const std::shared_ptr<ProbabilityStatePair<StateType>> second
+				const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
+				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
 			);
 			static void setupStatePriority();
 			/* Data members */

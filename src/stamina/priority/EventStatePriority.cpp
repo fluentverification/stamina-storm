@@ -14,20 +14,20 @@ const float SMALL_VALUE = 0.0001;
 
 template <typename StateType>
 float
-EventStatePriority<StateType>::priority(std::shared_ptr<ProbabilityStatePair<StateType>> state) {
+EventStatePriority<StateType>::priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state) {
 
 }
 
 template <typename StateType>
 bool
 EventStatePriority<StateType>::operatorValue(
-	const std::shared_ptr<ProbabilityStatePair<StateType>> first
-	, const std::shared_ptr<ProbabilityStatePair<StateType>> second
+	const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
+	, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
 ) {
 	/**
 	 * Explainer to make this code a little less obtuse:
-	 * ProbabilityStatePair->second is the state (CompressedState &)
-	 * ProbabilityStatePair->first is the state's probability information
+	 * builder::ProbabilityStatePair->second is the state (CompressedState &)
+	 * builder::ProbabilityStatePair->first is the state's probability information
 	 *
 	 * So:
 	 * first->second is the state values of the first pair passed in

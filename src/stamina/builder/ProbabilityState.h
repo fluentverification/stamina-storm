@@ -105,6 +105,7 @@ namespace stamina {
 		public:
 			ProbabilityState<StateType> * first;
 			CompressedState second;
+			float distance; // Distance between state and threshold
 			ProbabilityStatePair(
 				ProbabilityState<StateType> * first
 				, CompressedState second
