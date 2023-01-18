@@ -61,7 +61,7 @@ EventStatePriority<StateType>::initializePriorityTree(storm::jani::Property * pr
 
 void
 PriorityTree::Node::addChild(std::shared_ptr<Node> child) {
-	this->children.append(child);
+	this->children.push_back(child);
 }
 
 /* Implementation for PriorityTree::operatorNode */
@@ -151,7 +151,7 @@ PriorityTree::IntegerVariableNode::accumulate(CompressedState & state) {
 
 float
 PriorityTree::BooleanVariableNode::accumulate(CompressedState & state) {
-	uint_fast64_t offset = variable.bitWidth;
+	uint_fast64_t offset = variable.bitOffset;
 	return 1.0 ? state.get(offset) : 0.0;
 }
 
@@ -172,7 +172,7 @@ PriorityTree::initialize(storm::jani::Property * property) {
 	this->root = createNodeFromExpression(expression);
 }
 
-std::shared_ptr<Node>
+std::shared_ptr<PriorityTree::Node>
 PriorityTree::createNodeFromExpression(storm::expressions::Expression & expression) {
 	// Determine what type
 	// TODO
@@ -195,14 +195,15 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	}
 	else if (expression.isVariable()) {
 		// Create variable node from variable
+		// TODO: should have boolean and integer variables
 		auto vars = expression.getVariables();
 		auto var = // TODO: vars should only have one element
-		std::shared_ptr<VariableNode> vNode(new VariableNode(var));
+		std::shared_ptr<PriorityTree::VariableNode> vNode(new PriorityTree::VariableNode(var));
 		return vNode;
 	}
 	else if (expression.isFunctionApplication()) {
 		auto op = expression.getOperator();
-		std::shared_ptr<OperatorNode> opNode( /* TODO: Constructor*/ );
+		std::shared_ptr<PriorityTree::OperatorNode> opNode( /* TODO: Constructor*/ );
 		for (auto ex : ) {
 			auto child = createNodeFromExpression(ex);
 			opNode->addChild(child);
