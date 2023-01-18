@@ -29,7 +29,7 @@ namespace stamina {
 			const bool isRareEvent() { return rareEvent; }
 		private:
 			const bool rareEvent;
-			PriorityTree tree;
+			PriorityTree & tree;
 		};
 
 		class PriorityTree {

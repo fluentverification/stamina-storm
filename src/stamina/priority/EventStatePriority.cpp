@@ -187,24 +187,40 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	 *         append result as child of OperatorNode
 	 *     return the OperatorNode
 	 * */
-	if (expression.hasNumericalType()) {
-
+	if (expression.hasNumericalType() && expression.isLiteral()) {
+		int val = expression.evaluateAsInt();
+		std::shared_ptr<PriorityTree::PrimitiveNode<int>> intNode(new PriorityTree::PrimitiveNode<int>(val));
+		return intNode;
 	}
-	else if (expression.hasBooleanType()) {
-
+	else if (expression.hasBooleanType() && expression.isLiteral()) {
+		bool val = expression.evaluateAsBool();
+		std::shared_ptr<PriorityTree::PrimitiveNode<bool>> boolNode(new PriorityTree::PrimitiveNode<bool>(val));
+		return boolNode;
 	}
 	else if (expression.isVariable()) {
 		// Create variable node from variable
 		// TODO: should have boolean and integer variables
 		auto vars = expression.getVariables();
 		auto var = // TODO: vars should only have one element
-		std::shared_ptr<PriorityTree::VariableNode> vNode(new PriorityTree::VariableNode(var));
-		return vNode;
+		switch (var.getType()) {
+			case /* INTEGER */: // TODO: Where is storm::expressions::Type defined?!!
+				std::shared_ptr<PriorityTree::IntegerVariableNode> vNode(new PriorityTree::IntegerVariableNode(var));
+				return vNode;
+			case /* BOOLEAN */:
+				std::shared_ptr<PriorityTree::BooleanVariableNode> vNode(new PriorityTree::BooleanVariableNode(var));
+				return vNode;
+			default:
+				StaminaMessages::errorAndExit("Unknown Variable Type!");
+		}
 	}
 	else if (expression.isFunctionApplication()) {
 		auto op = expression.getOperator();
 		std::shared_ptr<PriorityTree::OperatorNode> opNode( /* TODO: Constructor*/ );
-		for (auto ex : ) {
+		// For the linguistics challenged programmer such as myself:
+		// Arity: the number of operands or count of elements taken
+		//        by an operator
+		for (int i = 0; i < expression.getArity(); i++) {
+			auto ex = expression.getOperand(i);
 			auto child = createNodeFromExpression(ex);
 			opNode->addChild(child);
 		}
