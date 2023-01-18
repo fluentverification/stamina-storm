@@ -175,7 +175,6 @@ PriorityTree::initialize(storm::jani::Property * property) {
 std::shared_ptr<PriorityTree::Node>
 PriorityTree::createNodeFromExpression(storm::expressions::Expression & expression) {
 	// Determine what type
-	// TODO
 	/* If the expression is a primitive
 	 *     Create and return a PrimitiveNode
 	 * Else if it is a variable
@@ -199,18 +198,18 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	}
 	else if (expression.isVariable()) {
 		// Create variable node from variable
-		// TODO: should have boolean and integer variables
 		auto vars = expression.getVariables();
 		auto var = // TODO: vars should only have one element
-		switch (var.getType()) {
-			case /* INTEGER */: // TODO: Where is storm::expressions::Type defined?!!
-				std::shared_ptr<PriorityTree::IntegerVariableNode> vNode(new PriorityTree::IntegerVariableNode(var));
-				return vNode;
-			case /* BOOLEAN */:
-				std::shared_ptr<PriorityTree::BooleanVariableNode> vNode(new PriorityTree::BooleanVariableNode(var));
-				return vNode;
-			default:
-				StaminaMessages::errorAndExit("Unknown Variable Type!");
+		if (var.getType().isIntegerType()) {
+			std::shared_ptr<PriorityTree::IntegerVariableNode> vNode(new PriorityTree::IntegerVariableNode(var));
+			return vNode;
+		}
+		else if (var.getType().isBooleanType()) {
+			std::shared_ptr<PriorityTree::BooleanVariableNode> vNode(new PriorityTree::BooleanVariableNode(var));
+			return vNode;
+		}
+		else {
+			StaminaMessages::errorAndExit("Unknown Variable Type!");
 		}
 	}
 	else if (expression.isFunctionApplication()) {
