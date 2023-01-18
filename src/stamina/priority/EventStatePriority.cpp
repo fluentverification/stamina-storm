@@ -15,7 +15,9 @@ const float SMALL_VALUE = 0.0001;
 template <typename StateType>
 float
 EventStatePriority<StateType>::priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state) {
-
+	float distance = tree.distance(state->second);
+	state->distance = distance;
+	return distance;
 }
 
 template <typename StateType>
@@ -199,12 +201,20 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	else if (expression.isVariable()) {
 		// Create variable node from variable
 		auto vars = expression.getVariables();
-		auto var = // TODO: vars should only have one element
+		if (vars.size() != 1) {
+			StaminaMessages::errorAndExit("Variables count should be 1 for this expression!\n\tExpression:"
+				+ expression.toString()
+				+ "\n\tCount: " + std::to_string(vars.size())
+			);
+		}
+		auto var = *vars.begin(); // TODO: vars should only have one element
 		if (var.getType().isIntegerType()) {
+			// TODO: how to get the variable information from here?
 			std::shared_ptr<PriorityTree::IntegerVariableNode> vNode(new PriorityTree::IntegerVariableNode(var));
 			return vNode;
 		}
 		else if (var.getType().isBooleanType()) {
+			// TODO also how to get the variable information from here?
 			std::shared_ptr<PriorityTree::BooleanVariableNode> vNode(new PriorityTree::BooleanVariableNode(var));
 			return vNode;
 		}
