@@ -10,6 +10,8 @@
 
 #include "StatePriority.h"
 
+#include <storm/generator/VariableInformation.h>
+
 namespace stamina {
 	namespace priority {
 		class PriorityTree;
@@ -72,22 +74,22 @@ namespace stamina {
 			 * */
 			class IntegerVariableNode : public Node {
 			public:
-				IntegerVariableNode(storm::prism::IntegerVariable variable)
+				IntegerVariableNode(storm::generator::IntegerVariableInformation variable)
 					: variable(variable) {}
 				/* Note: converts the value to a float */
 				virtual float accumulate(CompressedState & state);
-				storm::prism::IntegerVariable & variable;
+				storm::generator::IntegerVariableInformation & variable;
 			};
 			/**
 			 * Holds a boolean variable value
 			 * */
 			class BooleanVariableNode : public Node {
 			public:
-				BooleanVariableNode(storm::prism::BooleanVariable variable)
+				BooleanVariableNode(storm::generator::BooleanVariableInformation variable)
 					: variable(variable) {}
 				/* Converts false to 0.0 and true to 1.0 */
 				virtual float accumulate(CompressedState & state);
-				storm::prism::BooleanVariable & variable;
+				storm::generator::BooleanVariableInformation & variable;
 			};
 			PriorityTree() : root(nullptr) {}
 			/**
