@@ -47,14 +47,14 @@ namespace stamina {
 				void addChild(std::shared_ptr<Node> child);
 			protected:
 				std::vector<std::shared_ptr<Node>> children;
-			}
-			class operatorNode : public Node {
+			};
+			class OperatorNode : public Node {
 			public:
-				operatorNode(operator_t operator) : operator(operator) {}
+				OperatorNode(operator_t m_operator) : m_operator(m_operator) {}
 				virtual float accumulate(CompressedState & state);
 			private:
 				const operator_t m_operator;
-			}
+			};
 			/**
 			 * Holds a primitive value
 			 * */
@@ -62,32 +62,33 @@ namespace stamina {
 			class PrimitiveNode : public Node {
 			public:
 				PrimitiveNode() = default;
-				PrimitiveNode(ValueType value) : value(value);
+				PrimitiveNode(ValueType value)
+					: value(value) {}
 				virtual float accumulate(CompressedState & state);
 				ValueType value;
-			}
+			};
 			/**
 			 * Holds an integer variable value
 			 * */
 			class IntegerVariableNode : public Node {
 			public:
-				IntegerVariableNode(storm::variables::IntegerVariable variable)
+				IntegerVariableNode(storm::prism::IntegerVariable variable)
 					: variable(variable) {}
 				/* Note: converts the value to a float */
 				virtual float accumulate(CompressedState & state);
-				storm::variables::IntegerVariable & variable;
-			}
+				storm::prism::IntegerVariable & variable;
+			};
 			/**
 			 * Holds a boolean variable value
 			 * */
 			class BooleanVariableNode : public Node {
 			public:
-				BooleanVariableNode(storm::variables::BooleanVariable variable)
+				BooleanVariableNode(storm::prism::BooleanVariable variable)
 					: variable(variable) {}
 				/* Converts false to 0.0 and true to 1.0 */
 				virtual float accumulate(CompressedState & state);
-				storm::variables::BooleanVariable & variable;
-			}
+				storm::prism::BooleanVariable & variable;
+			};
 			PriorityTree() : root(nullptr) {}
 			/**
 			 * Calculates a composite of the "normalized" distance
@@ -108,7 +109,7 @@ namespace stamina {
 			std::shared_ptr<Node> createNodeFromExpression(storm::expressions::Expression & expression);
 		private:
 			std::shared_ptr<Node> root;
-		}
+		};
 	}
 }
 #endif // STAMINA_PRIORITY_EVENTSTATEPRIORITY_H

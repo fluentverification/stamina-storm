@@ -9,6 +9,8 @@
 
 #include <cstdint>
 
+#include "builder/__storm_needed_for_builder.h"
+
 #include "core/Options.h"
 #include "core/StaminaMessages.h"
 
@@ -19,6 +21,8 @@
 
 namespace stamina {
 	namespace priority {
+		typedef builder::CompressedState CompressedState;
+
 		template <typename StateType>
 		class StatePriority {
 		public:

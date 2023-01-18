@@ -80,8 +80,8 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 *       var
 		 * since we want a higher d for a lower var
 		 * */
-		float var = children[0]->accumulate();
-		float val = children[1]->accumulate();
+		float var = children[0]->accumulate(state);
+		float val = children[1]->accumulate(state);
 		return val / std::max(var, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::GREATER_THAN_EQ) {
@@ -96,8 +96,8 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 *       val
 		 * since we want a higher d for a lower var
 		 * */
-		float var = children[0]->accumulate();
-		float val = children[1]->accumulate();
+		float var = children[0]->accumulate(state);
+		float val = children[1]->accumulate(state);
 		return var / std::max(val, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::AND) {
@@ -105,7 +105,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		// together using multiplication
 		float distance = 1;
 		for (auto child : children) {
-			distance *= child->accumulate();
+			distance *= child->accumulate(state);
 		}
 		return distance;
 	}
@@ -114,7 +114,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		// the addition operator
 		float distance = 0;
 		for (auto child : children) {
-			distance += child->accumulate();
+			distance += child->accumulate(state);
 		}
 		return distance / children.size(); // TODO: Normalize or not?
 	}
@@ -123,7 +123,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		if (children.size() != 1) {
 			StaminaMessages::errorAndExit("! operator requires only one operand! Got " + std::to_string(children.size()));
 		}
-		return 1 / children[0]->accumulate();
+		return 1 / children[0]->accumulate(state);
 	}
 	else {
 		StaminaMessages::errorAndExit("Unknown operator! (integer value " + std::to_string(m_operator) + ")");
