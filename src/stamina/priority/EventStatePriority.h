@@ -19,7 +19,11 @@ namespace stamina {
 		template <typename StateType>
 		class EventStatePriority : public StatePriority<StateType> {
 		public:
-			EventStatePriority(bool rareEvent) : rareEvent(rareEvent) {}
+			EventStatePriority(
+				bool rareEvent
+				, storm::expressions::ExpressionManager expressionManager
+			) : rareEvent(rareEvent)
+			{}
 			virtual float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state);
 			virtual bool operatorValue(
 				const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
@@ -30,6 +34,7 @@ namespace stamina {
 		private:
 			const bool rareEvent;
 			PriorityTree & tree;
+			storm::expressions::ExpressionManager expressionManager;
 		};
 
 		class PriorityTree {

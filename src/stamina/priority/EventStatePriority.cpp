@@ -168,9 +168,9 @@ PriorityTree::distance(CompressedState & state) {
 
 void
 PriorityTree::initialize(storm::jani::Property * property) {
-	auto expressionManager = property->getRawFormula()->getAtomicExpressionFormulas()[0]->getExpression().getManager();
+	// auto expressionManager = property->getRawFormula()->getAtomicExpressionFormulas()[0]->getExpression().getManager();
 	// Create root node
-	auto expression = property->getRawFormula()->asStateFormula().toExpression(expressionManager); // TODO: Get the state formula as an expression
+	auto expression = property->getRawFormula()->asStateFormula().toExpression(this->expressionManager); // TODO: Get the state formula as an expression
 	auto simplifiedExpression = expression.simplify();
 	auto nonNestedExpression = simplifiedExpression.reduceNesting();
 	// createNodeFromExpression is recursive
