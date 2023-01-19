@@ -30,7 +30,7 @@ namespace stamina {
 			virtual bool operatorValue(
 				const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
 				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
-			);
+			) = 0;
 			static void setupStatePriority();
 			/* Data members */
 			// static StatePriority<StateType> statePriority;
