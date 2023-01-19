@@ -14,31 +14,6 @@
 
 namespace stamina {
 	namespace priority {
-		class PriorityTree;
-
-		template <typename StateType>
-		class EventStatePriority : public StatePriority<StateType> {
-		public:
-			EventStatePriority(
-				bool rareEvent
-				, storm::expressions::ExpressionManager & expressionManager
-			) : rareEvent(rareEvent)
-				, expressionManager(expressionManager)
-				, tree(expressionManager)
-			{}
-			virtual float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state);
-			virtual bool operatorValue(
-				const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
-				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
-			);
-			void initializePriorityTree(storm::jani::Property * property);
-			const bool isRareEvent() { return rareEvent; }
-		private:
-			const bool rareEvent;
-			PriorityTree & tree;
-			storm::expressions::ExpressionManager & expressionManager;
-		};
-
 		class PriorityTree {
 		public:
 			typedef uint8_t operator_t;
@@ -123,6 +98,29 @@ namespace stamina {
 			storm::expressions::ExpressionManager & expressionManager;
 		private:
 			std::shared_ptr<Node> root;
+		};
+
+		template <typename StateType>
+		class EventStatePriority : public StatePriority<StateType> {
+		public:
+			EventStatePriority(
+				bool rareEvent
+				, storm::expressions::ExpressionManager & expressionManager
+			) : rareEvent(rareEvent)
+				, expressionManager(expressionManager)
+				, tree(expressionManager)
+			{}
+			virtual float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state);
+			virtual bool operatorValue(
+				const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
+				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
+			);
+			void initializePriorityTree(storm::jani::Property * property);
+			const bool isRareEvent() { return rareEvent; }
+		private:
+			const bool rareEvent;
+			PriorityTree tree;
+			storm::expressions::ExpressionManager & expressionManager;
 		};
 	}
 }
