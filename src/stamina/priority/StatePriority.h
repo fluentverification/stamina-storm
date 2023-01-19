@@ -33,7 +33,7 @@ namespace stamina {
 			);
 			static void setupStatePriority();
 			/* Data members */
-			static StatePriority<StateType> statePriority;
+			// static StatePriority<StateType> statePriority;
 			static constexpr storm::jani::Property * property = nullptr;
 		};
 	} // namespace priority

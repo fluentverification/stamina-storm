@@ -10,6 +10,8 @@
 
 #include "StaminaModelBuilder.h"
 
+#include "priority/StatePriority.h"
+
 namespace stamina {
 	namespace builder {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
@@ -37,6 +39,10 @@ namespace stamina {
 				storm::prism::Program const& program
 				, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 			);
+			/**
+			* Destructor method
+			* */
+			~StaminaPriorityModelBuilder();
 			/**
 			* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 			* and state space truncation from that state.
@@ -74,6 +80,10 @@ namespace stamina {
 			 * */
 			void enqueue(std::shared_ptr<ProbabilityStatePair<StateType>> probabilityStatePair);
 		private:
+			/**
+			 * Uses the values in Options to set up the current state priority;
+			 * */
+			void setupStatePriority();
 			std::deque<std::shared_ptr<ProbabilityStatePair<StateType>>> statesTerminatedLastIteration;
 			void flushStatesTerminated();
 			void flushFromPriorityQueueToStatesTerminated();
@@ -121,6 +131,8 @@ namespace stamina {
 			uint64_t numberOfExploredStatesSinceLastMessage;
 			double piHat;
 			double windowPower;
+			// State Priority
+			priority::StatePriority<StateType> * statePriority;
 			/**
 			 * Should this be a std::unordered_set or std::unordered_map?
 			 * */

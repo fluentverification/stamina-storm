@@ -1,5 +1,7 @@
 #include "StaminaPriorityModelBuilder.h"
+
 #include "core/StateSpaceInformation.h"
+#include "priority/EventStatePriority.h"
 
 #include <functional>
 #include <sstream>
@@ -24,7 +26,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 	)
 	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
-	// Intentionally left empty
+	setupStatePriority();
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
@@ -38,7 +40,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 	)
 	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
-	// Intentionally left empty
+	setupStatePriority();
+}
+
+template<typename ValueType, typename RewardModelType, typename StateType>
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::~StaminaPriorityModelBuilder() {
+	if (this->statePriority) {
+		delete this->statePriority;
+	}
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
@@ -74,6 +83,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			std::shared_ptr<ProbabilityStatePair<StateType>> initProbabilityStatePair(
 				new ProbabilityStatePair<StateType>(initProbabilityState, state)
 			);
+			if (this->statePriority) {
+				statePriority->priority(initProbabilityStatePair);
+			}
 			statePriorityQueue.push(initProbabilityStatePair);
 			initProbabilityState->iterationLastSeen = iteration;
 		}
@@ -97,6 +109,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 				std::shared_ptr<ProbabilityStatePair<StateType>> nextProbabilityStatePair(
 					new ProbabilityStatePair<StateType>(nextProbabilityState, state)
 				);
+				if (this->statePriority) {
+					statePriority->priority(nextProbabilityStatePair);
+				}
 				enqueue(nextProbabilityStatePair);
 				enqueued = true;
 			}
@@ -117,6 +132,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 				std::shared_ptr<ProbabilityStatePair<StateType>> nextProbabilityStatePair(
 					new ProbabilityStatePair<StateType>(nextProbabilityState, state)
 				);
+				if (this->statePriority) {
+					statePriority->priority(nextProbabilityStatePair);
+				}
 				enqueue(nextProbabilityStatePair);
 				enqueued = true;
 			}
@@ -135,6 +153,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			std::shared_ptr<ProbabilityStatePair<StateType>> nextProbabilityStatePair(
 				new ProbabilityStatePair<StateType>(nextProbabilityState, state)
 			);
+			if (this->statePriority) {
+				statePriority->priority(nextProbabilityStatePair);
+			}
 			enqueue(nextProbabilityStatePair);
 
 			enqueued = true;
@@ -188,6 +209,22 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(std:
 			this->createTransition(transition);
 		}
 		probabilityState->preTerminatedTransitions = nullptr;
+	}
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::setupStatePriority() {
+	this->statePriority = nullptr;
+	switch (Options::event) {
+		case EVENTS::RARE:
+			this->statePriority = new priority::EventStatePriority<StateType>(true);
+			break;
+		case EVENTS::COMMON:
+			this->statePriority = new priority::EventStatePriority<StateType>(false);
+			break;
+		default:
+			StaminaMessages::errorAndExit("Unknown error! (StaminaPriorityModelBuilder::setupStatePriority())");
 	}
 }
 
