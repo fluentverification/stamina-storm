@@ -21,8 +21,10 @@ namespace stamina {
 		public:
 			EventStatePriority(
 				bool rareEvent
-				, storm::expressions::ExpressionManager expressionManager
+				, storm::expressions::ExpressionManager & expressionManager
 			) : rareEvent(rareEvent)
+				, expressionManager(expressionManager)
+				, tree(expressionManager)
 			{}
 			virtual float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state);
 			virtual bool operatorValue(
@@ -34,7 +36,7 @@ namespace stamina {
 		private:
 			const bool rareEvent;
 			PriorityTree & tree;
-			storm::expressions::ExpressionManager expressionManager;
+			storm::expressions::ExpressionManager & expressionManager;
 		};
 
 		class PriorityTree {
@@ -96,7 +98,11 @@ namespace stamina {
 				virtual float accumulate(CompressedState & state);
 				storm::generator::BooleanVariableInformation & variable;
 			};
-			PriorityTree() : root(nullptr) {}
+			PriorityTree(
+				storm::expressions::ExpressionManager & expressionManager
+			) : root(nullptr)
+				, expressionManager(expressionManager)
+			{}
 			/**
 			 * Calculates a composite of the "normalized" distance
 			 * from the state values to the threshold of the parameter that was setup
@@ -114,6 +120,7 @@ namespace stamina {
 			bool wasInitialized() { return root != nullptr; }
 		protected:
 			std::shared_ptr<Node> createNodeFromExpression(storm::expressions::Expression & expression);
+			storm::expressions::ExpressionManager & expressionManager;
 		private:
 			std::shared_ptr<Node> root;
 		};

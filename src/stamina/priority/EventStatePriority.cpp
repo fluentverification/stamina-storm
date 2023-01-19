@@ -229,7 +229,30 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	}
 	else if (expression.isFunctionApplication()) {
 		auto op = expression.getOperator();
-		std::shared_ptr<PriorityTree::OperatorNode> opNode( /* TODO: Constructor*/ );
+		operator_t m_operator; // We have to convert the operator to our type
+		switch (op) {
+			case storm::expressions::OperatorType::And:
+				m_operator = PriorityTree::OPERATORS::AND;
+				break;
+			case storm::expressions::OperatorType::Or:
+				m_operator = PriorityTree::OPERATORS::OR;
+				break;
+			case storm::expressions::OperatorType::Not:
+				m_operator = PriorityTree::OPERATORS::NOT;
+				break;
+			case storm::expressions::OperatorType::Less:
+			case storm::expressions::OperatorType::LessOrEqual:
+				m_operator = PriorityTree::OPERATORS::LESS_THAN_EQ;
+				break;
+			case storm::expressions::OperatorType::Greater:
+			case storm::expressions::OperatorType::GreaterOrEqual:
+				m_operator = PriorityTree::OPERATORS::GREATER_THAN_EQ;
+				break;
+			default:
+				StaminaMessages::errorAndExit("Operator not supported by OperatorNode");
+				break;
+		}
+		std::shared_ptr<PriorityTree::OperatorNode> opNode( new OperatorNode(m_operator) );
 		// For the linguistics challenged programmer such as myself:
 		// Arity: the number of operands or count of elements taken
 		//        by an operator
