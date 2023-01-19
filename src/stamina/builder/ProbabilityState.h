@@ -4,6 +4,8 @@
 #include "__storm_needed_for_builder.h"
 #include "StateAndTransitions.h"
 
+#include "core/Options.h"
+
 namespace stamina {
 	namespace builder {
 		using namespace storm::builder;
@@ -129,8 +131,20 @@ namespace stamina {
 				const ProbabilityStatePair<StateType> first
 				, const ProbabilityStatePair<StateType> second
 			) const {
-				// Create a max heap on the reachability probability
-				return first.first->pi < second.first->pi;
+				switch (core::Options::event) {
+				case EVENTS::RARE:
+					// For rare events, since we are trying to bring Pmax closer to Pactual, we want higher priority on
+					// states which DO NOT satisfy the property since PMax assumes all states outside of what we have
+					// explored do satisfy the property. As a result we want to mirror that.
+					return first.first->pi + first.distance < second.first->pi + second.distance;
+				case EVENTS::COMMON:
+					// For common events, it's the opposite. Therefore we reciprocate the distance
+					return first.first->pi + (1 / first.distance) < second.first->pi + (1 / second.distance);
+				case EVENTS::UNDEFINED:
+				default:
+					// Create a max heap on the reachability probability
+					return first.first->pi < second.first->pi;
+				}
 			}
 		};
 
