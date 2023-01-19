@@ -20,6 +20,7 @@ set_default_values(struct arguments * arguments) {
 	arguments->method = STAMINA_METHODS::ITERATIVE_METHOD;
 	arguments->threads = 1;
 	arguments->preterminate = false;
+	arguments->event = EVENTS::UNDEFINED;
 }
 
 /**

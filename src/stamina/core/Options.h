@@ -49,6 +49,8 @@ namespace stamina {
 			inline static uint8_t method;
 			inline static uint8_t threads;
 			inline static bool preterminate;
+			// Rare and common events
+			inline static uint8_t event;
 		};
 		/**
 		* Tells us if a string ends with another

@@ -21,6 +21,11 @@ enum STAMINA_METHODS {
 	, RE_EXPLORING_METHOD = 2     // STAMINA 2.0
 };
 
+enum EVENTS {
+	UNDEFINED = 0                 // Only prioritize on reachability
+	, RARE = 1                    // Prioritize on reachability and rare events
+	, COMMON = 2                  // Prioritize on reachability and common events
+};
 
 
 static char doc[] = "STAMINA -- truncates infinite CTMC state space and passes into STORM";
@@ -78,6 +83,10 @@ static struct argp_option options[] = {
 		"Print STAMINA Version information"}
 	, {"preterminate", 't', 0, 0,
 		"Allow states to be \"preterminated\" if reachability is low enough (only applies to priority method)"}
+	, {"rare", 'b', 0, 0,
+		"Prioritize for rare event priority (only works with -P option)"}
+	, {"common", 'd', 0, 0,
+		"Prioritize for common event priority (only works with -P option)"}
 	, { 0 }
 };
 
@@ -113,6 +122,7 @@ struct arguments {
 	uint8_t method;
 	uint8_t threads;
 	bool preterminate;
+	uint8_t event;
 };
 
 /**
@@ -214,6 +224,20 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 				, BUILD_INFO
 			);
 			exit(0);
+		case 'b':
+			if (arguments->event == EVENTS::COMMON) {
+				printf("Cannot use '-b' flag with '-d' flag!\n");
+				exit(1);
+			}
+			arguments->event = EVENTS::RARE;
+			break;
+		case 'd':
+			if (arguments->event == EVENTS::RARE) {
+				printf("Cannot use '-d' flag with '-b' flag!\n");
+				exit(1);
+			}
+			arguments->event = EVENTS::COMMON;
+			break;
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file
