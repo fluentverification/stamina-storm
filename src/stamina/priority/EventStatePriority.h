@@ -110,11 +110,11 @@ namespace stamina {
 				, expressionManager(expressionManager)
 				, tree(expressionManager)
 			{}
-			virtual float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state);
-			virtual bool operatorValue(
+			float priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state) override;
+			bool operatorValue(
 				const std::shared_ptr<builder::ProbabilityStatePair<StateType>> first
 				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
-			);
+			) override;
 			void initializePriorityTree(storm::jani::Property * property);
 			const bool isRareEvent() { return rareEvent; }
 		private:
