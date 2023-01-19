@@ -265,5 +265,8 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	}
 }
 
+// Forward declare EventStatePriority class
+template class EventStatePriority<uint32_t>;
+
 } // namespace priority
 } // namespace stamina
