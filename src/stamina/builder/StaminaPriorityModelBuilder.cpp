@@ -26,7 +26,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 	)
 	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
-	setupStatePriority();
+	setupStatePriority(modulesFile.getManager());
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
@@ -40,7 +40,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 	)
 	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
-	setupStatePriority();
+	setupStatePriority(program.getManager());
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
@@ -214,14 +214,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(std:
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
-StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::setupStatePriority() {
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::setupStatePriority(storm::expressions::ExpressionManager & manager) {
 	this->statePriority = nullptr;
 	switch (Options::event) {
 		case EVENTS::RARE:
-			this->statePriority = new priority::EventStatePriority<StateType>(true);
+			this->statePriority = new priority::EventStatePriority<StateType>(true, manager);
 			break;
 		case EVENTS::COMMON:
-			this->statePriority = new priority::EventStatePriority<StateType>(false);
+			this->statePriority = new priority::EventStatePriority<StateType>(false, manager);
 			break;
 		default:
 			StaminaMessages::errorAndExit("Unknown error! (StaminaPriorityModelBuilder::setupStatePriority())");

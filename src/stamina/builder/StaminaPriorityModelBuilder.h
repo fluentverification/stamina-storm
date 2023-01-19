@@ -83,7 +83,7 @@ namespace stamina {
 			/**
 			 * Uses the values in Options to set up the current state priority;
 			 * */
-			void setupStatePriority();
+			void setupStatePriority(storm::expressions::ExpressionManager & manager);
 			std::deque<std::shared_ptr<ProbabilityStatePair<StateType>>> statesTerminatedLastIteration;
 			void flushStatesTerminated();
 			void flushFromPriorityQueueToStatesTerminated();
