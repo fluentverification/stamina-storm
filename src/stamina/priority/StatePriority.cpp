@@ -14,5 +14,14 @@ StatePriority<StateType>::setupStatePriority() {
 	// TODO
 }
 
+template <typename StateType>
+void
+StatePriority<StateType>::initialize(storm::jani::Property * property) {
+	StaminaMessages::warning("initialize() does nothing in this instance!");
+}
+
+// Forward declare EventStatePriority class
+template class StatePriority<uint32_t>;
+
 } // namespace priority
 } // namespace stamina

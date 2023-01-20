@@ -44,6 +44,11 @@ namespace stamina {
 			* */
 			~StaminaPriorityModelBuilder();
 			/**
+			 * If this builder is using a priority::EventStatePriority (to find state distance), initializes
+			 * the EventStatePriority embedded within it
+			 * */
+			void initializeEventStatePriority(storm::jani::Property * property);
+			/**
 			* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 			* and state space truncation from that state.
 			*

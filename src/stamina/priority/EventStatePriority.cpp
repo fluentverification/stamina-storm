@@ -163,6 +163,10 @@ PriorityTree::BooleanVariableNode::accumulate(CompressedState & state) {
 
 float
 PriorityTree::distance(CompressedState & state) {
+	if (!wasInitialized()) {
+		StaminaMessages::warning("Priority tree was not initialized! Returning 0 for distance!");
+		return 0.0;
+	}
 	return root->accumulate(state);
 }
 
