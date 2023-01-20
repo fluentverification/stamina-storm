@@ -70,6 +70,7 @@ Options::setArgs(struct arguments * arguments) {
 	threads = arguments->threads;
 	preterminate = arguments->preterminate;
 	fudge_factor = arguments->fudge_factor;
+	event = arguments->event;
 }
 
 } // namespace core

@@ -223,6 +223,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::setupStatePr
 		case EVENTS::COMMON:
 			this->statePriority = new priority::EventStatePriority<StateType>(false, manager);
 			break;
+		case EVENTS::UNDEFINED:
+			return;
 		default:
 			StaminaMessages::errorAndExit("Unknown error! (StaminaPriorityModelBuilder::setupStatePriority())");
 	}
