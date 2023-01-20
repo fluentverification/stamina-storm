@@ -136,6 +136,7 @@ StaminaModelChecker::modelCheckProperty(
 		StaminaMessages::warning("Not fully implemented yet!");
 		// Create StaminaModelBuilder
 		auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		builderPointer->initializeEventStatePriority(&propMin);
 		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
 	}
 	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {
