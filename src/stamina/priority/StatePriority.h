@@ -32,7 +32,7 @@ namespace stamina {
 				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
 			) = 0;
 			static void setupStatePriority();
-			virtual void initialize(storm::jani::Property * property);
+			virtual void initialize(storm::jani::Property * property) = 0;
 			/* Data members */
 			// static StatePriority<StateType> statePriority;
 			static constexpr storm::jani::Property * property = nullptr;

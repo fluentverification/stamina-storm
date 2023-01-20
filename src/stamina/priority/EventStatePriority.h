@@ -116,6 +116,7 @@ namespace stamina {
 				, const std::shared_ptr<builder::ProbabilityStatePair<StateType>> second
 			) override;
 			void initializePriorityTree(storm::jani::Property * property);
+			void initialize(storm::jani::Property * property) override { initializePriorityTree(property); }
 			const bool isRareEvent() { return rareEvent; }
 		private:
 			const bool rareEvent;
