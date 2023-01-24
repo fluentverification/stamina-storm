@@ -53,6 +53,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::~StaminaPrio
 template<typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::initializeEventStatePriority(storm::jani::Property * property) {
+	if (Options::event == EVENTS::UNDEFINED) { return; }
 	// This method assumes you're using an event state priority
 	statePriority->initialize(property);
 }
