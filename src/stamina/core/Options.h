@@ -51,6 +51,7 @@ namespace stamina {
 			inline static bool preterminate;
 			// Rare and common events
 			inline static uint8_t event;
+			inline static double distance_weight; // The weighting of the "distance" metric (a multiplier)
 		};
 		/**
 		* Tells us if a string ends with another

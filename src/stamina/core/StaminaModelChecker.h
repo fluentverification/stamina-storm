@@ -123,9 +123,6 @@ namespace stamina {
 			storm::expressions::ExpressionManager expressionManager;
 			storm::models::sparse::StateLabeling * labeling;
 			std::string preUntilLabel;
-			bool stateSpaceWasBuilt;
-			std::shared_ptr<CtmcModelChecker> checker;
-			std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 		};
 	} // namespace core
 } // namespace stamina
