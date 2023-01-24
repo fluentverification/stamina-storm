@@ -23,6 +23,7 @@ namespace stamina {
 				, AND = 2
 				, OR = 3
 				, NOT = 4
+				, EQUAL = 5
 			};
 			class Node {
 			public:

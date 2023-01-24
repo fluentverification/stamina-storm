@@ -81,7 +81,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 * For var < val, the distance is calculated as
 		 *       var - val
 		 *  d  = ---------
-		 *          var
+		 *		  var
 		 * since we want a higher d for a lower var
 		 * */
 		float var = children[0]->accumulate(state);
@@ -97,7 +97,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 * For var > val, the distance is calculated as
 		 *       val - var
 		 *  d  = ---------
-		 *          val
+		 *		  val
 		 * since we want a higher d for a lower var
 		 * */
 		float var = children[0]->accumulate(state);
@@ -128,6 +128,22 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 			StaminaMessages::errorAndExit("! operator requires only one operand! Got " + std::to_string(children.size()));
 		}
 		return 1 / children[0]->accumulate(state);
+	}
+	else if (m_operator == OPERATORS::EQUAL) {
+		if (children.size() > 2) {
+			StaminaMessages::errorAndExit("Can only have less than two operators for equal!");
+		}
+		// If the size is 1, we assume the value is a boolean and say
+		// is the value == 1. Therefore the distance is value - 1
+		else if (children.size() == 1) {
+			float var = children[0]->accumulate(state);
+			return std::abs(var - 1);
+		}
+		else {
+			float var = children[0]->accumulate(state);
+			float val = children[1]->accumulate(state);
+			return std::abs(var - val);
+		}
 	}
 	else {
 		StaminaMessages::errorAndExit("Unknown operator! (integer value " + std::to_string(m_operator) + ")");
@@ -201,8 +217,8 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	 * Else:
 	 *     Create an OperatorNode
 	 *     For each operand:
-	 *         call createNodeFromExpression
-	 *         append result as child of OperatorNode
+	 *		 call createNodeFromExpression
+	 *		 append result as child of OperatorNode
 	 *     return the OperatorNode
 	 * */
 	if (expression.hasNumericalType() && expression.isLiteral()) {
@@ -242,6 +258,7 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 		}
 	}
 	else if (expression.isFunctionApplication()) {
+		StaminaMessages::info("Attempting to create node for " + expression.toString());
 		auto op = expression.getOperator();
 		operator_t m_operator; // We have to convert the operator to our type
 		switch (op) {
@@ -262,6 +279,62 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 			case storm::expressions::OperatorType::GreaterOrEqual:
 				m_operator = PriorityTree::OPERATORS::GREATER_THAN_EQ;
 				break;
+			case storm::expressions::OperatorType::Xor:
+				StaminaMessages::errorAndExit("Operator (Xor) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Implies:
+				StaminaMessages::errorAndExit("Operator (Implies) not yet supported by OperatorNode!");
+				break;
+			// PriorityTree::OPERATORS::EQUAL when has only one operand assumes == 1 or == true
+			case storm::expressions::OperatorType::Equal:
+			case storm::expressions::OperatorType::Iff:
+				m_operator = PriorityTree::OPERATORS::EQUAL;
+				break;
+			case storm::expressions::OperatorType::Plus:
+				StaminaMessages::errorAndExit("Operator (Plus) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Minus:
+				StaminaMessages::errorAndExit("Operator (Minus) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Times:
+				StaminaMessages::errorAndExit("Operator (Times) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Divide:
+				StaminaMessages::errorAndExit("Operator (Divide) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Min:
+				StaminaMessages::errorAndExit("Operator (Min) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Max:
+				StaminaMessages::errorAndExit("Operator (Max) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Power:
+				StaminaMessages::errorAndExit("Operator (Power) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Modulo:
+				StaminaMessages::errorAndExit("Operator (Modulo) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::NotEqual:
+				StaminaMessages::errorAndExit("Operator (NotEqual) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Floor:
+				StaminaMessages::errorAndExit("Operator (Floor) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Ceil:
+				StaminaMessages::errorAndExit("Operator (Ceil) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::Ite:
+				StaminaMessages::errorAndExit("Operator (Ite) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::AtLeastOneOf:
+				StaminaMessages::errorAndExit("Operator (AtLeastOneOf) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::AtMostOneOf:
+				StaminaMessages::errorAndExit("Operator (AtMostOneOf) not yet supported by OperatorNode!");
+				break;
+			case storm::expressions::OperatorType::ExactlyOneOf:
+				StaminaMessages::errorAndExit("Operator (ExactlyOneOf) not yet supported by OperatorNode!");
+				break;
 			default:
 				StaminaMessages::errorAndExit("Operator not supported by OperatorNode");
 				break;
@@ -269,7 +342,7 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 		std::shared_ptr<PriorityTree::OperatorNode> opNode( new OperatorNode(m_operator) );
 		// For the linguistics challenged programmer such as myself:
 		// Arity: the number of operands or count of elements taken
-		//        by an operator
+		//		by an operator
 		for (int i = 0; i < expression.getArity(); i++) {
 			auto ex = expression.getOperand(i);
 			auto child = createNodeFromExpression(ex);
