@@ -87,6 +87,8 @@ static struct argp_option options[] = {
 		"Prioritize for rare event priority (only works with -P option)"}
 	, {"common", 'd', 0, 0,
 		"Prioritize for common event priority (only works with -P option)"}
+	, {"distanceWeight", 'W', "double", 0,
+		"Weight factor for distance priority metric (use with -P and either -b or -d)"}
 	, { 0 }
 };
 
@@ -123,6 +125,7 @@ struct arguments {
 	uint8_t threads;
 	bool preterminate;
 	uint8_t event;
+	double distance_weight;
 };
 
 /**
@@ -238,6 +241,10 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			}
 			arguments->event = EVENTS::COMMON;
 			break;
+		case 'W':
+			arguments->distance_weight = (double) atof(arg);
+			break;
+
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file
