@@ -174,10 +174,10 @@ void
 PriorityTree::initialize(storm::jani::Property * property) {
 	// auto expressionManager = property->getRawFormula()->getAtomicExpressionFormulas()[0]->getExpression().getManager();
 	// Create root node
-	auto formula = property->getRawFormula()->asAtomicExpressionFormula(); //->getAtomicExpressionFormulas();
+	auto formula = property->getRawFormula();
 
 	// Gets the portion of the formula withouth the probability operator
-	auto const & subFormula = formula.asOperatorFormula().getSubformula();
+	auto const & subFormula = formula->asOperatorFormula().getSubformula();
 	// Gets the portion to the right of the boundedUntilFormula portion [X U f] gets f
 	if (!subFormula.isBoundedUntilFormula()) {
 		StaminaMessages::errorAndExit("Formula must be bounded until formula!");
