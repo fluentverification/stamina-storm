@@ -79,14 +79,14 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		}
 		/**
 		 * For var < val, the distance is calculated as
-		 *       val
-		 *  d  = ---
-		 *       var
+		 *       var - val
+		 *  d  = ---------
+		 *          var
 		 * since we want a higher d for a lower var
 		 * */
 		float var = children[0]->accumulate(state);
 		float val = children[1]->accumulate(state);
-		return val / std::max(var, SMALL_VALUE);
+		return (var - val) / std::max(var, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::GREATER_THAN_EQ) {
 		// Require only 2 operands
@@ -95,14 +95,14 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		}
 		/**
 		 * For var > val, the distance is calculated as
-		 *       var
-		 *  d  = ---
-		 *       val
+		 *       val - var
+		 *  d  = ---------
+		 *          val
 		 * since we want a higher d for a lower var
 		 * */
 		float var = children[0]->accumulate(state);
 		float val = children[1]->accumulate(state);
-		return var / std::max(val, SMALL_VALUE);
+		return (val - var) / std::max(val, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::AND) {
 		// For the "and" operator, we can chain all of the distances of the children
@@ -174,9 +174,17 @@ void
 PriorityTree::initialize(storm::jani::Property * property) {
 	// auto expressionManager = property->getRawFormula()->getAtomicExpressionFormulas()[0]->getExpression().getManager();
 	// Create root node
-	auto expression = property->getRawFormula()
-		->asStateFormula()
-		.toExpression(this->expressionManager); // TODO: Get the state formula as an expression
+	auto formula = property->getRawFormula()->asAtomicExpressionFormula(); //->getAtomicExpressionFormulas();
+
+	// Gets the portion of the formula withouth the probability operator
+	auto const & subFormula = formula.asOperatorFormula().getSubFormula();
+	// Gets the portion to the right of the boundedUntilFormula portion [X U f] gets f
+	if (!subFormula.isBoundedUntilFormula()) {
+		StaminaMessages::errorAndExit("Formula must be bounded until formula!");
+	}
+	auto const & subSubFormula = subFormula.asBoundedUntilFormula().getRightSubFormula();
+
+	auto expression = subSubFormula.toExpression(this->expressionManager);
 	auto simplifiedExpression = expression.simplify();
 	auto nonNestedExpression = simplifiedExpression.reduceNesting();
 	// createNodeFromExpression is recursive
