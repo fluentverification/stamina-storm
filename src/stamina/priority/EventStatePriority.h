@@ -58,10 +58,11 @@ namespace stamina {
 			class IntegerVariableNode : public Node {
 			public:
 				IntegerVariableNode(storm::generator::IntegerVariableInformation variable)
-					: variable(variable) {}
+					: bitOffset(variable.bitOffset), bitWidth(variable.bitWidth) {}
 				/* Note: converts the value to a float */
 				virtual float accumulate(CompressedState & state);
-				storm::generator::IntegerVariableInformation & variable;
+				uint_fast64_t bitOffset;
+				uint64_t bitWidth;
 			};
 			/**
 			 * Holds a boolean variable value
@@ -69,10 +70,10 @@ namespace stamina {
 			class BooleanVariableNode : public Node {
 			public:
 				BooleanVariableNode(storm::generator::BooleanVariableInformation variable)
-					: variable(variable) {}
+					: bitOffset(variable.bitOffset) {}
 				/* Converts false to 0.0 and true to 1.0 */
 				virtual float accumulate(CompressedState & state);
-				storm::generator::BooleanVariableInformation & variable;
+				uint_fast64_t bitOffset;
 			};
 			PriorityTree(
 				storm::expressions::ExpressionManager & expressionManager

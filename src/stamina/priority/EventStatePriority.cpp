@@ -162,8 +162,11 @@ PriorityTree::PrimitiveNode<ValueType>::accumulate(CompressedState & state) {
 
 float
 PriorityTree::IntegerVariableNode::accumulate(CompressedState & state) {
-	uint_fast64_t bitOffset = variable.bitOffset;
-	uint16_t bitWidth = variable.bitWidth;
+	uint_fast64_t bitOffset = this->bitOffset;
+	uint16_t bitWidth = this->bitWidth;
+	if (bitWidth > 64) {
+		StaminaMessages::warning("Int size is " + std::to_string(bitWidth));
+	}
 	return (float) state.getAsInt(bitOffset + 1, bitWidth - 1);
 }
 
@@ -171,7 +174,7 @@ PriorityTree::IntegerVariableNode::accumulate(CompressedState & state) {
 
 float
 PriorityTree::BooleanVariableNode::accumulate(CompressedState & state) {
-	uint_fast64_t offset = variable.bitOffset;
+	uint_fast64_t offset = this->bitOffset;
 	return 1.0 ? state.get(offset) : 0.0;
 }
 
