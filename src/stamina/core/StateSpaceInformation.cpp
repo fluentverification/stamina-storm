@@ -104,7 +104,7 @@ StateSpaceInformation::getInformationOnBooleanVariable(
 			return bvi;
 		}
 	}
-	StaminaMessages::error("Unable to find variable information!");
+	StaminaMessages::error("Unable to find variable information! (Boolean variable: " + variable.getName() + ")");
 }
 
 storm::generator::IntegerVariableInformation
@@ -116,7 +116,7 @@ StateSpaceInformation::getInformationOnIntegerVariable(
 			return ivi;
 		}
 	}
-	StaminaMessages::error("Unable to find variable information!");
+	StaminaMessages::error("Unable to find variable information! (Integer variable: " + variable.getName() + ")");
 }
 
 } // namespace core
