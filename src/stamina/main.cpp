@@ -21,7 +21,6 @@ set_default_values(struct arguments * arguments) {
 	arguments->threads = 1;
 	arguments->preterminate = false;
 	arguments->event = EVENTS::UNDEFINED;
-	arguments->distance_weight = 1.0;
 }
 
 /**

@@ -71,7 +71,6 @@ Options::setArgs(struct arguments * arguments) {
 	preterminate = arguments->preterminate;
 	fudge_factor = arguments->fudge_factor;
 	event = arguments->event;
-	distance_weight = arguments->distance_weight;
 }
 
 } // namespace core
