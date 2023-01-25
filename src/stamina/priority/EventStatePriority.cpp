@@ -18,7 +18,7 @@ template <typename StateType>
 float
 EventStatePriority<StateType>::priority(std::shared_ptr<builder::ProbabilityStatePair<StateType>> state) {
 	float distance = tree.distance(state->second);
-	state->distance = distance;
+	state->distance = std::min(distance, 1.0f);
 	return distance;
 }
 
@@ -86,7 +86,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 * */
 		float var = children[0]->accumulate(state);
 		float val = children[1]->accumulate(state);
-		return (var - val) / std::max(var, SMALL_VALUE);
+		return std::max(var - val, 0.0f) / std::max(var, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::GREATER_THAN_EQ) {
 		// Require only 2 operands
@@ -102,23 +102,23 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 * */
 		float var = children[0]->accumulate(state);
 		float val = children[1]->accumulate(state);
-		return (val - var) / std::max(val, SMALL_VALUE);
+		return std::max(val - var, 0.0f) / std::max(val, SMALL_VALUE);
 	}
 	else if (m_operator == OPERATORS::AND) {
 		// For the "and" operator, we can chain all of the distances of the children
 		// together using multiplication
-		float distance = 1;
+		float distance = 0;
 		for (auto child : children) {
-			distance *= child->accumulate(state);
+			distance += child->accumulate(state);
 		}
-		return distance;
+		return distance / children.size();
 	}
 	else if (m_operator == OPERATORS::OR) {
 		// For the "or" operator, we also chain the distances of the children using
 		// the addition operator
-		float distance = 0;
+		float distance = 1;
 		for (auto child : children) {
-			distance += child->accumulate(state);
+			distance *= child->accumulate(state);
 		}
 		return distance / children.size(); // TODO: Normalize or not?
 	}
@@ -226,10 +226,12 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	 * */
 	if (expression.hasNumericalType() && expression.isLiteral()) {
 		int val = expression.evaluateAsInt();
+		StaminaMessages::info("Creating node for integer literal " + expression.toString());
 		std::shared_ptr<PriorityTree::PrimitiveNode<int>> intNode(new PriorityTree::PrimitiveNode<int>(val));
 		return intNode;
 	}
 	else if (expression.hasBooleanType() && expression.isLiteral()) {
+		StaminaMessages::info("Creating node for boolean literal " + expression.toString());
 		bool val = expression.evaluateAsBool();
 		std::shared_ptr<PriorityTree::PrimitiveNode<bool>> boolNode(new PriorityTree::PrimitiveNode<bool>(val));
 		return boolNode;
@@ -246,12 +248,14 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 		auto var = *vars.begin();
 		if (var.getType().isIntegerType()) {
 			// get the variable information from variable
+			StaminaMessages::info("Creating node for integer var " + expression.toString());
 			auto integerVariableInformation = core::StateSpaceInformation::getInformationOnIntegerVariable(var);
 			std::shared_ptr<PriorityTree::IntegerVariableNode> vNode(new PriorityTree::IntegerVariableNode(integerVariableInformation));
 			return vNode;
 		}
 		else if (var.getType().isBooleanType()) {
 			// get the variable information from variable
+			StaminaMessages::info("Creating node for boolean var " + expression.toString());
 			auto booleanVariableInformation = core::StateSpaceInformation::getInformationOnBooleanVariable(var);
 			std::shared_ptr<PriorityTree::BooleanVariableNode> vNode(new PriorityTree::BooleanVariableNode(booleanVariableInformation));
 			return vNode;
@@ -266,19 +270,24 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 		operator_t m_operator; // We have to convert the operator to our type
 		switch (op) {
 			case storm::expressions::OperatorType::And:
+				StaminaMessages::info("Operator: AND");
 				m_operator = PriorityTree::OPERATORS::AND;
 				break;
 			case storm::expressions::OperatorType::Or:
+				StaminaMessages::info("Operator: OR");
 				m_operator = PriorityTree::OPERATORS::OR;
 				break;
 			case storm::expressions::OperatorType::Not:
+				StaminaMessages::info("Operator: NOT");
 				m_operator = PriorityTree::OPERATORS::NOT;
 				break;
 			case storm::expressions::OperatorType::Less:
 			case storm::expressions::OperatorType::LessOrEqual:
+				StaminaMessages::info("Operator: LESS/LEQ");
 				m_operator = PriorityTree::OPERATORS::LESS_THAN_EQ;
 				break;
 			case storm::expressions::OperatorType::Greater:
+				StaminaMessages::info("Operator: GREATER/GEQ");
 			case storm::expressions::OperatorType::GreaterOrEqual:
 				m_operator = PriorityTree::OPERATORS::GREATER_THAN_EQ;
 				break;
@@ -291,6 +300,7 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 			// PriorityTree::OPERATORS::EQUAL when has only one operand assumes == 1 or == true
 			case storm::expressions::OperatorType::Equal:
 			case storm::expressions::OperatorType::Iff:
+				StaminaMessages::info("Operator: EQ");
 				m_operator = PriorityTree::OPERATORS::EQUAL;
 				break;
 			case storm::expressions::OperatorType::Plus:
