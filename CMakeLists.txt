@@ -61,6 +61,9 @@ set(SOURCE_FILES
 	src/stamina/builder/threads/ExplorationThread.h
 	src/stamina/builder/threads/IterativeExplorationThread.cpp
 	src/stamina/builder/threads/IterativeExplorationThread.h
+	# Files for `stamina::priority` namespace
+	src/stamina/priority/EventStatePriority.cpp
+	src/stamina/priority/StatePriority.cpp
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})

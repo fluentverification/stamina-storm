@@ -95,5 +95,29 @@ StateSpaceInformation::printVariableNames() {
 	std::cout << varString << std::endl;
 }
 
+storm::generator::BooleanVariableInformation
+StateSpaceInformation::getInformationOnBooleanVariable(
+	storm::expressions::Variable variable
+) {
+	for (auto bvi : variableInformation.booleanVariables) {
+		if (bvi.variable == variable) {
+			return bvi;
+		}
+	}
+	StaminaMessages::error("Unable to find variable information! (Boolean variable: " + variable.getName() + ")");
+}
+
+storm::generator::IntegerVariableInformation
+StateSpaceInformation::getInformationOnIntegerVariable(
+	storm::expressions::Variable variable
+) {
+	for (auto ivi : variableInformation.integerVariables) {
+		if (ivi.variable == variable) {
+			return ivi;
+		}
+	}
+	StaminaMessages::error("Unable to find variable information! (Integer variable: " + variable.getName() + ")");
+}
+
 } // namespace core
 } // namespace stamina

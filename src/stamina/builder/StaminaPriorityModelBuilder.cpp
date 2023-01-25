@@ -1,9 +1,14 @@
 #include "StaminaPriorityModelBuilder.h"
+
 #include "core/StateSpaceInformation.h"
+#include "priority/EventStatePriority.h"
 
 #include <functional>
 #include <sstream>
 #include <cmath>
+
+// Pre-load factor for hash-map
+#define PRE_LOAD 1000000
 
 namespace stamina {
 namespace builder {
@@ -19,8 +24,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 		, modulesFile
 		, options
 	)
+	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
-	// Intentionally left empty
+	setupStatePriority(modulesFile.getManager());
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
@@ -32,8 +38,24 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::StaminaPrior
 		program
 		, generatorOptions
 	)
+	, preTerminatedStates(PRE_LOAD * (int) Options::preterminate) // pre-size our hashmap. The "*Options::preterminate" prevents resizing if no pretermination occurs
 {
-	// Intentionally left empty
+	setupStatePriority(program.getManager());
+}
+
+template<typename ValueType, typename RewardModelType, typename StateType>
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::~StaminaPriorityModelBuilder() {
+	if (this->statePriority) {
+		delete this->statePriority;
+	}
+}
+
+template<typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::initializeEventStatePriority(storm::jani::Property * property) {
+	if (Options::event == EVENTS::UNDEFINED) { return; }
+	// This method assumes you're using an event state priority
+	statePriority->initialize(property);
 }
 
 template<typename ValueType, typename RewardModelType, typename StateType>
@@ -65,9 +87,20 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
+<<<<<<< priority2
+			// Explicitly enqueue the initial state--do not use enqueue()
+			std::shared_ptr<ProbabilityStatePair<StateType>> initProbabilityStatePair(
+				new ProbabilityStatePair<StateType>(initProbabilityState, state)
+			);
+			if (this->statePriority) {
+				statePriority->priority(initProbabilityStatePair);
+			}
+			statePriorityQueue.push(initProbabilityStatePair);
+=======
 			// ProbabilityStatePair<StateType> initProbabilityStatePair(initProbabilityState, state);
 			// orderedNextStates.emplace_back(initProbabilityStatePair);
 			statePriorityQueue.push({initProbabilityState, state});
+>>>>>>> priority
 			initProbabilityState->iterationLastSeen = iteration;
 		}
 		else {
@@ -87,9 +120,19 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
+<<<<<<< priority2
+				std::shared_ptr<ProbabilityStatePair<StateType>> nextProbabilityStatePair(
+					new ProbabilityStatePair<StateType>(nextProbabilityState, state)
+				);
+				if (this->statePriority) {
+					statePriority->priority(nextProbabilityStatePair);
+				}
+				enqueue(nextProbabilityStatePair);
+=======
 				// statePriorityQueue.push({nextProbabilityState, state});
 				ProbabilityStatePair<StateType> nextProbabilityStatePair(nextProbabilityState, state);
 				orderedNextStates.emplace_back(nextProbabilityStatePair);
+>>>>>>> priority
 				enqueued = true;
 			}
 			else {
@@ -111,10 +154,20 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
+<<<<<<< priority2
+				std::shared_ptr<ProbabilityStatePair<StateType>> nextProbabilityStatePair(
+					new ProbabilityStatePair<StateType>(nextProbabilityState, state)
+				);
+				if (this->statePriority) {
+					statePriority->priority(nextProbabilityStatePair);
+				}
+				enqueue(nextProbabilityStatePair);
+=======
 				// statePriorityQueue.push({nextProbabilityState, state});
 				ProbabilityStatePair<StateType> nextProbabilityStatePair(nextProbabilityState, state);
 				orderedNextStates.emplace_back(nextProbabilityStatePair);
 
+>>>>>>> priority
 				enqueued = true;
 			}
 			else {
@@ -135,15 +188,90 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
+<<<<<<< priority2
+			std::shared_ptr<ProbabilityStatePair<StateType>> nextProbabilityStatePair(
+				new ProbabilityStatePair<StateType>(nextProbabilityState, state)
+			);
+			if (this->statePriority) {
+				statePriority->priority(nextProbabilityStatePair);
+			}
+			enqueue(nextProbabilityStatePair);
+=======
 			// statePriorityQueue.push({nextProbabilityState, state});
 			ProbabilityStatePair<StateType> nextProbabilityStatePair(nextProbabilityState, state);
 			orderedNextStates.emplace_back(nextProbabilityStatePair);
+>>>>>>> priority
 
 			enqueued = true;
 			numberTerminal++;
 		}
 	}
 	return actualIndex;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::enqueue(std::shared_ptr<ProbabilityStatePair<StateType>> probabilityStatePair) {
+	// Do not preterminate
+	if (!Options::preterminate) {
+		statePriorityQueue.push(probabilityStatePair);
+		return;
+	}
+
+	auto probabilityState = probabilityStatePair->first;
+	auto stateReachability = probabilityStatePair->first->getPi();
+	auto state = probabilityStatePair->second;
+	// We should be somewhat conscious of the reachability that may get added
+	double halfNextReachability = stateReachability + this->currentProbabilityState->getPi() / 2;
+
+
+	bool preTerminateThisIteration = halfNextReachability < windowPower / (double) numberOfExploredStates;
+	// Our state is not pre-terminated, and should not be
+	if (!probabilityState->isPreTerminated() && !preTerminateThisIteration) {
+		statePriorityQueue.push(probabilityStatePair);
+		return;
+	}
+	// Our state is preterminated and should stay that way
+	else if (probabilityState->isPreTerminated() && preTerminateThisIteration) {
+		return;
+	}
+	// Only call find() once
+	auto inPreTerminatedSet = preTerminatedStates.find(state) != preTerminatedStates.end();
+	if (preTerminateThisIteration && !inPreTerminatedSet) {
+		// It is the main loop's responsibility to insert the transition
+		preTerminatedStates.insert({state, probabilityState->index});
+		std::shared_ptr<std::vector<TransitionInfo>> transitionVector(new std::vector<TransitionInfo>());
+		probabilityState->preTerminatedTransitions = transitionVector;
+		probabilityState->setPreTerminated(true);
+	}
+	// If it is preterminated but should be un-preterminated
+	else if (inPreTerminatedSet && !preTerminateThisIteration) {
+		preTerminatedStates.erase(state);
+		probabilityState->setPreTerminated(false);
+		statePriorityQueue.push(probabilityStatePair);
+		for (auto transition : *probabilityState->preTerminatedTransitions) {
+			this->createTransition(transition);
+		}
+		probabilityState->preTerminatedTransitions = nullptr;
+	}
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::setupStatePriority(storm::expressions::ExpressionManager & manager) {
+	this->statePriority = nullptr;
+	switch (Options::event) {
+		case EVENTS::RARE:
+			this->statePriority = new priority::EventStatePriority<StateType>(true, manager);
+			break;
+		case EVENTS::COMMON:
+			this->statePriority = new priority::EventStatePriority<StateType>(false, manager);
+			break;
+		case EVENTS::UNDEFINED:
+			return;
+		default:
+			StaminaMessages::errorAndExit("Unknown error! (StaminaPriorityModelBuilder::setupStatePriority())");
+	}
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -177,6 +305,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
 
+	if (!firstIteration) {
+		StaminaMessages::errorAndExit("Could not acquire a satisfactory result!\n\tMore Info: Multiple iterations are currently not supported in the Priority method.\n\tTry again with a higher fudge factor (-F)");
+	}
 	// Component builders
 	storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(
 			0
@@ -300,14 +431,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	uint32_t numberExpandedNotIncluded = 0;
 
 	bool hold = true;
-	double windowPower = pow(Options::prob_win, 5);
+	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
 	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
 		hold = false;
-		auto currentProbabilityStatePair = statePriorityQueue.top();
-		currentProbabilityState = statePriorityQueue.top().first;
+		auto currentProbabilityStatePair = *statePriorityQueue.top();
+		currentProbabilityState = statePriorityQueue.top()->first;
 		// std::cout << "Current pi: " << currentProbabilityState->pi << std::endl;
-		currentState = statePriorityQueue.top().second;
+		currentState = statePriorityQueue.top()->second;
 		currentIndex = currentProbabilityState->index;
 		statePriorityQueue.pop();
 		if (currentIndex == 0) {
@@ -428,6 +559,22 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						continue;
 					}
 
+<<<<<<< priority2
+					if (currentProbabilityState->isNew) {
+						if (!nextProbabilityState->isPreTerminated()) {
+							// Our state is not pre-terminated
+							this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
+							// std::cout << "Current index, sPrime, probability: " << currentIndex << ", " << sPrime << ", " << stateProbabilityPair.second << std::endl;
+							numberTransitions++;
+						}
+						else {
+							if (!nextProbabilityState->preTerminatedTransitions) {
+								StaminaMessages::error("Error with set of preterminated states!");
+							}
+							// Our state is preterminated and we must keep track of the transition we would have inserted in case we un-preterminate it
+							nextProbabilityState->preTerminatedTransitions->emplace_back(TransitionInfo(currentIndex, sPrime, stateProbabilityPair.second));
+						}
+=======
 					bool noPreTerminate = true; // nextProbabilityState->getPi() > Options::prob_win / Options::approx_factor;
 					if (currentProbabilityState->isNew && noPreTerminate) {
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
@@ -446,6 +593,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						statesTerminatedLastIteration.emplace_back(
 							nextProbabilityStatePair
 						);
+>>>>>>> priority
 					}
 				}
 				else {
@@ -476,6 +624,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		++currentRowGroup;
 
 		++numberOfExploredStates;
+		windowPower = pow(Options::prob_win, Options::fudge_factor * (std::log10(numberOfExploredStates) + 1));
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
 
@@ -516,7 +665,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesT
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
 		statePriorityQueue.push(probabilityStatePair);
-		probabilityStatePair.first->wasPutInTerminalQueue = false;
+		probabilityStatePair->first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
 	}
 }
@@ -527,9 +676,36 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 	// Terminal states are any remaining states in the state transition queue
 	while (!statePriorityQueue.empty()) {
 		auto currentProbabilityStatePair = statePriorityQueue.top();
+<<<<<<< priority2
+		auto currentProbabilityState = statePriorityQueue.top()->first;
+		auto currentState = statePriorityQueue.top()->second;
+=======
+>>>>>>> priority
 		statePriorityQueue.pop();
 		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
 	}
+	// flush from the preterminated states
+	uint32_t numberOfPreTerminatedStates = 0;
+	uint32_t numberOfPreTerminatedTransitions = 0;
+	if (!Options::preterminate) {
+		return;
+	}
+	for (auto const & [stateValues, stateId] : preTerminatedStates) {
+		numberOfPreTerminatedStates++;
+		auto transitions = stateMap.get(stateId)->preTerminatedTransitions;
+		if (!transitions) {
+			StaminaMessages::errorAndExit("Preterminated transition vector was null!");
+		}
+		// Loop over each transition in the terminated vector
+		for (auto const & transition : *transitions) {
+			// actually create the transition
+			this->createTransition(transition.from, 0, transition.transition);
+			// Make preterminated state have a self loop
+			this->createTransition(transition.to, transition.to, 1.0);
+			numberOfPreTerminatedTransitions++;
+		}
+	}
+	StaminaMessages::info(std::to_string(numberOfPreTerminatedStates) + " states were pre-terminated, eliminating " + std::to_string(numberOfPreTerminatedTransitions) + " transitions.");
 }
 
 
@@ -540,8 +716,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 ) {
 	// Terminal states are any remaining states in the state transition queue
 	while (!statesTerminatedLastIteration.empty()) {
-		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
-		auto state = statesTerminatedLastIteration.front().second;
+		auto currentProbabilityState = statesTerminatedLastIteration.front()->first;
+		auto state = statesTerminatedLastIteration.front()->second;
 		statesTerminatedLastIteration.pop_front();
 		// If the state is not marked as terminal, we've already connected it to absorbing
 		if (!currentProbabilityState->isTerminal()) {

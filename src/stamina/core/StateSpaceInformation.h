@@ -16,6 +16,12 @@ namespace stamina {
 			static void printStateAsBase64String(CompressedState const & state, double pi);
 			static void setVariableInformation(storm::generator::VariableInformation varInformation);
 			static void printVariableNames();
+			static storm::generator::BooleanVariableInformation getInformationOnBooleanVariable(
+				storm::expressions::Variable variable
+			);
+			static storm::generator::IntegerVariableInformation getInformationOnIntegerVariable(
+				storm::expressions::Variable variable
+			);
 		private:
 			inline static storm::generator::VariableInformation variableInformation;
 		};

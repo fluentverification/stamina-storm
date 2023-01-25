@@ -47,6 +47,8 @@ Stamina::run() {
 	for (int i = 0; i + 1 < propertiesVector->size(); i += 2 ) {
 		auto propMin = (*propertiesVector)[i];
 		auto propMax = (*propertiesVector)[i + 1];
+		// Re-initialize
+		// initialize();
 		modelChecker->modelCheckProperty(
 			propMin
 			, propMax

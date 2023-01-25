@@ -32,6 +32,7 @@ namespace stamina {
 			inline static double kappa;
 			inline static double reduce_kappa;
 			inline static double approx_factor; // Misprediction factor
+			inline static double fudge_factor; // Only applies to priority method
 			inline static double prob_win;
 			inline static uint64_t max_approx_count;
 			inline static bool no_prop_refine;
@@ -47,6 +48,10 @@ namespace stamina {
 			inline static uint64_t max_states;
 			inline static uint8_t method;
 			inline static uint8_t threads;
+			inline static bool preterminate;
+			// Rare and common events
+			inline static uint8_t event;
+			inline static double distance_weight; // The weighting of the "distance" metric (a multiplier)
 		};
 		/**
 		* Tells us if a string ends with another
