@@ -85,11 +85,16 @@ namespace stamina {
 			 * */
 			void enqueue(std::shared_ptr<ProbabilityStatePair<StateType>> probabilityStatePair);
 		private:
+<<<<<<< priority2
 			/**
 			 * Uses the values in Options to set up the current state priority;
 			 * */
 			void setupStatePriority(storm::expressions::ExpressionManager & manager);
 			std::deque<std::shared_ptr<ProbabilityStatePair<StateType>>> statesTerminatedLastIteration;
+=======
+			std::deque<ProbabilityStatePair<StateType>> statesTerminatedLastIteration;
+			std::deque<ProbabilityStatePair<StateType>> orderedNextStates;
+>>>>>>> priority
 			void flushStatesTerminated();
 			void flushFromPriorityQueueToStatesTerminated();
 			/*
