@@ -106,15 +106,6 @@ namespace stamina {
 		template <typename StateType>
 		class ProbabilityStatePair {
 		public:
-			ProbabilityStatePair(
-				ProbabilityState<StateType> * first
-				, CompressedState second
-
-			) : first(first)
-				, second(second)
-			{
-				// intentionally left empty
-			}
 			ProbabilityState<StateType> * first;
 			CompressedState second;
 			float distance; // Distance between state and threshold

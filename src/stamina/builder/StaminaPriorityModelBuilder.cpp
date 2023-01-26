@@ -123,11 +123,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 				enqueue(nextProbabilityStatePair);
 				enqueued = true;
 			}
-			else {
-				std::cout << "State exists but was seen in current iteration" << std::endl;
-				ProbabilityStatePair<StateType> nextProbabilityStatePair(nullptr, state);
-				orderedNextStates.emplace_back(nextProbabilityStatePair);
-			}
 		}
 		else {
 			// State does not exist yet in this iteration
@@ -151,12 +146,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 				enqueue(nextProbabilityStatePair);
 				enqueued = true;
 			}
-			else {
-				std::cout << "State exists but was seen in current iteration" << std::endl;
-				ProbabilityStatePair<StateType> nextProbabilityStatePair(nullptr, state);
-				orderedNextStates.emplace_back(nextProbabilityStatePair);
-			}
-
 		}
 		else {
 			// This state has not been seen so create a new ProbabilityState
@@ -176,6 +165,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 				statePriority->priority(nextProbabilityStatePair);
 			}
 			enqueue(nextProbabilityStatePair);
+
 			enqueued = true;
 			numberTerminal++;
 		}
@@ -402,8 +392,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 	isInit = false;
 
-	uint32_t numberExpandedNotIncluded = 0;
-
 	bool hold = true;
 	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
@@ -429,6 +417,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 		// Load state for us to use
 		generator->load(currentState);
+
 		if (propertyExpression != nullptr) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
 			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
@@ -444,9 +433,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				continue;
 			}
 		}
-
-		// Clear orderedNextStates before expanding
-		orderedNextStates.clear();
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -470,7 +456,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
 		// Now add all choices.
 		bool firstChoiceOfState = true;
-
 		for (auto const& choice : behavior) {
 			if (!firstChoiceOfState) {
 				StaminaMessages::errorAndExit("Model was not deterministic!");
@@ -501,8 +486,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 					totalRate += stateProbabilityPair.second;
 				}
 			}
-			std::cout << "Choice size: " << choice.size() << std::endl;
-			std::cout << "Ordered next states' vector size: " << orderedNextStates.size() << std::endl;
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
@@ -527,11 +510,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						}
 					}
 
-					auto nextProbabilityStatePair = orderedNextStates.front();
-					orderedNextStates.pop_front();
-					if (!nextProbabilityStatePair.first) {
-						continue;
-					}
 
 					if (currentProbabilityState->isNew) {
 						if (!nextProbabilityState->isPreTerminated()) {
@@ -549,10 +527,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						}
 					}
 				}
-				else {
-					StaminaMessages::warning("Next state is null!");
-				}
-
 			}
 
 			++currentRow;
