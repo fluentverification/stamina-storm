@@ -104,24 +104,25 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		float val = children[1]->accumulate(state);
 		return std::max(val - var, 0.0f) / std::max(val, SMALL_VALUE);
 	}
-	else if (m_operator == OPERATORS::AND) {
+	else if (m_operator == OPERATORS::AND || m_operator == OPERATORS::OR) {
 		// For the "and" operator, we can chain all of the distances of the children
 		// together using multiplication
 		float distance = 0;
 		for (auto child : children) {
 			distance += child->accumulate(state);
 		}
-		return distance / children.size();
+		// We subtract 1 because we pass in propMin when creating the tree, which includes (Absorbing = False)
+		return (distance - 1) / children.size();
 	}
-	else if (m_operator == OPERATORS::OR) {
+	/*else if (m_operator == OPERATORS::) {
 		// For the "or" operator, we also chain the distances of the children using
 		// the addition operator
 		float distance = 1;
 		for (auto child : children) {
 			distance *= child->accumulate(state);
 		}
-		return distance / children.size(); // TODO: Normalize or not?
-	}
+		return distance; // TODO: Normalize or not?
+	}*/
 	else if (m_operator == OPERATORS::NOT) {
 		// For this, we just invert the first operator
 		if (children.size() != 1) {
