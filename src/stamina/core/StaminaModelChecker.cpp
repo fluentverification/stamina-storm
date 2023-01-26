@@ -7,6 +7,8 @@
 #include "ANSIColors.h"
 #include "StaminaMessages.h"
 
+#include "core/StateSpaceInformation.h"
+
 #include "storm/builder/BuilderOptions.h"
 #include "storm/storage/expressions/BinaryRelationExpression.h"
 
@@ -106,7 +108,7 @@ StaminaModelChecker::modelCheckProperty(
 	auto options = BuilderOptions(*propMin.getFilter().getFormula());
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-
+	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
 	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
 		// The reason that this splits into two separate classes is that when calling STAMINA
 		// as a single-threaded application there is less overhead to use just StaminaIterativeModelBuilder
@@ -136,6 +138,7 @@ StaminaModelChecker::modelCheckProperty(
 		StaminaMessages::warning("Not fully implemented yet!");
 		// Create StaminaModelBuilder
 		auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		builderPointer->initializeEventStatePriority(&propMin);
 		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
 	}
 	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {

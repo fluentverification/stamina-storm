@@ -10,6 +10,8 @@
 
 #include "StaminaModelBuilder.h"
 
+#include "priority/StatePriority.h"
+
 namespace stamina {
 	namespace builder {
 		template<typename ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>, typename StateType = uint32_t>
@@ -37,6 +39,15 @@ namespace stamina {
 				storm::prism::Program const& program
 				, storm::generator::NextStateGeneratorOptions const& generatorOptions = storm::generator::NextStateGeneratorOptions()
 			);
+			/**
+			* Destructor method
+			* */
+			~StaminaPriorityModelBuilder();
+			/**
+			 * If this builder is using a priority::EventStatePriority (to find state distance), initializes
+			 * the EventStatePriority embedded within it
+			 * */
+			void initializeEventStatePriority(storm::jani::Property * property);
 			/**
 			* Gets the state ID of a current state, or adds it to the internal state storage. Performs state exploration
 			* and state space truncation from that state.
@@ -72,9 +83,13 @@ namespace stamina {
 			 *
 			 * @param probabilityState The state to either conditionally enqueue or pre-terminate
 			 * */
-			void enqueue(ProbabilityStatePair<StateType> probabilityStatePair);
+			void enqueue(std::shared_ptr<ProbabilityStatePair<StateType>> probabilityStatePair);
 		private:
-			std::deque<ProbabilityStatePair<StateType>> statesTerminatedLastIteration;
+			/**
+			 * Uses the values in Options to set up the current state priority;
+			 * */
+			void setupStatePriority(storm::expressions::ExpressionManager & manager);
+			std::deque<std::shared_ptr<ProbabilityStatePair<StateType>>> statesTerminatedLastIteration;
 			void flushStatesTerminated();
 			void flushFromPriorityQueueToStatesTerminated();
 			/*
@@ -113,14 +128,16 @@ namespace stamina {
 			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
 			/* Data members */
 			std::priority_queue<
-				ProbabilityStatePair<StateType>
-				, std::vector<ProbabilityStatePair<StateType>>
-				, ProbabilityStatePairComparison<StateType>
+				std::shared_ptr<ProbabilityStatePair<StateType>>
+				, std::vector<std::shared_ptr<ProbabilityStatePair<StateType>>>
+				, ProbabilityStatePairPointerComparison<StateType>
 			> statePriorityQueue;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 			double piHat;
 			double windowPower;
+			// State Priority
+			priority::StatePriority<StateType> * statePriority;
 			/**
 			 * Should this be a std::unordered_set or std::unordered_map?
 			 * */
