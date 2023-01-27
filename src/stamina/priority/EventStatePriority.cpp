@@ -128,7 +128,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		if (children.size() != 1) {
 			StaminaMessages::errorAndExit("! operator requires only one operand! Got " + std::to_string(children.size()));
 		}
-		return 1 / children[0]->accumulate(state);
+		return 1 - children[0]->accumulate(state);
 	}
 	else if (m_operator == OPERATORS::EQUAL) {
 		if (children.size() > 2) {
