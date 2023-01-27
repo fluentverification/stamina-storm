@@ -143,7 +143,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		else {
 			float var = children[0]->accumulate(state);
 			float val = children[1]->accumulate(state);
-			return std::abs(var - val);
+			return std::abs(var - val) / val; // Assumes val > 0
 		}
 	}
 	else {
