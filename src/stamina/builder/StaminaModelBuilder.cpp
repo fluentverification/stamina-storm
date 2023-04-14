@@ -313,13 +313,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 				createTransition(stateId, stateProbabilityPair.first, stateProbabilityPair.second);
 			}
 			else {
-				// totalRateToAbsorbing += stateProbabilityPair.second;
-				createTransition(stateId, 0, stateProbabilityPair.second);
+				totalRateToAbsorbing += stateProbabilityPair.second;
+				// createTransition(stateId, 0, stateProbabilityPair.second);
 			}
 		}
 		addedValue = true;
 		// Absorbing state
-		// createTransition(stateId, 0, totalRateToAbsorbing);
+		createTransition(stateId, 0, totalRateToAbsorbing);
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
