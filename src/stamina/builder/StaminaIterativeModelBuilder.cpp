@@ -453,6 +453,9 @@ void
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		if (!currentProbabilityState->isTerminal()) {
+			continue;
+		}
 		statesToExplore.emplace_back(probabilityStatePair);
 		probabilityStatePair.first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();

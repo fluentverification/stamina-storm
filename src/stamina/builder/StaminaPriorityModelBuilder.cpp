@@ -591,6 +591,9 @@ void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		if (!currentProbabilityState->isTerminal()) {
+			continue;
+		}
 		statePriorityQueue.push(probabilityStatePair);
 		probabilityStatePair->first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
