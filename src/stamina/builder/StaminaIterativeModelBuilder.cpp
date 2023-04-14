@@ -470,7 +470,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
 		auto state = statesTerminatedLastIteration.front().second;
 		if (!currentProbabilityState->terminal) {
-			StaminaMessages::error("State should not be terminal! State ID: " + std::to_string(currentProbabilityState->index));
+			// StaminaMessages::error("State should not be terminal! State ID: " + std::to_string(currentProbabilityState->index));
 			continue;
 		}
 // 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;

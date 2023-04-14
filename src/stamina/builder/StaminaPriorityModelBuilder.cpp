@@ -643,6 +643,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 		auto currentProbabilityState = statesTerminatedLastIteration.front()->first;
 		auto state = statesTerminatedLastIteration.front()->second;
 		statesTerminatedLastIteration.pop_front();
+		if (!currentProbabilityState->terminal) {
+			continue;
+		}
 		// If the state is not marked as terminal, we've already connected it to absorbing
 		if (!currentProbabilityState->isTerminal()) {
 			continue;

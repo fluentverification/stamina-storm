@@ -468,7 +468,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
 		auto state = statesTerminatedLastIteration.front().second;
 		if (!currentProbabilityState->terminal) {
-			StaminaMessages::error("State should not be terminal! State ID: " + std::to_string(currentProbabilityState->index));
+			// StaminaMessages::error("State should not be terminal! State ID: " + std::to_string(currentProbabilityState->index));
 			continue;
 		}
 // 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
