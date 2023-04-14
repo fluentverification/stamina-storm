@@ -164,9 +164,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
+			StaminaMessages::warning("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
 			continue;
-			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
@@ -469,6 +469,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
 		auto state = statesTerminatedLastIteration.front().second;
+		if (!currentProbabilityState->terminal) {
+			StaminaMessages::error("State should not be terminal! State ID: " + std::to_string(currentProbabilityState->index));
+			continue;
+		}
 // 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 		statesTerminatedLastIteration.pop_front();
 		// If the state is not marked as terminal, we've already connected it to absorbing
@@ -483,6 +487,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 		);
 		currentProbabilityState->setTerminal(false);
 	}
+	this->createTransition(0, 0, 1.0);
 }
 
 template class StaminaIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
