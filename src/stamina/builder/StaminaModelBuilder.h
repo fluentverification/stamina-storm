@@ -164,6 +164,7 @@ namespace stamina {
 			 * */
 			void printTransitionActions();
 		protected:
+			void purgeAbsorbingTransitions();
 			/**
 			* Creates and loads the property expression from the formula
 			* */
@@ -258,6 +259,7 @@ namespace stamina {
 			bool absorbingWasSetUp;
 			bool isInit;
 			bool fresh;
+			bool hasAbsorbingTransitions;
 			uint8_t iteration;
 			bool firstIteration;
 			double localKappa;

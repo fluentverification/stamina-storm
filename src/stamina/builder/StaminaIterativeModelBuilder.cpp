@@ -411,6 +411,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	}
 
 	// No remapping is necessary
+	this->purgeAbsorbingTransitions();
 	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 	this->flushToTransitionMatrix(transitionMatrixBuilder);
 

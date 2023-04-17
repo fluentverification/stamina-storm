@@ -49,6 +49,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, numberTransitions(0)
 	, currentRow(0)
 	, currentRowGroup(0)
+	, hasAbsorbingTransitions(false)
 {
 	// Intentionally left empty
 }
@@ -151,10 +152,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
 		if (transitionsToAdd[row].empty()) {
 			// This state is deadlock
-			transitionMatrixBuilder.addNextValue(row, row, 1);
+			// transitionMatrixBuilder.addNextValue(row, row, 1);
 		}
 		else {
 			for (TransitionInfo tInfo : transitionsToAdd[row]) {
+				if (tInfo.transition == 0.0) {
+					continue;
+				}
 				transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
 			}
 		}
@@ -313,6 +317,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		StaminaMessages::warning("Behavior for perimeter state was empty!");
 		return;
 	}
+	hasAbsorbingTransitions = true;
 	for (auto const& choice : behavior) {
 		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {
@@ -420,6 +425,22 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::printTransitionActio
 		}
 	}
 	out.close();
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::purgeAbsorbingTransitions() {
+	if (!hasAbsorbingTransitions) {
+		return;
+	}
+	for (auto & transitionBucket : transitionsToAdd) {
+		for (auto & transition : transitionBucket) {
+			if (transition.to == 0) {
+				transition.transition = 0.0;
+			}
+		}
+	}
+	hasAbsorbingTransitions = false;
 }
 
 // Explicitly instantiate the class.

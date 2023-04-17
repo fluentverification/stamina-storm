@@ -292,6 +292,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 		);
 
 	// No remapping is necessary
+	this->purgeAbsorbingTransitions();
 	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 	this->flushToTransitionMatrix(transitionMatrixBuilder);
 

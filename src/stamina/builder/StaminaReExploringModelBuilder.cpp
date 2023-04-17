@@ -418,6 +418,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 	this->printStateSpaceInformation();
 
 	// No remapping is necessary
+	this->purgeAbsorbingTransitions();
 	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 	this->flushToTransitionMatrix(transitionMatrixBuilder);
 
