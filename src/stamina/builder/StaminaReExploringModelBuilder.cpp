@@ -159,9 +159,9 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			StaminaMessages::warning("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 			this->createTransition(currentRow, currentIndex, 1.0);
 			continue;
+			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
@@ -467,10 +467,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
 		auto state = statesTerminatedLastIteration.front().second;
-		if (!currentProbabilityState->terminal) {
-			// StaminaMessages::error("State should not be terminal! State ID: " + std::to_string(currentProbabilityState->index));
-			continue;
-		}
 // 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
@@ -480,7 +476,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 		);
 		statesTerminatedLastIteration.pop_front();
 	}
-	this->createTransition(0, 0, 1.0);
 }
 
 template class StaminaReExploringModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

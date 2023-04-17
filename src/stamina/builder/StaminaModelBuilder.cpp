@@ -314,7 +314,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 			}
 			else {
 				totalRateToAbsorbing += stateProbabilityPair.second;
-				// createTransition(stateId, 0, stateProbabilityPair.second);
 			}
 		}
 		addedValue = true;

@@ -591,9 +591,6 @@ void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
-		if (!currentProbabilityState->isTerminal()) {
-			continue;
-		}
 		statePriorityQueue.push(probabilityStatePair);
 		probabilityStatePair->first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
@@ -646,9 +643,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTe
 		auto currentProbabilityState = statesTerminatedLastIteration.front()->first;
 		auto state = statesTerminatedLastIteration.front()->second;
 		statesTerminatedLastIteration.pop_front();
-		if (!currentProbabilityState->terminal) {
-			continue;
-		}
 		// If the state is not marked as terminal, we've already connected it to absorbing
 		if (!currentProbabilityState->isTerminal()) {
 			continue;
