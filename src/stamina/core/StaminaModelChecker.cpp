@@ -241,6 +241,13 @@ StaminaModelChecker::modelCheckProperty(
 		++numRefineIterations;
 	}
 
+	// Export transitions to file if desired
+	if (Options::export_trans != "") {
+		StaminaMessages::info("Exporting transitions to file: " + Options::export_trans);
+		builder->printTransitionActions();
+		StaminaMessages::good("Export Complete!");
+	}
+
 	auto endTime = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> timeTaken = endTime - startTime;
 	std::chrono::duration<double> timeTakenModel = modelTime - startTime;
@@ -263,12 +270,6 @@ StaminaModelChecker::modelCheckProperty(
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
 	StaminaMessages::info(resultInfo.str());
 
-	// Export transitions to file if desired
-	if (Options::export_trans != "") {
-		StaminaMessages::info("Exporting transitions to file: " + Options::export_trans);
-		printTransitionActions(Options::export_trans);
-		StaminaMessages::good("Export Complete!");
-	}
 
 	return nullptr;
 }

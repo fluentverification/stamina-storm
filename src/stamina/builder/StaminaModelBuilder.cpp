@@ -392,6 +392,25 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateMap() {
 	return this->stateMap;
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::printTransitionActions() {
+	if (Options::export_trans == "") {
+		StaminaMessages::warning("Transition file is empty! Defaulting to \"export.tra\"");
+		Options::export_trans = "export.tra";
+	}
+	if (transitionsToAdd.size() == 0) {
+		StaminaMessages::error("Cannot call printTransitionActions() AFTER model checking!");
+	}
+	std::ofstream out(Options::export_trans);
+	for (auto & transitionBucket : transitionsToAdd) {
+		for (auto & transition : transitionBucket) {
+			out << transition.from << " " << transition.to << " " << transition.transition << std::endl;
+		}
+	}
+	out.close();
+}
+
 // Explicitly instantiate the class.
 template class StaminaModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
 

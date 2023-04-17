@@ -159,6 +159,10 @@ namespace stamina {
 			void createTransition(TransitionInfo transitionInfo);
 
 			util::StateIndexArray<StateType, ProbabilityState<StateType>> & getStateMap();
+			/**
+			 * Prints the transition list to a .tra file. Reads the static `Options` class.
+			 * */
+			void printTransitionActions();
 		protected:
 			/**
 			* Creates and loads the property expression from the formula
