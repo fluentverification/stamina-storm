@@ -164,6 +164,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
+	if (probability == 0) {
+		StaminaMessages::warning("Will not create transition of probability 0 from state " + std::to_string(from) + " to " + std::to_string(to));
+		return;
+	}
 	TransitionInfo tInfo(from, to, probability);
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(from, to)) {
@@ -177,6 +181,10 @@ void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(
 	typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo transitionInfo
 ) {
+	if (transitionInfo.transition == 0) {
+		StaminaMessages::warning("Will not create transition of probability 0 from state " + std::to_string(transitionInfo.from) + " to " + std::to_string(transitionInfo.to));
+		return;
+	}
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(transitionInfo.from, transitionInfo.to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
@@ -317,8 +325,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 			}
 		}
 		addedValue = true;
-		// Absorbing state
-		createTransition(stateId, 0, totalRateToAbsorbing);
+		// Absorbing state. We wrap it in this if statement to not create useless transitions
+		// In case the perimeter state just loops back into all existing states
+		if (totalRateToAbsorbing != 0) {
+			createTransition(stateId, 0, totalRateToAbsorbing);
+		}
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
