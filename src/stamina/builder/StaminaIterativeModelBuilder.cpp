@@ -123,7 +123,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// If the property does not hold at the current state, make it absorbing in the
 			// state graph and do not explore its successors
 			if (!evaluationAtCurrentState) {
-				transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+				this->createTransition(currentRow, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
@@ -165,7 +165,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentRow, currentIndex, 1.0);
+			this->createTransition(currentRow, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -251,8 +251,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 				auto statesPerSecond = numberOfExploredStatesSinceLastMessage / durationSinceLastMessage;
 				auto durationSinceStart = std::chrono::duration_cast<std::chrono::seconds>(now - timeOfStart).count();
 				StaminaMessages::info(
-					"Explored " + std::to_string(numberOfExploredStatesSinceLastMessage) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
-				);
+						"Explored " + std::to_string(numberOfExploredStatesSinceLastMessage) + " states in " + std::to_string(durationSinceStart) + " seconds (currently " + std::to_string(statesPerSecond) + " states per second)."
+						);
 				timeOfLastMessage = std::chrono::high_resolution_clock::now();
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
@@ -262,7 +262,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 	iteration++;
 	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
 
-// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
+	// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -288,10 +288,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			// Create a ProbabilityState for each individual state
 			ProbabilityState<StateType> * initProbabilityState = memoryPool.allocate();
 			*initProbabilityState = ProbabilityState<StateType>(
-				actualIndex
-				, 1.0
-				, true
-			);
+					actualIndex
+					, 1.0
+					, true
+					);
 			numberTerminal++;
 			stateMap.put(actualIndex, initProbabilityState);
 			statesToExplore.push_back(std::make_pair(initProbabilityState, state));
@@ -339,10 +339,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			// This state has not been seen so create a new ProbabilityState
 			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState<StateType>(
-				actualIndex
-				, 0.0
-				, true
-			);
+					actualIndex
+					, 0.0
+					, true
+					);
 			stateMap.put(actualIndex, nextProbabilityState);
 			nextProbabilityState->iterationLastSeen = iteration;
 			// exploredStates.emplace(actualIndex);
@@ -392,7 +392,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 			, false
 			, false // All models are deterministic
 			, 0
-		);
+			);
 	double piHat = 1.0;
 	int innerLoopCount = 0;
 
@@ -400,12 +400,12 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	while (piHat >= Options::prob_win / Options::approx_factor) {
 		// Builds matrices and truncates state space
 		buildMatrices(
-			transitionMatrixBuilder
-			, rewardModelBuilders
-			, stateAndChoiceInformationBuilder
-			, markovianStates
-			, stateValuationsBuilder
-		);
+				transitionMatrixBuilder
+				, rewardModelBuilders
+				, stateAndChoiceInformationBuilder
+				, markovianStates
+				, stateValuationsBuilder
+				);
 
 		piHat = this->accumulateProbabilities();
 		innerLoopCount++;
@@ -418,12 +418,12 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 
 	// Using the information from buildMatrices, initialize the model components
 	storm::storage::sparse::ModelComponents<ValueType, RewardModelType> modelComponents(
-		transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount())
-		, this->buildStateLabeling()
-		, std::unordered_map<std::string, RewardModelType>()
-		, !generator->isDiscreteTimeModel()
-		, std::move(markovianStates)
-	);
+			transitionMatrixBuilder.build(0, transitionMatrixBuilder.getCurrentRowGroupCount())
+			, this->buildStateLabeling()
+			, std::unordered_map<std::string, RewardModelType>()
+			, !generator->isDiscreteTimeModel()
+			, std::move(markovianStates)
+			);
 
 	// Build choice labeling
 	if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications()) {
