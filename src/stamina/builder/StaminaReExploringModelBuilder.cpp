@@ -257,7 +257,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 
 	}
 	iteration++;
-	numberStates = numberOfExploredStates;
+	numberStates =  stateStorage.stateToId.size();
 	firstIteration = false;
 // 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }

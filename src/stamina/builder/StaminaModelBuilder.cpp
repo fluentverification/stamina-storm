@@ -177,6 +177,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	while (transitionsToAdd.size() <= std::max(from, to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
+	numberTransitions++;
 	// Quick check
 	/* for (auto & trans : transitionsToAdd[from]) {
 		if (trans.to == to) {
