@@ -458,6 +458,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStates
 		statesToExplore.emplace_back(probabilityStatePair);
 		probabilityStatePair.first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
+		probabilityStatePair.first->isNew = true;
 	}
 }
 
