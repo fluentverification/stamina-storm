@@ -595,6 +595,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesT
 		statePriorityQueue.push(probabilityStatePair);
 		probabilityStatePair->first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
+		probabilityStatePair->first->isNew = true;
 	}
 }
 
