@@ -123,7 +123,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// If the property does not hold at the current state, make it absorbing in the
 			// state graph and do not explore its successors
 			if (!evaluationAtCurrentState) {
-				this->createTransition(currentRow, currentIndex, 1.0);
+				this->createTransition(currentIndex, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
@@ -165,7 +165,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			this->createTransition(currentRow, currentIndex, 1.0);
+			this->createTransition(currentIndex, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -180,12 +180,12 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// add the generated choice information
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
-					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentIndex);
 
 				}
 			}
 			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
-				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentIndex);
 			}
 			if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
 				if (firstChoiceOfState) {
@@ -222,6 +222,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 					}
 
 					if (currentProbabilityState->isNew) {
+						// Ask Matthias if this should be probability rather than stateProbabilityPair.second
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						// numberTransitions++;
 					}

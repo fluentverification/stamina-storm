@@ -123,7 +123,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			// If the property does not hold at the current state, make it absorbing in the
 			// state graph and do not explore its successors
 			if (!evaluationAtCurrentState) {
-				this->createTransition(currentRow, currentIndex, 1.0);
+				this->createTransition(currentIndex, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
@@ -136,11 +136,14 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// Add the state rewards to the corresponding reward models.
 		// Do not explore if state is terminal and its reachability probability is less than kappa
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
-			// Do not connect to absorbing yet--only connect at the end
-			statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
-			++numberOfExploredStates;
-			++currentRow;
-			++currentRowGroup;
+			if (!currentProbabilityState->wasPutInTerminalQueue) {
+				// Do not connect to absorbing yet--only connect at the end
+				statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
+				++numberOfExploredStates;
+				currentProbabilityState->wasPutInTerminalQueue = true;
+				++currentRow;
+				++currentRowGroup;
+			}
 			continue;
 		}
 
@@ -159,7 +162,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			this->createTransition(currentRow, currentIndex, 1.0);
+			this->createTransition(currentIndex, currentIndex, 1.0);
 			continue;
 			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
@@ -174,12 +177,12 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			// add the generated choice information
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
-					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentRow);
+					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentIndex);
 
 				}
 			}
 			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
-				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentRow);
+				stateAndChoiceInformationBuilder.addChoiceOriginData(choice.getOriginData(), currentIndex);
 			}
 			if (stateAndChoiceInformationBuilder.isBuildStatePlayerIndications() && choice.hasPlayerIndex()) {
 				if (firstChoiceOfState) {
