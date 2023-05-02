@@ -150,7 +150,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMatrix(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder) {
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
-		if (transitionsToAdd[row].empty()) {
+		if (transitionsToAdd[row].empty() && row != 0) {
 			// This state is deadlock
 			StaminaMessages::errorAndExit("State " + std::to_string(row) + " did not have any successive transitions!");
 			// transitionMatrixBuilder.addNextValue(row, row, 1);
@@ -200,6 +200,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(
 		StaminaMessages::warning("Will not create transition of probability 0 from state " + std::to_string(transitionInfo.from) + " to " + std::to_string(transitionInfo.to));
 		return;
 	}
+	numberTransitions++;
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(transitionInfo.from, transitionInfo.to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
