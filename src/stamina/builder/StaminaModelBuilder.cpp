@@ -152,6 +152,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
 		if (transitionsToAdd[row].empty()) {
 			// This state is deadlock
+			StaminaMessages::errorAndExit("State " + std::to_string(row) + " did not have any successive transitions!");
 			// transitionMatrixBuilder.addNextValue(row, row, 1);
 		}
 		else {
@@ -159,10 +160,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 				if (tInfo.transition == 0.0) {
 					continue;
 				}
-				transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
+				transitionMatrixBuilder.addNextValue(tInfo.from, tInfo.to, tInfo.transition);
 			}
 		}
 	}
+	transitionsToAdd.clear();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
