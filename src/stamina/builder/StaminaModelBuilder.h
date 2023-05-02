@@ -17,6 +17,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <list>
 #include <deque>
 #include <queue>
 #include <cstdint>
@@ -249,7 +250,7 @@ namespace stamina {
 			boost::optional<std::vector<uint_fast64_t>> stateRemapping;
 
 			// Transitions which we must add
-			std::vector<std::vector<TransitionInfo>> transitionsToAdd;
+			std::vector<std::list<TransitionInfo>> transitionsToAdd;
 			// Options for next state generators
 			storm::generator::NextStateGeneratorOptions const & options;
 			// The model builder must have access to this to create a fresh next state generator each iteration

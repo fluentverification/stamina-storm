@@ -177,7 +177,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	TransitionInfo tInfo(from, to, probability);
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(from, to)) {
-		transitionsToAdd.push_back(std::vector<TransitionInfo>());
+		transitionsToAdd.push_back(std::list<TransitionInfo>());
 	}
 	numberTransitions++;
 	// Quick check
@@ -188,7 +188,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 			return;
 		}
 	} */
+	// auto & it = tra
 	transitionsToAdd[from].push_back(tInfo);
+	transitionsToAdd[from].sort(); // TODO: Change
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
