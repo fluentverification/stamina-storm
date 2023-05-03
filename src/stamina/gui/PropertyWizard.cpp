@@ -38,14 +38,14 @@ void
 PropertyWizard::insertOperand(QString opString, operandType_t opType) {
 	auto selectedItems = ui.propertyTree->selectedItems();
 	for (auto item : selectedItems) {
-		ui.propertyTree->insertTopLevelItem(
+		/* ui.propertyTree->insertTopLevelItem(
 			ui.propertyTree->currentColumn() + 1
 			, new QTreeWidgetItem(
 				ui.propertyTree
 				, item
 				, QStringList(QString(opString))
 			)
-		);
+		); */
 	}
 }
 void
@@ -124,9 +124,9 @@ OperandItem::createExpressionFromThisAndChildren() {
 				return QString("OPERROR");
 			}
 			return QString("(  ")
-				+ child(0)->createExpressionFromThisAndChildren()
+				+ ((OperandItem *) child(0))->createExpressionFromThisAndChildren()
 				+ ' ' + data(1).toString() + ' '
-				+ child(1)->createExpressionFromThisAndChildren()
+				+ ((OperandItem *) child(1))->createExpressionFromThisAndChildren()
 				+ QString(" )");
 		case OPERAND_TYPE::UNARY_OPERAND:
 			if (childCount() != 1) {
@@ -134,7 +134,7 @@ OperandItem::createExpressionFromThisAndChildren() {
 				return QString("OPERROR");
 			}
 			return QString("(  ")
-				+ child(0)->createExpressionFromThisAndChildren()
+				+ ((OperandItem *) child(0))->createExpressionFromThisAndChildren()
 				+ ' ' + data(1).toString() + ' '
 				+ QString(" )");
 		case OPERAND_TYPE::VARIABLE:

@@ -92,7 +92,9 @@ namespace stamina {
 				, int columns = 1
 				, operandType_t opType = OPERAND_TYPE::EMPTY
 			);
-
+			int childCount() {
+				return 0; // TODO
+			}
 			QString createExpressionFromThisAndChildren();
 			operandType_t opType;
 		private:

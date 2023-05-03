@@ -3,7 +3,7 @@
 namespace stamina {
 namespace gui {
 
-static const std::string PrefInfo::prefPath = ".xstaminarc";
+const std::string PrefInfo::prefPath = ".xstaminarc";
 
 Preferences::Preferences(QWidget *parent)
 	: QDialog(parent)
