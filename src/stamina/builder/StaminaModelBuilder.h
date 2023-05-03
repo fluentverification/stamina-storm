@@ -41,7 +41,7 @@
 #include "__storm_needed_for_builder.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-#define MSG_FREQUENCY 100000
+#define MSG_FREQUENCY 10000000
 // #define MSG_FREQUENCY 4000
 
 namespace stamina {
