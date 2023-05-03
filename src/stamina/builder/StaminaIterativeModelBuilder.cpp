@@ -147,6 +147,12 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			continue;
 		}
 
+		if (currentProbabilityState->wasPutInTerminalQueue) {
+			// Mark as not put in terminal queue
+			// Note that it still will be IN the terminal queue, but
+			// that when we flush this queue, it will be ignored
+		}
+
 		// Load state for us to use
 		generator->load(currentState);
 
@@ -222,7 +228,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 					}
 
 					if (currentProbabilityState->isNew) {
-						// Ask Matthias if this should be probability rather than stateProbabilityPair.second
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						// numberTransitions++;
 					}
@@ -361,6 +366,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	StaminaMessages::info("Using STAMINA 2.5 Algorithm");
 	// Is this model deterministic? (I.e., is there only one choice per state?)
 	bool deterministic = generator->isDeterministicModel();
+	if (!deterministic) {
+		StaminaMessages::errorAndExit("Model is not deterministic! STAMINA only supports deterministic models!");
+	}
 
 	std::vector<RewardModelBuilder<typename RewardModelType::ValueType>> rewardModelBuilders;
 	// Iterate through the reward models and add them to the rewardmodelbuilders
@@ -393,7 +401,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 			, false
 			, false // All models are deterministic
 			, 0
-			);
+	);
+
 	double piHat = 1.0;
 	int innerLoopCount = 0;
 
@@ -456,6 +465,12 @@ void
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		// States can be marked as not put in terminal queue and when we flush the terminal queue we
+		// ignore those estates
+		if (! probabilityStatePair.first->wasPutInTerminalQueue) {
+			statesTerminatedLastIteration.pop_front();
+			continue;
+		}
 		statesToExplore.emplace_back(probabilityStatePair);
 		probabilityStatePair.first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
@@ -476,7 +491,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 // 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 		statesTerminatedLastIteration.pop_front();
 		// If the state is not marked as terminal, we've already connected it to absorbing
-		if (!currentProbabilityState->isTerminal()) {
+		// Additionally, if it was marked as not being put in the terminal queue, it should be
+		// ignored by this step.
+		if (!currentProbabilityState->isTerminal() || !currentProbabilityState->wasPutInTerminalQueue ) {
 			continue;
 		}
 		this->connectTerminalStatesToAbsorbing(

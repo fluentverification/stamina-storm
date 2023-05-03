@@ -587,11 +587,21 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 }
 
+// TODO: this method is kept for compatibility with the superclass I think.
+// Edit: superclass does not require this method to be there.
+// Should we remove it? Or have it raise an error? I don't think it is
+// currently used in the code.
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		if (!probabilityStatePair->first->wasPutInTerminalQueue) {
+			// Should not use if this was not put in terminal queue
+			// (Sometimes states may be placed there but then removed later in program runtime)
+			statesTerminatedLastIteration.pop_front();
+			continue;
+		}
 		statePriorityQueue.push(probabilityStatePair);
 		probabilityStatePair->first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
@@ -608,9 +618,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 		auto currentProbabilityState = statePriorityQueue.top()->first;
 		auto currentState = statePriorityQueue.top()->second;
 		statePriorityQueue.pop();
+		if (!currentProbabilityState->wasPutInTerminalQueue) {
+			// Again, rather than removing this state from the terminal queue, we simply ignore it when we iterate through that queue.
+			continue;
+		}
 		statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
 	}
 	// flush from the preterminated states
+	// TODO: make sure no preterminated states were "un"-preterminated
 	uint32_t numberOfPreTerminatedStates = 0;
 	uint32_t numberOfPreTerminatedTransitions = 0;
 	if (!Options::preterminate) {
