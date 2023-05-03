@@ -587,28 +587,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 }
 
-// TODO: this method is kept for compatibility with the superclass I think.
-// Edit: superclass does not require this method to be there.
-// Should we remove it? Or have it raise an error? I don't think it is
-// currently used in the code.
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
-	while (!statesTerminatedLastIteration.empty()) {
-		auto probabilityStatePair = statesTerminatedLastIteration.front();
-		if (!probabilityStatePair->first->wasPutInTerminalQueue) {
-			// Should not use if this was not put in terminal queue
-			// (Sometimes states may be placed there but then removed later in program runtime)
-			statesTerminatedLastIteration.pop_front();
-			continue;
-		}
-		statePriorityQueue.push(probabilityStatePair);
-		probabilityStatePair->first->wasPutInTerminalQueue = false;
-		statesTerminatedLastIteration.pop_front();
-		probabilityStatePair->first->isNew = true;
-	}
-}
-
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPriorityQueueToStatesTerminated() {
