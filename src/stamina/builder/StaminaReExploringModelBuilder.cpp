@@ -168,9 +168,9 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			this->createTransition(currentIndex, currentIndex, 1.0);
+			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
+			// this->createTransition(currentIndex, currentIndex, 1.0);
 			continue;
-			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
@@ -330,6 +330,8 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			}
 		}
 		else {
+			// Should this be just return 0?
+			// TODO: Clean up this portion of the code
 			// State does not exist yet in this iteration
 			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
@@ -342,7 +344,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
 			enqueued = true;
 
-			return 0;
 		}
 	}
 	else {
