@@ -9,7 +9,7 @@
 
 #include "core/StateSpaceInformation.h"
 
-#include "storm/Environment.h"
+#include "storm/environment/Environment.h"
 #include "storm/builder/BuilderOptions.h"
 #include "storm/storage/expressions/BinaryRelationExpression.h"
 
