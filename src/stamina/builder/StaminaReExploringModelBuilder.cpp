@@ -321,7 +321,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 	// The previous state has reachability of 0
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
-			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
