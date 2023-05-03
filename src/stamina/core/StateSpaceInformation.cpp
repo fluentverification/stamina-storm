@@ -39,8 +39,10 @@ StateSpaceInformation::stateToString(CompressedState const & state, double pi) {
 	for (auto variable : locationVariables) {
 		StaminaMessages::error("Location Variable printing not implemented yet!");
 	}
-	varString += std::to_string(((int) (pi * 1000000)) / 1000000.0);
-	varString += ")";
+	if (pi != -1.0) {
+		varString += std::to_string(((int) (pi * 1000000)) / 1000000.0);
+		varString += ")";
+	}
 	return varString;
 }
 
