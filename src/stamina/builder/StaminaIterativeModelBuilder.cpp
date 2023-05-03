@@ -151,6 +151,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// Mark as not put in terminal queue
 			// Note that it still will be IN the terminal queue, but
 			// that when we flush this queue, it will be ignored
+			currentProbabilityState->wasPutInTerminalQueue = false;
 		}
 
 		// Load state for us to use
