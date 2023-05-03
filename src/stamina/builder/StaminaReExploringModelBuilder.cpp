@@ -170,7 +170,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			// Make absorbing
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 			// this->createTransition(currentIndex, currentIndex, 1.0);
-			continue;
+			// continue;
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;

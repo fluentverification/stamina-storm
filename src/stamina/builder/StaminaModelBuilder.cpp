@@ -334,8 +334,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	// If there is no behavior, we have an error.
 	if (behavior.empty()) {
-		StaminaMessages::warning("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
-		return;
+		StaminaMessages::errorAndExit("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+		// return;
 	}
 	hasAbsorbingTransitions = true;
 	for (auto const& choice : behavior) {

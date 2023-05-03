@@ -450,8 +450,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
-			continue;
+			// transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+			// continue;
+			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
