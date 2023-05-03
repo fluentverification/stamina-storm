@@ -333,9 +333,24 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			}
 		}
 		else {
+			// Should this be just return 0?
+			// TODO: Clean up this portion of the code
 			// State does not exist yet in this iteration
-			return 0;
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState(
+				actualIndex
+				, 0.0
+				, true
+			);
+			nextProbabilityState->iterationLastSeen = iteration;
+			// exploredStates.emplace(actualIndex);
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
+
 		}
+			// State does not exist yet in this iteration
+			// return 0;
+		// }
 	}
 	else {
 		if (stateIsExisting) {
