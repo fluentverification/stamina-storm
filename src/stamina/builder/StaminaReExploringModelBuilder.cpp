@@ -331,6 +331,17 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 		}
 		else {
 			// State does not exist yet in this iteration
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState(
+				actualIndex
+				, 0.0
+				, true
+			);
+			nextProbabilityState->iterationLastSeen = iteration;
+			// exploredStates.emplace(actualIndex);
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
+
 			return 0;
 		}
 	}
