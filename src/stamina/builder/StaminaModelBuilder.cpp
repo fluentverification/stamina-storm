@@ -181,13 +181,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	}
 	numberTransitions++;
 	// Quick check
-	/* for (auto & trans : transitionsToAdd[from]) {
+	for (auto & trans : transitionsToAdd[from]) {
 		if (trans.to == to) {
 			StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!");
 			// trans.transition += probability;
 			return;
 		}
-	} */
+	}
 	// auto & it = tra
 	transitionsToAdd[from].push_back(tInfo);
 	// transitionsToAdd[from].sort(); // TODO: Change
