@@ -187,6 +187,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 		}
 		if (trans.to == to) {
 			StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!\n\tFrom: " + std::to_string(from) + " To: " + std::to_string(to) + " Rates: " + std::to_string(probability) + " / " + std::to_string(trans.transition) );
+			if (trans.transition != probability) {
+				StaminaMessages::error("The transitions should have the same probability but do not!");
+			}
 			// trans.transition += probability;
 			return;
 		}
