@@ -210,6 +210,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 				}
 			}
 			// Add the probabilistic behavior to the matrix.
+			if (choice.size() == 0) {
+				StaminaMessages::warning("Found deadlock state (from model description): state ID " + std::to_string(currentIndex));
+			}
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				if (sPrime == 0) {
@@ -503,6 +506,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 			, this->terminalStateToIdCallback
 		);
 		currentProbabilityState->setTerminal(false);
+		currentProbabilityState->wasPutInTerminalQueue = false;
 	}
 }
 

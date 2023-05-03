@@ -207,6 +207,9 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 				}
 			}
 			// Add the probabilistic behavior to the matrix.
+			if (choice.size() == 0) {
+				StaminaMessages::warning("Found deadlock state (from model description): state ID " + std::to_string(currentIndex));
+			}
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				if (sPrime == 0) {
@@ -481,6 +484,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 			statesTerminatedLastIteration.pop_front();
 			continue;
 		}
+		currentProbabilityState->wasPutInTerminalQueue = false;
 // 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder

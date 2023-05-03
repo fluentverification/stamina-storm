@@ -458,6 +458,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		// Now add all choices.
 		bool firstChoiceOfState = true;
 		for (auto const& choice : behavior) {
+			if (choice.size() == 0) {
+				StaminaMessages::warning("Found deadlock state (from model description): state ID " + std::to_string(currentIndex));
+			}
 			if (!firstChoiceOfState) {
 				StaminaMessages::errorAndExit("Model was not deterministic!");
 			}
