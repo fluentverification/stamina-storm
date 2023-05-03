@@ -61,6 +61,10 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::initializeEv
 template<typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+	if (state == this->absorbingState) {
+		StaminaMessages::errorAndExit("Got Absorbing state in stateToIdCallback!");
+		return 0;
+	}
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
