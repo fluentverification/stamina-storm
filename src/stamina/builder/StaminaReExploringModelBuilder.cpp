@@ -147,6 +147,12 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			continue;
 		}
 
+		// If it was previously put in the terminal queue, mark it as no longer
+		// This way it will not be connected to the absorbing state
+		if (currentProbabilityState->wasPutInTerminalQueue) {
+			currentProbabilityState->wasPutInTerminalQueue = false;
+		}
+
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
@@ -471,6 +477,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
 		auto state = statesTerminatedLastIteration.front().second;
+		if (!currentProbabilityState->wasPutInTerminalQueue) {
+			statesTerminatedLastIteration.pop_front();
+			continue;
+		}
 // 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder
