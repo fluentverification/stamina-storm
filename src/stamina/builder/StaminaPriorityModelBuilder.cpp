@@ -453,6 +453,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		}
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
+			StaminaMessages::info("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
 			// Make absorbing
 			// transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
 			// continue;

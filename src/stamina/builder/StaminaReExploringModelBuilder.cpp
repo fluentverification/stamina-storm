@@ -167,6 +167,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		}
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
+			StaminaMessages::info("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
 			// Make absorbing
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 			// this->createTransition(currentIndex, currentIndex, 1.0);
