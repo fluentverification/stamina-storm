@@ -182,6 +182,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	numberTransitions++;
 	// Quick check
 	for (auto & trans : transitionsToAdd[from]) {
+		if (trans.from != from) {
+			StaminaMessages::errorAndExit("Transition list is malformed!");
+		}
 		if (trans.to == to) {
 			StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!\n\tFrom: " + std::to_string(from) + " To: " + std::to_string(to) + " Rates: " + std::to_string(probability) + " / " + std::to_string(trans.transition) );
 			// trans.transition += probability;
