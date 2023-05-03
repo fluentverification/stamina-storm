@@ -627,6 +627,23 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 	StaminaMessages::info(std::to_string(numberOfPreTerminatedStates) + " states were pre-terminated, eliminating " + std::to_string(numberOfPreTerminatedTransitions) + " transitions.");
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
+	while (!statesTerminatedLastIteration.empty()) {
+		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		if (!probabilityStatePair->first->wasPutInTerminalQueue) {
+			// Should not use if this was not put in terminal queue
+			// (Sometimes states may be placed there but then removed later in program runtime)
+			statesTerminatedLastIteration.pop_front();
+			continue;
+		}
+		statePriorityQueue.push(probabilityStatePair);
+		probabilityStatePair->first->wasPutInTerminalQueue = false;
+		statesTerminatedLastIteration.pop_front();
+		probabilityStatePair->first->isNew = true;
+	}
+}
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
