@@ -209,16 +209,16 @@ StaminaModelChecker::modelCheckProperty(
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
-			storm::Environment env;
-			env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
+			// storm::Environment env;
+			// env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
 			auto result_lower = checker->check(
-				env
-				, storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
+				// env,
+				storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 			);
 			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			auto result_upper = checker->check(
-				env
-				, storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
+				// env,
+				storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
 			);
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			builder->printStateSpaceInformation();
