@@ -181,8 +181,13 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 #elif defined WARN_ON_DEADLOCK
 			StaminaMessages::warning("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
 #endif // DIE_ON_DEADLOCK / WARN_ON_DEADLOCK
-			this->createTransition(currentIndex, currentIndex, 1.0);
-			stateStorage.deadlockStateIndices.push_back(currentIndex);
+			// If we are not yet aware that this is a deadlock state
+			// we should make future iterations aware of this
+			if (!currentProbabilityState->deadlock) {
+				this->createTransition(currentIndex, currentIndex, 1.0);
+				stateStorage.deadlockStateIndices.push_back(currentIndex);
+				currentProbabilityState->deadlock = true;
+			}
 			continue;
 		}
 
@@ -510,7 +515,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 		// If the state is not marked as terminal, we've already connected it to absorbing
 		// Additionally, if it was marked as not being put in the terminal queue, it should be
 		// ignored by this step.
-		if (!currentProbabilityState->isTerminal() || !currentProbabilityState->wasPutInTerminalQueue ) {
+		if (!currentProbabilityState->isTerminal()
+				|| !currentProbabilityState->wasPutInTerminalQueue
+				|| currentProbabilityState->deadlock) {
 			continue;
 		}
 		this->connectTerminalStatesToAbsorbing(

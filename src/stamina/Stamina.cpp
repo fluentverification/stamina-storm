@@ -89,7 +89,6 @@ Stamina::initialize() {
 		modelFile = modelModify.createModifiedModel();
 		propertiesVector = modelModify.createModifiedProperties(modelFile);
 		auto labels = modelFile->getLabels();
-		StaminaMessages::info("There are the following number of state labels: " + std::to_string(labels.size()));
 		modelChecker->initialize(modelFile, propertiesVector);
 	}
 	catch (const std::exception& e) {

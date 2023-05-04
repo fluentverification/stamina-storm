@@ -459,9 +459,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 
 			StaminaMessages::warning("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
 #endif // DIE_ON_DEADLOCK / WARN_ON_DEADLOCK
-			stateStorage.deadlockStateIndices.push_back(currentIndex);
-			// Make absorbing
-			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);
+			// If we are not yet aware that this is a deadlock state
+			// we should make future iterations aware of this
+			if (!currentProbabilityState->deadlock) {
+				this->createTransition(currentIndex, currentIndex, 1.0);
+				stateStorage.deadlockStateIndices.push_back(currentIndex);
+				// Make absorbing
+				currentProbabilityState->deadlock = true;
+			}
 			continue;
 		}
 
