@@ -49,6 +49,7 @@ StateSpaceInformation::stateToString(CompressedState const & state, double pi) {
 std::string
 StateSpaceInformation::stateToBase64String(CompressedState const & state, double pi) {
 	std::string stateString = stateToString(state, pi);
+	return stateString;
 }
 
 void

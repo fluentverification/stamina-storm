@@ -453,10 +453,12 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		}
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
-			StaminaMessages::info("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
 #ifdef DIE_ON_DEADLOCK
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
-#endif // DIE_ON_DEADLOCK
+#elif defined WARN_ON_DEADLOCK
+
+			StaminaMessages::warning("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
+#endif // DIE_ON_DEADLOCK / WARN_ON_DEADLOCK
 			stateStorage.deadlockStateIndices.push_back(currentIndex);
 			// Make absorbing
 			transitionMatrixBuilder.addNextValue(currentIndex, currentIndex, 1.0);

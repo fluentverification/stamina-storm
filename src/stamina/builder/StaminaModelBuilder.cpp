@@ -164,7 +164,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 			}
 		}
 	}
-	transitionsToAdd.clear();
+	// transitionsToAdd.clear();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -228,7 +228,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::printStateSpaceInfor
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
-	return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
+	auto labeling = generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
+	labeling.addLabel("Absorbing");
+	labeling.addLabelToState("Absorbing", 0);
+	return labeling;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -334,10 +337,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	// If there is no behavior, we have an error.
 	if (behavior.empty()) {
-#ifdef DIE_ON_DEADLOCK
+#if defined DIE_ON_DEADLOCK
 		StaminaMessages::errorAndExit("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
-#endif // DIE_ON_DEADLOCK
+#elif defined WARN_ON_DEADLOCK
 		StaminaMessages::warning("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+#endif // DIE_ON_DEADLOCK
 		stateStorage.deadlockStateIndices.push_back(stateId);
 		createTransition(stateId, stateId, 1.0); // Create Self-loop
 		return;

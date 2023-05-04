@@ -44,7 +44,7 @@
 #define MSG_FREQUENCY 10000000
 // #define MSG_FREQUENCY 4000
 
-#define DIE_ON_DEADLOCK
+// #define DIE_ON_DEADLOCK
 
 namespace stamina {
 	namespace builder {

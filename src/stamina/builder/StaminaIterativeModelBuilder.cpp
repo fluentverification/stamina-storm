@@ -147,6 +147,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			continue;
 		}
 
+		/* if (currentIndex > 105) {
+			StaminaMessages::info("Temporary thing to stop here. State is: " + StateSpaceInformation::stateToString(currentState));
+		} */
+
 		if (currentProbabilityState->wasPutInTerminalQueue) {
 			// Mark as not put in terminal queue
 			// Note that it still will be IN the terminal queue, but
@@ -172,10 +176,11 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			StaminaMessages::info("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
-#ifdef DIE_ON_DEADLOCK
+#if defined DIE_ON_DEADLOCK
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
-#endif // DIE_ON_DEADLOCK
+#elif defined WARN_ON_DEADLOCK
+			StaminaMessages::warning("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
+#endif // DIE_ON_DEADLOCK / WARN_ON_DEADLOCK
 			this->createTransition(currentIndex, currentIndex, 1.0);
 			stateStorage.deadlockStateIndices.push_back(currentIndex);
 			continue;
