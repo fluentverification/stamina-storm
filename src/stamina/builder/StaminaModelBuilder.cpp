@@ -343,10 +343,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		return;
 	}
 	hasAbsorbingTransitions = true;
-	if (behavior.size() > 1) {
-		StaminaMessages::errorAndExit("Model should be deterministic! Got multiple choices in behavior for state " + std::to_string(stateId));
-	}
+	bool firstChoice = true;
 	for (auto const& choice : behavior) {
+		if (!firstChoice) {
+			StaminaMessages::errorAndExit("Model should be deterministic! Got multiple choices in behavior for state " + std::to_string(stateId));
+		}
 		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {
 			if (stateProbabilityPair.first != 0) {
@@ -363,6 +364,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		if (totalRateToAbsorbing != 0) {
 			createTransition(stateId, 0, totalRateToAbsorbing);
 		}
+		firstChoice = false;
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
