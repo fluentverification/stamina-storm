@@ -102,12 +102,12 @@ std::unique_ptr<storm::modelchecker::CheckResult>
 StaminaModelChecker::modelCheckProperty(
 	storm::jani::Property propMin
 	, storm::jani::Property propMax
+	, storm::jani::Property propOriginal
 	, storm::prism::Program const& modulesFile
 ) {
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
-	// auto options = BuilderOptions(*propMin.getFilter().getFormula());
-	auto options = BuilderOptions(*(storm::api::parsePropertiesForPrismProgram("P=? [ true U[0,1000] (YFP_protein <= 30) ]", *(this->modulesFile))[0].getRawFormula()));
+	auto options = BuilderOptions(*propOriginal.getFilter().getFormula());
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
