@@ -172,10 +172,13 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
+			StaminaMessages::info("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
+#ifdef DIE_ON_DEADLOCK
+			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
+#endif // DIE_ON_DEADLOCK
 			this->createTransition(currentIndex, currentIndex, 1.0);
+			stateStorage.deadlockStateIndices.push_back(currentIndex);
 			continue;
-			// StaminaMessages::info("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
-			// StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;

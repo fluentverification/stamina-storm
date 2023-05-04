@@ -334,11 +334,18 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	// If there is no behavior, we have an error.
 	if (behavior.empty()) {
-		// StaminaMessages::errorAndExit("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+#ifdef DIE_ON_DEADLOCK
+		StaminaMessages::errorAndExit("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+#endif // DIE_ON_DEADLOCK
+		StaminaMessages::warning("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+		stateStorage.deadlockStateIndices.push_back(stateId);
 		createTransition(stateId, stateId, 1.0); // Create Self-loop
 		return;
 	}
 	hasAbsorbingTransitions = true;
+	if (behavior.size() > 1) {
+		StaminaMessages::errorAndExit("Model should be deterministic! Got multiple choices in behavior for state " + std::to_string(stateId));
+	}
 	for (auto const& choice : behavior) {
 		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {

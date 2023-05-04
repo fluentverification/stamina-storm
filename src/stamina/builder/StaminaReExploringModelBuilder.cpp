@@ -169,9 +169,12 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		if (behavior.empty()) {
 			StaminaMessages::info("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
 			// Make absorbing
+#ifdef DIE_ON_DEADLOCK
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
-			// this->createTransition(currentIndex, currentIndex, 1.0);
-			// continue;
+#endif // DIE_ON_DEADLOCK
+			this->createTransition(currentIndex, currentIndex, 1.0);
+			stateStorage.deadlockStateIndices.push_back(currentIndex);
+			continue;
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
