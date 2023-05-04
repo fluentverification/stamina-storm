@@ -14,6 +14,7 @@
 
 namespace stamina {
 	namespace util {
+		struct
 		class ModelModify {
 		public:
 			/**
@@ -38,7 +39,7 @@ namespace stamina {
 			 * **/
 			~ModelModify();
 			/**
-			 * Creates the modified model
+			 * Reads the model. I don't believe we need to modify it at all
 			 * **/
 			std::shared_ptr<storm::prism::Program> readModel();
 			/**
@@ -49,6 +50,16 @@ namespace stamina {
 			 * **/
 			std::shared_ptr<std::vector<storm::jani::Property>> createPropertiesList(
 				std::shared_ptr<storm::prism::Program> modelFile
+			);
+			/**
+			 * Creates a modified property
+			 *
+			 * @param isMin whether or not to make it min
+			 * @return Modified property
+			 * */
+			storm::jani::Property modifyProperty(
+				storm::jani::Property prop
+				, bool isMin
 			);
 		private:
 			std::string model;

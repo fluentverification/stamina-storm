@@ -50,3 +50,53 @@ ModelModify::createPropertiesList(
 	auto propertiesVector = std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(fullPath, *modelFile));
 
 }
+
+
+storm::jani::Property
+ModelModify::modifyProperty(
+	storm::jani::Property prop
+	, bool isMin
+) {
+	storm::logic::Formula formula = prop.getFormula();
+	try {
+		assert(formula.isProbabilityOperatorFormula());
+		// This is a path formula
+		auto pathFormula = formula.getSubformula();
+		auto stateFormula = pathFormula.getRightSubformula();
+		// At this point, formula should be a state formula
+		assert(stateFormula.isStateFormula());
+		auto opType = storm::logic::BinaryBooleanOperatorType::And
+			? isMin : storm::logic::BinaryBooleanOperatorType::Or;
+		storm::logic::AtomicLabelFormula absorbing("Absorbing");
+		if (isMin) {
+			storm::logic::UnaryBooleanStateFormula nt(
+				storm::logic::UnaryBooleanOperatorType::Not
+				, absorbing
+			);
+			storm::logic::BinaryBooleanStateFormula newFormula(
+				opType
+				// Left formula
+				, nt
+				// Right Formula
+				, stateFormula
+			);
+			pathFormula.setRightSubformula(newFormula);
+		}
+		else {
+			storm::logic::BinaryBooleanStateFormula newFormula(
+				opType
+				// Left formula
+				, absorbing
+				// Right Formula
+				, stateFormula
+			);
+			pathFormula.setRightSubformula(newFormula);
+		}
+		formula.setSubFormula(pathFormula);
+		prop.setFormula(formula);
+		return prop;
+	}
+	catch (std::exception e) {
+		// TODO: handle
+	}
+}
