@@ -68,6 +68,10 @@ Options::setArgs(struct arguments * arguments) {
 	max_states = arguments->max_states;
 	method = arguments->method;
 	threads = arguments->threads;
+	preterminate = arguments->preterminate;
+	fudge_factor = arguments->fudge_factor;
+	event = arguments->event;
+	distance_weight = arguments->distance_weight;
 }
 
 } // namespace core

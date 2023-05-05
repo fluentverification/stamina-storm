@@ -9,8 +9,8 @@
 #include "core/StaminaModelChecker.h"
 #include "core/Options.h"
 
-#define VERSION_MAJOR 2
-#define VERSION_MINOR 2.5
+// #define VERSION_MAJOR 2
+// #define VERSION_MINOR 2.5
 
 #include <storm/api/storm.h>
 #include <storm-parsers/api/storm-parsers.h>

@@ -11,6 +11,10 @@
 #include <string>
 #include <argp.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <cstdint>
+
+#define BUILD_INFO ""
 
 enum STAMINA_METHODS {
 	ITERATIVE_METHOD = 0          // STAMINA 2.5
@@ -18,6 +22,11 @@ enum STAMINA_METHODS {
 	, RE_EXPLORING_METHOD = 2     // STAMINA 2.0
 };
 
+enum EVENTS {
+	UNDEFINED = 0                 // Only prioritize on reachability
+	, RARE = 1                    // Prioritize on reachability and rare events
+	, COMMON = 2                  // Prioritize on reachability and common events
+};
 
 
 static char doc[] = "STAMINA -- truncates infinite CTMC state space and passes into STORM";
@@ -34,6 +43,8 @@ static struct argp_option options[] = {
 		"Reduction factor for Reachability Threshold (kappa) during the refinement step (default 2.0)"}
 	, {"approxFactor", 'f', "double", 0,
 		"Factor to estimate how far off our reachability predictions will be (default: 2.0)"}
+	, {"fudge", 'F', "double", 0,
+		"\"Aggressiveness\" (fudge) factor for priority method (default 1.0). Higher means more aggressive (more states explored), and lower means less aggressive (fewer states explored)"}
 	, {"probWin", 'w', "double", 0,
 		"Probability window between lower and upperbound for termination (default: 1.0e-3)"}
 	, {"maxApproxCount", 'n', "int", 0,
@@ -52,7 +63,7 @@ static struct argp_option options[] = {
 		"Specify a certain property to check in a model file that contains many"}
 	, {"const", 'c', "\"C1=VAL,C2=VAL,C3=VAL\"", 0,
 		"Comma separated values for constants"}
-	, {"exportTrans", 't', "filename", 0,
+	, {"exportTrans", 'a', "filename", 0,
 		"Export the list of transitions and actions to a specified file name, or to trans.txt if no file name is specified.\nTransitions are exported in the format <Source State Index> <Destination State Index> <Action Label>"}
 	/* Additional options. GNU argp shows args alphabetically */
 	, {"rankTransitions", 'T', 0, 0,
@@ -69,7 +80,23 @@ static struct argp_option options[] = {
 		"Use the STAMINA 2.0 method (the method in STAMINA/PRISM)"}
 	, {"threads", 'j', "int", 0,
 		"Number of threads to use for state exploration (default 1)"}
+	, {"version", 'v', 0, 0,
+		"Print STAMINA Version information"}
+	, {"preterminate", 't', 0, 0,
+		"Allow states to be \"preterminated\" if reachability is low enough (only applies to priority method)"}
+	, {"rare", 'b', 0, 0,
+		"Prioritize for rare event priority (only works with -P option)"}
+	, {"common", 'd', 0, 0,
+		"Prioritize for common event priority (only works with -P option)"}
+	, {"distanceWeight", 'W', "double", 0,
+		"Weight factor for distance priority metric (use with -P and either -b or -d)"}
 	, { 0 }
+};
+
+struct version {
+	static const uint8_t version_major = 0;
+	static const uint8_t version_minor = 2;
+	static const uint8_t version_sub_minor = 5;
 };
 
 /**
@@ -81,6 +108,7 @@ struct arguments {
 	double kappa;
 	double reduce_kappa;
 	double approx_factor; // Analagous to "misprediction factor" in the Java version
+	double fudge_factor;
 	double prob_win;
 	uint64_t max_approx_count;
 	bool no_prop_refine;
@@ -96,6 +124,9 @@ struct arguments {
 	uint64_t max_states;
 	uint8_t method;
 	uint8_t threads;
+	bool preterminate;
+	uint8_t event;
+	double distance_weight;
 };
 
 /**
@@ -117,6 +148,10 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 		// approx factor
 		case 'f':
 			arguments->approx_factor = (double) atof(arg);
+			break;
+		// fudge factor (aggressive factor)
+		case 'F':
+			arguments->fudge_factor = (double) atof(arg);
 			break;
 		// probability window (difference between Pmin and Pmax)
 		case 'w':
@@ -155,7 +190,7 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			arguments->consts = std::string(arg);
 			break;
 		// export transitions
-		case 't':
+		case 'a':
 			arguments->export_trans = std::string(arg);
 			break;
 		// use rank transitions before expanding
@@ -181,6 +216,36 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 		case 'j':
 			arguments->threads = (uint8_t) atoi(arg);
 			break;
+		case 't':
+			arguments->preterminate = true;
+			break;
+		case 'v':
+			printf(
+					"STAMINA - STochiastic Approximate Model-checker for INfinite-state Analysis\n\tVersion %d.%d.%d\n\tBuild:%s\n"
+				, version::version_major
+				, version::version_minor
+				, version::version_sub_minor
+				, BUILD_INFO
+			);
+			exit(0);
+		case 'b':
+			if (arguments->event == EVENTS::COMMON) {
+				printf("Cannot use '-b' flag with '-d' flag!\n");
+				exit(1);
+			}
+			arguments->event = EVENTS::RARE;
+			break;
+		case 'd':
+			if (arguments->event == EVENTS::RARE) {
+				printf("Cannot use '-d' flag with '-b' flag!\n");
+				exit(1);
+			}
+			arguments->event = EVENTS::COMMON;
+			break;
+		case 'W':
+			arguments->distance_weight = (double) atof(arg);
+			break;
+
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file

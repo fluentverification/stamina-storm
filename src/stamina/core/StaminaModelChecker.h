@@ -5,7 +5,7 @@
 #include "builder/StaminaModelBuilder.h"
 #include "builder/StaminaIterativeModelBuilder.h"
 #include "builder/StaminaThreadedIterativeModelBuilder.h"
-// #include "builder/StaminaPriorityModelBuilder.h"
+#include "builder/StaminaPriorityModelBuilder.h"
 #include "builder/StaminaReExploringModelBuilder.h"
 
 #include <sstream>
@@ -46,13 +46,16 @@ namespace stamina {
 			/**
 			* Model checks a specific property
 			*
-			* @param prop Property to check
+			* @param propMin Minimum variant of the property to check
+			* @param propMax Maximum variant of the property to check
+			* @propOriginal The original version of the property to check
 			* @param modulesFile The modules file to work with
 			* @return A pointer to the result of the model checking
 			* */
 			std::unique_ptr<storm::modelchecker::CheckResult> modelCheckProperty(
 				storm::jani::Property propMin
 				, storm::jani::Property propMax
+				, storm::jani::Property propOriginal
 				, storm::prism::Program const& modulesFile
 			);
 		private:

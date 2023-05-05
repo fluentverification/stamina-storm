@@ -17,6 +17,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <list>
 #include <deque>
 #include <queue>
 #include <cstdint>
@@ -40,8 +41,10 @@
 #include "__storm_needed_for_builder.h"
 
 // Frequency for info/debug messages in terms of number of states explored.
-#define MSG_FREQUENCY 100000
+#define MSG_FREQUENCY 10000000
 // #define MSG_FREQUENCY 4000
+
+// #define DIE_ON_DEADLOCK
 
 namespace stamina {
 	namespace builder {
@@ -150,7 +153,7 @@ namespace stamina {
 			util::StateMemoryPool<ProbabilityState<StateType>> & getMemoryPool();
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> getGenerator();
 			storm::storage::sparse::StateStorage<StateType> & getStateStorage() const;
-			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const & getExplorationThreads() const;
+			virtual std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const & getExplorationThreads() const;
 			/**
 			 * Inserts a TransitionInfo into transitionsToAdd. This method must NOT be called
 			 * after flushToTransitionMatrix has cleared transitionsToAdd
@@ -159,7 +162,12 @@ namespace stamina {
 			void createTransition(TransitionInfo transitionInfo);
 
 			util::StateIndexArray<StateType, ProbabilityState<StateType>> & getStateMap();
+			/**
+			 * Prints the transition list to a .tra file. Reads the static `Options` class.
+			 * */
+			void printTransitionActions();
 		protected:
+			void purgeAbsorbingTransitions();
 			/**
 			* Creates and loads the property expression from the formula
 			* */
@@ -169,7 +177,7 @@ namespace stamina {
 			* */
 			void connectTerminalStatesToAbsorbing(
 				storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-				, CompressedState & terminalState
+				, CompressedState const & terminalState
 				, StateType stateId
 				, std::function<StateType (CompressedState const&)> stateToIdCallback
 			);
@@ -220,7 +228,7 @@ namespace stamina {
 
 			/* Data Members */
 			std::shared_ptr<threads::ControlThread<ValueType, RewardModelType, StateType>> controlThread;
-			std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> explorationThreads;
+			std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> explorationThreads;
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 
@@ -254,6 +262,7 @@ namespace stamina {
 			bool absorbingWasSetUp;
 			bool isInit;
 			bool fresh;
+			bool hasAbsorbingTransitions;
 			uint8_t iteration;
 			bool firstIteration;
 			double localKappa;

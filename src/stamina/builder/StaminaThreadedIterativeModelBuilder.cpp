@@ -18,6 +18,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 	)
 	, controlThread(this, Options::threads)
 	, controlThreadsCreated(false)
+	, generators(nullptr)
 
 {
 	// Intentionally left empty
@@ -33,6 +34,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::Sta
 	)
 	, controlThread(this, Options::threads)
 	, controlThreadsCreated(false)
+	, generators(nullptr)
 {
 	// Intentionally left empty
 }
@@ -65,22 +67,29 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		, std::placeholders::_1
 	);
 
+	// Another callback function to keep track of terminal states
+	std::function<StateType (CompressedState const&)> stateToIdCallbackWithTerminalTracking = std::bind(
+		&StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndexAndTrackTerminal
+		, this
+		, std::placeholders::_1
+	);
+
 	// Create exploration threads
 	if (!controlThreadsCreated) {
-		uint8_t threadIndex = 1;
+		uint8_t currentThreadIndex = 1;
 		while (explorationThreads.size() < Options::threads) {
 			explorationThreads.push_back(
 				new threads::IterativeExplorationThread<ValueType, RewardModelType, StateType>(
 					this // parent
-					, threadIndex // Thread index
+					, currentThreadIndex // Thread index
 					, this->controlThread // Control Thread
 					, this->getGenerator()->getVariableInformation().getTotalBitOffset(true)// state size
 					, & this->getStateMap()
-					, this->getGenerator()
-					, stateToIdCallback
+					, this->generators->at(currentThreadIndex - 1)
+					// , stateToIdCallback
 				)
 			);
-			threadIndex++;
+			currentThreadIndex++;
 		}
 		controlThreadsCreated = true;
 	}
@@ -96,7 +105,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		);
 		this->isInit = true;
 		// Let the generator create all initial states.
-		this->stateStorage.initialStateIndices = this->generator->getInitialStates(stateToIdCallback);
+		this->stateStorage.initialStateIndices = this->generator->getInitialStates(stateToIdCallbackWithTerminalTracking);
 		if (this->stateStorage.initialStateIndices.empty()) {
 			StaminaMessages::errorAndExit("Initial states are empty!");
 		}
@@ -117,12 +126,19 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 	CompressedState currentState;
 
 	this->isInit = false;
+
+	// Put all initial states in fastTerminalStates
+	// If this doesn't work, change to a while loop that re-enqueues
+	for (auto initProbabilityStatePair : this->statesToExplore) {
+		fastTerminalStates.emplace_back(initProbabilityStatePair.second);
+	}
 	// Perform a search through the model.
 	while (!this->statesToExplore.empty() && this->numberTerminal < Options::threads) {
 		auto currentProbabilityStatePair = this->statesToExplore.front();
 		this->currentProbabilityState = this->statesToExplore.front().first;
 		currentState = this->statesToExplore.front().second;
 		this->statesToExplore.pop_front();
+		fastTerminalStates.pop_front();
 		// Get the first state in the queue.
 		currentIndex = this->currentProbabilityState->index;
 		if (currentIndex == 0) {
@@ -170,13 +186,15 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 				++this->currentRow;
 				++this->currentRowGroup;
 			}
+			// Add to fastTerminal
+			fastTerminalStates.emplace_back(currentState);
 			continue;
 		}
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
-		storm::generator::StateBehavior<ValueType, StateType> behavior = this->generator->expand(stateToIdCallback);
+		storm::generator::StateBehavior<ValueType, StateType> behavior = this->generator->expand(stateToIdCallbackWithTerminalTracking);
 
 		auto stateRewardIt = behavior.getStateRewards().begin();
 		for (auto& rewardModelBuilder : rewardModelBuilders) {
@@ -310,11 +328,13 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		explorationThread->startThread();
 	}
 
-	auto terminalStatesVector = this->getPerimeterStates(); // TODO: should this be all T states
 	uint8_t threadIndex = 1;
-	for (auto & terminalState : terminalStatesVector) {
-		auto & explorationThread = this->explorationThreads[threadIndex];
+	for (auto & terminalState : this->fastTerminalStates) {
+		auto & explorationThread = this->explorationThreads[threadIndex - 1];
 		// TODO: ask for cross exploration from thread at that index
+		// auto state = this->stateMap.get(terminalState);
+		STAMINA_DEBUG_MESSAGE("Requesting cross exploration of state to thread " << threadIndex);
+		explorationThread->requestCrossExploration(terminalState, 0.0);
 		if (threadIndex == Options::threads) {
 			threadIndex = 1;
 		}
@@ -322,20 +342,143 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 			threadIndex++;
 		}
 	}
+	this->controlThread.setHold(false);
 
 	// Remove the hold on all of the worker threads
 	for (auto & explorationThread : this->explorationThreads) {
 		explorationThread->setHold(false);
 	}
 
-	this->controlThread.setHold(false);
 
 	this->controlThread.join();
 	STAMINA_DEBUG_MESSAGE("Control thread finished");
+
 	for (auto explorationThread : this->explorationThreads) {
+		explorationThread->terminate();
 		explorationThread->join();
 		STAMINA_DEBUG_MESSAGE("Exploration thread finished");
 	}
+	// Control thread must be the one to terminate the other threads, so it must be alive when they all
+	// are joined
+
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+StateType
+StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndexAndTrackTerminal(CompressedState const& state) {
+	StateType actualIndex;
+	StateType newIndex = static_cast<StateType>(this->stateStorage.getNumberOfStates());
+	if (this->stateStorage.stateToId.contains(state)) {
+		actualIndex = this->stateStorage.stateToId.getValue(state);
+	}
+	else {
+		// Create new index just in case we need it
+		actualIndex = newIndex;
+	}
+
+	auto nextState = this->stateMap.get(actualIndex);
+	bool stateIsExisting = nextState != nullptr;
+
+	this->stateStorage.stateToId.findOrAdd(state, actualIndex);
+	// Handle conditional enqueuing
+	if (this->isInit) {
+		if (!stateIsExisting) {
+			// Create a ProbabilityState for each individual state
+			ProbabilityState<StateType> * initProbabilityState = this->memoryPool.allocate();
+			*initProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 1.0
+				, true
+			);
+			// Add to fast terminal states
+			fastTerminalStates.emplace_back(state);
+			this->numberTerminal++;
+			this->stateMap.put(actualIndex, initProbabilityState);
+			this->statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = this->iteration;
+		}
+		else {
+			ProbabilityState<StateType> * initProbabilityState = nextState;
+			this->stateMap.put(actualIndex, initProbabilityState);
+			this->statesToExplore.push_back(std::make_pair(initProbabilityState, state));
+			initProbabilityState->iterationLastSeen = this->iteration;
+		}
+		return actualIndex;
+	}
+
+	bool enqueued = false;
+
+	// This bit handles the non-initial states
+	// The previous state has reachability of 0
+	if (this->currentProbabilityState->getPi() == 0) {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
+			if (nextProbabilityState->iterationLastSeen != this->iteration) {
+				nextProbabilityState->iterationLastSeen = this->iteration;
+				// Enqueue
+				this->statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				enqueued = true;
+			}
+		}
+		else {
+			// State does not exist yet in this iteration
+			return 0;
+		}
+	}
+	else {
+		if (stateIsExisting) {
+			// Don't rehash if we've already called find()
+			ProbabilityState<StateType> * nextProbabilityState = nextState;
+			// auto emplaced = exploredStates.emplace(actualIndex);
+			if (nextProbabilityState->iterationLastSeen != this->iteration) {
+				nextProbabilityState->iterationLastSeen = this->iteration;
+				// Enqueue
+				this->statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+				enqueued = true;
+			}
+		}
+		else {
+			// This state has not been seen so create a new ProbabilityState
+			ProbabilityState<StateType> * nextProbabilityState = this->memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 0.0
+				, true
+			);
+			// Add to fast terminal states
+			fastTerminalStates.emplace_back(state);
+			this->stateMap.put(actualIndex, nextProbabilityState);
+			nextProbabilityState->iterationLastSeen = this->iteration;
+			// exploredStates.emplace(actualIndex);
+			this->statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
+			this->numberTerminal++;
+		}
+	}
+	return actualIndex;
+}
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const &
+StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
+	return explorationThreads;
+	// std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> currentExplorationThreads;
+	// for (auto thread : explorationThreads) {
+	// 	currentExplorationThreads.push_back(thread);
+	// }
+	// return currentExplorationThreads;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::setGeneratorsVector(
+	std::vector<std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>>> & generators
+) {
+	// Check the size
+	if (generators.size() != Options::threads) {
+		StaminaMessages::errorAndExit("Generators vector size does not match thread count!");
+	}
+	this->generators = &generators;
 }
 
 template class StaminaThreadedIterativeModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

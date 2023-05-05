@@ -46,7 +46,7 @@ namespace stamina {
 			 * @param index The index to find
 			 * @return The ProbabilityState or nullptr if does not exist
 			 * */
-			ProbabilityStateType * get(StateType index);
+			ProbabilityStateType * get(StateType index) const;
 			/**
 			 * Puts a ProbabilityState in at index and if needed, expands the array to accomodate
 			 *

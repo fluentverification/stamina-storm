@@ -14,8 +14,7 @@
 
 namespace stamina {
 	namespace util {
-		const std::string modelFileDefault = "stamina_modified_model_file.prism";
-		const std::string propFileDefault = "stamina_modified_prop_file.csl";
+		struct
 		class ModelModify {
 		public:
 			/**
@@ -30,34 +29,41 @@ namespace stamina {
 			 * @param modifiedProperties The file where we store the modified properties
 			 * **/
 			ModelModify(
-				std::string originalModel
-				, std::string originalProperties
+				std::string model
+				, std::string properties
 				, bool saveModifiedModel = true
 				, bool saveModifiedProperties = true
-				, std::string modifiedModel = modelFileDefault
-				, std::string modifiedProperties = propFileDefault
 			);
 			/**
 			 * The destructor for the model modifier
 			 * **/
 			~ModelModify();
 			/**
-			 * Creates the modified model
+			 * Reads the model. I don't believe we need to modify it at all
 			 * **/
-			std::shared_ptr<storm::prism::Program> createModifiedModel();
+			std::shared_ptr<storm::prism::Program> readModel();
 			/**
-			 * Creates the modified Properties
+			 * Creates the modified Properties list. Each element in the list contains
+			 *     - The original property
+			 *     - The Pmin
+			 *     - The Pmax
 			 * **/
-			std::shared_ptr<std::vector<storm::jani::Property>> createModifiedProperties(
+			std::shared_ptr<std::vector<storm::jani::Property>> createPropertiesList(
 				std::shared_ptr<storm::prism::Program> modelFile
 			);
+			/**
+			 * Creates a modified property
+			 *
+			 * @param isMin whether or not to make it min
+			 * @return Modified property
+			 * */
+			storm::jani::Property modifyProperty(
+				storm::jani::Property prop
+				, bool isMin
+			);
 		private:
-			std::string originalModel;
-			std::string modifiedModel;
-			std::string originalProperties;
-			std::string modifiedProperties;
-			bool saveModifiedModel;
-			bool saveModifiedProperties;
+			std::string model;
+			std::string properties;
 		};
 	} // namespace util
 } // namespace stamina

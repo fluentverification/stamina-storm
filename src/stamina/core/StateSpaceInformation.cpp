@@ -5,7 +5,7 @@ namespace stamina {
 namespace core {
 
 std::string
-StateSpaceInformation::stateToString(CompressedState & state, double pi) {
+StateSpaceInformation::stateToString(CompressedState const & state, double pi) {
 	std::string varString = "(";
 	auto integerVariables  = variableInformation.integerVariables;
 	auto booleanVariables  = variableInformation.booleanVariables;
@@ -39,23 +39,26 @@ StateSpaceInformation::stateToString(CompressedState & state, double pi) {
 	for (auto variable : locationVariables) {
 		StaminaMessages::error("Location Variable printing not implemented yet!");
 	}
-	varString += std::to_string(((int) (pi * 1000000)) / 1000000.0);
-	varString += ")";
+	if (pi != -1.0) {
+		varString += std::to_string(((int) (pi * 1000000)) / 1000000.0);
+		varString += ")";
+	}
 	return varString;
 }
 
 std::string
-StateSpaceInformation::stateToBase64String(CompressedState & state, double pi) {
+StateSpaceInformation::stateToBase64String(CompressedState const & state, double pi) {
 	std::string stateString = stateToString(state, pi);
+	return stateString;
 }
 
 void
-StateSpaceInformation::printStateAsString(CompressedState & state, double pi) {
+StateSpaceInformation::printStateAsString(CompressedState const & state, double pi) {
 	std::cout << stateToString(state, pi) << std::endl;
 }
 
 void
-StateSpaceInformation::printStateAsBase64String(CompressedState & state, double pi) {
+StateSpaceInformation::printStateAsBase64String(CompressedState const & state, double pi) {
 	std::cout << stateToBase64String(state, pi) << std::endl;
 }
 
@@ -93,6 +96,30 @@ StateSpaceInformation::printVariableNames() {
 	}
 	varString += "\b)";
 	std::cout << varString << std::endl;
+}
+
+storm::generator::BooleanVariableInformation
+StateSpaceInformation::getInformationOnBooleanVariable(
+	storm::expressions::Variable variable
+) {
+	for (auto bvi : variableInformation.booleanVariables) {
+		if (bvi.variable == variable) {
+			return bvi;
+		}
+	}
+	StaminaMessages::error("Unable to find variable information! (Boolean variable: " + variable.getName() + ")");
+}
+
+storm::generator::IntegerVariableInformation
+StateSpaceInformation::getInformationOnIntegerVariable(
+	storm::expressions::Variable variable
+) {
+	for (auto ivi : variableInformation.integerVariables) {
+		if (ivi.variable == variable) {
+			return ivi;
+		}
+	}
+	StaminaMessages::error("Unable to find variable information! (Integer variable: " + variable.getName() + ")");
 }
 
 } // namespace core

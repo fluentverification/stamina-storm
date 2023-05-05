@@ -47,6 +47,8 @@ Stamina::run() {
 	for (int i = 0; i + 1 < propertiesVector->size(); i += 2 ) {
 		auto propMin = (*propertiesVector)[i];
 		auto propMax = (*propertiesVector)[i + 1];
+		// Re-initialize
+		// initialize();
 		modelChecker->modelCheckProperty(
 			propMin
 			, propMax
@@ -61,7 +63,7 @@ Stamina::run() {
 
 void
 Stamina::initialize() {
-	StaminaMessages::info("Stamina version is: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR));
+	StaminaMessages::info("Stamina version is: " + std::to_string(version::version_major) + "." + std::to_string(version::version_minor) + "." + std::to_string(version::version_sub_minor));
 	try {
 		std::allocator<StaminaModelChecker> alloc;
 		// Initialize as shared pointer
@@ -87,7 +89,6 @@ Stamina::initialize() {
 		modelFile = modelModify.createModifiedModel();
 		propertiesVector = modelModify.createModifiedProperties(modelFile);
 		auto labels = modelFile->getLabels();
-		StaminaMessages::info("There are the following number of state labels: " + std::to_string(labels.size()));
 		modelChecker->initialize(modelFile, propertiesVector);
 	}
 	catch (const std::exception& e) {

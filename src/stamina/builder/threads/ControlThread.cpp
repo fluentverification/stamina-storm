@@ -17,12 +17,15 @@ ControlThread<ValueType, RewardModelType, StateType>::ControlThread(
 	, numberExplorationThreads(numberExplorationThreads)
 	, stateThreadMap(*(new storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>>(parent->getGenerator()->getStateSize())))
 {
-	// Intentionally left empty
+	// Create transition queues
+	for (int i = 0; i < Options::threads; i++) {
+		transitionQueues.push_back(LockableDeque());
+	}
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 std::pair<uint8_t, StateType>
-ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId) {
+ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(CompressedState const & state, uint8_t threadIndex, StateType requestedId) {
 	// Test to see if a thread already owns this state.
 	// TODO: should this pre-lock even be in here?
 	if (stateThreadMap.contains(state)) {
@@ -53,7 +56,7 @@ ControlThread<ValueType, RewardModelType, StateType>::requestOwnership(Compresse
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 uint8_t
-ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & state) {
+ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState const & state) const {
 	if (stateThreadMap.contains(state)) {
 		return stateThreadMap.getValue(state);
 	}
@@ -63,7 +66,7 @@ ControlThread<ValueType, RewardModelType, StateType>::whoOwns(CompressedState & 
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
-ControlThread<ValueType, RewardModelType, StateType>::whatIsIndex(CompressedState & state) {
+ControlThread<ValueType, RewardModelType, StateType>::whatIsIndex(CompressedState const & state) {
 	// Don't need to lock it in this function
 	if (this->parent->getStateStorage().stateToId.contains(state)) {
 		return this->parent->getStateStorage().stateToId.getValue(state);
@@ -80,15 +83,33 @@ ControlThread<ValueType, RewardModelType, StateType>::requestInsertTransition(
 	, double rate
 ) {
 	LockableDeque & tQueue = transitionQueues[thread - 1];
+	tQueue.lockThread();
+	tQueue.emplace_back(from, to, rate);
+	tQueue.unlockThread();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ControlThread<ValueType, RewardModelType, StateType>::requestCrossExplorationFromThread(
 	StateProbability stateAndProbability
-	, double threadIndex
+	, uint8_t threadIndex
+	, StateType fromIndex
+	, ValueType transitionRate
 ) {
 	// TODO: implement
+	// Pointer black magic because you can't have a reference or variable of an abstract class
+	auto explorationThread = &(this->explorationThreads[threadIndex - 1]);
+	explorationThread->requestCrossExploration(
+		stateAndProbability.state
+		, stateAndProbability.deltaPi
+	);
+	requestInsertTransition(
+		threadIndex
+		, fromIndex
+		, stateAndProbability.index
+		, transitionRate
+	);
+	// explorationThread(stateAndProbability.state, stateAndProbability.probability);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -96,11 +117,16 @@ void
 ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 	STAMINA_DEBUG_MESSAGE("Starting control thread.");
 	uint8_t numberFinishedThreads;
+	auto explorationThreads = this->parent->getExplorationThreads();
 	while (!this->finished || this->hold) { // allow for this thread to be killed outside of its main loop
 		bool exitThisIteration = false;
 		numberFinishedThreads = 0;
-		for (auto explorationThread : this->parent->getExplorationThreads()) {
-			if (explorationThread->isIdling()) {
+
+		for (auto explorationThread : explorationThreads) {
+			if (!explorationThread) {
+				StaminaMessages::warning("Somehow this exploration thread is null!");
+			}
+			else if (explorationThread->isIdling()) {
 				++numberFinishedThreads;
 			}
 		}
@@ -108,36 +134,51 @@ ControlThread<ValueType, RewardModelType, StateType>::mainLoop() {
 			// We have finished.
 			exitThisIteration = true;
 		}
-		// Make sure that we flush the queues AFTER we determine whether to exit. This prevents a
-		// thread from requesting a transition to be added
-		for (auto q : transitionQueues) {
-			q.lockThread();
-			while (!q.empty()) {
-				// Request that the parent class
-				this->parent->createTransition(q.top());
-				q.pop();
-			}
-			q.unlockThread();
-		}
+		registerTransitions();
 		if (exitThisIteration) {
 			STAMINA_DEBUG_MESSAGE("Exiting control thread main loop because all threads are finished");
+			STAMINA_DEBUG_MESSAGE("Sanity check: there are the following number of exploration threads: " << this->parent->getExplorationThreads().size());
 			for (auto explorationThread : this->parent->getExplorationThreads()) {
+				STAMINA_DEBUG_MESSAGE("Killing exploration thread");
 				explorationThread->terminate();
+				explorationThread->join();
 			}
 			this->finished = true;
 			this->hold = false;
 			// this->terminate();
+			STAMINA_DEBUG_MESSAGE("Ending this iteration now!");
+			registerTransitions();
+			return;
 		}
 		// TODO: de-fragmentation
 		// TODO: LRU Cache
 	}
 }
 
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+ControlThread<ValueType, RewardModelType, StateType>::registerTransitions() {
+		// Make sure that we flush the queues AFTER we determine whether to exit. This prevents a
+		// thread from requesting a transition to be added
+		STAMINA_DEBUG_MESSAGE("Size of transition queues: " << transitionQueues.size());
+		for (auto q : transitionQueues) {
+			q.lockThread();
+			STAMINA_DEBUG_MESSAGE("Queue size: " << q.size());
+			while (!q.empty()) {
+				// Request that the parent class
+				this->parent->createTransition(q.top());
+				q.pop();
+				STAMINA_DEBUG_MESSAGE("Creating a transition for a state");
+			}
+			q.unlockThread();
+		}
+
+}
 // Lockable Deque methods
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 int
-ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::size() {
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::size() const {
 	return queue.size();
 }
 
@@ -148,29 +189,30 @@ ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::emplace_bac
 	, StateType to
 	, double rate
 ) {
-
+	Transition t(from, to, rate);
+	queue.emplace_back(t);
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 bool
-ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::empty() {
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::empty() const {
 	return queue.empty();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::lockThread() {
-	// TODO: Implement
+	lock.lock();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::unlockThread() {
-	// TODO: Implement
+	lock.unlock();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 typename ControlThread<ValueType, RewardModelType, StateType>::Transition
-ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::top() {
+ControlThread<ValueType, RewardModelType, StateType>::LockableDeque::top() const {
 	return queue.front();
 }
 

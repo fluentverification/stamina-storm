@@ -39,27 +39,54 @@ namespace stamina {
 
 				class LockableDeque {
 				public:
-					LockableDeque() {
+					LockableDeque()
+						// : guard(this->lock)
+					{
 						// Intentionally left empty
 					}
 
-					LockableDeque(const LockableDeque & other) {
-						queue = other.queue;
+					LockableDeque(const LockableDeque & other)
+						// : guard(this->lock)
+						: queue(other.queue)
+					{
 						// We don't need to copy the lock, just the queue
 					}
-					int size();
+					int size() const;
 					/**
-					 * Locks the queue and emplaces
+					 * Locks the queue and emplaces an element
+					 *
+					 * @param from The state we are going from
+					 * @param to The state the transition goes to
+					 * @param rate The transition rate of this transition
 					 * */
 					void emplace_back(StateType from, StateType to, double rate);
-					bool empty();
+					/**
+					 * Determines whether the internal queue is empty. This method is
+					 * const as it does not change anything about the internals of this
+					 * datastructure
+					 *
+					 * @return whether the internal queue is empty
+					 * */
+					bool empty() const;
+					/**
+					 * Locks the mutex with a std::lock_guard and leaves it locked
+					 * */
 					void lockThread();
+					/**
+					 * Unlocks the std::lock_guard guarding the mutex
+					 * */
 					void unlockThread();
-					Transition top();
+					/**
+					 * Gets the top element (or front element) of the internal queue.
+					 *
+					 * @return The first transition
+					 * */
+					Transition top() const;
 					void pop();
 				private:
 					std::deque<Transition> queue;
 					mutable std::shared_mutex lock;
+					// std::lock_guard<std::shared_mutex> guard;
 				};
 
 				/**
@@ -90,7 +117,7 @@ namespace stamina {
 				* @param requestedId The (new) stateId that a thread can request we assign a state to
 				* @return The thread who owns the state and the new state index
 				* */
-				std::pair<uint8_t, StateType> requestOwnership(CompressedState & state, uint8_t threadIndex, StateType requestedId = 0);
+				std::pair<uint8_t, StateType> requestOwnership(CompressedState const & state, uint8_t threadIndex, StateType requestedId = 0);
 				/**
 				* Gets the owning thread of a particular state without locking the mutex.
 				* This allows for threads to use the many-read, one-write idea put forth
@@ -99,7 +126,7 @@ namespace stamina {
 				* @param state The state who we wonder if owns
 				* @return The thread who owns `state`
 				* */
-				uint8_t whoOwns(CompressedState & state);
+				uint8_t whoOwns(CompressedState const & state) const;
 				/**
 				 * Gets the index of a state which already exists. If the state does not
 				 * exist, returns 0.
@@ -107,7 +134,7 @@ namespace stamina {
 				 * @param state The state to look up
 				 * @return The state index
 				 * */
-				StateType whatIsIndex(CompressedState & state);
+				StateType whatIsIndex(CompressedState const & state);
 				/**
 				* Requests a transition to be inserted (not necessarily in order).
 				* These transitions are requested by the exploration threads and
@@ -139,7 +166,9 @@ namespace stamina {
 				 * */
 				void requestCrossExplorationFromThread(
 					StateProbability stateAndProbability
-					, double threadIndex
+					, uint8_t threadIndex
+					, StateType fromIndex
+					, ValueType transitionRate
 				);
 				/**
 				* This thread lives for the duration of all exploration threads. It waits for
@@ -151,12 +180,14 @@ namespace stamina {
 				* */
 				virtual void mainLoop() override;
 				void terminate();
+			protected:
+				void registerTransitions();
 			private:
 				std::vector<LockableDeque> transitionQueues;
 				std::shared_mutex ownershipMutex;
 				const uint8_t numberExplorationThreads;
 				storm::storage::BitVectorHashMap<uint8_t, storm::storage::Murmur3BitVectorHash<StateType>>& stateThreadMap;
-				const std::vector<ExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
+				std::vector<ExplorationThread<ValueType, RewardModelType, StateType>> explorationThreads;
 			};
 
 		} // namespace threads

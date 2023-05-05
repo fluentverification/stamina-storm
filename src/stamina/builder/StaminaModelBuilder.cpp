@@ -49,6 +49,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, numberTransitions(0)
 	, currentRow(0)
 	, currentRowGroup(0)
+	, hasAbsorbingTransitions(false)
 {
 	// Intentionally left empty
 }
@@ -149,27 +150,53 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMatrix(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder) {
 	for (StateType row = 0; row < transitionsToAdd.size(); ++row) {
-		if (transitionsToAdd[row].empty()) {
+		if (transitionsToAdd[row].empty() && row != 0) {
 			// This state is deadlock
-			transitionMatrixBuilder.addNextValue(row, row, 1);
+			StaminaMessages::errorAndExit("State " + std::to_string(row) + " did not have any successive transitions!");
+			// transitionMatrixBuilder.addNextValue(row, row, 1);
 		}
 		else {
 			for (TransitionInfo tInfo : transitionsToAdd[row]) {
-				transitionMatrixBuilder.addNextValue(row, tInfo.to, tInfo.transition);
+				if (tInfo.transition == 0.0) {
+					continue;
+				}
+				transitionMatrixBuilder.addNextValue(tInfo.from, tInfo.to, tInfo.transition);
 			}
 		}
 	}
+	// transitionsToAdd.clear();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(StateType from, StateType to, ValueType probability) {
+	if (probability == 0) {
+		StaminaMessages::warning("Will not create transition of probability 0 from state " + std::to_string(from) + " to " + std::to_string(to));
+		return;
+	}
 	TransitionInfo tInfo(from, to, probability);
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(from, to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
+	numberTransitions++;
+	// Quick check
+	for (auto & trans : transitionsToAdd[from]) {
+		if (trans.from != from) {
+			StaminaMessages::errorAndExit("Transition list is malformed!");
+		}
+		if (trans.to == to) {
+			StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!\n\tFrom: " + std::to_string(from) + " To: " + std::to_string(to) + " Rates: " + std::to_string(probability) + " / " + std::to_string(trans.transition) );
+			if (trans.transition != probability) {
+				StaminaMessages::error("The transitions should have the same probability but do not!");
+			}
+			// trans.transition += probability;
+			return;
+		}
+	}
+	// auto & it = tra
 	transitionsToAdd[from].push_back(tInfo);
+	// transitionsToAdd[from].sort(); // TODO: Change
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -177,6 +204,11 @@ void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(
 	typename StaminaModelBuilder<ValueType, RewardModelType, StateType>::TransitionInfo transitionInfo
 ) {
+	if (transitionInfo.transition == 0) {
+		StaminaMessages::warning("Will not create transition of probability 0 from state " + std::to_string(transitionInfo.from) + " to " + std::to_string(transitionInfo.to));
+		return;
+	}
+	numberTransitions++;
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(transitionInfo.from, transitionInfo.to)) {
 		transitionsToAdd.push_back(std::vector<TransitionInfo>());
@@ -196,7 +228,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::printStateSpaceInfor
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
-	return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
+	auto labeling = generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
+	labeling.addLabel("Absorbing");
+	labeling.addLabelToState("Absorbing", 0);
+	return labeling;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -293,7 +328,7 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalStatesToAbsorbing(
 	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-	, CompressedState & terminalState
+	, CompressedState const & terminalState
 	, StateType stateId
 	, std::function<StateType (CompressedState const&)> stateToIdCallback
 ) {
@@ -302,10 +337,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	// If there is no behavior, we have an error.
 	if (behavior.empty()) {
-		StaminaMessages::warning("Behavior for perimeter state was empty!");
+#if defined DIE_ON_DEADLOCK
+		StaminaMessages::errorAndExit("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+#elif defined WARN_ON_DEADLOCK
+		StaminaMessages::warning("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+#endif // DIE_ON_DEADLOCK
+		stateStorage.deadlockStateIndices.push_back(stateId);
+		createTransition(stateId, stateId, 1.0); // Create Self-loop
 		return;
 	}
+	hasAbsorbingTransitions = true;
+	bool firstChoice = true;
 	for (auto const& choice : behavior) {
+		if (!firstChoice) {
+			StaminaMessages::errorAndExit("Model should be deterministic! Got multiple choices in behavior for state " + std::to_string(stateId));
+		}
 		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {
 			if (stateProbabilityPair.first != 0) {
@@ -317,8 +363,12 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 			}
 		}
 		addedValue = true;
-		// Absorbing state
-		createTransition(stateId, 0, totalRateToAbsorbing);
+		// Absorbing state. We wrap it in this if statement to not create useless transitions
+		// In case the perimeter state just loops back into all existing states
+		if (totalRateToAbsorbing != 0) {
+			createTransition(stateId, 0, totalRateToAbsorbing);
+		}
+		firstChoice = false;
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");
@@ -368,8 +418,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateStorage() co
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-std::vector<std::shared_ptr<threads::ExplorationThread<ValueType, RewardModelType, StateType>>> const &
+std::vector<typename threads::ExplorationThread<ValueType, RewardModelType, StateType> *> const &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getExplorationThreads() const {
+	StaminaMessages::warning("Using base class implementation of getExplorationThreads()! This is almost certainly a mistake!");
 	return explorationThreads;
 }
 
@@ -389,6 +440,41 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 util::StateIndexArray<StateType, ProbabilityState<StateType>> &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateMap() {
 	return this->stateMap;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::printTransitionActions() {
+	if (Options::export_trans == "") {
+		StaminaMessages::warning("Transition file is empty! Defaulting to \"export.tra\"");
+		Options::export_trans = "export.tra";
+	}
+	if (transitionsToAdd.size() == 0) {
+		StaminaMessages::error("Cannot call printTransitionActions() AFTER model checking!");
+	}
+	std::ofstream out(Options::export_trans);
+	for (auto & transitionBucket : transitionsToAdd) {
+		for (auto & transition : transitionBucket) {
+			out << transition.from << " " << transition.to << " " << transition.transition << std::endl;
+		}
+	}
+	out.close();
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::purgeAbsorbingTransitions() {
+	if (!hasAbsorbingTransitions) {
+		return;
+	}
+	for (auto & transitionBucket : transitionsToAdd) {
+		for (auto & transition : transitionBucket) {
+			if (transition.to == 0) {
+				transition.transition = 0.0;
+			}
+		}
+	}
+	hasAbsorbingTransitions = false;
 }
 
 // Explicitly instantiate the class.

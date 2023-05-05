@@ -55,7 +55,9 @@ BaseThread<ValueType, RewardModelType, StateType>::terminate() {
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 BaseThread<ValueType, RewardModelType, StateType>::join() {
-	this->threadLoop->join();
+	if (this->threadLoop->joinable()) {
+		this->threadLoop->join();
+	}
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

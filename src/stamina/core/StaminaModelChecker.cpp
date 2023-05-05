@@ -7,6 +7,9 @@
 #include "ANSIColors.h"
 #include "StaminaMessages.h"
 
+#include "core/StateSpaceInformation.h"
+
+#include "storm/environment/Environment.h"
 #include "storm/builder/BuilderOptions.h"
 #include "storm/storage/expressions/BinaryRelationExpression.h"
 
@@ -99,14 +102,15 @@ std::unique_ptr<storm::modelchecker::CheckResult>
 StaminaModelChecker::modelCheckProperty(
 	storm::jani::Property propMin
 	, storm::jani::Property propMax
+	, storm::jani::Property propOriginal
 	, storm::prism::Program const& modulesFile
 ) {
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
-	auto options = BuilderOptions(*propMin.getFilter().getFormula());
+	auto options = BuilderOptions(*propOriginal.getFilter().getFormula());
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
-
+	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
 	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
 		// The reason that this splits into two separate classes is that when calling STAMINA
 		// as a single-threaded application there is less overhead to use just StaminaIterativeModelBuilder
@@ -120,13 +124,24 @@ StaminaModelChecker::modelCheckProperty(
 			StaminaMessages::info("Using thread-count: " + std::to_string(Options::threads));
 			auto builderPointer = std::make_shared<StaminaThreadedIterativeModelBuilder<double>> (generator, modulesFile, options);
 			builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+			std::vector<std::shared_ptr<storm::generator::PrismNextStateGenerator<double, uint32_t>>> generators;
+			for (int i = 0; i < Options::threads; i++) {
+				generators.push_back(std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options));
+			}
+			// Give to model builder.
+			//
+			// This must be builderPointer because when we pointer-cast to a
+			// std::shared_ptr<StaminaModelBuilder> we lose the knowledge that this is a
+			// StaminaThreadedIterativeModelBuilder, which has this method.
+			builderPointer->setGeneratorsVector(generators);
 		}
 	}
 	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
-		StaminaMessages::errorAndExit("Not fully implemented yet!");
+		StaminaMessages::warning("Not fully implemented yet!");
 		// Create StaminaModelBuilder
-		// auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
-		// builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+		auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		builderPointer->initializeEventStatePriority(&propMin);
+		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
 	}
 	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {
 		if (Options::threads != 1) {
@@ -183,8 +198,6 @@ StaminaModelChecker::modelCheckProperty(
 
 		// Rebuild the initial state labels
 		labeling = &( model->getStateLabeling());
-		labeling->addLabel("(Absorbing = true)");
-		labeling->addLabelToState("(Absorbing = true)", 0);
 
 		std::cout << "Labeling:\n" << model->getStateLabeling() << std::endl;
 
@@ -195,11 +208,17 @@ StaminaModelChecker::modelCheckProperty(
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
+			// storm::Environment env;
+			// env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
 			auto result_lower = checker->check(
+				// env,
 				storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 			);
 			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
-			auto result_upper = checker->check(storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true));
+			auto result_upper = checker->check(
+				// env,
+				storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
+			);
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			builder->printStateSpaceInformation();
 			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
@@ -228,6 +247,13 @@ StaminaModelChecker::modelCheckProperty(
 		++numRefineIterations;
 	}
 
+	// Export transitions to file if desired
+	if (Options::export_trans != "") {
+		StaminaMessages::info("Exporting transitions to file: " + Options::export_trans);
+		builder->printTransitionActions();
+		StaminaMessages::good("Export Complete!");
+	}
+
 	auto endTime = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> timeTaken = endTime - startTime;
 	std::chrono::duration<double> timeTakenModel = modelTime - startTime;
@@ -250,12 +276,6 @@ StaminaModelChecker::modelCheckProperty(
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
 	StaminaMessages::info(resultInfo.str());
 
-	// Export transitions to file if desired
-	if (Options::export_trans != "") {
-		StaminaMessages::info("Exporting transitions to file: " + Options::export_trans);
-		printTransitionActions(Options::export_trans);
-		StaminaMessages::good("Export Complete!");
-	}
 
 	return nullptr;
 }

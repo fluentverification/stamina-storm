@@ -9,15 +9,19 @@ set_default_values(struct arguments * arguments) {
 	arguments->kappa = 1.0;
 	arguments->reduce_kappa = 1.25; // 2.0;
 	arguments->approx_factor = 2.0;
+	arguments->fudge_factor = 1.0;
 	arguments->prob_win = 1.0e-3;
 	arguments->max_approx_count = 10;
 	arguments->no_prop_refine = false;
 	arguments->cudd_max_mem = "1g";
-	arguments->export_trans = "trans.txt";
+	arguments->export_trans = "";
 	arguments->rank_transitions = false;
 	arguments->max_iterations = 10000;
 	arguments->method = STAMINA_METHODS::ITERATIVE_METHOD;
 	arguments->threads = 1;
+	arguments->preterminate = false;
+	arguments->event = EVENTS::UNDEFINED;
+	arguments->distance_weight = 1.0;
 }
 
 /**

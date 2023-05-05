@@ -59,7 +59,7 @@ namespace stamina {
 				* @param deltaPi The difference in reachability to add to that
 				* state and push forward to its successors.
 				* */
-				void requestCrossExploration(CompressedState & state, double deltaPi);
+				void requestCrossExploration(CompressedState const & state, double deltaPi);
 				void requestCrossExploration(StateType stateIndex, double deltaPi);
 				/**
 				* Does state exploration or idles until worker thread asks to kill it.
@@ -68,13 +68,13 @@ namespace stamina {
 			protected:
 				virtual void exploreStates() = 0;
 				virtual void exploreState(StateProbability & stateProbability) = 0;
-				virtual void enqueueSuccessors(CompressedState & state) = 0; // stateToIdCallback
+				virtual StateType enqueueSuccessors(CompressedState const & state) = 0; // stateToIdCallback
 				// Weak priority on crossExplorationQueue (superseded by mutex lock)
 				std::shared_mutex crossExplorationQueueMutex;
 				// The lock that locks our mutex
 				std::unique_lock<std::shared_mutex> xLock;
 				std::deque<std::pair<CompressedState, double>> crossExplorationQueue;
-				std::deque<std::pair<ProbabilityState<StateType> *, CompressedState &>> mainExplorationQueue;
+				std::deque<std::pair<ProbabilityState<StateType> *, CompressedState const &>> mainExplorationQueue;
 				uint32_t numberOfOwnedStates;
 				bool idling;
 				ControlThread<ValueType, RewardModelType, StateType> & controlThread;
