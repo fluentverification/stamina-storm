@@ -20,6 +20,8 @@
 #include <storm/modelchecker/results/CheckResult.h>
 #include <storm/modelchecker/results/ExplicitQuantitativeCheckResult.h>
 
+#include "util/ModelModify.h"
+
 // #include <storm/utility/initialize.h>
 
 namespace stamina {
@@ -51,7 +53,8 @@ namespace stamina {
         std::shared_ptr<core::StaminaModelChecker> modelChecker;
         std::shared_ptr<storm::prism::Program> modelFile;
         std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
-    };
+ 		util::ModelModify modelModify;
+	};
 }
 
 #endif // STAMINA_STAMINA

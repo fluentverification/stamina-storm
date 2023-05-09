@@ -14,7 +14,6 @@
 
 namespace stamina {
 	namespace util {
-		struct
 		class ModelModify {
 		public:
 			/**
@@ -64,6 +63,7 @@ namespace stamina {
 		private:
 			std::string model;
 			std::string properties;
+			std::shared_ptr<storm::prism::Program> modelFile;
 		};
 	} // namespace util
 } // namespace stamina

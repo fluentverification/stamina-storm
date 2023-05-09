@@ -19,6 +19,7 @@
 #include <stdio.h> // For remove()
 
 #include "ModelModify.h"
+
 #include "core/StaminaMessages.h"
 
 using namespace stamina;
@@ -39,15 +40,15 @@ ModelModify::~ModelModify() {
 
 std::shared_ptr<storm::prism::Program>
 ModelModify::readModel() {
-	modifiedModelStream.close();
-	return std::make_shared<storm::prism::Program>(storm::parser::PrismParser::parse(modifiedModel, true));
+	this->modelFile = std::make_shared<storm::prism::Program>(storm::parser::PrismParser::parse(model, true));
+	return this->modelFile;
 }
 
 std::shared_ptr<std::vector<storm::jani::Property>>
 ModelModify::createPropertiesList(
 	std::shared_ptr<storm::prism::Program> modelFile
 ) {
-	auto propertiesVector = std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(fullPath, *modelFile));
+	auto propertiesVector = std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(properties, *modelFile));
 
 }
 
@@ -57,7 +58,7 @@ ModelModify::modifyProperty(
 	storm::jani::Property prop
 	, bool isMin
 ) {
-	storm::logic::Formula formula = prop.getFormula();
+	storm::logic::Formula formula = prop.getRawFormula();
 	try {
 		assert(formula.isProbabilityOperatorFormula());
 		// This is a path formula
