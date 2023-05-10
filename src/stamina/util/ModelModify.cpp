@@ -49,7 +49,8 @@ ModelModify::createPropertiesList(
 	std::shared_ptr<storm::prism::Program> modelFile
 ) {
 	auto propertiesVector = std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(properties, *modelFile));
-
+	// TODO: Add in the modified properties
+	return propertiesVector;
 }
 
 
@@ -58,17 +59,20 @@ ModelModify::modifyProperty(
 	storm::jani::Property prop
 	, bool isMin
 ) {
-	storm::logic::Formula formula = prop.getRawFormula();
+	auto formula = prop.getRawFormula();
 	try {
-		assert(formula.isProbabilityOperatorFormula());
+		assert(formula->isProbabilityOperatorFormula());
 		// This is a path formula
-		auto pathFormula = formula.getSubformula();
-		auto stateFormula = pathFormula.getRightSubformula();
+		auto pathFormula = formula->getSubformula();
+		auto stateFormula = pathFormula->getRightSubformula();
 		// At this point, formula should be a state formula
-		assert(stateFormula.isStateFormula());
-		auto opType = storm::logic::BinaryBooleanOperatorType::And
-			? isMin : storm::logic::BinaryBooleanOperatorType::Or;
-		storm::logic::AtomicLabelFormula absorbing("Absorbing");
+		assert(stateFormula->isStateFormula());
+		// If isMin, chose And, otherwise, choose or
+		auto opType = isMin ?
+			storm::logic::BinaryBooleanOperatorType::And
+			: storm::logic::BinaryBooleanOperatorType::Or;
+		std::shared_ptr<storm::logic::AtomicLabelFormula> absorbing(
+				new storm::logic::AtomicLabelFormula("Absorbing"));
 		if (isMin) {
 			storm::logic::UnaryBooleanStateFormula nt(
 				storm::logic::UnaryBooleanOperatorType::Not
@@ -81,7 +85,7 @@ ModelModify::modifyProperty(
 				// Right Formula
 				, stateFormula
 			);
-			pathFormula.setRightSubformula(newFormula);
+			pathFormula->setRightSubformula(newFormula);
 		}
 		else {
 			storm::logic::BinaryBooleanStateFormula newFormula(
@@ -91,9 +95,9 @@ ModelModify::modifyProperty(
 				// Right Formula
 				, stateFormula
 			);
-			pathFormula.setRightSubformula(newFormula);
+			pathFormula->setRightSubformula(newFormula);
 		}
-		formula.setSubFormula(pathFormula);
+		formula->setSubFormula(pathFormula);
 		prop.setFormula(formula);
 		return prop;
 	}

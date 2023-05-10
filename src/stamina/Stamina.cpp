@@ -23,8 +23,6 @@ using namespace stamina::core;
 Stamina::Stamina(struct arguments * arguments) : modelModify(
 	Options::model_file
 	, Options::properties_file
-	, false
-	, false
 ) {
 	try {
 		Options::setArgs(arguments);
@@ -84,8 +82,8 @@ Stamina::initialize() {
 
 	// Load model file and properties file
 	try {
-		modelFile = modelModify.createModifiedModel();
-		propertiesVector = modelModify.createModifiedProperties(modelFile);
+		modelFile = modelModify.readModel();
+		propertiesVector = modelModify.createPropertiesList(modelFile);
 		auto labels = modelFile->getLabels();
 		modelChecker->initialize(modelFile, propertiesVector);
 	}

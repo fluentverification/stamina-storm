@@ -30,8 +30,6 @@ namespace stamina {
 			ModelModify(
 				std::string model
 				, std::string properties
-				, bool saveModifiedModel = true
-				, bool saveModifiedProperties = true
 			);
 			/**
 			 * The destructor for the model modifier
