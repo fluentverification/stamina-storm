@@ -59,33 +59,39 @@ ModelModify::modifyProperty(
 	storm::jani::Property prop
 	, bool isMin
 ) {
-	auto formula = prop.getRawFormula();
 	try {
+		std::shared_ptr<storm::logic::ProbabilityOperatorFormula> formula = prop.getRawFormula();
 		assert(formula->isProbabilityOperatorFormula());
 		// This is a path formula
-		auto pathFormula = formula->getSubformula();
-		auto stateFormula = pathFormula->getRightSubformula();
+		storm::logic::BinaryPathFormula & pathFormula = formula->getSubformula();
+		storm::logic::StateFormula & stateFormula = pathFormula.getRightSubformula();
 		// At this point, formula should be a state formula
-		assert(stateFormula->isStateFormula());
+		assert(stateFormula.isStateFormula());
 		// If isMin, chose And, otherwise, choose or
 		auto opType = isMin ?
 			storm::logic::BinaryBooleanOperatorType::And
 			: storm::logic::BinaryBooleanOperatorType::Or;
 		std::shared_ptr<storm::logic::AtomicLabelFormula> absorbing(
 				new storm::logic::AtomicLabelFormula("Absorbing"));
+		// use std::make_shared ?
+		std::shared_ptr<storm::logic::StateFormula> stateFormulaPointer(
+			new storm::logic::StateFormula(stateFormula)
+		);
 		if (isMin) {
-			storm::logic::UnaryBooleanStateFormula nt(
-				storm::logic::UnaryBooleanOperatorType::Not
-				, absorbing
+			std::shared_ptr<storm::logic::UnaryBooleanStateFormula> nt(
+				new storm::logic::UnaryBooleanStateFormula(
+					storm::logic::UnaryBooleanOperatorType::Not
+					, absorbing
+				)
 			);
 			storm::logic::BinaryBooleanStateFormula newFormula(
 				opType
 				// Left formula
 				, nt
 				// Right Formula
-				, stateFormula
+				, stateFormulaPointer
 			);
-			pathFormula->setRightSubformula(newFormula);
+			pathFormula.setRightSubformula(newFormula);
 		}
 		else {
 			storm::logic::BinaryBooleanStateFormula newFormula(
@@ -93,15 +99,21 @@ ModelModify::modifyProperty(
 				// Left formula
 				, absorbing
 				// Right Formula
-				, stateFormula
+				, stateFormulaPointer
 			);
-			pathFormula->setRightSubformula(newFormula);
+			pathFormula.setRightSubformula(newFormula);
 		}
-		formula->setSubFormula(pathFormula);
-		prop.setFormula(formula);
-		return prop;
+		auto pathFormulaPtr = std::make_shared<storm::logic::Formula const>(pathFormula);
+		// TODO: Get operator information from formula and set it to newFormula
+		std::shared_ptr<storm::logic::Formula> newFormula(
+			new storm::logic::ProbabilityOperatorFormula(pathFormulaPtr)
+		);
+		// formula->setSubFormula(pathFormula);
+		std::string name = isMin ? "_min" : "_max";
+		storm::jani::Property newProp(prop.getName() + name, newFormula, prop.getUndefinedConstants(), "Added by STAMINA");
+		return newProp;
 	}
 	catch (std::exception e) {
-		// TODO: handle
+		StaminaMessages::errorAndExit("Caught Error while trying to modify property!");
 	}
 }
