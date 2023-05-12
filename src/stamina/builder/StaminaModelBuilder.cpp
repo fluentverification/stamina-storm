@@ -257,20 +257,6 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	}
 	if (firstIteration) {
 		this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
-		bool gotVar = false;
-		for (auto variable : generator->getVariableInformation().booleanVariables) {
-			if (variable.getName() == "Absorbing") {
-				this->absorbingState.setFromInt(variable.bitOffset + 1, 1, 1);
-				if (this->absorbingState.getAsInt(variable.bitOffset + 1, 1) != 1) {
-					StaminaMessages::errorAndExit("Absorbing state setup failed!");
-				}
-				gotVar = true;
-				break;
-			}
-		}
-		if (!gotVar) {
-			StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
-		}
 		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 		stateStorage.deadlockStateIndices.push_back(0);
 		// Check if state is already registered

@@ -58,6 +58,19 @@ namespace stamina {
 				storm::jani::Property prop
 				, bool isMin
 			);
+			/**
+			 * Allows you to set the model and properties file path
+			 * after the model modify has been constructed.
+			 *
+			 * @param model New model file path
+			 * @param properties New Properties file path
+			 * */
+			void setModelAndProperties(std::string model, std::string properties);
+			/**
+			 * Getters for model and properties
+			 * */
+			std::string getModel();
+			std::string getProperties();
 		private:
 			std::string model;
 			std::string properties;

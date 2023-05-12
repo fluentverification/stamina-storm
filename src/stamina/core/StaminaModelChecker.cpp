@@ -167,7 +167,7 @@ StaminaModelChecker::modelCheckProperty(
 	// Property refinement optimization
 	if (!Options::no_prop_refine) {
 		// Get the expression for the current property
-		auto propertyFormula = propMin.getRawFormula();
+		auto propertyFormula = propOriginal.getRawFormula();
 		StaminaMessages::info("Attempting to convert formula to expression:\n\t" + propertyFormula->toString());
 		if ((!propertyFormula->isPathFormula())
 			&& (

@@ -21,8 +21,8 @@ using namespace stamina::core;
 
 // PUBLIC METHODS
 Stamina::Stamina(struct arguments * arguments) : modelModify(
-	Options::model_file
-	, Options::properties_file
+	arguments->model_file
+	, arguments->properties_file
 ) {
 	try {
 		Options::setArgs(arguments);
@@ -30,6 +30,7 @@ Stamina::Stamina(struct arguments * arguments) : modelModify(
 	catch (const std::exception& e) {
 		StaminaMessages::errorAndExit("Failed to allocate stamina::Options: " + std::string(e.what()));
 	}
+	StaminaMessages::initMessage();
 	StaminaMessages::info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
 	bool good = Options::checkOptions();
 	if (!good) {

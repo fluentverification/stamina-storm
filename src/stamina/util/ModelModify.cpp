@@ -31,7 +31,13 @@ ModelModify::ModelModify(
 ) : model(model)
 	, properties(properties)
 {
-	// Intentionally left empty
+	// Ensure we are actually given a file path
+	if (model == "") {
+		StaminaMessages::error("Model file path was \"\"!");
+	}
+	if (properties == "") {
+		StaminaMessages::error("Properties file path was \"\"!");
+	}
 }
 
 ModelModify::~ModelModify() {
@@ -68,12 +74,14 @@ ModelModify::modifyProperty(
 			StaminaMessages::errorAndExit("Could not convert formula to ProbabilityOperatorFormula!");
 		}
 		// This is a path formula
-		const storm::logic::BinaryPathFormula & pathFormula
-			= static_cast<const storm::logic::BinaryPathFormula &>(formula->getSubformula());
+		const storm::logic::BoundedUntilFormula & pathFormula
+			= static_cast<const storm::logic::BoundedUntilFormula &>(formula->getSubformula());
 		const storm::logic::StateFormula & stateFormula
 			= static_cast<const storm::logic::StateFormula &>(pathFormula.getRightSubformula());
 		// Assert that the path formula is an until formula
-		assert(pathFormula.isUntilFormula());
+		if (!pathFormula.isUntilFormula()) {
+			StaminaMessages::warning("Formula \"" + pathFormula.toString() + "\" was not an until formula");
+		}
 		// At this point, formula should be a state formula
 		assert(stateFormula.isStateFormula());
 		// If isMin, chose And, otherwise, choose or
@@ -134,4 +142,24 @@ ModelModify::modifyProperty(
 	catch (std::exception e) {
 		StaminaMessages::errorAndExit("Caught Error while trying to modify property!");
 	}
+}
+
+
+void
+ModelModify::setModelAndProperties(
+	std::string model
+	, std::string properties
+) {
+	this->model = model;
+	this->properties = properties;
+}
+
+std::string
+ModelModify::getModel() {
+	return this->model;
+}
+
+std::string
+ModelModify::getProperties() {
+	return this->properties;
 }
