@@ -68,8 +68,12 @@ ModelModify::modifyProperty(
 			StaminaMessages::errorAndExit("Could not convert formula to ProbabilityOperatorFormula!");
 		}
 		// This is a path formula
-		const storm::logic::BinaryPathFormula & pathFormula = static_cast<const storm::logic::BinaryPathFormula &>(formula->getSubformula());
-		const storm::logic::StateFormula & stateFormula = static_cast<const storm::logic::StateFormula &>(pathFormula.getRightSubformula());
+		const storm::logic::BinaryPathFormula & pathFormula
+			= static_cast<const storm::logic::BinaryPathFormula &>(formula->getSubformula());
+		const storm::logic::StateFormula & stateFormula
+			= static_cast<const storm::logic::StateFormula &>(pathFormula.getRightSubformula());
+		// Assert that the path formula is an until formula
+		assert(pathFormula.isUntilFormula());
 		// At this point, formula should be a state formula
 		assert(stateFormula.isStateFormula());
 		// If isMin, chose And, otherwise, choose or
@@ -79,9 +83,9 @@ ModelModify::modifyProperty(
 		std::shared_ptr<storm::logic::AtomicLabelFormula> absorbing(
 				new storm::logic::AtomicLabelFormula("Absorbing"));
 		// use std::make_shared ?
-		std::shared_ptr<storm::logic::StateFormula> stateFormulaPointer(
-			new storm::logic::StateFormula(stateFormula)
-		);
+		std::shared_ptr<storm::logic::StateFormula> stateFormulaPointer
+			= std::dynamic_pointer_cast<storm::logic::StateFormula>(stateFormula.clone());
+		std::shared_ptr<storm::logic::Formula const> pathFormulaPtr(nullptr);
 		if (isMin) {
 			std::shared_ptr<storm::logic::UnaryBooleanStateFormula> nt(
 				new storm::logic::UnaryBooleanStateFormula(
@@ -96,7 +100,12 @@ ModelModify::modifyProperty(
 				// Right Formula
 				, stateFormulaPointer
 			);
-			pathFormula.setRightSubformula(newFormula);
+			pathFormulaPtr = storm::logic::UntilFormula(
+					// Left subformula from the existing path formula
+					pathFormula.getLeftSubformula().clone()
+					// New right-hand formula from above
+					, newFormula.clone()
+			).clone();
 		}
 		else {
 			storm::logic::BinaryBooleanStateFormula newFormula(
@@ -106,9 +115,13 @@ ModelModify::modifyProperty(
 				// Right Formula
 				, stateFormulaPointer
 			);
-			pathFormula.setRightSubformula(newFormula);
+			pathFormulaPtr = storm::logic::UntilFormula(
+					// Left subformula from the existing path formula
+					pathFormula.getLeftSubformula().clone()
+					// New right-hand formula from above
+					, newFormula.clone()
+			).clone();
 		}
-		auto pathFormulaPtr = std::make_shared<storm::logic::Formula const>(pathFormula);
 		// TODO: Get operator information from formula and set it to newFormula
 		std::shared_ptr<storm::logic::Formula> newFormula(
 			new storm::logic::ProbabilityOperatorFormula(pathFormulaPtr)
