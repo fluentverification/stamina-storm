@@ -60,11 +60,16 @@ ModelModify::modifyProperty(
 	, bool isMin
 ) {
 	try {
-		std::shared_ptr<storm::logic::ProbabilityOperatorFormula> formula = prop.getRawFormula();
-		assert(formula->isProbabilityOperatorFormula());
+		std::shared_ptr<const storm::logic::Formula> formulaAbs = prop.getRawFormula();
+		assert(formulaAbs->isProbabilityOperatorFormula());
+		std::shared_ptr<const storm::logic::ProbabilityOperatorFormula> formula
+			= std::static_pointer_cast<const storm::logic::ProbabilityOperatorFormula>(formulaAbs);
+		if (!formula) {
+			StaminaMessages::errorAndExit("Could not convert formula to ProbabilityOperatorFormula!");
+		}
 		// This is a path formula
-		storm::logic::BinaryPathFormula & pathFormula = formula->getSubformula();
-		storm::logic::StateFormula & stateFormula = pathFormula.getRightSubformula();
+		const storm::logic::BinaryPathFormula & pathFormula = static_cast<const storm::logic::BinaryPathFormula &>(formula->getSubformula());
+		const storm::logic::StateFormula & stateFormula = static_cast<const storm::logic::StateFormula &>(pathFormula.getRightSubformula());
 		// At this point, formula should be a state formula
 		assert(stateFormula.isStateFormula());
 		// If isMin, chose And, otherwise, choose or
