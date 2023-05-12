@@ -40,6 +40,10 @@ namespace stamina {
 		class StaminaMessages {
 		public:
 			/**
+			 * Prints a nice init message.
+			 * */
+			static void initMessage();
+			/**
 			* Errors and exits program
 			* */
 			static void errorAndExit(std::string err, uint8_t err_num = STAMINA_ERRORS::ERR_GENERAL);
