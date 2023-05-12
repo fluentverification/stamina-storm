@@ -19,18 +19,18 @@ const std::string StaminaMessages::horizontalSeparator = "======================
 
 void
 StaminaMessages::initMessage() {
-	std::cerr << horizontalSeparator << std::endl;
-	std::cerr << BOLD("STAMINA -- The STochiastic Approximate Model-checker, for INfinite-state Analysis") << std::endl;
-	std::cerr << horizontalSeparator << std::endl;
-	std::cerr << "(C) 2023 Fluent Verification Research Group -- Licensed freely under the MIT license" << std::endl;
-	std::cerr << "Version: " << VERSION_MAJOR << "." << VERSION_MINOR << std::endl;
-	std::cerr << "Developers: J Jeppson, Z Zhang, R Roberts, T Neupane, and others." << std::endl;
-	std::cerr << "Website: https://staminachecker.org" << std::endl;
-	std::cerr << "Repository: https://github.com/fluentverification/stamina-storm" << std::endl;
-	std::cerr << horizontalSeparator << std::endl;
-	std::cerr << "Model checker: Storm (https://stormchecker.org) - Licensed under the GPLv3" << std::endl;
-	// std::cerr << "Storm Authors: C Hensel, S Junges, J Katoen, T Quatmann, M Volk" << std::endl;
-	std::cerr << horizontalSeparator << std::endl;
+	std::cout << horizontalSeparator << std::endl;
+	std::cout << BOLD("STAMINA -- The STochiastic Approximate Model-checker, for INfinite-state Analysis") << std::endl;
+	std::cout << horizontalSeparator << std::endl;
+	std::cout << "(C) 2023 Fluent Verification Research Group -- Licensed freely under the MIT license" << std::endl;
+	std::cout << "Version: " << VERSION_MAJOR << "." << VERSION_MINOR << std::endl;
+	std::cout << "Developers: J Jeppson, Z Zhang, R Roberts, T Neupane, and others." << std::endl;
+	std::cout << "Website: https://staminachecker.org" << std::endl;
+	std::cout << "Repository: https://github.com/fluentverification/stamina-storm" << std::endl;
+	std::cout << horizontalSeparator << std::endl;
+	std::cout << "Model checker: Storm (https://stormchecker.org) - Licensed under the GPLv3" << std::endl;
+	std::cout << "Storm Authors: C Hensel, S Junges, J Katoen, T Quatmann, M Volk" << std::endl;
+	std::cout << horizontalSeparator << std::endl;
 
 }
 
