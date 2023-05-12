@@ -15,6 +15,7 @@
 #include <regex>
 
 #include <boost/algorithm/string/trim.hpp>
+#include "storm/storage/expressions/RationalLiteralExpression.h"
 
 #include <stdio.h> // For remove()
 
@@ -95,8 +96,20 @@ ModelModify::modifyProperty(
 			= std::dynamic_pointer_cast<storm::logic::StateFormula>(stateFormula.clone());
 		std::shared_ptr<storm::logic::Formula const> pathFormulaPtr(nullptr);
 		// Create lower and upper bounds from the known information
-		storm::logic::TimeBound lowerBound(true, pathFormula.getLowerBound());
-		storm::logic::TimeBound upperBound(true, pathFormula.getUpperBound());
+		auto upper = pathFormula.getUpperBound();
+		if (!pathFormula.hasUpperBound()) {
+			StaminaMessages::errorAndExit("Needs upper bound!");
+		}
+		// auto lower = pathFormula.getLowerBound();
+		std::shared_ptr<storm::expressions::BaseExpression> zeroBase(new storm::expressions::RationalLiteralExpression(upper.getManager(), 0.0));
+		storm::expressions::Expression zeroLiteral(zeroBase);
+		storm::expressions::Expression & zero = zeroLiteral;
+		storm::expressions::Expression & lower = zero;
+		if (pathFormula.hasLowerBound()) {
+			lower = pathFormula.getLowerBound();
+		}
+		storm::logic::TimeBound lowerBound(true, lower);
+		storm::logic::TimeBound upperBound(true, upper);
 		// TODO: add for Steps if DTMC
 		storm::logic::TimeBoundReference timeBoundReference(storm::logic::TimeBoundType::Time);
 		if (isMin) {
