@@ -145,7 +145,6 @@ ModelModify::modifyProperty(
 				, upperBound
 				// The time bound reference (basically whether it's steps, time, or reward)
 				, timeBoundReference
-
 			).clone();
 		}
 		// Get operator information from formula and set it to newFormula

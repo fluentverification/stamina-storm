@@ -436,7 +436,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 
 	// Continuously decrement kappa
 	while (piHat >= Options::prob_win / Options::approx_factor) {
-		statesTerminatedLastIteration.clear();
+		// statesTerminatedLastIteration.clear();
 		// Builds matrices and truncates state space
 		buildMatrices(
 			transitionMatrixBuilder
