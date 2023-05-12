@@ -94,6 +94,11 @@ ModelModify::modifyProperty(
 		std::shared_ptr<storm::logic::StateFormula> stateFormulaPointer
 			= std::dynamic_pointer_cast<storm::logic::StateFormula>(stateFormula.clone());
 		std::shared_ptr<storm::logic::Formula const> pathFormulaPtr(nullptr);
+		// Create lower and upper bounds from the known information
+		storm::logic::TimeBound lowerBound(true, pathFormula.getLowerBound());
+		storm::logic::TimeBound upperBound(true, pathFormula.getUpperBound());
+		// TODO: add for Steps if DTMC
+		storm::logic::TimeBoundReference timeBoundReference(storm::logic::TimeBoundType::Time);
 		if (isMin) {
 			std::shared_ptr<storm::logic::UnaryBooleanStateFormula> nt(
 				new storm::logic::UnaryBooleanStateFormula(
@@ -108,11 +113,17 @@ ModelModify::modifyProperty(
 				// Right Formula
 				, stateFormulaPointer
 			);
-			pathFormulaPtr = storm::logic::UntilFormula(
+			pathFormulaPtr = storm::logic::BoundedUntilFormula(
 				// Left subformula from the existing path formula
 				pathFormula.getLeftSubformula().clone()
 				// New right-hand formula from above
 				, newFormula.clone()
+				// The lower bound from pathFormula
+				, lowerBound
+				// The upper bound from the pathFormula
+				, upperBound
+				// The time bound reference (basically whether it's steps, time, or reward)
+				, timeBoundReference
 			).clone();
 		}
 		else {
@@ -123,11 +134,18 @@ ModelModify::modifyProperty(
 				// Right Formula
 				, stateFormulaPointer
 			);
-			pathFormulaPtr = storm::logic::UntilFormula(
+			pathFormulaPtr = storm::logic::BoundedUntilFormula(
 				// Left subformula from the existing path formula
 				pathFormula.getLeftSubformula().clone()
 				// New right-hand formula from above
 				, newFormula.clone()
+				// The lower bound from pathFormula
+				, lowerBound
+				// The upper bound from the pathFormula
+				, upperBound
+				// The time bound reference (basically whether it's steps, time, or reward)
+				, timeBoundReference
+
 			).clone();
 		}
 		// Get operator information from formula and set it to newFormula
