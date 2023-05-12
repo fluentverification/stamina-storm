@@ -1,6 +1,5 @@
 ![stamina-logo](doc/staminaLogo.png)
 
-Test
 # STAMINA (STORM Integration)
 
 [![CodeFactor](https://www.codefactor.io/repository/github/fluentverification/stamina-cplusplus/badge)](https://www.codefactor.io/repository/github/fluentverification/stamina-storm)
