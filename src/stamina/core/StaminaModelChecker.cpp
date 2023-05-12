@@ -163,7 +163,8 @@ StaminaModelChecker::modelCheckProperty(
 	// Create number of refined iterations and reachability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
-
+	StaminaMessages::info("Created min prop: " + propMin.asPrismSyntax());
+	StaminaMessages::info("Created max prop: " + propMax.asPrismSyntax());
 	// Property refinement optimization
 	if (!Options::no_prop_refine) {
 		// Get the expression for the current property
@@ -271,7 +272,7 @@ StaminaModelChecker::modelCheckProperty(
 	std::stringstream resultInfo;
 	resultInfo.setf( std::ios::floatfield );
 	resultInfo << std::fixed << std::setprecision(12);
-	resultInfo << "Finished checking property: " << propMin.getName() << std::endl;
+	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
 	StaminaMessages::info(resultInfo.str());

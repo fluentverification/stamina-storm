@@ -109,10 +109,10 @@ ModelModify::modifyProperty(
 				, stateFormulaPointer
 			);
 			pathFormulaPtr = storm::logic::UntilFormula(
-					// Left subformula from the existing path formula
-					pathFormula.getLeftSubformula().clone()
-					// New right-hand formula from above
-					, newFormula.clone()
+				// Left subformula from the existing path formula
+				pathFormula.getLeftSubformula().clone()
+				// New right-hand formula from above
+				, newFormula.clone()
 			).clone();
 		}
 		else {
@@ -124,15 +124,15 @@ ModelModify::modifyProperty(
 				, stateFormulaPointer
 			);
 			pathFormulaPtr = storm::logic::UntilFormula(
-					// Left subformula from the existing path formula
-					pathFormula.getLeftSubformula().clone()
-					// New right-hand formula from above
-					, newFormula.clone()
+				// Left subformula from the existing path formula
+				pathFormula.getLeftSubformula().clone()
+				// New right-hand formula from above
+				, newFormula.clone()
 			).clone();
 		}
-		// TODO: Get operator information from formula and set it to newFormula
+		// Get operator information from formula and set it to newFormula
 		std::shared_ptr<storm::logic::Formula> newFormula(
-			new storm::logic::ProbabilityOperatorFormula(pathFormulaPtr)
+			new storm::logic::ProbabilityOperatorFormula(pathFormulaPtr, formula->getOperatorInformation())
 		);
 		// formula->setSubFormula(pathFormula);
 		std::string name = isMin ? "_min" : "_max";
