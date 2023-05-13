@@ -66,12 +66,13 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 		return 0;
 	}
 	StateType actualIndex;
+	// Create new index just in case we need it
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
 		actualIndex = stateStorage.stateToId.getValue(state);
 	}
 	else {
-		// Create new index just in case we need it
+		// Use the new index
 		actualIndex = newIndex;
 	}
 
@@ -113,7 +114,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStat
 	// The previous state has reachability of 0
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
-			// Don't rehash if we've already called find()
+			// Don't search again if we've already called get()
+			// (although get() is pretty fast)
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
@@ -401,10 +403,12 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
 	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
+		std::cout << "PiHat = " << piHat << std::endl;
+		std::cout << "cond = " << windowPower / Options::approx_factor << std::endl;
 		hold = false;
 		auto currentProbabilityStatePair = *statePriorityQueue.top();
 		currentProbabilityState = statePriorityQueue.top()->first;
-		// std::cout << "Current pi: " << currentProbabilityState->pi << std::endl;
+		std::cout << "Current pi: " << currentProbabilityState->pi << std::endl;
 		currentState = statePriorityQueue.top()->second;
 		currentIndex = currentProbabilityState->index;
 		statePriorityQueue.pop();
