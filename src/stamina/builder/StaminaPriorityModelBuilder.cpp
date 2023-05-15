@@ -510,12 +510,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 					totalRate += stateProbabilityPair.second;
 				}
 			}
+			bool gotOneNonZeroNextState = false;
 			// Add the probabilistic behavior to the matrix.
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				if (sPrime == 0) {
 					continue;
 				}
+				gotOneNonZeroNextState = true;
 				double probability = isCtmc ? stateProbabilityPair.second / totalRate : stateProbabilityPair.second;
 				// Enqueue S is handled in stateToIdCallback
 				// Update transition probability only if we should enqueue all
@@ -549,7 +551,14 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 					}
 				}
 			}
+			if (!gotOneNonZeroNextState) {
+				StaminaMessages::warning("Got a state with no non-zero successors! State ID: " + std::to_string(currentIndex));
+				this->createTransition(currentIndex, currentIndex, 1.0);
+				stateStorage.deadlockStateIndices.push_back(currentIndex);
+				// Make absorbing
+				currentProbabilityState->deadlock = true;
 
+			}
 			++currentRow;
 			firstChoiceOfState = false;
 		}
