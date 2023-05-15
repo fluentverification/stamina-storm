@@ -4,6 +4,8 @@
 #include <functional>
 #include <sstream>
 
+#define CHECK_TERMINAL_COUNT
+
 namespace stamina {
 namespace builder {
 
@@ -105,9 +107,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
-		// Set our state variable in the class
-
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
@@ -146,10 +145,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			}
 			continue;
 		}
-
-		/* if (currentIndex > 105) {
-			StaminaMessages::info("Temporary thing to stop here. State is: " + StateSpaceInformation::stateToString(currentState));
-		} */
 
 		if (currentProbabilityState->wasPutInTerminalQueue) {
 			// Mark as not put in terminal queue
@@ -250,6 +245,11 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 						// numberTransitions++;
 					}
 				}
+				// Sanity Check
+				else if (currentProbabilityState->getPi() != 0) {
+					StaminaMessages::errorAndExit("Should have gotten a successor for unexplored state!");
+				}
+
 			}
 
 			++currentRow;
@@ -257,9 +257,17 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		}
 
 		currentProbabilityState->isNew = false;
-
+#ifdef CHECK_TERMINAL_COUNT
+		uint32_t terminalCount = stateMap.getNumberTerminal();
+		if (terminalCount != terminal) {
+			StaminaMessages::error("Terminal Count is wrong!\n\tActual: " + std::to_string(terminalCount) + "\n\tBookkept: " + std::to_string(terminal));
+		}
+#endif // CHECK_TERMINAL_COUNT
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
+		}
+		else if (currentProbabilityState->isTerminal()) {
+			StaminaMessages::errorAndExit("Number terminal should have been positive, but was zero! (State was marked terminal but not accounted for!");
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
@@ -281,12 +289,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
-
 	}
 	iteration++;
 	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
-
-	// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -340,6 +345,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
+				// Sanity check
+				if (nextProbabilityState->iterationLastSeen > iteration) {
+					StaminaMessages::errorAndExit("Iteration last seen for state was greater than current iteration!");
+				}
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
@@ -348,7 +357,17 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 		}
 		else {
 			// State does not exist yet in this iteration
-			return 0;
+			// so we must create it
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 0.0
+				, true
+			);
+			// Set the iteration last seen
+			nextProbabilityState->iterationLastSeen = iteration;
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
 		}
 	}
 	else {
@@ -357,6 +376,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
+				// Sanity check
+				if (nextProbabilityState->iterationLastSeen > iteration) {
+					StaminaMessages::errorAndExit("Iteration last seen for state was greater than current iteration!");
+				}
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));

@@ -103,9 +103,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
-		// Set our state variable in the class
-
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
@@ -276,12 +273,10 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
-
 	}
 	iteration++;
 	numberStates =  stateStorage.stateToId.size();
 	firstIteration = false;
-// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
