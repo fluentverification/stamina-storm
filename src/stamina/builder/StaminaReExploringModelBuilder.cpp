@@ -339,8 +339,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 			}
 		}
 		else {
-			// Should this be just return 0?
-			// TODO: Clean up this portion of the code
 			// State does not exist yet in this iteration
 			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
 			*nextProbabilityState = ProbabilityState(
