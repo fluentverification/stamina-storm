@@ -10,6 +10,8 @@
 #include <string>
 #include <cstdint>
 
+#include <stamina/util/ModelModify.h>
+
 namespace bt = boost::unit_test;
 
 // =======================================================================================
