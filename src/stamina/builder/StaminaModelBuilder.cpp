@@ -257,6 +257,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	}
 	if (firstIteration) {
 		this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
+		// Set all values to 1
+		for (uint_fast64_t i = 0; i < generator->getVariableInformation().getTotalBitOffset(true); i++) {
+			this->absorbingState.set(i);
+		}
 		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 		stateStorage.deadlockStateIndices.push_back(0);
 		// Check if state is already registered
