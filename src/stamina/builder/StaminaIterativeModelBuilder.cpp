@@ -4,7 +4,7 @@
 #include <functional>
 #include <sstream>
 
-#define CHECK_TERMINAL_COUNT
+// #define CHECK_TERMINAL_COUNT
 
 namespace stamina {
 namespace builder {
@@ -259,8 +259,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		currentProbabilityState->isNew = false;
 #ifdef CHECK_TERMINAL_COUNT
 		uint32_t terminalCount = stateMap.getNumberTerminal();
-		if (terminalCount != terminal) {
-			StaminaMessages::error("Terminal Count is wrong!\n\tActual: " + std::to_string(terminalCount) + "\n\tBookkept: " + std::to_string(terminal));
+		if (terminalCount != numberTerminal) {
+			StaminaMessages::error("Terminal Count is wrong!\n\tActual: " + std::to_string(terminalCount) + "\n\tBookkept: " + std::to_string(numberTerminal));
 		}
 #endif // CHECK_TERMINAL_COUNT
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {

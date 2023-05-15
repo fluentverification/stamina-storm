@@ -269,15 +269,22 @@ StaminaModelChecker::modelCheckProperty(
 	StaminaMessages::info(ss.str());
 
 	// Print results
-	std::stringstream resultInfo;
+	/*std::stringstream resultInfo;
 	resultInfo.setf( std::ios::floatfield );
 	resultInfo << std::fixed << std::setprecision(12);
 	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
-	StaminaMessages::info(resultInfo.str());
+	StaminaMessages::info(resultInfo.str()); */
 
-
+	ResultInformation r(
+		min_results->result
+		, max_results->result
+		, 0 // TODO: Get actual number of states
+		, 1 // TODO: Actual number of initial states
+		, propOriginal.asPrismSyntax() // name?
+	);
+	StaminaMessages::writeResults(r, std::cout);
 	return nullptr;
 }
 
