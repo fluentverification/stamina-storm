@@ -169,10 +169,13 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 			std::remove_if(
 				transitionsToAdd[row].begin()
 				, transitionsToAdd[row].end()
-				, [](TransitionInfo t) {
+				, [&](TransitionInfo t) {
 					return t.to == 0;
 				}
-			));
+			)
+			, transitionsToAdd[row].end()
+		);
+
 	}
 	// transitionsToAdd.clear();
 }
