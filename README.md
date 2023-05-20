@@ -36,7 +36,9 @@ For detailed usage instructions, installation guidelines, and further informatio
 Check out our website at [https://staminachecker.org](https://staminachecker.org) or view the [website's source code](https://github.com/fluentverification/staminachecker.org) on GitHub.
 
 ## To compile:
-(Please see our [wiki page](https://staminachecker.org/documentation/wiki/install-sstamina.html) for more information)
+
+Please see our [wiki page](https://staminachecker.org/documentation/wiki/install-sstamina.html) for more information, dependency list, etc. However, assuming you have the dependencies (most notably, Storm) installed:
+
 ### On Linux and Mac:
 ```
 git clone https://github.com/fluentverification/stamina-storm
@@ -48,7 +50,7 @@ Both GCC and CLang are supported, but we recommend CLang as it's STL implementat
 
 ### On Windows:
 
-Windows is not officially supported but if Storm, CMake, Git, etc., are installed then it is possible to install STAMINA on windows.
+Windows is not officially supported but if Storm, CMake, Git, etc., are installed then it is possible to install STAMINA on windows. Simply invoke CMake as you would on Linux and Mac and then build the project.
 
 ## To run:
 The basic syntax of running STAMINA is as follows:
