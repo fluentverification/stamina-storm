@@ -9,7 +9,7 @@
 
 #include "core/StateSpaceInformation.h"
 
-#include "storm/Environment.h"
+#include "storm/environment/Environment.h"
 #include "storm/builder/BuilderOptions.h"
 #include "storm/storage/expressions/BinaryRelationExpression.h"
 
@@ -102,11 +102,12 @@ std::unique_ptr<storm::modelchecker::CheckResult>
 StaminaModelChecker::modelCheckProperty(
 	storm::jani::Property propMin
 	, storm::jani::Property propMax
+	, storm::jani::Property propOriginal
 	, storm::prism::Program const& modulesFile
 ) {
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
-	auto options = BuilderOptions(*propMin.getFilter().getFormula());
+	auto options = BuilderOptions(*propOriginal.getFilter().getFormula());
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
@@ -162,11 +163,12 @@ StaminaModelChecker::modelCheckProperty(
 	// Create number of refined iterations and reachability threshold
 	int numRefineIterations = 0;
 	double reachThreshold = Options::kappa;
-
+	StaminaMessages::info("Created min prop: " + propMin.asPrismSyntax());
+	StaminaMessages::info("Created max prop: " + propMax.asPrismSyntax());
 	// Property refinement optimization
 	if (!Options::no_prop_refine) {
 		// Get the expression for the current property
-		auto propertyFormula = propMin.getRawFormula();
+		auto propertyFormula = propOriginal.getRawFormula();
 		StaminaMessages::info("Attempting to convert formula to expression:\n\t" + propertyFormula->toString());
 		if ((!propertyFormula->isPathFormula())
 			&& (
@@ -197,8 +199,6 @@ StaminaModelChecker::modelCheckProperty(
 
 		// Rebuild the initial state labels
 		labeling = &( model->getStateLabeling());
-		labeling->addLabel("(Absorbing = true)");
-		labeling->addLabelToState("(Absorbing = true)", 0);
 
 		std::cout << "Labeling:\n" << model->getStateLabeling() << std::endl;
 
@@ -209,16 +209,16 @@ StaminaModelChecker::modelCheckProperty(
 		// Instruct STORM to compute P_min and P_max
 		// We will need to get info from the terminal states
 		try {
-			storm::Environment env;
-			env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
+			// storm::Environment env;
+			// env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
 			auto result_lower = checker->check(
-				env
-				, storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
+				// env,
+				storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 			);
 			min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			auto result_upper = checker->check(
-				env
-				, storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
+				// env,
+				storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
 			);
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
 			builder->printStateSpaceInformation();
@@ -272,12 +272,19 @@ StaminaModelChecker::modelCheckProperty(
 	std::stringstream resultInfo;
 	resultInfo.setf( std::ios::floatfield );
 	resultInfo << std::fixed << std::setprecision(12);
-	resultInfo << "Finished checking property: " << propMin.getName() << std::endl;
+	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
 	StaminaMessages::info(resultInfo.str());
 
-
+	ResultInformation r(
+		min_results->result
+		, max_results->result
+		, 0 // TODO: Get actual number of states
+		, 1 // TODO: Actual number of initial states
+		, propOriginal.asPrismSyntax() // name?
+	);
+	StaminaMessages::writeResults(r, std::cout);
 	return nullptr;
 }
 

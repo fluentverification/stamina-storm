@@ -12,6 +12,7 @@
 #include <argp.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <cstdint>
 
 #define BUILD_INFO ""
 

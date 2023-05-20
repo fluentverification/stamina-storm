@@ -9,9 +9,6 @@
 #include "core/StaminaModelChecker.h"
 #include "core/Options.h"
 
-// #define VERSION_MAJOR 2
-// #define VERSION_MINOR 2.5
-
 #include <storm/api/storm.h>
 #include <storm-parsers/api/storm-parsers.h>
 #include <storm-parsers/parser/PrismParser.h>
@@ -19,6 +16,8 @@
 #include <storm/storage/jani/Property.h>
 #include <storm/modelchecker/results/CheckResult.h>
 #include <storm/modelchecker/results/ExplicitQuantitativeCheckResult.h>
+
+#include "util/ModelModify.h"
 
 // #include <storm/utility/initialize.h>
 
@@ -51,7 +50,8 @@ namespace stamina {
         std::shared_ptr<core::StaminaModelChecker> modelChecker;
         std::shared_ptr<storm::prism::Program> modelFile;
         std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
-    };
+ 		util::ModelModify modelModify;
+	};
 }
 
 #endif // STAMINA_STAMINA

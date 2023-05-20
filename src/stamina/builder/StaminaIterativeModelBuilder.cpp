@@ -4,6 +4,8 @@
 #include <functional>
 #include <sstream>
 
+// #define CHECK_TERMINAL_COUNT
+
 namespace stamina {
 namespace builder {
 
@@ -105,9 +107,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
-		// Set our state variable in the class
-
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
@@ -147,6 +146,13 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			continue;
 		}
 
+		if (currentProbabilityState->wasPutInTerminalQueue) {
+			// Mark as not put in terminal queue
+			// Note that it still will be IN the terminal queue, but
+			// that when we flush this queue, it will be ignored
+			currentProbabilityState->wasPutInTerminalQueue = false;
+		}
+
 		// Load state for us to use
 		generator->load(currentState);
 
@@ -165,9 +171,19 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			this->createTransition(currentIndex, currentIndex, 1.0);
+#if defined DIE_ON_DEADLOCK
+			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
+#elif defined WARN_ON_DEADLOCK
+			StaminaMessages::warning("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
+#endif // DIE_ON_DEADLOCK / WARN_ON_DEADLOCK
+			// If we are not yet aware that this is a deadlock state
+			// we should make future iterations aware of this
+			if (!currentProbabilityState->deadlock) {
+				this->createTransition(currentIndex, currentIndex, 1.0);
+				stateStorage.deadlockStateIndices.push_back(currentIndex);
+				currentProbabilityState->deadlock = true;
+			}
 			continue;
-			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
@@ -204,6 +220,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 				}
 			}
 			// Add the probabilistic behavior to the matrix.
+			if (choice.size() == 0) {
+				StaminaMessages::warning("Found deadlock state (from model description): state ID " + std::to_string(currentIndex));
+			}
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				if (sPrime == 0) {
@@ -222,11 +241,15 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 					}
 
 					if (currentProbabilityState->isNew) {
-						// Ask Matthias if this should be probability rather than stateProbabilityPair.second
 						this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
 						// numberTransitions++;
 					}
 				}
+				// Sanity Check
+				else if (currentProbabilityState->getPi() != 0) {
+					StaminaMessages::errorAndExit("Should have gotten a successor for unexplored state!");
+				}
+
 			}
 
 			++currentRow;
@@ -234,9 +257,17 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		}
 
 		currentProbabilityState->isNew = false;
-
+#ifdef CHECK_TERMINAL_COUNT
+		uint32_t terminalCount = stateMap.getNumberTerminal();
+		if (terminalCount != numberTerminal) {
+			StaminaMessages::error("Terminal Count is wrong!\n\tActual: " + std::to_string(terminalCount) + "\n\tBookkept: " + std::to_string(numberTerminal));
+		}
+#endif // CHECK_TERMINAL_COUNT
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
 			numberTerminal--;
+		}
+		else if (currentProbabilityState->isTerminal()) {
+			StaminaMessages::errorAndExit("Number terminal should have been positive, but was zero! (State was marked terminal but not accounted for!");
 		}
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
@@ -258,17 +289,18 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
-
 	}
 	iteration++;
 	numberStates = stateStorage.stateToId.size(); // numberOfExploredStates;
-
-	// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+	if (state == this->absorbingState) {
+		StaminaMessages::errorAndExit("Got Absorbing state in stateToIdCallback!");
+		return 0;
+	}
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
@@ -313,6 +345,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
+				// Sanity check
+				if (nextProbabilityState->iterationLastSeen > iteration) {
+					StaminaMessages::errorAndExit("Iteration last seen for state was greater than current iteration!");
+				}
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
@@ -321,7 +357,17 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 		}
 		else {
 			// State does not exist yet in this iteration
-			return 0;
+			// so we must create it
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState<StateType>(
+				actualIndex
+				, 0.0
+				, true
+			);
+			// Set the iteration last seen
+			nextProbabilityState->iterationLastSeen = iteration;
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
 		}
 	}
 	else {
@@ -330,6 +376,10 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::getOrAddSta
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			// auto emplaced = exploredStates.emplace(actualIndex);
 			if (nextProbabilityState->iterationLastSeen != iteration) {
+				// Sanity check
+				if (nextProbabilityState->iterationLastSeen > iteration) {
+					StaminaMessages::errorAndExit("Iteration last seen for state was greater than current iteration!");
+				}
 				nextProbabilityState->iterationLastSeen = iteration;
 				// Enqueue
 				statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
@@ -361,6 +411,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 	StaminaMessages::info("Using STAMINA 2.5 Algorithm");
 	// Is this model deterministic? (I.e., is there only one choice per state?)
 	bool deterministic = generator->isDeterministicModel();
+	if (!deterministic) {
+		StaminaMessages::errorAndExit("Model is not deterministic! STAMINA only supports deterministic models!");
+	}
 
 	std::vector<RewardModelBuilder<typename RewardModelType::ValueType>> rewardModelBuilders;
 	// Iterate through the reward models and add them to the rewardmodelbuilders
@@ -393,7 +446,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 			, false
 			, false // All models are deterministic
 			, 0
-			);
+	);
+
 	double piHat = 1.0;
 	int innerLoopCount = 0;
 
@@ -456,6 +510,12 @@ void
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
 	while (!statesTerminatedLastIteration.empty()) {
 		auto probabilityStatePair = statesTerminatedLastIteration.front();
+		// States can be marked as not put in terminal queue and when we flush the terminal queue we
+		// ignore those estates
+		if (! probabilityStatePair.first->wasPutInTerminalQueue) {
+			statesTerminatedLastIteration.pop_front();
+			continue;
+		}
 		statesToExplore.emplace_back(probabilityStatePair);
 		probabilityStatePair.first->wasPutInTerminalQueue = false;
 		statesTerminatedLastIteration.pop_front();
@@ -476,7 +536,11 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 // 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
 		statesTerminatedLastIteration.pop_front();
 		// If the state is not marked as terminal, we've already connected it to absorbing
-		if (!currentProbabilityState->isTerminal()) {
+		// Additionally, if it was marked as not being put in the terminal queue, it should be
+		// ignored by this step.
+		if (!currentProbabilityState->isTerminal()
+				|| !currentProbabilityState->wasPutInTerminalQueue
+				|| currentProbabilityState->deadlock) {
 			continue;
 		}
 		this->connectTerminalStatesToAbsorbing(
@@ -486,6 +550,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllT
 			, this->terminalStateToIdCallback
 		);
 		currentProbabilityState->setTerminal(false);
+		currentProbabilityState->wasPutInTerminalQueue = false;
 	}
 }
 

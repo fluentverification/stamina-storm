@@ -9,10 +9,30 @@
 #include <sstream>
 #include <iostream>
 
+#define VERSION_MAJOR 2
+#define VERSION_MINOR 2.5
+
 namespace stamina {
 namespace core {
 
 const std::string StaminaMessages::horizontalSeparator = "========================================================================================";
+
+void
+StaminaMessages::initMessage() {
+	std::cout << horizontalSeparator << std::endl;
+	std::cout << BOLD("STAMINA -- The STochiastic Approximate Model-checker, for INfinite-state Analysis") << std::endl;
+	std::cout << horizontalSeparator << std::endl;
+	std::cout << "(C) 2023 Fluent Verification Research Group -- Licensed freely under the MIT license" << std::endl;
+	std::cout << "Version: " << VERSION_MAJOR << "." << VERSION_MINOR << std::endl;
+	std::cout << "Developers: J Jeppson, Z Zhang, R Roberts, T Neupane, and others." << std::endl;
+	std::cout << "Website: https://staminachecker.org" << std::endl;
+	std::cout << "Repository: https://github.com/fluentverification/stamina-storm" << std::endl;
+	std::cout << horizontalSeparator << std::endl;
+	std::cout << "Model checker: Storm (https://stormchecker.org) - Licensed under the GPLv3" << std::endl;
+	std::cout << "Storm Authors: C Hensel, S Junges, J Katoen, T Quatmann, M Volk" << std::endl;
+	std::cout << horizontalSeparator << std::endl;
+
+}
 
 void
 StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
@@ -51,7 +71,7 @@ void StaminaMessages::debugPrint(std::string msg) {
 #endif
 
 void
-StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream out) {
+StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream & out) {
 	out.setf( std:: ios::floatfield );
 	out << std::fixed << std::setprecision(12);
 	out << horizontalSeparator << std::endl;

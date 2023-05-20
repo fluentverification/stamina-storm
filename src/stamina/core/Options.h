@@ -5,6 +5,7 @@
 #include <string>
 #include "StaminaArgParse.h"
 #include <functional>
+#include <cstdint>
 
 namespace stamina {
 	namespace core {

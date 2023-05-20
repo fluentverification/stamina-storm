@@ -7,8 +7,6 @@
 #include "ANSIColors.h"
 #include "core/StaminaMessages.h"
 
-#include "util/ModelModify.h"
-
 #include <stdlib.h>
 #include <iomanip>
 #include <stdlib.h>
@@ -22,13 +20,17 @@ using namespace stamina::core;
 /* ===== IMPLEMENTATION FOR `Stamina::Stamina` Methods ===== */
 
 // PUBLIC METHODS
-Stamina::Stamina(struct arguments * arguments) {
+Stamina::Stamina(struct arguments * arguments) : modelModify(
+	arguments->model_file
+	, arguments->properties_file
+) {
 	try {
 		Options::setArgs(arguments);
 	}
 	catch (const std::exception& e) {
 		StaminaMessages::errorAndExit("Failed to allocate stamina::Options: " + std::string(e.what()));
 	}
+	StaminaMessages::initMessage();
 	StaminaMessages::info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
 	bool good = Options::checkOptions();
 	if (!good) {
@@ -44,14 +46,15 @@ void
 Stamina::run() {
 	initialize();
 	// Check each property in turn
-	for (int i = 0; i + 1 < propertiesVector->size(); i += 2 ) {
-		auto propMin = (*propertiesVector)[i];
-		auto propMax = (*propertiesVector)[i + 1];
+	for (auto & prop : *propertiesVector) {
+		auto propMin = modelModify.modifyProperty(prop, true);
+		auto propMax = modelModify.modifyProperty(prop, false);
 		// Re-initialize
 		// initialize();
 		modelChecker->modelCheckProperty(
 			propMin
 			, propMax
+			, prop
 			, *modelFile
 		);
 	}
@@ -80,16 +83,9 @@ Stamina::initialize() {
 
 	// Load model file and properties file
 	try {
-		util::ModelModify modelModify(
-			Options::model_file
-			, Options::properties_file
-			, false
-			, false
-		);
-		modelFile = modelModify.createModifiedModel();
-		propertiesVector = modelModify.createModifiedProperties(modelFile);
+		modelFile = modelModify.readModel();
+		propertiesVector = modelModify.createPropertiesList(modelFile);
 		auto labels = modelFile->getLabels();
-		StaminaMessages::info("There are the following number of state labels: " + std::to_string(labels.size()));
 		modelChecker->initialize(modelFile, propertiesVector);
 	}
 	catch (const std::exception& e) {

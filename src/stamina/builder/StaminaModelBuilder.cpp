@@ -12,6 +12,7 @@
 
 #include <functional>
 #include <sstream>
+#include <algorithm>
 
 namespace stamina {
 namespace builder {
@@ -156,15 +157,27 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 			// transitionMatrixBuilder.addNextValue(row, row, 1);
 		}
 		else {
-			for (TransitionInfo tInfo : transitionsToAdd[row]) {
+			for (TransitionInfo & tInfo : transitionsToAdd[row]) {
 				if (tInfo.transition == 0.0) {
 					continue;
 				}
 				transitionMatrixBuilder.addNextValue(tInfo.from, tInfo.to, tInfo.transition);
 			}
 		}
+		// Remove all transitions to the absorbing state
+		transitionsToAdd[row].erase(
+			std::remove_if(
+				transitionsToAdd[row].begin()
+				, transitionsToAdd[row].end()
+				, [&](TransitionInfo t) {
+					return t.to == 0;
+				}
+			)
+			, transitionsToAdd[row].end()
+		);
+
 	}
-	transitionsToAdd.clear();
+	// transitionsToAdd.clear();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -177,20 +190,26 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 	TransitionInfo tInfo(from, to, probability);
 	// Create an element for both from and to
 	while (transitionsToAdd.size() <= std::max(from, to)) {
-		transitionsToAdd.push_back(std::list<TransitionInfo>());
+		transitionsToAdd.push_back(std::vector<TransitionInfo>());
 	}
 	numberTransitions++;
 	// Quick check
-	/* for (auto & trans : transitionsToAdd[from]) {
+	for (auto & trans : transitionsToAdd[from]) {
+		if (trans.from != from) {
+			StaminaMessages::errorAndExit("Transition list is malformed!");
+		}
 		if (trans.to == to) {
-			StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!");
+			StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!\n\tFrom: " + std::to_string(from) + " To: " + std::to_string(to) + " Rates: " + std::to_string(probability) + " / " + std::to_string(trans.transition) );
+			if (trans.transition != probability) {
+				StaminaMessages::error("The transitions should have the same probability but do not!");
+			}
 			// trans.transition += probability;
 			return;
 		}
-	} */
+	}
 	// auto & it = tra
 	transitionsToAdd[from].push_back(tInfo);
-	transitionsToAdd[from].sort(); // TODO: Change
+	// transitionsToAdd[from].sort(); // TODO: Change
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -222,7 +241,10 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::printStateSpaceInfor
 template <typename ValueType, typename RewardModelType, typename StateType>
 storm::models::sparse::StateLabeling
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::buildStateLabeling() {
-	return generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
+	auto labeling = generator->label(stateStorage, stateStorage.initialStateIndices, stateStorage.deadlockStateIndices);
+	labeling.addLabel("Absorbing");
+	labeling.addLabelToState("Absorbing", 0);
+	return labeling;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -248,19 +270,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setUpAbsorbingState(
 	}
 	if (firstIteration) {
 		this->absorbingState = CompressedState(generator->getVariableInformation().getTotalBitOffset(true)); // CompressedState(64);
-		bool gotVar = false;
-		for (auto variable : generator->getVariableInformation().booleanVariables) {
-			if (variable.getName() == "Absorbing") {
-				this->absorbingState.setFromInt(variable.bitOffset + 1, 1, 1);
-				if (this->absorbingState.getAsInt(variable.bitOffset + 1, 1) != 1) {
-					StaminaMessages::errorAndExit("Absorbing state setup failed!");
-				}
-				gotVar = true;
-				break;
-			}
-		}
-		if (!gotVar) {
-			StaminaMessages::errorAndExit("Did not get \"Absorbing\" variable!");
+		// Set all values to 1
+		for (uint_fast64_t i = 0; i < generator->getVariableInformation().getTotalBitOffset(true); i++) {
+			this->absorbingState.set(i);
 		}
 		// Add index 0 to deadlockstateindecies because the absorbing state is in deadlock
 		stateStorage.deadlockStateIndices.push_back(0);
@@ -328,11 +340,21 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 	storm::generator::StateBehavior<ValueType, StateType> behavior = generator->expand(stateToIdCallback);
 	// If there is no behavior, we have an error.
 	if (behavior.empty()) {
-		StaminaMessages::warning("Behavior for perimeter state was empty!");
+#if defined DIE_ON_DEADLOCK
+		StaminaMessages::errorAndExit("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+#elif defined WARN_ON_DEADLOCK
+		StaminaMessages::warning("Behavior for perimeter state (id = " + std::to_string(stateId) + ") was empty!");
+#endif // DIE_ON_DEADLOCK
+		stateStorage.deadlockStateIndices.push_back(stateId);
+		createTransition(stateId, stateId, 1.0); // Create Self-loop
 		return;
 	}
 	hasAbsorbingTransitions = true;
+	bool firstChoice = true;
 	for (auto const& choice : behavior) {
+		if (!firstChoice) {
+			StaminaMessages::errorAndExit("Model should be deterministic! Got multiple choices in behavior for state " + std::to_string(stateId));
+		}
 		double totalRateToAbsorbing = 0;
 		for (auto const& stateProbabilityPair : choice) {
 			if (stateProbabilityPair.first != 0) {
@@ -349,6 +371,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 		if (totalRateToAbsorbing != 0) {
 			createTransition(stateId, 0, totalRateToAbsorbing);
 		}
+		firstChoice = false;
 	}
 	if (!addedValue) {
 		StaminaMessages::errorAndExit("Did not add to transition matrix!");

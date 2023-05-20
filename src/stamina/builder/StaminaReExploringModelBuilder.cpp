@@ -103,9 +103,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			StaminaMessages::errorAndExit("Dequeued artificial absorbing state!");
 		}
 
-		// std::cout << "Dequeued state " << currentIndex << std::endl;
-		// Set our state variable in the class
-
 		if (currentIndex % MSG_FREQUENCY == 0) {
 			StaminaMessages::info("Exploring state with id " + std::to_string(currentIndex) + ".");
 		}
@@ -147,6 +144,12 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			continue;
 		}
 
+		// If it was previously put in the terminal queue, mark it as no longer
+		// This way it will not be connected to the absorbing state
+		if (currentProbabilityState->wasPutInTerminalQueue) {
+			currentProbabilityState->wasPutInTerminalQueue = false;
+		}
+
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
 		// Expand (explore next states)
@@ -162,9 +165,19 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// If there is no behavior, we have an error.
 		if (behavior.empty()) {
 			// Make absorbing
-			this->createTransition(currentIndex, currentIndex, 1.0);
+#if defined DIE_ON_DEADLOCK
+			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
+#elif defined WARN_ON_DEADLOCK
+			StaminaMessages::warning("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
+#endif // DIE_ON_DEADLOCK / WARN_ON_DEADLOCK
+			// If we are not yet aware that this is a deadlock state
+			// we should make future iterations aware of this
+			if (!currentProbabilityState->deadlock) {
+				this->createTransition(currentIndex, currentIndex, 1.0);
+				stateStorage.deadlockStateIndices.push_back(currentIndex);
+				currentProbabilityState->deadlock = true;
+			}
 			continue;
-			// StaminaMessages::warn("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 		}
 
 		bool shouldEnqueueAll = currentProbabilityState->getPi() == 0.0;
@@ -201,6 +214,9 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 				}
 			}
 			// Add the probabilistic behavior to the matrix.
+			if (choice.size() == 0) {
+				StaminaMessages::warning("Found deadlock state (from model description): state ID " + std::to_string(currentIndex));
+			}
 			for (auto const& stateProbabilityPair : choice) {
 				StateType sPrime = stateProbabilityPair.first;
 				if (sPrime == 0) {
@@ -257,17 +273,19 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 				numberOfExploredStatesSinceLastMessage = 0;
 			}
 		}
-
 	}
 	iteration++;
 	numberStates =  stateStorage.stateToId.size();
 	firstIteration = false;
-// 	std::cout << "State space truncation finished for this iteration. Explored " << numberStates << " states. pi = " << accumulateProbabilities() << std::endl;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
 StateType
 StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddStateIndex(CompressedState const& state) {
+	if (state == this->absorbingState) {
+		StaminaMessages::errorAndExit("Got Absorbing state in stateToIdCallback!");
+		return 0;
+	}
 	StateType actualIndex;
 	StateType newIndex = static_cast<StateType>(stateStorage.getNumberOfStates());
 	if (stateStorage.stateToId.contains(state)) {
@@ -312,7 +330,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 	// The previous state has reachability of 0
 	if (currentProbabilityState->getPi() == 0) {
 		if (stateIsExisting) {
-			// Don't rehash if we've already called find()
 			ProbabilityState<StateType> * nextProbabilityState = nextState;
 			if (nextProbabilityState->iterationLastSeen != iteration) {
 				nextProbabilityState->iterationLastSeen = iteration;
@@ -323,7 +340,17 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::getOrAddS
 		}
 		else {
 			// State does not exist yet in this iteration
-			return 0;
+			ProbabilityState<StateType> * nextProbabilityState = memoryPool.allocate();
+			*nextProbabilityState = ProbabilityState(
+				actualIndex
+				, 0.0
+				, true
+			);
+			nextProbabilityState->iterationLastSeen = iteration;
+			// exploredStates.emplace(actualIndex);
+			statesToExplore.push_back(std::make_pair(nextProbabilityState, state));
+			enqueued = true;
+
 		}
 	}
 	else {
@@ -402,7 +429,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 
 	// Continuously decrement kappa
 	while (piHat >= Options::prob_win / Options::approx_factor) {
-		statesTerminatedLastIteration.clear();
+		// statesTerminatedLastIteration.clear();
 		// Builds matrices and truncates state space
 		buildMatrices(
 			transitionMatrixBuilder
@@ -471,6 +498,11 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAl
 	while (!statesTerminatedLastIteration.empty()) {
 		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
 		auto state = statesTerminatedLastIteration.front().second;
+		if (!currentProbabilityState->wasPutInTerminalQueue) {
+			statesTerminatedLastIteration.pop_front();
+			continue;
+		}
+		currentProbabilityState->wasPutInTerminalQueue = false;
 // 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
 		this->connectTerminalStatesToAbsorbing(
 			transitionMatrixBuilder

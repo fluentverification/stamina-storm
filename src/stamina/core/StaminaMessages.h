@@ -30,15 +30,32 @@ namespace stamina {
 			, ERR_MEMORY_EXCEEDED = 137
 		};
 		/* All result information */
-		struct ResultInformation {
+		class ResultInformation {
+		public:
 			double pMin;
 			double pMax;
 			uint32_t numberStates;
 			uint8_t numberInitial;
 			std::string property;
+			ResultInformation(
+				double pMin
+				, double pMax
+				, uint32_t numberStates
+				, uint8_t numberInitial
+				, std::string property
+			) : pMin(pMin)
+				, pMax(pMax)
+				, numberStates(numberStates)
+				, numberInitial(numberInitial)
+				, property(property)
+			{}
 		};
 		class StaminaMessages {
 		public:
+			/**
+			 * Prints a nice init message.
+			 * */
+			static void initMessage();
 			/**
 			* Errors and exits program
 			* */
@@ -65,7 +82,7 @@ namespace stamina {
 			* */
 			static void debugPrint(std::string msg);
 	#endif
-			static void writeResults(ResultInformation resultInformation, std::ostream out);
+			static void writeResults(ResultInformation resultInformation, std::ostream & out);
 		protected:
 			static const std::string horizontalSeparator;
 		};

@@ -20,6 +20,7 @@ namespace stamina {
 			bool isNew;
 			bool wasPutInTerminalQueue;
 			bool preTerminated;
+			bool deadlock;
 			std::shared_ptr<std::vector<StaminaTransitionInfo<StateType>>> preTerminatedTransitions; // the list of preterminated transitions
 			ProbabilityState(
 				StateType index = 0
@@ -35,6 +36,7 @@ namespace stamina {
 				, wasPutInTerminalQueue(false)
 				, preTerminated(false)
 				, preTerminatedTransitions(nullptr)
+				, deadlock(false)
 			{
 				// Intentionally left empty
 			}
@@ -47,6 +49,7 @@ namespace stamina {
 				, isNew(other.isNew)
 				, preTerminated(other.preTerminated)
 				, preTerminatedTransitions(other.preTerminatedTransitions)
+				, deadlock(other.deadlock)
 			{
 				// Intentionally left empty
 			}
