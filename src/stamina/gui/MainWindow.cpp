@@ -197,6 +197,27 @@ MainWindow::saveModelFileAs() {
 }
 
 void
+MainWindow::savePropertyFile() {
+	if (this->activePropertiesFile == "") {
+		this->savePropertyFileAs();
+	}
+	else {
+		saveToActivePropertiesFile();
+	}
+}
+
+void
+MainWindow::savePropertyFileAs() {
+	fd->setOperationMode(KFileWidget::Saving);
+	connect(
+		fd->fileWidget()
+		, SIGNAL(accepted())
+		, this
+		, SLOT(setActivePropertyFileAndSave())
+	);
+}
+
+void
 MainWindow::downloadFinished(KJob* job) {
 	if (job->error()) {
 		KMessageBox::error(this, job->errorString());
@@ -240,6 +261,16 @@ MainWindow::setActiveModelFileAndSave() {
 }
 
 void
+MainWindow::setActivePropertyFileAndSave() {
+	disconnect(
+		fd->fileWidget()
+		, SIGNAL(accepted())
+	);
+	activePropertiesFile = fd->fileWidget()->selectedFile();
+	saveToActivePropertyFile();
+}
+
+void
 MainWindow::onClose() {
 	if (unsavedChangesModel) {
 		bool shouldSave = KMessageBox::questionYesNo(0, i18n("You have unsaved changes to your model file! Would you like to save it now?")) == KMessageBox::Yes;
@@ -259,6 +290,11 @@ MainWindow::showPropertyWizard() {
 	}
 	propWizard->show();
 	// TODO: connect the close() slot to appending to the text file
+}
+
+void
+MainWindow::checkModelAndProperties() {
+	this->saveModelFile();
 }
 
 } // namespace gui

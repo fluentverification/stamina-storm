@@ -45,11 +45,14 @@ namespace stamina {
 			void openFromAcceptedPath();
 			void saveModelFile();
 			void saveModelFileAs();
+			void savePropertyFile();
+			void savePropertyFileAs();
 			void downloadFinished(KJob * job);
 			void showAbout();
 			void setModifiedModel();
 			void setModifiedProperties();
 			void setActiveModelFileAndSave();
+			void setActivePropertyFileAndSave();
 			void onClose();
 			void showPropertyWizard();
 		};
