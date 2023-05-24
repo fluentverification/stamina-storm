@@ -12,6 +12,7 @@
 
 #include <functional>
 #include <sstream>
+#include <algorithm>
 
 namespace stamina {
 namespace builder {
@@ -156,13 +157,25 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::flushToTransitionMat
 			// transitionMatrixBuilder.addNextValue(row, row, 1);
 		}
 		else {
-			for (TransitionInfo tInfo : transitionsToAdd[row]) {
+			for (TransitionInfo & tInfo : transitionsToAdd[row]) {
 				if (tInfo.transition == 0.0) {
 					continue;
 				}
 				transitionMatrixBuilder.addNextValue(tInfo.from, tInfo.to, tInfo.transition);
 			}
 		}
+		// Remove all transitions to the absorbing state
+		transitionsToAdd[row].erase(
+			std::remove_if(
+				transitionsToAdd[row].begin()
+				, transitionsToAdd[row].end()
+				, [&](TransitionInfo t) {
+					return t.to == 0;
+				}
+			)
+			, transitionsToAdd[row].end()
+		);
+
 	}
 	// transitionsToAdd.clear();
 }
