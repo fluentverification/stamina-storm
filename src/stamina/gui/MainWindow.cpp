@@ -16,6 +16,8 @@
 
 #include <iostream>
 
+#include "stamina/Stamina.h"
+
 namespace stamina {
 namespace gui {
 
@@ -295,6 +297,16 @@ MainWindow::showPropertyWizard() {
 void
 MainWindow::checkModelAndProperties() {
 	this->saveModelFile();
+}
+
+void
+MainWindow::checkModelAndProperties() {
+	std::string modFile = this->activeModelFile.toStdString();
+	std::string propFile = this->activePropertiesFile.toStdString();
+	core::Options::model_file = modFile;
+	core::Options::properties_file = propFile;
+	Stamina s(); // TODO: create constructor for stamina::Stamina class without struct args*
+	s.run();
 }
 
 } // namespace gui

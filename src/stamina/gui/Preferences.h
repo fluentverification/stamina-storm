@@ -3,6 +3,10 @@
 
 #include <KXmlGuiWindow>
 #include <QDialog>
+#include <cstdint>
+#include <string>
+
+#include "stamina/core/Options.h"
 
 #include "ui/ui_Preferences.h"
 
@@ -18,9 +22,9 @@ namespace stamina {
 			struct General {
 				static void setDefaults();
 				// Auto-detect model file type from extension
-				inline static bool modelFileFromExtension;
+				// inline static bool modelFileFromExtension; // Depricated
 				// Save modified CSL properties file
-				inline static bool saveModifiedCSL;
+				// inline static bool saveModifiedCSL; // Depricated
 				// Truncate model
 				inline static bool truncateModel;
 				// Attempt to generate counterExamples
@@ -59,7 +63,7 @@ namespace stamina {
 				inline static bool exportPerimeterStates;
 				// File to export perimeter states to
 				inline static std::string perimeterStatesFile;
-				// Truncation method. TODO: import enum from stamina::core::Options
+				// Truncation method.
 				inline static uint8_t truncationMethod;
 				// Number of threads
 				inline static uint8_t threads;
@@ -95,6 +99,11 @@ namespace stamina {
 			void hide();
 		private:
 			void setupActions();
+			/**
+			 * Sets the "options" values in Stamina::core::Options
+			 * from the preferences selected on this window.
+			 * */
+			void setOptionsFromPreferences();
 			// Data members
 			Ui::Preferences ui;
 		};

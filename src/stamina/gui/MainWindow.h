@@ -55,6 +55,7 @@ namespace stamina {
 			void setActivePropertyFileAndSave();
 			void onClose();
 			void showPropertyWizard();
+			void checkModelAndProperties();
 		};
 	} // namespace gui
 } // namespace stamina
