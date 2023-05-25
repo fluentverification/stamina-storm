@@ -28,9 +28,20 @@ Stamina::Stamina(struct arguments * arguments) : modelModify(
 		Options::setArgs(arguments);
 	}
 	catch (const std::exception& e) {
-		StaminaMessages::errorAndExit("Failed to allocate stamina::Options: " + std::string(e.what()));
+		StaminaMessages::errorAndExit("Failed to set stamina::Options: " + std::string(e.what()));
 	}
 	StaminaMessages::initMessage();
+	StaminaMessages::info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
+	bool good = Options::checkOptions();
+	if (!good) {
+		StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");
+	}
+}
+
+Stamina::Stamina() : modelModify(
+	Options::model_file
+	, Options::properties_file
+) {
 	StaminaMessages::info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
 	bool good = Options::checkOptions();
 	if (!good) {

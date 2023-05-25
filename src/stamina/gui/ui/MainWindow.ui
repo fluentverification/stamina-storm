@@ -424,6 +424,12 @@
             <enum>Qt::Vertical</enum>
            </property>
            <widget class="QGroupBox" name="counterExamplesGroup">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Counterexample paths to the property. Currently not implemented.</string>
+            </property>
             <property name="title">
              <string>Counterexamples</string>
             </property>
@@ -544,7 +550,7 @@
      <x>0</x>
      <y>0</y>
      <width>1624</width>
-     <height>30</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

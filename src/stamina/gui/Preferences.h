@@ -104,6 +104,7 @@ namespace stamina {
 			 * from the preferences selected on this window.
 			 * */
 			void setOptionsFromPreferences();
+			void getPreferencesFromUI();
 			// Data members
 			Ui::Preferences ui;
 		};

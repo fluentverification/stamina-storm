@@ -23,34 +23,35 @@
 
 namespace stamina {
 
-    /* MAIN STAMINA CLASS */
-    class Stamina {
-    public:
-        /**
-         * Main construtor: creates an instance of the STAMINA class
-         *
-         * @param arguments Arguments struct from StaminaArgParse
-         * */
-        Stamina(struct arguments * arguments);
-        /**
-         * Destructor. Cleans up memory
-         * */
-        ~Stamina();
-        /**
-         * Runs stamina
-         * */
-        void run();
-        /* Data Members */
-        /**
-         * Initializes Stamina
-         * */
-        void initialize();
+	/* MAIN STAMINA CLASS */
+	class Stamina {
+	public:
+		/**
+		* Main construtor: creates an instance of the STAMINA class
+		*
+		* @param arguments Arguments struct from StaminaArgParse
+		* */
+		Stamina(struct arguments * arguments);
+		Stamina();
+		/**
+		* Destructor. Cleans up memory
+		* */
+		~Stamina();
+		/**
+		* Runs stamina
+		* */
+		void run();
+		/* Data Members */
+		/**
+		* Initializes Stamina
+		* */
+		void initialize();
 
-        /* Data Members */
-        std::shared_ptr<core::StaminaModelChecker> modelChecker;
-        std::shared_ptr<storm::prism::Program> modelFile;
-        std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
- 		util::ModelModify modelModify;
+		/* Data Members */
+		std::shared_ptr<core::StaminaModelChecker> modelChecker;
+		std::shared_ptr<storm::prism::Program> modelFile;
+		std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
+		util::ModelModify modelModify;
 	};
 }
 
