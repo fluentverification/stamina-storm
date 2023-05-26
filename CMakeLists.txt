@@ -19,48 +19,30 @@ set(CMAKE_BUILD_TYPE Debug)
 set(SOURCE_DIR src)
 set(SOURCE_FILES
 	# Main source files for the `stamina` namespace
-	src/stamina/ANSIColors.h
 	src/stamina/main.cpp
 	src/stamina/Stamina.cpp
-	src/stamina/Stamina.h
-	src/stamina/StaminaArgParse.h
 	# Files for `stamina::core` namespace
-	src/stamina/core/StaminaModelChecker.h
 	src/stamina/core/StaminaModelChecker.cpp
-	src/stamina/core/StaminaMessages.h
 	src/stamina/core/StaminaMessages.cpp
-	src/stamina/core/Options.h
 	src/stamina/core/Options.cpp
 	src/stamina/core/StateSpaceInformation.cpp
 	src/stamina/core/StateSpaceInformation.h
 	# Files for `stamina::util` namespace
-	src/stamina/util/ModelModify.h
 	src/stamina/util/ModelModify.cpp
-	src/stamina/util/StateIndexArray.h
 	src/stamina/util/StateIndexArray.cpp
-	src/stamina/util/StateMemoryPool.h
 	src/stamina/util/StateMemoryPool.cpp
 	# Files for `stamina::builder` namespace
-	src/stamina/builder/StaminaModelBuilder.h
 	src/stamina/builder/StaminaModelBuilder.cpp
 	src/stamina/builder/StaminaIterativeModelBuilder.cpp
-	src/stamina/builder/StaminaIterativeModelBuilder.h
 	src/stamina/builder/StaminaThreadedIterativeModelBuilder.cpp
 	src/stamina/builder/StaminaPriorityModelBuilder.cpp
-	src/stamina/builder/StaminaPriorityModelBuilder.h
 	src/stamina/builder/StaminaReExploringModelBuilder.cpp
-	src/stamina/builder/StaminaReExploringModelBuilder.h
-	src/stamina/builder/ExplicitTruncatedModelBuilder.h
 	src/stamina/builder/ExplicitTruncatedModelBuilder.cpp
 	# Files for `stamina::builder::threads` namespace
 	src/stamina/builder/threads/BaseThread.cpp
-	src/stamina/builder/threads/BaseThread.h
 	src/stamina/builder/threads/ControlThread.cpp
-	src/stamina/builder/threads/ControlThread.h
 	src/stamina/builder/threads/ExplorationThread.cpp
-	src/stamina/builder/threads/ExplorationThread.h
 	src/stamina/builder/threads/IterativeExplorationThread.cpp
-	src/stamina/builder/threads/IterativeExplorationThread.h
 	# Files for `stamina::priority` namespace
 	src/stamina/priority/EventStatePriority.cpp
 	src/stamina/priority/StatePriority.cpp
