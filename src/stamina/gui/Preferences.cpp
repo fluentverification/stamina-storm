@@ -1,6 +1,7 @@
 #include "Preferences.h"
 
 #include <QMessageBox>
+#include "stamina/StaminaArgParse.h"
 
 namespace stamina {
 namespace gui {
@@ -108,15 +109,15 @@ Preferences::getPreferencesFromUI() {
 	PrefInfo::ModelBuilding::perimeterStatesFile = ui->perimPath.text().toStdString();
 	if (ui->reExploring.value()) {
 		// set value
-		PrefInfo::ModelBuilding::truncationMethod =
+		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::RE_EXPLORING_METHOD;
 	}
 	else if (ui->iterative.value()) {
 		// set value
-		PrefInfo::ModelBuilding::truncationMethod =
+		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::ITERATIVE_METHOD;
 	}
 	else if (ui->priority.value()) {
 		// set value
-		PrefInfo::ModelBuilding::truncationMethod =
+		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::PRIORITY_METHOD;
 	}
 	PrefInfo::ModelBuilding::thread = ui->numberThreads.value();
 	// The ModelChecking tab
