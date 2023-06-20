@@ -115,6 +115,8 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
 
+		// Load state for us to use
+		generator->load(currentState);
 
 		if (propertyExpression != nullptr) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
@@ -152,9 +154,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// that when we flush this queue, it will be ignored
 			currentProbabilityState->wasPutInTerminalQueue = false;
 		}
-
-		// Load state for us to use
-		generator->load(currentState);
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa

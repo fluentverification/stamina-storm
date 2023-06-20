@@ -105,7 +105,6 @@ Stamina::initialize() {
 		msg << "Got error when reading model or properties file:\n\t\t" << e.what();
 		StaminaMessages::errorAndExit(msg.str());
 	}
-
 }
 
 

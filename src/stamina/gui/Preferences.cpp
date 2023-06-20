@@ -1,5 +1,7 @@
 #include "Preferences.h"
 
+#include <QMessageBox>
+
 namespace stamina {
 namespace gui {
 
@@ -62,7 +64,13 @@ Preferences::getPreferencesFromUI() {
 	}
 	else {
 		// Text was not valid as an integer
-		StaminaMessages::error("The text \"" + ui->tabSize.currentText().toStdString() + "\" could not be parsed to an integer!");
+		std::string msg = "The text \"" + ui->tabSize.currentText().toStdString() + "\" could not be parsed to an integer!";
+		StaminaMessages::error(msg);
+		QMessageBox::critical(
+			this
+			, QString(msg)
+		);
+
 	}
 	PrefInfo::General::useTabs = ui->useTabs.value();
 	// Model Building options
@@ -77,7 +85,9 @@ Preferences::getPreferencesFromUI() {
 		PrefInfo::ModelBuilding::window = w;
 	}
 	else {
-		StaminaMessages::error("Either kappa, rKappa, or the window cannot be parsed!");
+		std::string msg = "Either kappa, rKappa, or the window cannot be parsed!";
+		StaminaMessages::error(msg);
+		QMessageBox::critical(this, QString(msg));
 	}
 	PrefInfo::ModelBuilding::earlyTerminationProperty = ui->earlyTerminationProperty.value();
 	bool validMaxIters, validMaxApproxIters;
@@ -88,7 +98,9 @@ Preferences::getPreferencesFromUI() {
 		PrefInfo::ModelBuilding::maxApproxIterations = (uint8_t) mxAprxItrs;
 	}
 	else {
-		StaminaMessages::error("The max iteration count or the max approx iterations cannot be parsed");
+		std::string msg = "The max iteration count or the max approx iterations cannot be parsed";
+		StaminaMessages::error(msg);
+		QMessageBox::critical(this, QString(msg));
 	}
 	PrefInfo::ModelBuilding::exportTransitions = ui->traExport.value();
 	PrefInfo::ModelBuilding::transitionsFile = ui->traFilePath.text().toStdString();
