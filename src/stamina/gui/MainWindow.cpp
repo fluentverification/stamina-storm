@@ -12,6 +12,8 @@
 #include <KMessageBox>
 #include <KIO/Job>
 
+#include <stamina/Stamina.h>
+
 #include "MainWindow.h"
 
 #include <iostream>
@@ -295,6 +297,7 @@ MainWindow::showPropertyWizard() {
 }
 
 void
+<<<<<<< Updated upstream
 MainWindow::checkModelAndProperties() {
 	this->saveModelFile();
 }
