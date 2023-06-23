@@ -298,6 +298,7 @@ MainWindow::showPropertyWizard() {
 
 void
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 MainWindow::checkModelAndProperties() {
 	this->saveModelFile();
 }
