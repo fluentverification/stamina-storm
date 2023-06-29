@@ -166,6 +166,11 @@ namespace stamina {
 			 * Prints the transition list to a .tra file. Reads the static `Options` class.
 			 * */
 			void printTransitionActions();
+
+			/**
+			 * Gets the absorbing state
+			 * */
+			CompressedState & getAbsorbingState();
 		protected:
 			void purgeAbsorbingTransitions();
 			/**

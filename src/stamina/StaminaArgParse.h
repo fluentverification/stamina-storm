@@ -35,6 +35,8 @@ static char args_doc[] = "MODEL_FILE PROPERTIES_FILE";
 
 /**
 * Options understood by stamina, as well as documentation for those arguments
+*
+* Arguments commented out are those that we wish to add support for, but do not yet.
 * */
 static struct argp_option options[] = {
 	{"kappa", 'k', "double", 0,
@@ -51,23 +53,23 @@ static struct argp_option options[] = {
 		"Maximum number of iterations in the approximation (default 10)"}
 	, {"noPropRefine", 'R', 0, 0,
 		"Do not use property based refinement. If given, the model exploration method will reduce kappa and do property independent definement (default: off)"}
-	, {"cuddMaxMem", 'C', "memory", 0,
-		"Maximum CUDD memory, in the same format as PRISM (default: 1g)"}
-	, {"export", 'e', "filename", 0,
-		"Export model to a (text) file"}
-	, {"exportPerimeterStates", 'S', "filename", 0,
-		"Export perimeter states to a file. Please provide a filename. This will append to the file if it is existing"}
-	, {"import", 'i', "filename", 0,
-		"Import model to a (text) file"}
-	, {"property", 'p', "propname", 0,
-		"Specify a certain property to check in a model file that contains many"}
-	, {"const", 'c', "\"C1=VAL,C2=VAL,C3=VAL\"", 0,
-		"Comma separated values for constants"}
+// 	, {"cuddMaxMem", 'C', "memory", 0,
+// 		"Maximum CUDD memory, in the same format as PRISM (default: 1g)"}
+// 	, {"export", 'e', "filename", 0,
+// 		"Export model to a (text) file"}
+// 	, {"exportPerimeterStates", 'S', "filename", 0,
+// 		"Export perimeter states to a file. Please provide a filename. This will append to the file if it is existing"}
+// 	, {"import", 'i', "filename", 0,
+// 		"Import model from a series of text files"}
+// 	, {"property", 'p', "propname", 0,
+// 		"Specify a certain property to check in a model file that contains many"}
+// 	, {"const", 'c', "\"C1=VAL,C2=VAL,C3=VAL\"", 0,
+// 		"Comma separated values for constants"}
 	, {"exportTrans", 'a', "filename", 0,
 		"Export the list of transitions and actions to a specified file name, or to trans.txt if no file name is specified.\nTransitions are exported in the format <Source State Index> <Destination State Index> <Action Label>"}
 	/* Additional options. GNU argp shows args alphabetically */
-	, {"rankTransitions", 'T', 0, 0,
-		"Rank transitions before expanding (default: false)"}
+// 	, {"rankTransitions", 'T', 0, 0,
+// 		"Rank transitions before expanding (default: false)"}
 	, {"maxIterations", 'M', "int", 0,
 		"Maximum iteration for solution (default: 10000)"}
 	, {"maxStates", 'V', "integer", 0,

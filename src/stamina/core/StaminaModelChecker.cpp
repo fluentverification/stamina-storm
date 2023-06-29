@@ -221,6 +221,7 @@ StaminaModelChecker::modelCheckProperty(
 				storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
 			);
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+			// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
 			builder->printStateSpaceInformation();
 			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
 				"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +

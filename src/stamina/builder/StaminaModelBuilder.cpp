@@ -446,6 +446,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateMap() {
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
+CompressedState &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getAbsorbingState() {
+	return this->absorbingState;
+}
+template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::printTransitionActions() {
 	if (Options::export_trans == "") {
