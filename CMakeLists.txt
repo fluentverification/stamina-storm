@@ -20,13 +20,15 @@ set(SOURCE_DIR src)
 set(SOURCE_FILES
 	# Main source files for the `stamina` namespace
 	src/stamina/main.cpp
+)
+
+set(LIB_FILES
 	src/stamina/Stamina.cpp
 	# Files for `stamina::core` namespace
 	src/stamina/core/StaminaModelChecker.cpp
 	src/stamina/core/StaminaMessages.cpp
 	src/stamina/core/Options.cpp
 	src/stamina/core/StateSpaceInformation.cpp
-	src/stamina/core/StateSpaceInformation.h
 	# Files for `stamina::util` namespace
 	src/stamina/util/ModelModify.cpp
 	src/stamina/util/StateIndexArray.cpp
@@ -70,8 +72,11 @@ find_package(storm REQUIRED PATHS ${STORM_PATH})
 #endif
 
 # Add executable target with source files listed in SOURCE_FILES variable
-add_executable(sstamina ${SOURCE_FILES})
+add_library(stamina SHARED ${LIB_FILES})
+add_executable(sstamina ${SOURCE_FILES} ${LIB_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
+target_include_directories(stamina PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
 target_link_libraries(${PROJECT_NAME} PUBLIC storm storm-parsers)
+target_link_libraries(stamina PUBLIC storm storm-parsers)
 
 
