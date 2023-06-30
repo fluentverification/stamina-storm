@@ -83,4 +83,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_
 target_link_libraries(${LIB_NAME} PUBLIC storm storm-parsers)
 target_link_libraries(${PROJECT_NAME} PUBLIC stamina storm storm-parsers)
 
+#set (GUI_PREFIX src/stamina/gui)
 
+#include(${GUI_PREFIX}/CMakeLists.txt)
