@@ -61,5 +61,12 @@ target_link_libraries(xstamina KF5::KIOCore KF5::KIOFileWidgets KF5::KIOWidgets 
 
 target_link_libraries(xstamina KF5::TextEditor)
 
+set(STAMINA_PATH TODO)
+message("STAMINA_PATH is set as " ${STAMINA_PATH})
+# find_package(stamina REQUIRED PATHS ${STAMINA_PATH})
+target_include_directories(xstamina PUBLIC ${STAMINA_PATH})
+
+target_link_libraries(xstamina stamina)
+
 install(TARGETS xstamina  ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(FILES mainWindow.ui DESTINATION ${KXMLGUI_INSTALL_DIR}/xstamina)
