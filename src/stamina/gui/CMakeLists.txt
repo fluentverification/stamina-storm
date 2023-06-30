@@ -68,5 +68,5 @@ target_include_directories(xstamina PUBLIC ${STAMINA_PATH})
 
 target_link_libraries(xstamina stamina)
 
-install(TARGETS xstamina  ${INSTALL_TARGETS_DEFAULT_ARGS})
-install(FILES mainWindow.ui DESTINATION ${KXMLGUI_INSTALL_DIR}/xstamina)
+#install(TARGETS xstamina  ${INSTALL_TARGETS_DEFAULT_ARGS})
+#install(FILES mainWindow.ui DESTINATION ${KXMLGUI_INSTALL_DIR}/xstamina)
