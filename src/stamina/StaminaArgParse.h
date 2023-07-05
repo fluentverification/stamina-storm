@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <cstdint>
 
-#define BUILD_INFO ""
+// #define BUILD_INFO ""
 
 enum STAMINA_METHODS {
 	ITERATIVE_METHOD = 0          // STAMINA 2.5

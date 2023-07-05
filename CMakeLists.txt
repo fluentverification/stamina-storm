@@ -11,6 +11,10 @@ set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(CMAKE_BUILD_TYPE Debug)
 
+# STAMINA Build
+# option(STAMINA_BUILD_TAG "Build tag information" "unspecified")
+add_compile_definitions(BUILD_INFO "unspecified")
+
 # Build options
 option(BUILD_GUI "Build XStamina GUI" OFF)
 
