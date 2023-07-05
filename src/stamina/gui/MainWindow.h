@@ -27,6 +27,7 @@ namespace stamina {
 			void setupActions();
 			bool unsavedChangesModel;
 			bool unsavedChangesProperty;
+			bool modelActive; // If not model is active, then property is active
 			// UI
 			Ui::MainWindow ui;
 			// Showable dialogs
@@ -48,6 +49,7 @@ namespace stamina {
 			void openFromAcceptedPath();
 			void saveModelFile();
 			void saveModelFileAs();
+			void openPropertyFile();
 			void savePropertyFile();
 			void savePropertyFileAs();
 			void downloadFinished(KJob * job);
@@ -59,6 +61,7 @@ namespace stamina {
 			void onClose();
 			void showPropertyWizard();
 			void checkModelAndProperties();
+			void handleTabChange();
 		};
 	} // namespace gui
 } // namespace stamina

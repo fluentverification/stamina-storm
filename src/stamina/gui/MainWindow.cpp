@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, unsavedChangesProperty(false)
 	, baseWindowTitle("New File")
 	, modelWasBuilt(false)
+	, modelActive(true)
 {
 	setupActions();
 }
@@ -94,9 +95,21 @@ MainWindow::setupActions() {
 		, SLOT(showPropertyWizard())
 	);
 
-	// TODO: Connect on close to onClose()
-
+	// Connect on close to onClose()
+	connect(
+		ui
+		, SIGNAL(onClose())
+		, this
+		, SLOT(onClose())
+	);
 	// setupGUI(Default, "mainWindow.ui");
+
+	connect(
+		ui.mainTabs
+		, SIGNAL(currentChanged(int))
+		, this
+		, SLOT(handleTabChange())
+	);
 }
 
 void
@@ -132,14 +145,16 @@ MainWindow::saveToActivePropertiesFile() {
 
 void
 MainWindow::showPreferences() {
-	std::cout << "Showing preferences dialog" << std::endl;
+	StaminaMessages::info("Showing preferences dialog");
 	prefs->exec();
 }
 
 void
 MainWindow::openModelFile() {
 	if (unsavedChangesModel) {
-		bool shouldNotDiscard = KMessageBox::questionYesNo(0, i18n("You have unsaved changes to your model file! Would you like to save it now?")) == KMessageBox::Yes;
+		bool shouldNotDiscard = KMessageBox::questionYesNo(0
+			, i18n("You have unsaved changes to your model file! Would you like to save it now?")
+		) == KMessageBox::Yes;
 		if (shouldNotDiscard) {
 			saveModelFile();
 		}
@@ -203,6 +218,28 @@ MainWindow::saveModelFileAs() {
 }
 
 void
+MainWindow::openPropertyFile() {
+	if (unsavedChangesModel) {
+		bool shouldNotDiscard = KMessageBox::questionYesNo(0
+		, i18n("You have unsaved changes to your property file! Would you like to save it now?")
+		) == KMessageBox::Yes;
+		if (shouldNotDiscard) {
+			savePropertyFile();
+		}
+	}
+	StaminaMessages::info("Opening property file");
+	ofd->setOperationMode(KFileWidget::Opening);
+	ofd->fileWidget()->setFilter(QString("*.csl *.pctl|PRISM Property Files"));
+	connect(
+		ofd->fileWidget()
+		, SIGNAL(accepted())
+		, this
+		, SLOT(openFromAcceptedPath())
+	);
+	ofd->show();
+}
+
+void
 MainWindow::savePropertyFile() {
 	if (this->activePropertiesFile == "") {
 		this->savePropertyFileAs();
@@ -232,7 +269,12 @@ MainWindow::downloadFinished(KJob* job) {
 	}
 
 	KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
-	ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+	if (modelActive) {
+		ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+	}
+	else {
+		ui.propertiesFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+	}
 }
 
 void
@@ -279,7 +321,9 @@ MainWindow::setActivePropertyFileAndSave() {
 void
 MainWindow::onClose() {
 	if (unsavedChangesModel) {
-		bool shouldSave = KMessageBox::questionYesNo(0, i18n("You have unsaved changes to your model file! Would you like to save it now?")) == KMessageBox::Yes;
+		bool shouldSave = KMessageBox::questionYesNo(0
+			, i18n("You have unsaved changes to your model file! Would you like to save it now?")
+		) == KMessageBox::Yes;
 		if (shouldSave) {
 			saveModelFile();
 		}
@@ -289,7 +333,9 @@ MainWindow::onClose() {
 void
 MainWindow::showPropertyWizard() {
 	if (!modelWasBuilt) {
-		bool shouldShow = KMessageBox::warningContinueCancel(0, i18n("The model has not been built yet! Variable names will not appear in the Property Wizard.")) == KMessageBox::Continue;
+		bool shouldShow = KMessageBox::warningContinueCancel(0
+			, i18n("The model has not been built yet! Variable names will not appear in the Property Wizard.")
+		) == KMessageBox::Continue;
 		if (!shouldShow) {
 			return;
 		}
@@ -306,6 +352,13 @@ MainWindow::checkModelAndProperties() {
 	core::Options::properties_file = propFile;
 	Stamina s; // TODO: create constructor for stamina::Stamina class without struct args*
 	s.run();
+}
+
+void
+MainWindow::handleTabChange() {
+	int tabIndex = ui.mainTabs->currentIndex();
+	modelActive = tabIndex != 1;
+	StaminaMessages::info("Model active is " + std::to_string(modelActive));
 }
 
 } // namespace gui
