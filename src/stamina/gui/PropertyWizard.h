@@ -84,7 +84,7 @@ namespace stamina {
 
 		/* An operand item stored in the PropertyTree */
 		class OperandItem : QStandardItem {
-			Q_OBJECT
+// 			Q_OBJECT
 		public:
 			// TODO: https://doc.qt.io/qt-5/qtwidgets-itemviews-simpletreemodel-example.html
 			explicit OperandItem(

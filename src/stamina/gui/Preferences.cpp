@@ -2,6 +2,7 @@
 
 #include <QMessageBox>
 #include "stamina/StaminaArgParse.h"
+#include "stamina/core/StaminaMessages.h"
 
 namespace stamina {
 namespace gui {
@@ -54,10 +55,10 @@ Preferences::setOptionsFromPreferences() {
 void
 Preferences::getPreferencesFromUI() {
 	// General Options
-	PrefInfo::General::truncateModel = ui.truncateModel->value();
-	PrefInfo::General::generateCounterexamples = ui.generateCounterexamples->value();
-	PrefInfo::General::createRefinedProperties = ui.createRefinedProperties->value();
-	PrefInfo::General::verboseLog = ui.verboseLog->value();
+	PrefInfo::General::truncateModel = ui.truncateModel->isChecked();
+	PrefInfo::General::generateCounterexamples = ui.genCounterexamples->isChecked();
+	PrefInfo::General::createRefinedProperties = ui.createRefinedProperties->isChecked();
+	PrefInfo::General::verboseLog = ui.verboseLog->isChecked();
 	bool validInteger;
 	auto tSize = (uint8_t) ui.tabSize->currentText().toInt(&validInteger);
 	if (validInteger) {
@@ -69,11 +70,12 @@ Preferences::getPreferencesFromUI() {
 		StaminaMessages::error(msg);
 		QMessageBox::critical(
 			this
-			, QString(msg)
+			, "Parsing Error"
+			, QString::fromStdString(msg)
 		);
 
 	}
-	PrefInfo::General::useTabs = ui.useTabs->value();
+	PrefInfo::General::useTabs = ui.useTabs->isChecked();
 	// Model Building options
 	// These we will take in batches of related properties
 	bool validKappa, validRKappa, validW;
@@ -88,9 +90,9 @@ Preferences::getPreferencesFromUI() {
 	else {
 		std::string msg = "Either kappa, rKappa, or the window cannot be parsed!";
 		StaminaMessages::error(msg);
-		QMessageBox::critical(this, QString(msg));
+		QMessageBox::critical(this, "Parsing Error", QString::fromStdString(msg));
 	}
-	PrefInfo::ModelBuilding::earlyTerminationProperty = ui.earlyTerminationProperty->value();
+	PrefInfo::ModelBuilding::earlyTerminationProperty = ui.earlyTerminationProperty->isChecked();
 	bool validMaxIters, validMaxApproxIters;
 	auto mxItrs = ui.maxIterations->text().toInt(&validMaxIters);
 	auto mxAprxItrs = ui.maxApproxIterations->text().toInt(&validMaxApproxIters);
@@ -101,25 +103,25 @@ Preferences::getPreferencesFromUI() {
 	else {
 		std::string msg = "The max iteration count or the max approx iterations cannot be parsed";
 		StaminaMessages::error(msg);
-		QMessageBox::critical(this, QString(msg));
+		QMessageBox::critical(this, "Parsing Error", QString::fromStdString(msg));
 	}
-	PrefInfo::ModelBuilding::exportTransitions = ui.traExport->value();
-	PrefInfo::ModelBuilding::transitionsFile = ui.traFilePath.text().toStdString();
-	PrefInfo::ModelBuilding::exportPerimeterStates = ui.exportPerimeterStates->value();
-	PrefInfo::ModelBuilding::perimeterStatesFile = ui.perimPath.text().toStdString();
-	if (ui.reExploring->value()) {
+	PrefInfo::ModelBuilding::exportTransitions = ui.traExport->isChecked();
+	PrefInfo::ModelBuilding::transitionsFile = ui.traFilePath->text().toStdString();
+	PrefInfo::ModelBuilding::exportPerimeterStates = ui.exportPerimeterStates->isChecked();
+	PrefInfo::ModelBuilding::perimeterStatesFile = ui.perimPath->text().toStdString();
+	if (ui.reExploring->isChecked()) {
 		// set value
 		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::RE_EXPLORING_METHOD;
 	}
-	else if (ui.iterative->value()) {
+	else if (ui.iterative->isChecked()) {
 		// set value
 		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::ITERATIVE_METHOD;
 	}
-	else if (ui.priority->value()) {
+	else if (ui.priority->isChecked()) {
 		// set value
 		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::PRIORITY_METHOD;
 	}
-	PrefInfo::ModelBuilding::thread = ui.numberThreads->value();
+// 	PrefInfo::ModelBuilding::thread = ui.numberThreads->value();
 	// The ModelChecking tab
 	// TODO
 	// The Counterexamples tab

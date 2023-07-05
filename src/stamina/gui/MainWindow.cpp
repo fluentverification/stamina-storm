@@ -26,7 +26,8 @@ namespace gui {
 
 MainWindow::MainWindow(QWidget *parent)
 	: KXmlGuiWindow(parent)
-	, fd(new KFileCustomDialog())
+	, sfd(new KFileCustomDialog())
+	, ofd(new KFileCustomDialog())
 	, about(new About(this))
 	, prefs(new Preferences(this))
 	, propWizard(new PropertyWizard(this))
@@ -100,8 +101,8 @@ MainWindow::setupActions() {
 
 void
 MainWindow::saveToActiveModelFile() {
-
 	if (activeModelFile != "") {
+		StaminaMessages::info("Saving active model file to path '" + activeModelFile.toStdString() + "'");
 		QSaveFile file(activeModelFile);
 		file.open(QIODevice::WriteOnly);
 
@@ -143,25 +144,26 @@ MainWindow::openModelFile() {
 			saveModelFile();
 		}
 	}
-	std::cout << "Opening model file" << std::endl;
-	fd->setOperationMode(KFileWidget::Opening);
-	fd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
+	StaminaMessages::info("Opening model file");
+	ofd->setOperationMode(KFileWidget::Opening);
+	ofd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
 	connect(
-		fd->fileWidget()
+		ofd->fileWidget()
 		, SIGNAL(accepted())
 		, this
 		, SLOT(openFromAcceptedPath())
 	);
-	fd->show();
+	ofd->show();
 // 	QString openFileName = KFileDialog::getOpenFileName(this, i18n("Open model file"));
 }
 
 void
 MainWindow::openFromAcceptedPath() {
-	QString selectedFile = fd->fileWidget()->selectedFile();
-	std::cout << "Opening file " << selectedFile.toStdString() << std::endl;
+	QString selectedFile = ofd->fileWidget()->selectedFile();
+	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
+	activeModelFile = selectedFile;
 	disconnect(
-		fd->fileWidget()
+		ofd->fileWidget()
 		, SIGNAL(accepted())
 	);
 	if (selectedFile != "") {
@@ -187,16 +189,16 @@ MainWindow::saveModelFile() {
 
 void
 MainWindow::saveModelFileAs() {
-	std::cout << "Saving model file as" << std::endl;
-	fd->setOperationMode(KFileWidget::Saving);
+	StaminaMessages::info("Saving model file as...");
+	sfd->setOperationMode(KFileWidget::Saving);
 	connect(
-		fd->fileWidget()
+		sfd->fileWidget()
 		, SIGNAL(accepted())
 		, this
 		, SLOT(setActiveModelFileAndSave())
 	);
-	fd->show();
-	fd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
+	sfd->show();
+	sfd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
 // 	saveToActiveModelFile();
 }
 
@@ -212,9 +214,9 @@ MainWindow::savePropertyFile() {
 
 void
 MainWindow::savePropertyFileAs() {
-	fd->setOperationMode(KFileWidget::Saving);
+	sfd->setOperationMode(KFileWidget::Saving);
 	connect(
-		fd->fileWidget()
+		sfd->fileWidget()
 		, SIGNAL(accepted())
 		, this
 		, SLOT(setActivePropertyFileAndSave())
@@ -255,23 +257,23 @@ MainWindow::setModifiedProperties() {
 
 void
 MainWindow::setActiveModelFileAndSave() {
-	// Disconnect fd just in case it sent us here
+	// Disconnect sfd just in case it sent us here
 	disconnect(
-		fd->fileWidget()
+		sfd->fileWidget()
 		, SIGNAL(accepted())
 	);
-	activeModelFile = fd->fileWidget()->selectedFile();
+	activeModelFile = sfd->fileWidget()->selectedFile();
 	saveToActiveModelFile();
 }
 
 void
 MainWindow::setActivePropertyFileAndSave() {
 	disconnect(
-		fd->fileWidget()
+		sfd->fileWidget()
 		, SIGNAL(accepted())
 	);
-	activePropertiesFile = fd->fileWidget()->selectedFile();
-	saveToActivePropertyFile();
+	activePropertiesFile = sfd->fileWidget()->selectedFile();
+	saveToActivePropertiesFile();
 }
 
 void
@@ -297,19 +299,12 @@ MainWindow::showPropertyWizard() {
 }
 
 void
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-MainWindow::checkModelAndProperties() {
-	this->saveModelFile();
-}
-
-void
 MainWindow::checkModelAndProperties() {
 	std::string modFile = this->activeModelFile.toStdString();
 	std::string propFile = this->activePropertiesFile.toStdString();
 	core::Options::model_file = modFile;
 	core::Options::properties_file = propFile;
-	Stamina s(); // TODO: create constructor for stamina::Stamina class without struct args*
+	Stamina s; // TODO: create constructor for stamina::Stamina class without struct args*
 	s.run();
 }
 

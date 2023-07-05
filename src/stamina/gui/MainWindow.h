@@ -33,7 +33,10 @@ namespace stamina {
 			About * about;
 			Preferences * prefs;
 			PropertyWizard * propWizard;
-			KFileCustomDialog * fd;
+			// Save file dialog
+			KFileCustomDialog * sfd;
+			// Open file dialog
+			KFileCustomDialog * ofd;
 			QString activeModelFile;
 			QString activePropertiesFile;
 			QString baseWindowTitle;
