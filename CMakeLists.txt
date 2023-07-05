@@ -11,34 +11,40 @@ set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(CMAKE_BUILD_TYPE Debug)
 
-set(QT_MIN_VERSION "5.3.0")
-set(KF5_MIN_VERSION "5.2.0")
+# Build options
+option(BUILD_GUI "Build XStamina GUI" OFF)
 
-find_package(ECM 1.0.0 REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# These build options are for the GUI only
+if (BUILD_GUI)
+	set(QT_MIN_VERSION "5.3.0")
+	set(KF5_MIN_VERSION "5.2.0")
 
-include(KDEInstallDirs)
-include(KDECMakeSettings)
-#include(KDECompilerSettings)
-include(FeatureSummary)
+	find_package(ECM 1.0.0 REQUIRED NO_MODULE)
+	set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-find_package(KF5TextEditor)
+	include(KDEInstallDirs)
+	include(KDECMakeSettings)
+	#include(KDECompilerSettings)
+	include(FeatureSummary)
 
-find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
-	Core	# QCommandLineParser, QStringLiteral
-	Widgets # QApplication
-)
+	find_package(KF5TextEditor)
 
-find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
-	CoreAddons	  # KAboutData
-	I18n			# KLocalizedString
-	XmlGui		  # KXmlGuiWindow
-	TextWidgets	 # KTextEdit
-)
-find_package(KF5KIO)
+	find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+		Core	# QCommandLineParser, QStringLiteral
+		Widgets # QApplication
+	)
 
-feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
-set(PICO_ENABLE_CXX_EXCEPTIONS 1)
+	find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
+		CoreAddons	  # KAboutData
+		I18n			# KLocalizedString
+		XmlGui		  # KXmlGuiWindow
+		TextWidgets	 # KTextEdit
+	)
+	find_package(KF5KIO)
+
+	feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+	set(PICO_ENABLE_CXX_EXCEPTIONS 1)
+endif()
 
 # Main STAMINA executable
 include_directories("src")
@@ -135,19 +141,22 @@ target_link_libraries(${LIB_NAME} PUBLIC storm storm-parsers)
 target_link_libraries(${PROJECT_NAME} PUBLIC stamina storm storm-parsers)
 
 # Stuff for the GUI
-set(GUI_EXECUTABLE_NAME xstamina)
-add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES})
-target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC
-	Qt5::Widgets
-	KF5::CoreAddons
-	KF5::I18n
-	KF5::XmlGui
-	KF5::TextWidgets
-	KF5::KIOCore
-	KF5::KIOFileWidgets
-	KF5::KIOWidgets
-	KF5::KIONTLM
-	KF5::TextEditor
-)
+if(BUILD_GUI)
+	set(GUI_EXECUTABLE_NAME xstamina)
+	add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES})
+	target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC
+		Qt5::Widgets
+		KF5::CoreAddons
+		KF5::I18n
+		KF5::XmlGui
+		KF5::TextWidgets
+		KF5::KIOCore
+		KF5::KIOFileWidgets
+		KF5::KIOWidgets
+		KF5::KIONTLM
+		KF5::TextEditor
+	)
 
-target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC stamina storm storm-parsers)
+	target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC stamina storm storm-parsers)
+
+endif()

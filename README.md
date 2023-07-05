@@ -73,3 +73,13 @@ Some features of this new GUI include (or rather, *will include*:
 ![xstamina screenshot](doc/screenshots/xstamina.png)
 
 ![xstamina screenshot](doc/screenshots/xstamina2.png)
+
+To compile with the GUI, you will need the following dependencies:
+	- QtWidgets v5+
+	- KF5
+
+You can compile the `xstamina` executable using the `BUILD_GUI` cmake option.
+
+```
+cmake .. [OTHER CMAKE OPTIONS] -DBUILD_GUI=ON
+```
