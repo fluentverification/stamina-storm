@@ -54,18 +54,18 @@ Preferences::setOptionsFromPreferences() {
 void
 Preferences::getPreferencesFromUI() {
 	// General Options
-	PrefInfo::General::truncateModel = ui->truncateModel.value();
-	PrefInfo::General::generateCounterexamples = ui->generateCounterexamples.value();
-	PrefInfo::General::createRefinedProperties = ui->createRefinedProperties.value();
-	PrefInfo::General::verboseLog = ui->verboseLog.value();
+	PrefInfo::General::truncateModel = ui.truncateModel->value();
+	PrefInfo::General::generateCounterexamples = ui.generateCounterexamples->value();
+	PrefInfo::General::createRefinedProperties = ui.createRefinedProperties->value();
+	PrefInfo::General::verboseLog = ui.verboseLog->value();
 	bool validInteger;
-	auto tSize = (uint8_t) ui->tabSize.currentText().toInt(&validInteger);
+	auto tSize = (uint8_t) ui.tabSize->currentText().toInt(&validInteger);
 	if (validInteger) {
 		PrefInfo::General::tabSize = tSize;
 	}
 	else {
 		// Text was not valid as an integer
-		std::string msg = "The text \"" + ui->tabSize.currentText().toStdString() + "\" could not be parsed to an integer!";
+		std::string msg = "The text \"" + ui.tabSize->currentText().toStdString() + "\" could not be parsed to an integer!";
 		StaminaMessages::error(msg);
 		QMessageBox::critical(
 			this
@@ -73,13 +73,13 @@ Preferences::getPreferencesFromUI() {
 		);
 
 	}
-	PrefInfo::General::useTabs = ui->useTabs.value();
+	PrefInfo::General::useTabs = ui.useTabs->value();
 	// Model Building options
 	// These we will take in batches of related properties
 	bool validKappa, validRKappa, validW;
-	auto k = ui->kappa.text().toInt(&validKappa);
-	auto rk = ui->rKappa.text().toInt(&validRKappa);
-	auto w = ui->w.text().toInt(&validW);
+	auto k = ui.kappa->text().toInt(&validKappa);
+	auto rk = ui.rKappa->text().toInt(&validRKappa);
+	auto w = ui.w->text().toInt(&validW);
 	if (validKappa && validRKappa && validW) {
 		PrefInfo::ModelBuilding::kappa = k;
 		PrefInfo::ModelBuilding::rKappa = rk;
@@ -90,10 +90,10 @@ Preferences::getPreferencesFromUI() {
 		StaminaMessages::error(msg);
 		QMessageBox::critical(this, QString(msg));
 	}
-	PrefInfo::ModelBuilding::earlyTerminationProperty = ui->earlyTerminationProperty.value();
+	PrefInfo::ModelBuilding::earlyTerminationProperty = ui.earlyTerminationProperty->value();
 	bool validMaxIters, validMaxApproxIters;
-	auto mxItrs = ui->maxIterations.text().toInt(&validMaxIters);
-	auto mxAprxItrs = ui->maxApproxIterations.text().toInt(&validMaxApproxIters);
+	auto mxItrs = ui.maxIterations->text().toInt(&validMaxIters);
+	auto mxAprxItrs = ui.maxApproxIterations->text().toInt(&validMaxApproxIters);
 	if (validMaxApproxIters && validMaxIters) {
 		PrefInfo::ModelBuilding::maxIterations = (uint16_t) mxItrs;
 		PrefInfo::ModelBuilding::maxApproxIterations = (uint8_t) mxAprxItrs;
@@ -103,23 +103,23 @@ Preferences::getPreferencesFromUI() {
 		StaminaMessages::error(msg);
 		QMessageBox::critical(this, QString(msg));
 	}
-	PrefInfo::ModelBuilding::exportTransitions = ui->traExport.value();
-	PrefInfo::ModelBuilding::transitionsFile = ui->traFilePath.text().toStdString();
-	PrefInfo::ModelBuilding::exportPerimeterStates = ui->exportPerimeterStates.value();
-	PrefInfo::ModelBuilding::perimeterStatesFile = ui->perimPath.text().toStdString();
-	if (ui->reExploring.value()) {
+	PrefInfo::ModelBuilding::exportTransitions = ui.traExport->value();
+	PrefInfo::ModelBuilding::transitionsFile = ui.traFilePath.text().toStdString();
+	PrefInfo::ModelBuilding::exportPerimeterStates = ui.exportPerimeterStates->value();
+	PrefInfo::ModelBuilding::perimeterStatesFile = ui.perimPath.text().toStdString();
+	if (ui.reExploring->value()) {
 		// set value
 		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::RE_EXPLORING_METHOD;
 	}
-	else if (ui->iterative.value()) {
+	else if (ui.iterative->value()) {
 		// set value
 		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::ITERATIVE_METHOD;
 	}
-	else if (ui->priority.value()) {
+	else if (ui.priority->value()) {
 		// set value
 		PrefInfo::ModelBuilding::truncationMethod = STAMINA_METHODS::PRIORITY_METHOD;
 	}
-	PrefInfo::ModelBuilding::thread = ui->numberThreads.value();
+	PrefInfo::ModelBuilding::thread = ui.numberThreads->value();
 	// The ModelChecking tab
 	// TODO
 	// The Counterexamples tab

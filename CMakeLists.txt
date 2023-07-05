@@ -5,50 +5,101 @@
 ##
 
 cmake_minimum_required(VERSION 3.10)
-
-# Main STAMINA executable
-include_directories("src")
-include_directories("src/stamina")
-
 project(sstamina)               # Create project "sstamina"
 set(LIB_NAME stamina)
 set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
+
+set(QT_MIN_VERSION "5.3.0")
+set(KF5_MIN_VERSION "5.2.0")
+
+find_package(ECM 1.0.0 REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+#include(KDECompilerSettings)
+include(FeatureSummary)
+
+find_package(KF5TextEditor)
+
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+	Core	# QCommandLineParser, QStringLiteral
+	Widgets # QApplication
+)
+
+find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
+	CoreAddons	  # KAboutData
+	I18n			# KLocalizedString
+	XmlGui		  # KXmlGuiWindow
+	TextWidgets	 # KTextEdit
+)
+find_package(KF5KIO)
+
+feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+set(PICO_ENABLE_CXX_EXCEPTIONS 1)
+
+# Main STAMINA executable
+include_directories("src")
 
 # Source files for the main STAMINA CLI
 set(SOURCE_DIR src)
+set(STAMINA_NAMESPACE_DIR ${SOURCE_DIR}/stamina)
+include_directories("${STAMINA_NAMESPACE_DIR}")
 set(SOURCE_FILES
 	# Main source files for the `stamina` namespace
-	src/stamina/main.cpp
+	${STAMINA_NAMESPACE_DIR}/main.cpp
 )
 
 set(LIB_FILES
-	src/stamina/Stamina.cpp
+	${STAMINA_NAMESPACE_DIR}/Stamina.cpp
 	# Files for `stamina::core` namespace
-	src/stamina/core/StaminaModelChecker.cpp
-	src/stamina/core/StaminaMessages.cpp
-	src/stamina/core/Options.cpp
-	src/stamina/core/StateSpaceInformation.cpp
+	${STAMINA_NAMESPACE_DIR}/core/StaminaModelChecker.cpp
+	${STAMINA_NAMESPACE_DIR}/core/StaminaMessages.cpp
+	${STAMINA_NAMESPACE_DIR}/core/Options.cpp
+	${STAMINA_NAMESPACE_DIR}/core/StateSpaceInformation.cpp
 	# Files for `stamina::util` namespace
-	src/stamina/util/ModelModify.cpp
-	src/stamina/util/StateIndexArray.cpp
-	src/stamina/util/StateMemoryPool.cpp
+	${STAMINA_NAMESPACE_DIR}/util/ModelModify.cpp
+	${STAMINA_NAMESPACE_DIR}/util/StateIndexArray.cpp
+	${STAMINA_NAMESPACE_DIR}/util/StateMemoryPool.cpp
 	# Files for `stamina::builder` namespace
-	src/stamina/builder/StaminaModelBuilder.cpp
-	src/stamina/builder/StaminaIterativeModelBuilder.cpp
-	src/stamina/builder/StaminaThreadedIterativeModelBuilder.cpp
-	src/stamina/builder/StaminaPriorityModelBuilder.cpp
-	src/stamina/builder/StaminaReExploringModelBuilder.cpp
-	src/stamina/builder/ExplicitTruncatedModelBuilder.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/StaminaModelBuilder.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/StaminaIterativeModelBuilder.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/StaminaThreadedIterativeModelBuilder.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/StaminaPriorityModelBuilder.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/StaminaReExploringModelBuilder.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/ExplicitTruncatedModelBuilder.cpp
 	# Files for `stamina::builder::threads` namespace
-	src/stamina/builder/threads/BaseThread.cpp
-	src/stamina/builder/threads/ControlThread.cpp
-	src/stamina/builder/threads/ExplorationThread.cpp
-	src/stamina/builder/threads/IterativeExplorationThread.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/threads/BaseThread.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/threads/ControlThread.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/threads/ExplorationThread.cpp
+	${STAMINA_NAMESPACE_DIR}/builder/threads/IterativeExplorationThread.cpp
 	# Files for `stamina::priority` namespace
-	src/stamina/priority/EventStatePriority.cpp
-	src/stamina/priority/StatePriority.cpp
+	${STAMINA_NAMESPACE_DIR}/priority/EventStatePriority.cpp
+	${STAMINA_NAMESPACE_DIR}/priority/StatePriority.cpp
+)
+
+set(GUI_PREFIX ${STAMINA_NAMESPACE_DIR}/gui)
+
+set(GUI_FILES
+	# Main GUI file is (currently) in the STAMINA_NAMESPACE_DIR
+	${STAMINA_NAMESPACE_DIR}/gui.cpp
+	# The rest of these are not
+	${GUI_PREFIX}/MainWindow.cpp
+	${GUI_PREFIX}/About.cpp
+	${GUI_PREFIX}/Preferences.cpp
+	${GUI_PREFIX}/PropertyWizard.cpp
+	# Code editing
+	${GUI_PREFIX}/addons/CodeEditor.cpp
+	${GUI_PREFIX}/addons/LineNumberArea.cpp
+	# Syntax Highlighting
+	${GUI_PREFIX}/addons/highlighter/Highlighter.cpp
+	${GUI_PREFIX}/addons/highlighter/PrismHighlighter.cpp
+)
+
+set(GUI_RECS
+	${GUI_PREFIX}/resources/resources.qrc
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})
@@ -83,6 +134,20 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_
 target_link_libraries(${LIB_NAME} PUBLIC storm storm-parsers)
 target_link_libraries(${PROJECT_NAME} PUBLIC stamina storm storm-parsers)
 
-#set (GUI_PREFIX src/stamina/gui)
+# Stuff for the GUI
+set(GUI_EXECUTABLE_NAME xstamina)
+add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES})
+target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC
+	Qt5::Widgets
+	KF5::CoreAddons
+	KF5::I18n
+	KF5::XmlGui
+	KF5::TextWidgets
+	KF5::KIOCore
+	KF5::KIOFileWidgets
+	KF5::KIOWidgets
+	KF5::KIONTLM
+	KF5::TextEditor
+)
 
-#include(${GUI_PREFIX}/CMakeLists.txt)
+target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC stamina storm storm-parsers)
