@@ -1,6 +1,7 @@
 #include "StaminaMessages.h"
 
 #include "ANSIColors.h"
+#include "core/Options.h"
 
 #include <stdlib.h>
 #include <iomanip>
@@ -36,6 +37,9 @@ StaminaMessages::initMessage() {
 
 void
 StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
+	if (Options::quiet) {
+		exit(err_num);
+	}
 	std::cerr << BOLD(FRED("[ERROR]: "));
 	std::cerr << BOLD("STAMINA encountered the following error and will now exit: ") << std::endl;
 	std::cerr << '\t' << err << std::endl;
@@ -44,6 +48,9 @@ StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
 
 void
 StaminaMessages::error(std::string err, uint8_t err_num) {
+	if (Options::quiet) {
+		return;
+	}
 	std::cerr << BOLD(FRED("[ERROR]: "));
 	std::cerr << BOLD("STAMINA encountered the following (possibly recoverable) error: ") << std::endl;
 	std::cerr << '\t' << err << std::endl;
@@ -51,21 +58,33 @@ StaminaMessages::error(std::string err, uint8_t err_num) {
 
 void
 StaminaMessages::warning(std::string warn) {
+	if (Options::quiet) {
+		return;
+	}
 	std::cerr << BOLD(FYEL("[WARNING]: ")) << warn << std::endl;
 }
 
 void
 StaminaMessages::info(std::string info) {
+	if (Options::quiet) {
+		return;
+	}
 	std::cerr << BOLD(FBLU("[INFO]: ")) << info << std::endl;
 }
 
 void
 StaminaMessages::good(std::string good) {
+	if (Options::quiet) {
+		return;
+	}
 	std::cerr << BOLD(FGRN("[MESSAGE]: ")) << good << std::endl;
 }
 
 #ifdef DEBUG_PRINTS
 void StaminaMessages::debugPrint(std::string msg) {
+	if (Options::quiet) {
+		return;
+	}
 	std::cout << BOLD(FMAG("[DEBUG MESSAGE]: ")) << msg << std::endl;
 }
 #endif

@@ -72,8 +72,10 @@ static struct argp_option options[] = {
 // 		"Rank transitions before expanding (default: false)"}
 	, {"maxIterations", 'M', "int", 0,
 		"Maximum iteration for solution (default: 10000)"}
-	, {"maxStates", 'V', "integer", 0,
-		"The maximum number of states to explore in an iteration (default 2000000)"}
+//	, {"maxStates", 'V', "integer", 0,
+//		"The maximum number of states to explore in an iteration (default 2000000)"}
+	, {"quiet", 'q', 0, 0,
+		"Do not emit any warning, info, or error messages"}
 	, {"iterative", 'I', 0, 0,
 		"Use the STAMINA 2.5 method (iterative)"}
 	, {"priority", 'P', 0, 0,
@@ -129,6 +131,7 @@ struct arguments {
 	bool preterminate;
 	uint8_t event;
 	double distance_weight;
+	bool quiet;
 };
 
 /**
@@ -248,6 +251,9 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			arguments->distance_weight = (double) atof(arg);
 			break;
 
+		case 'q':
+			arguments->quiet = true;
+			break;
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file
