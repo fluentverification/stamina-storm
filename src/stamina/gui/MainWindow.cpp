@@ -28,10 +28,10 @@ namespace gui {
 
 MainWindow::MainWindow(QWidget *parent)
 	: KXmlGuiWindow(parent)
-	, sfdm(new KFileCustomDialog())
-	, ofdm(new KFileCustomDialog())
-	, sfdp(new KFileCustomDialog())
-	, ofdp(new KFileCustomDialog())
+	, sfdm(new KFileCustomDialog(this))
+	, ofdm(new KFileCustomDialog(this))
+	, sfdp(new KFileCustomDialog(this))
+	, ofdp(new KFileCustomDialog(this))
 	, about(new About(this))
 	, prefs(new Preferences(this))
 	, propWizard(new PropertyWizard(this))
@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, baseWindowTitle("New File")
 	, modelWasBuilt(false)
 	, modelActive(true)
+	, stayOpen(true)
 {
 	setupActions();
 }
@@ -106,15 +107,6 @@ MainWindow::setupActions() {
 		, SLOT(checkModelAndProperties())
 	);
 
-	// Connect on close to onClose()
-	/*connect(
-		ui
-		, SIGNAL(onClose())
-		, this
-		, SLOT(handleOnClose())
-	);*/
-	// setupGUI(Default, "mainWindow.ui");
-
 	connect(
 		ui.mainTabs
 		, SIGNAL(currentChanged(int))
@@ -136,6 +128,7 @@ MainWindow::saveToActiveModelFile() {
 		file.commit();
 		unsavedChangesModel = false;
 		setCaption(baseWindowTitle);
+		stayOpen = false;
 	}
 	else {
 		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
@@ -155,6 +148,7 @@ MainWindow::saveToActivePropertiesFile() {
 		file.commit();
 		unsavedChangesProperty = false;
 		setCaption(baseWindowTitle);
+		stayOpen = false;
 	}
 	else {
 		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
@@ -399,13 +393,24 @@ MainWindow::setActivePropertyFileAndSave() {
 }
 
 void
-MainWindow::handleOnClose() {
+MainWindow::closeEvent(QCloseEvent *event) {
+	// stayOpen = true;
 	if (unsavedChangesModel) {
 		bool shouldSave = KMessageBox::questionYesNo(0
 			, i18n("You have unsaved changes to your model file! Would you like to save it now?")
 		) == KMessageBox::Yes;
 		if (shouldSave) {
 			saveModelFile();
+			// while (stayOpen) {}
+		}
+	}
+	else if (unsavedChangesProperty) {
+		bool shouldSave = KMessageBox::questionYesNo(0
+		, i18n("You have unsaved changes to your model file! Would you like to save it now?")
+		) == KMessageBox::Yes;
+		if (shouldSave) {
+			savePropertyFile();
+			// while (stayOpen) {}
 		}
 	}
 }

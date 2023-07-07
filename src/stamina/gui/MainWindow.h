@@ -3,6 +3,7 @@
 
 #include <KXmlGuiWindow>
 #include <kfilecustomdialog.h>
+#include <QCloseEvent>
 
 #include "ui/ui_MainWindow.h"
 
@@ -46,6 +47,8 @@ namespace stamina {
 			QString activePropertiesFile;
 			QString baseWindowTitle;
 			bool modelWasBuilt;
+			// Hackey way to get the file dialog to stay open
+			bool stayOpen;
 
 		private slots:
 			void showPreferences();
@@ -64,7 +67,7 @@ namespace stamina {
 			void setModifiedProperties();
 			void setActiveModelFileAndSave();
 			void setActivePropertyFileAndSave();
-			void handleOnClose();
+			void closeEvent(QCloseEvent *event);
 			void showPropertyWizard();
 			void checkModelAndProperties();
 			void handleTabChange();
