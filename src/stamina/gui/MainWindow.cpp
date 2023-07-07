@@ -335,6 +335,7 @@ MainWindow::downloadFinishedModel(KJob* job) {
 
 	ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	StaminaMessages::good("Succesfully loaded file into model editor!");
+	unsavedChangesModel = false;
 
 }
 
@@ -350,6 +351,7 @@ MainWindow::downloadFinishedProperty(KJob* job) {
 
 	ui.propertiesEditor->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	StaminaMessages::good("Succesfully loaded file into property editor!");
+	unsavedChangesProperty = false;
 
 }
 
