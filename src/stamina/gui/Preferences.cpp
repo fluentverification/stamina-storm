@@ -33,6 +33,7 @@ Preferences::hide() {
 
 void
 Preferences::setOptionsFromPreferences() {
+	StaminaMessages::info("Setting options for model builder and checker.");
 	// General options
 
 	// ModelBuilding tab Options

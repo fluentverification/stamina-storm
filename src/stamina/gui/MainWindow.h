@@ -34,10 +34,14 @@ namespace stamina {
 			About * about;
 			Preferences * prefs;
 			PropertyWizard * propWizard;
+			// Perhaps there is a better way to do this, but there
+			// appear to be threadsafety issues using the same dialog
 			// Save file dialog
-			KFileCustomDialog * sfd;
+			KFileCustomDialog * sfdm;
+			KFileCustomDialog * sfdp;
 			// Open file dialog
-			KFileCustomDialog * ofd;
+			KFileCustomDialog * ofdm;
+			KFileCustomDialog * ofdp;
 			QString activeModelFile;
 			QString activePropertiesFile;
 			QString baseWindowTitle;
@@ -46,13 +50,15 @@ namespace stamina {
 		private slots:
 			void showPreferences();
 			void openModelFile();
-			void openFromAcceptedPath();
+			void openModelFromAcceptedPath();
+			void openPropertyFromAcceptedPath();
 			void saveModelFile();
 			void saveModelFileAs();
 			void openPropertyFile();
 			void savePropertyFile();
 			void savePropertyFileAs();
-			void downloadFinished(KJob * job);
+			void downloadFinishedModel(KJob * job);
+			void downloadFinishedProperty(KJob * job);
 			void showAbout();
 			void setModifiedModel();
 			void setModifiedProperties();

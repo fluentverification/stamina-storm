@@ -97,14 +97,14 @@ namespace stamina {
 			Preferences(QWidget * parent = 0);
 			void show();
 			void hide();
-		private:
-			void setupActions();
 			/**
 			 * Sets the "options" values in Stamina::core::Options
 			 * from the preferences selected on this window.
 			 * */
 			void setOptionsFromPreferences();
 			void getPreferencesFromUI();
+		private:
+			void setupActions();
 			// Data members
 			Ui::Preferences ui;
 		};

@@ -26,8 +26,10 @@ namespace gui {
 
 MainWindow::MainWindow(QWidget *parent)
 	: KXmlGuiWindow(parent)
-	, sfd(new KFileCustomDialog())
-	, ofd(new KFileCustomDialog())
+	, sfdm(new KFileCustomDialog())
+	, ofdm(new KFileCustomDialog())
+	, sfdp(new KFileCustomDialog())
+	, ofdp(new KFileCustomDialog())
 	, about(new About(this))
 	, prefs(new Preferences(this))
 	, propWizard(new PropertyWizard(this))
@@ -93,6 +95,13 @@ MainWindow::setupActions() {
 		, SIGNAL(clicked())
 		, this
 		, SLOT(showPropertyWizard())
+	);
+
+	connect(
+		ui.buildModelButton
+		, SIGNAL(clicked())
+		, this
+		, SLOT(checkModelAndProperties())
 	);
 
 	// Connect on close to onClose()
@@ -167,33 +176,57 @@ MainWindow::openModelFile() {
 		}
 	}
 	StaminaMessages::info("Opening model file");
-	ofd->setOperationMode(KFileWidget::Opening);
-	ofd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
+	ofdm->setOperationMode(KFileWidget::Opening);
+	ofdm->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
 	connect(
-		ofd->fileWidget()
+		ofdm->fileWidget()
 		, SIGNAL(accepted())
 		, this
-		, SLOT(openFromAcceptedPath())
+		, SLOT(openModelFromAcceptedPath())
 	);
-	ofd->show();
+	ofdm->show();
 // 	QString openFileName = KFileDialog::getOpenFileName(this, i18n("Open model file"));
 }
 
 void
-MainWindow::openFromAcceptedPath() {
-	QString selectedFile = ofd->fileWidget()->selectedFile();
+MainWindow::openModelFromAcceptedPath() {
+	QString selectedFile = ofdm->fileWidget()->selectedFile();
 	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
 	activeModelFile = selectedFile;
 	disconnect(
-		ofd->fileWidget()
+		ofdm->fileWidget()
 		, SIGNAL(accepted())
+		, 0
+		, 0
 	);
 	if (selectedFile != "") {
 		QFileInfo info(selectedFile);
 		baseWindowTitle = info.fileName();
 		setCaption(baseWindowTitle);
 		KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(selectedFile));
-		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinished(KJob*)));
+		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinishedModel(KJob*)));
+		job->exec();
+	}
+
+}
+
+void
+MainWindow::openPropertyFromAcceptedPath() {
+	QString selectedFile = ofdp->fileWidget()->selectedFile();
+	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
+	activePropertiesFile = selectedFile;
+	disconnect(
+		ofdp->fileWidget()
+		, SIGNAL(accepted())
+		, 0
+		, 0
+	);
+	if (selectedFile != "") {
+		QFileInfo info(selectedFile);
+		baseWindowTitle = info.fileName();
+		setCaption(baseWindowTitle);
+		KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(selectedFile));
+		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinishedProperty(KJob*)));
 		job->exec();
 	}
 
@@ -207,26 +240,27 @@ MainWindow::saveModelFile() {
 	else {
 		saveToActiveModelFile();
 	}
+	unsavedChangesModel = false;
 }
 
 void
 MainWindow::saveModelFileAs() {
 	StaminaMessages::info("Saving model file as...");
-	sfd->setOperationMode(KFileWidget::Saving);
+	sfdm->setOperationMode(KFileWidget::Saving);
 	connect(
-		sfd->fileWidget()
+		sfdm->fileWidget()
 		, SIGNAL(accepted())
 		, this
 		, SLOT(setActiveModelFileAndSave())
 	);
-	sfd->show();
-	sfd->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
+	sfdm->show();
+	sfdm->fileWidget()->setFilter(QString("*.prism *.sm|PRISM Model files\n*.jani|JANI Model Files"));
 // 	saveToActiveModelFile();
 }
 
 void
 MainWindow::openPropertyFile() {
-	if (unsavedChangesModel) {
+	if (unsavedChangesProperty) {
 		bool shouldNotDiscard = KMessageBox::questionYesNo(0
 		, i18n("You have unsaved changes to your property file! Would you like to save it now?")
 		) == KMessageBox::Yes;
@@ -235,15 +269,15 @@ MainWindow::openPropertyFile() {
 		}
 	}
 	StaminaMessages::info("Opening property file");
-	ofd->setOperationMode(KFileWidget::Opening);
-	ofd->fileWidget()->setFilter(QString("*.csl *.pctl|PRISM Property Files"));
+	ofdp->setOperationMode(KFileWidget::Opening);
+	ofdp->fileWidget()->setFilter(QString("*.csl *.pctl|PRISM Property Files"));
 	connect(
-		ofd->fileWidget()
+		ofdp->fileWidget()
 		, SIGNAL(accepted())
 		, this
-		, SLOT(openFromAcceptedPath())
+		, SLOT(openPropertyFromAcceptedPath())
 	);
-	ofd->show();
+	ofdp->show();
 }
 
 void
@@ -254,13 +288,14 @@ MainWindow::savePropertyFile() {
 	else {
 		saveToActivePropertiesFile();
 	}
+	unsavedChangesProperty = false;
 }
 
 void
 MainWindow::savePropertyFileAs() {
-	sfd->setOperationMode(KFileWidget::Saving);
+	sfdp->setOperationMode(KFileWidget::Saving);
 	connect(
-		sfd->fileWidget()
+		sfdp->fileWidget()
 		, SIGNAL(accepted())
 		, this
 		, SLOT(setActivePropertyFileAndSave())
@@ -268,20 +303,33 @@ MainWindow::savePropertyFileAs() {
 }
 
 void
-MainWindow::downloadFinished(KJob* job) {
+MainWindow::downloadFinishedModel(KJob* job) {
 	if (job->error()) {
 		KMessageBox::error(this, job->errorString());
 		activeModelFile.clear();
 		return;
 	}
 
-	KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
-	if (modelActive) {
-		ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+	KIO::StoredTransferJob * storedJob = (KIO::StoredTransferJob*) job;
+
+	ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+	StaminaMessages::good("Succesfully loaded file into model editor!");
+
+}
+
+void
+MainWindow::downloadFinishedProperty(KJob* job) {
+	if (job->error()) {
+		KMessageBox::error(this, job->errorString());
+		activeModelFile.clear();
+		return;
 	}
-	else {
-		ui.propertiesEditor->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
-	}
+
+	KIO::StoredTransferJob * storedJob = (KIO::StoredTransferJob*) job;
+
+	ui.propertiesEditor->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+	StaminaMessages::good("Succesfully loaded file into property editor!");
+
 }
 
 void
@@ -308,20 +356,22 @@ void
 MainWindow::setActiveModelFileAndSave() {
 	// Disconnect sfd just in case it sent us here
 	disconnect(
-		sfd->fileWidget()
+		sfdm->fileWidget()
 		, SIGNAL(accepted())
+		, 0
+		, 0
 	);
-	activeModelFile = sfd->fileWidget()->selectedFile();
+	activeModelFile = sfdm->fileWidget()->selectedFile();
 	saveToActiveModelFile();
 }
 
 void
 MainWindow::setActivePropertyFileAndSave() {
 	disconnect(
-		sfd->fileWidget()
+		sfdp->fileWidget()
 		, SIGNAL(accepted())
 	);
-	activePropertiesFile = sfd->fileWidget()->selectedFile();
+	activePropertiesFile = sfdp->fileWidget()->selectedFile();
 	saveToActivePropertiesFile();
 }
 
@@ -353,10 +403,20 @@ MainWindow::showPropertyWizard() {
 
 void
 MainWindow::checkModelAndProperties() {
+	// Trigger save of model and properties file
+	if (unsavedChangesModel || unsavedChangesProperty) {
+		bool shouldSave = KMessageBox::questionYesNo(0
+			, i18n("You have unsaved changes in either your model or properties file. These must be saved before checking. Save now?")
+		) == KMessageBox::Yes;
+		if (!shouldSave) { return; }
+	}
 	std::string modFile = this->activeModelFile.toStdString();
 	std::string propFile = this->activePropertiesFile.toStdString();
+	StaminaMessages::info("Checking model file: '" + modFile + "' and prop file '" + propFile + "'");
 	core::Options::model_file = modFile;
 	core::Options::properties_file = propFile;
+	prefs->getPreferencesFromUI();
+	prefs->setOptionsFromPreferences();
 	Stamina s; // TODO: create constructor for stamina::Stamina class without struct args*
 	s.run();
 }
