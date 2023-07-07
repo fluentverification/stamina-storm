@@ -80,6 +80,37 @@ MainWindow::setupActions() {
 		, this
 		, SLOT(showAbout())
 	);
+	// Actions which are connected to lambdas
+	connect(
+		ui.actionModel_Editor
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.mainTabs->setCurrentIndex(0);
+			this->ui.actionProperties_Editor->setChecked(false);
+			this->ui.actionResults_Viewer->setChecked(false);
+		}
+	);
+	connect(
+		ui.actionProperties_Editor
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.mainTabs->setCurrentIndex(1);
+			this->ui.actionModel_Editor->setChecked(false);
+			this->ui.actionResults_Viewer->setChecked(false);
+		}
+	);
+	connect(
+		ui.actionResults_Viewer
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.mainTabs->setCurrentIndex(2);
+			this->ui.actionModel_Editor->setChecked(false);
+			this->ui.actionProperties_Editor->setChecked(false);
+		}
+	);
 	connect(
 		ui.modelFile
 		, SIGNAL(textChanged())
