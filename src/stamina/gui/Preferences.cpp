@@ -49,8 +49,8 @@ Preferences::setOptionsFromPreferences() {
 	else if (PrefInfo::ModelBuilding::exportPerimeterStates) {
 		core::Options::export_perimeter_states = PrefInfo::ModelBuilding::perimeterStatesFile;
 	}
-	core::Options::method = PrefInfo::ModelBuilding::truncationMethod;
-	core::Options::threads = PrefInfo::ModelBuilding::threads;
+	// core::Options::method = PrefInfo::ModelBuilding::truncationMethod;
+	// core::Options::threads = PrefInfo::ModelBuilding::threads;
 }
 
 void
@@ -80,9 +80,9 @@ Preferences::getPreferencesFromUI() {
 	// Model Building options
 	// These we will take in batches of related properties
 	bool validKappa, validRKappa, validW;
-	auto k = ui.kappa->text().toInt(&validKappa);
-	auto rk = ui.rKappa->text().toInt(&validRKappa);
-	auto w = ui.w->text().toInt(&validW);
+	auto k = ui.kappa->text().toDouble(&validKappa);
+	auto rk = ui.rKappa->text().toDouble(&validRKappa);
+	auto w = ui.w->text().toDouble(&validW);
 	if (validKappa && validRKappa && validW) {
 		PrefInfo::ModelBuilding::kappa = k;
 		PrefInfo::ModelBuilding::rKappa = rk;
@@ -90,7 +90,11 @@ Preferences::getPreferencesFromUI() {
 	}
 	else {
 		std::string msg = "Either kappa, rKappa, or the window cannot be parsed!";
-		StaminaMessages::error(msg);
+		StaminaMessages::error(msg
+			+ std::string("\nValid k: ") + (validKappa ? "true" : "false") + " (" + ui.kappa->text().toStdString() + ")"
+			+ std::string("\nValid rk: ") + (validRKappa ? "true" : "false") + " (" + ui.rKappa->text().toStdString() + ")"
+			+ std::string("\nValid w: ") + (validW ? "true" : "false") + " (" + ui.w->text().toStdString() + ")"
+		);
 		QMessageBox::critical(this, "Parsing Error", QString::fromStdString(msg));
 	}
 	PrefInfo::ModelBuilding::earlyTerminationProperty = ui.earlyTerminationProperty->isChecked();
