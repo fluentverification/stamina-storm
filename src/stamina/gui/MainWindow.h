@@ -58,7 +58,7 @@ namespace stamina {
 			void setModifiedProperties();
 			void setActiveModelFileAndSave();
 			void setActivePropertyFileAndSave();
-			void onClose();
+			void handleOnClose();
 			void showPropertyWizard();
 			void checkModelAndProperties();
 			void handleTabChange();

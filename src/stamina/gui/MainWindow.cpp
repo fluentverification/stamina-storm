@@ -96,12 +96,12 @@ MainWindow::setupActions() {
 	);
 
 	// Connect on close to onClose()
-	connect(
+	/*connect(
 		ui
 		, SIGNAL(onClose())
 		, this
-		, SLOT(onClose())
-	);
+		, SLOT(handleOnClose())
+	);*/
 	// setupGUI(Default, "mainWindow.ui");
 
 	connect(
@@ -126,11 +126,15 @@ MainWindow::saveToActiveModelFile() {
 		unsavedChangesModel = false;
 		setCaption(baseWindowTitle);
 	}
+	else {
+		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
+	}
 }
 
 void
 MainWindow::saveToActivePropertiesFile() {
 	if (activePropertiesFile != "") {
+		StaminaMessages::info("Saving active properties file to path '" + activePropertiesFile.toStdString() + "'");
 		QSaveFile file(activePropertiesFile);
 		file.open(QIODevice::WriteOnly);
 
@@ -140,6 +144,9 @@ MainWindow::saveToActivePropertiesFile() {
 		file.commit();
 		unsavedChangesProperty = false;
 		setCaption(baseWindowTitle);
+	}
+	else {
+		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
 	}
 }
 
@@ -273,7 +280,7 @@ MainWindow::downloadFinished(KJob* job) {
 		ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	}
 	else {
-		ui.propertiesFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+		ui.propertiesEditor->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	}
 }
 
@@ -319,7 +326,7 @@ MainWindow::setActivePropertyFileAndSave() {
 }
 
 void
-MainWindow::onClose() {
+MainWindow::handleOnClose() {
 	if (unsavedChangesModel) {
 		bool shouldSave = KMessageBox::questionYesNo(0
 			, i18n("You have unsaved changes to your model file! Would you like to save it now?")
@@ -358,7 +365,38 @@ void
 MainWindow::handleTabChange() {
 	int tabIndex = ui.mainTabs->currentIndex();
 	modelActive = tabIndex != 1;
-	StaminaMessages::info("Model active is " + std::to_string(modelActive));
+	// StaminaMessages::info("Model active is " + std::to_string(modelActive));
+	// Disconnect the open and save actions
+	disconnect(ui.actionOpen, SIGNAL(triggered()), 0, 0);
+	disconnect(ui.actionSave, SIGNAL(triggered()), 0, 0);
+	if (modelActive) {
+		connect(
+			ui.actionOpen
+			, SIGNAL(triggered())
+			, this
+			, SLOT(openModelFile())
+		);
+		connect(
+			ui.actionSave
+			, SIGNAL(triggered())
+			, this
+			, SLOT(saveModelFile())
+		);
+	}
+	else {
+		connect(
+			ui.actionOpen
+			, SIGNAL(triggered())
+			, this
+			, SLOT(openPropertyFile())
+		);
+		connect(
+			ui.actionSave
+			, SIGNAL(triggered())
+			, this
+			, SLOT(savePropertyFile())
+		);
+	}
 }
 
 } // namespace gui
