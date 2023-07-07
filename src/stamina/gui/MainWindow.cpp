@@ -17,6 +17,8 @@
 #include "MainWindow.h"
 
 #include <iostream>
+#include <regex>
+#include <filesystem>
 
 #include "stamina/Stamina.h"
 
@@ -206,6 +208,25 @@ MainWindow::openModelFromAcceptedPath() {
 		KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(selectedFile));
 		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinishedModel(KJob*)));
 		job->exec();
+		// Check to see if a property file with the same filename
+		// is in the same directory. If so, ask if the user wishes to open that as well
+		std::string baseFileName = std::regex_replace(selectedFile.toStdString(), std::regex("\\.prism|\\.sm"), "");
+		std::string propFileName = baseFileName + ".csl";
+		if (std::filesystem::exists(propFileName)) {
+			// Ask the user if they want to open
+			bool shouldOpenPropFile = KMessageBox::questionYesNo(0
+			, i18n("There appears to be a property file in this directory with the same base name as the model file you opened. Would you like to open this property file as well?")
+			) == KMessageBox::Yes;
+			if (shouldOpenPropFile) {
+				QString pFileName = QString::fromStdString(propFileName);
+				QFileInfo pInfo(pFileName);
+				activePropertiesFile = pFileName;
+				StaminaMessages::info("Also opening prop file (due to name similarity): " + propFileName);
+				KIO::Job * pJob = KIO::storedGet(QUrl::fromLocalFile(pFileName));
+				connect(pJob, SIGNAL(result(KJob *)), this, SLOT(downloadFinishedProperty(KJob*)));
+				pJob->exec();
+			}
+		}
 	}
 
 }
@@ -419,6 +440,7 @@ MainWindow::checkModelAndProperties() {
 	prefs->setOptionsFromPreferences();
 	Stamina s; // TODO: create constructor for stamina::Stamina class without struct args*
 	s.run();
+	// auto staminaProcess = []() {
 	auto & resultsTable = s.getResultTable();
 	ui.simulationResultsTable->setRowCount(resultsTable.size());
 	int currentRow = 0;
@@ -445,6 +467,8 @@ MainWindow::checkModelAndProperties() {
 	}
 	// KMessageBox::
 	ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
+	// };
+	// QTimer::singleShot(0, this, staminaProcess);
 }
 
 void
