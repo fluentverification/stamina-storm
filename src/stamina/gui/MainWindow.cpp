@@ -419,6 +419,32 @@ MainWindow::checkModelAndProperties() {
 	prefs->setOptionsFromPreferences();
 	Stamina s; // TODO: create constructor for stamina::Stamina class without struct args*
 	s.run();
+	auto & resultsTable = s.getResultTable();
+	ui.simulationResultsTable->setRowCount(resultsTable.size());
+	int currentRow = 0;
+	for (auto & result : resultsTable) {
+		// The property name
+		ui.simulationResultsTable->setItem(
+			currentRow
+			, 0
+			, new QTableWidgetItem(QString::fromStdString(result.property))
+		);
+		// Minimum probability
+		ui.simulationResultsTable->setItem(
+			currentRow
+			, 1
+			, new QTableWidgetItem(QString::number(result.pMin))
+		);
+		// Maximum probability
+		ui.simulationResultsTable->setItem(
+			currentRow
+			, 2
+			, new QTableWidgetItem(QString::number(result.pMax))
+		);
+		currentRow++;
+	}
+	// KMessageBox::
+	ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 }
 
 void
