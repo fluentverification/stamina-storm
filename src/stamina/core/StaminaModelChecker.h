@@ -20,6 +20,20 @@ namespace stamina {
 		const uint32_t absorbingStateIndex = 0;
 		class StaminaModelChecker {
 		public:
+			class ResultTableRow {
+			public:
+				ResultTableRow(
+					double pMin
+					, double pMax
+					, std::string property
+				) : pMin(pMin)
+				, pMax(pMax)
+				, property(property)
+				{ /* Intentionally left empty */ }
+				double pMin;
+				double pMax;
+				std::string property;
+			};
 			/**
 			* Constructor for StaminaModelChecker
 			*
@@ -58,6 +72,7 @@ namespace stamina {
 				, storm::jani::Property propOriginal
 				, storm::prism::Program const& modulesFile
 			);
+			std::vector<ResultTableRow> & getResultTable() { return this->resultTable; }
 		private:
 			/**
 			* Result subclass (no private members since is a private subclass)
@@ -93,6 +108,8 @@ namespace stamina {
 				std::string explanation;
 
 			};
+
+
 			/**
 			* Whether or not to terminate model check
 			*
@@ -114,12 +131,15 @@ namespace stamina {
 			* */
 			void writeToOutput(std::string filename);
 			/**
-
+			* Takes a state and
 			*/
 			void modifyState(bool isMin);
+
 			/* Data Members */
 			std::shared_ptr<StaminaModelChecker::Result> min_results;
 			std::shared_ptr<StaminaModelChecker::Result> max_results;
+			// The results for all of the properties we check
+			std::vector<ResultTableRow> resultTable;
 			std::shared_ptr<StaminaModelBuilder<double>> builder;
 			std::shared_ptr<storm::prism::Program> modulesFile;
 			std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;

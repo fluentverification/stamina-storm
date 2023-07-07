@@ -228,6 +228,7 @@ StaminaModelChecker::modelCheckProperty(
 				"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
 				"This gives us a window of " + std::to_string(max_results->result - min_results->result)
 			);
+
 		}
 		catch (std::exception& e) {
 			StaminaMessages::errorAndExit(e.what());
@@ -276,6 +277,7 @@ StaminaModelChecker::modelCheckProperty(
 	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	resultTable.push_back( { min_results->result, max_results->result, propOriginal.getName() } );
 	StaminaMessages::info(resultInfo.str());
 
 	ResultInformation r(

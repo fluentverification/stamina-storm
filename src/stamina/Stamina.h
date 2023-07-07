@@ -46,7 +46,7 @@ namespace stamina {
 		* Initializes Stamina
 		* */
 		void initialize();
-
+		std::vector<core::StaminaModelChecker::ResultTableRow> & getResultTable() { return this->modelChecker->getResultTable(); }
 		/* Data Members */
 		std::shared_ptr<core::StaminaModelChecker> modelChecker;
 		std::shared_ptr<storm::prism::Program> modelFile;
