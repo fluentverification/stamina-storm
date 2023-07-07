@@ -94,12 +94,6 @@ PrismHighlighter::setupKeyWordPatterns() {
 		, QStringLiteral("\\bW\\b")
 	};
 
-	for (const QString &pattern : keywordPatterns) {
-		rule.pattern = QRegularExpression(pattern);
-		rule.format = keywordFormat;
-		highlightingRules.append(rule);
-	}
-
 	// String expressions
 	classFormat.setFontWeight(QFont::Bold);
 	classFormat.setForeground(cs->string);
@@ -133,6 +127,13 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z_]+\\b"));
 	rule.format = constFormat;
 	highlightingRules.append(rule);
+
+	// Keywords have highest priority, with the exception of comments
+	for (const QString &pattern : keywordPatterns) {
+		rule.pattern = QRegularExpression(pattern);
+		rule.format = keywordFormat;
+		highlightingRules.append(rule);
+	}
 
 	// Single line comments
 	singleLineCommentFormat.setForeground(cs->comment);
