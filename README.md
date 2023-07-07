@@ -83,3 +83,5 @@ You can compile the `xstamina` executable using the `BUILD_GUI` cmake option.
 ```
 cmake .. [OTHER CMAKE OPTIONS] -DBUILD_GUI=ON
 ```
+
+Note that in order to do this, you will first need to run `CompileUiFiles.sh` in `src/stamina/gui`.
