@@ -544,6 +544,14 @@ MainWindow::checkModelAndProperties() {
 		) == KMessageBox::Yes;
 		if (!shouldSave) { return; }
 	}
+	else if (activeModelFile == "" || activePropertiesFile == "") {
+		bool shouldSave = KMessageBox::questionYesNo(0
+			, i18n("Your model or properties file has not been saved on the filesystem. Save now?")
+		) == KMessageBox::Yes;
+		if (!shouldSave) { return; }
+	}
+	saveModelFile();
+	savePropertyFile();
 	std::string modFile = this->activeModelFile.toStdString();
 	std::string propFile = this->activePropertiesFile.toStdString();
 	StaminaMessages::info("Checking model file: '" + modFile + "' and prop file '" + propFile + "'");
