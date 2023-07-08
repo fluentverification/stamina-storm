@@ -21,7 +21,7 @@ if (Boost_FOUND)
 endif (Boost_FOUND)
 
 find_package(storm REQUIRED PATHS ${STORM_PATH})
-find_package(sstamina REQUIRED PATHS ${STAMINA_PATH})
+find_package(stamina REQUIRED PATHS ${STAMINA_PATH})
 
 add_executable(unit ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${STAMINA_PATH} ${LIB_PATH})
