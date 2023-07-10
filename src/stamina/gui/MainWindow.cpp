@@ -52,8 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
 void
 MainWindow::setupActions() {
 	ui.setupUi(this);
-	modelFindReplace->place(this->ui.modelFileLayout1);
-	propFindReplace->place(this->ui.propertySideVBox);
+	modelFindReplace->place(this->ui.modelFileLayout1, this->ui.modelFile);
+	propFindReplace->place(this->ui.propertySideVBox, this->ui.propertiesEditor);
 	connect(
 		ui.actionOpen
 		, SIGNAL(triggered())
@@ -227,6 +227,35 @@ MainWindow::setupActions() {
 			this->handleClose();
 			StaminaMessages::info("Goodbye to xSTAMINA");
 			exit(0);
+		}
+	);
+	connect(
+		ui.actionFind
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) {
+				modelFindReplace->show(false);
+			}
+			else if (idx == 1) {
+				propFindReplace->show(false);
+			}
+		}
+	);
+
+	connect(
+		ui.actionReplace
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) {
+				modelFindReplace->show(true);
+			}
+			else if (idx == 1) {
+				propFindReplace->show(true);
+			}
 		}
 	);
 	// Non-action slots to connect

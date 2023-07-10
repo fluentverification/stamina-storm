@@ -64,7 +64,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="findButtons">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -116,9 +116,9 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="replaceButtons">
      <item>
-      <spacer name="horizontalSpacer2">
+      <spacer name="replaceSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
