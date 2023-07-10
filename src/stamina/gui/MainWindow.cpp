@@ -254,6 +254,24 @@ MainWindow::setupActions() {
 	);
 
 	connect(
+		ui.addConstantButton
+		, &QPushButton::clicked
+		, this
+		, [this]() {
+			ui.constantsTable->setRowCount(ui.constantsTable->rowCount() + 1);
+		}
+	);
+
+	connect(
+		ui.createLabelButton
+		, &QPushButton::clicked
+		, this
+		, [this]() {
+			ui.labelTabel->setRowCount(ui.labelTabel->rowCount() + 1);
+		}
+	);
+
+	connect(
 		ui.mainTabs
 		, SIGNAL(currentChanged(int))
 		, this

@@ -314,7 +314,7 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
-                <widget class="QPushButton" name="pushButton">
+                <widget class="QPushButton" name="createLabelButton">
                  <property name="text">
                   <string>Create Label</string>
                  </property>
@@ -325,7 +325,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_2">
+                <widget class="QPushButton" name="deleteLabelButton">
                  <property name="text">
                   <string>Delete Label</string>
                  </property>
@@ -550,7 +550,7 @@
      <x>0</x>
      <y>0</y>
      <width>1624</width>
-     <height>33</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
