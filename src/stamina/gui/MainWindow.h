@@ -68,6 +68,7 @@ namespace stamina {
 			void setActiveModelFileAndSave();
 			void setActivePropertyFileAndSave();
 			void closeEvent(QCloseEvent *event);
+			void handleClose(); // Separate from closeEvent so it can be called without event param
 			void showPropertyWizard();
 			void checkModelAndProperties();
 			void handleTabChange();
