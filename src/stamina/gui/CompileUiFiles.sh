@@ -15,3 +15,7 @@ uic ui/Preferences.ui >> ui/ui_Preferences.h
 # Property Wizard
 rm ui/ui_PropertyWizard.h
 uic ui/PropertyWizard.ui >> ui/ui_PropertyWizard.h
+
+# Find and replace Wizard
+rm ui/ui_FindReplace.h
+uic ui/FindReplace.ui >> ui/ui_FindReplace.h

@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, about(new About(this))
 	, prefs(new Preferences(this))
 	, propWizard(new PropertyWizard(this))
+	, modelFindReplace(new FindReplace(this))
+	, propFindReplace(new FindReplace(this))
 	, activeModelFile("")
 	, activePropertiesFile("")
 	, unsavedChangesModel(false)
@@ -50,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
 void
 MainWindow::setupActions() {
 	ui.setupUi(this);
+	modelFindReplace->place(this->ui.modelFileLayout1);
+	propFindReplace->place(this->ui.propertySideVBox);
 	connect(
 		ui.actionOpen
 		, SIGNAL(triggered())

@@ -10,6 +10,7 @@
 #include "About.h"
 #include "Preferences.h"
 #include "PropertyWizard.h"
+#include "FindReplace.h"
 
 #include "addons/CodeEditor.h"
 
@@ -35,6 +36,9 @@ namespace stamina {
 			About * about;
 			Preferences * prefs;
 			PropertyWizard * propWizard;
+			// Widgets whose methods we must call
+			FindReplace * modelFindReplace;
+			FindReplace * propFindReplace;
 			// Perhaps there is a better way to do this, but there
 			// appear to be threadsafety issues using the same dialog
 			// Save file dialog
@@ -49,6 +53,7 @@ namespace stamina {
 			bool modelWasBuilt;
 			// Hackey way to get the file dialog to stay open
 			bool stayOpen;
+
 
 		private slots:
 			void showPreferences();

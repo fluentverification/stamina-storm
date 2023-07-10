@@ -202,12 +202,18 @@
             </item>
            </layout>
           </widget>
-          <widget class="stamina::gui::addons::CodeEditor" name="modelFile">
-           <property name="font">
-            <font>
-             <family>Noto Sans Mono</family>
-            </font>
-           </property>
+          <widget class="QWidget" name="modelFileLayout">
+            <layout class="QVBoxLayout" name="modelFileLayout">
+              <item>
+                <widget class="stamina::gui::addons::CodeEditor" name="modelFile">
+                <property name="font">
+                  <font>
+                  <family>Noto Sans Mono</family>
+                  </font>
+                </property>
+                </widget>
+              </item>
+            </layout>
           </widget>
          </widget>
         </item>

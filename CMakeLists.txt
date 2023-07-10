@@ -100,6 +100,7 @@ set(GUI_FILES
 	${GUI_PREFIX}/About.cpp
 	${GUI_PREFIX}/Preferences.cpp
 	${GUI_PREFIX}/PropertyWizard.cpp
+	${GUI_PREFIX}/FindReplace.cpp
 	# Code editing
 	${GUI_PREFIX}/addons/CodeEditor.cpp
 	${GUI_PREFIX}/addons/LineNumberArea.cpp
