@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QByteArray>
+#include <QStringListModel>
 
 #include <KTextEdit>
 #include <KLocalizedString>
@@ -37,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, propWizard(new PropertyWizard(this))
 	, modelFindReplace(new FindReplace(this))
 	, propFindReplace(new FindReplace(this))
+	, modCompleter(new QCompleter(this))
+	, propCompleter(new QCompleter(this))
 	, activeModelFile("")
 	, activePropertiesFile("")
 	, unsavedChangesModel(false)
@@ -54,6 +57,20 @@ MainWindow::setupActions() {
 	ui.setupUi(this);
 	modelFindReplace->place(this->ui.modelFileLayout1, this->ui.modelFile);
 	propFindReplace->place(this->ui.propertySideVBox, this->ui.propertiesEditor);
+	// Set up the autocompleters
+	auto completerWordModFileModel = modelFromFile(":/resources/wordlist.txt", modCompleter);
+	auto completerWordPropFileModel = modelFromFile(":/resources/wordlist.txt", propCompleter);
+	modCompleter->setModel(completerWordModFileModel);
+	propCompleter->setModel(completerWordPropFileModel);
+	modCompleter->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+	propCompleter->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+	modCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	propCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	modCompleter->setWrapAround(false);
+	propCompleter->setWrapAround(false);
+	ui.modelFile->setCompleter(modCompleter);
+	ui.propertiesEditor->setCompleter(propCompleter);
+	// Connect slots
 	connect(
 		ui.actionOpen
 		, SIGNAL(triggered())
@@ -725,6 +742,32 @@ MainWindow::handleTabChange() {
 			, SLOT(savePropertyFile())
 		);
 	}
+}
+
+QAbstractItemModel *
+MainWindow::modelFromFile(const QString & fileName, QCompleter * completer)
+{
+	QFile file(fileName);
+	if (!file.open(QFile::ReadOnly)) {
+		return new QStringListModel(completer);
+	}
+
+#ifndef QT_NO_CURSOR
+	QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+	QStringList words;
+
+	while (!file.atEnd()) {
+		QByteArray line = file.readLine();
+		if (!line.isEmpty()) {
+			words << QString::fromUtf8(line.trimmed());
+		}
+	}
+
+#ifndef QT_NO_CURSOR
+	QGuiApplication::restoreOverrideCursor();
+#endif
+	return new QStringListModel(words, completer);
 }
 
 } // namespace gui

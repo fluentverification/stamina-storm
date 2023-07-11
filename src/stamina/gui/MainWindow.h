@@ -4,6 +4,7 @@
 #include <KXmlGuiWindow>
 #include <kfilecustomdialog.h>
 #include <QCloseEvent>
+#include <QCompleter>
 
 #include "ui/ui_MainWindow.h"
 
@@ -39,6 +40,9 @@ namespace stamina {
 			// Widgets whose methods we must call
 			FindReplace * modelFindReplace;
 			FindReplace * propFindReplace;
+			// Completers
+			QCompleter * modCompleter;
+			QCompleter * propCompleter;
 			// Perhaps there is a better way to do this, but there
 			// appear to be threadsafety issues using the same dialog
 			// Save file dialog
@@ -77,6 +81,8 @@ namespace stamina {
 			void showPropertyWizard();
 			void checkModelAndProperties();
 			void handleTabChange();
+			// Method that gets a model from a filename
+			QAbstractItemModel * modelFromFile(const QString & fileName, QCompleter * completer);
 		};
 	} // namespace gui
 } // namespace stamina

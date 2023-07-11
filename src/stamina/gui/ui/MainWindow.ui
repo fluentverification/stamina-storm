@@ -14,7 +14,7 @@
    <string>STAMINA/STORM</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../resources/resources.qrc">
+   <iconset>
     <normaloff>:/images/staminaIcon.svg</normaloff>:/images/staminaIcon.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -203,17 +203,17 @@
            </layout>
           </widget>
           <widget class="QWidget" name="modelFileLayout">
-            <layout class="QVBoxLayout" name="modelFileLayout">
-              <item>
-                <widget class="stamina::gui::addons::CodeEditor" name="modelFile">
-                <property name="font">
-                  <font>
-                  <family>Noto Sans Mono</family>
-                  </font>
-                </property>
-                </widget>
-              </item>
-            </layout>
+           <layout class="QVBoxLayout" name="modelFileLayout">
+            <item>
+             <widget class="stamina::gui::addons::CodeEditor" name="modelFile">
+              <property name="font">
+               <font>
+                <family>Noto Sans Mono</family>
+               </font>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -1249,7 +1249,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../resources/resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>
