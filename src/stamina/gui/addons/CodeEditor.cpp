@@ -59,6 +59,31 @@ CodeEditor::updateLineNumberArea(const QRect & rect, int16_t dy) {
 }
 
 void
+CodeEditor::setCompleter(QCompleter * completer) {
+	if (c) {
+		c->disconnect(this);
+	}
+	c = completer;
+	if (!completer) {
+		return;
+	}
+	completer->setWidget(this);
+	completer->setCompletionMode(QCompleter::PopupCompletion);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	QObject::connect(
+		completer
+		, QOverload<const QString &>::of(&QCompleter::activated)
+		, this
+		, &CodeEditor::insertCompletion
+	);
+}
+
+QCompleter *
+CodeEditor::completer() const {
+	return c;
+}
+
+void
 CodeEditor::resizeEvent(QResizeEvent *e)
 {
 	QPlainTextEdit::resizeEvent(e);
@@ -116,6 +141,98 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 	}
 }
 
+void
+CodeEditor::insertCompletion(const QString & completion) {
+	if (c->widget() != this) { return; }
+	QTextCursor tc = textCursor();
+	int remaining = completion.length() - c->completionPrefix().length();
+	tc.movePosition(QTextCursor::Left);
+	tc.movePosition(QTextCursor::EndOfWord);
+	tc.insertText(completion.right(remaining));
+	setTextCursor(tc);
 }
+
+QString
+CodeEditor::textUnderCursor() const {
+	QTextCursor tc = textCursor();
+	tc.select(QTextCursor::WordUnderCursor);
+	return tc.selectedText();
 }
+
+void
+CodeEditor::focusInEvent(QFocusEvent * e) {
+	if (c) {
+		c->setWidget(this);
+	}
+	QTextEdit::focusInEvent(e);
 }
+
+void
+CodeEditor::keyPressEvent(QKeyEvent * e) {
+	if (c && c->popup()->isVisible()) {
+		// Use these keys for the completer
+		switch (e->key()) {
+		case Qt::KeyEnter:
+		case Qt::Key_Return:
+		case Qt::Key_Escape:
+		case Qt::Key_Tab:
+		case Qt::Key_Backtab:
+			e->ignore();
+			return;
+		default:
+			break;
+		}
+	}
+
+	// Detect Ctl + E shortcut
+	const bool isShortcut = (
+		// Control key is pressed
+		e->modifiers().testFlag(Qt::ControlModifier)
+		// And E key is pressed
+		&& e->key() == Qt::Key_E
+	);
+
+	if (!c || !isShortcut) {
+		// Forward onto the super class
+		QTextEdit::keyPressEvent(e);
+	}
+
+	// Other events
+	const bool ctlOrShift = e->modifiers().testFlag(Qt::ControlModifier)
+						|| e->modifiers().testFlag(Qt::ShiftModifier);
+
+	if (!c || (ctlOrShift && e->text().isEmpty())) { return; }
+
+	// Test if end of word
+	static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-=");
+	const bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctlOrShift;
+
+	// Get prefix for completion
+	QString completionPrefix = textUnderCursor();
+	if (!isShortcut && (
+			hasModifier // If there is a modifier
+			|| e->text().isEmpty() // Or there is no input
+			|| completionPrefix.length() < 3 // Or the prefix has a length less than 3
+			|| eow.contains(e.text().right(1)) // Or we are at EOW
+		)
+	) {
+		// Hide the popup
+		c->popup()->hide();
+		return
+	}
+
+	if (completionPrefix != c->completionPrefix()) {
+		c->setCompletionPrefix(completionPrefix());
+		c->popup()->setCurrentIndex(c->completionMode()->index(0, 0));
+	}
+
+	QRect cr = cursorRect();
+	cr.setWidth(c->popup()->sizeHintForColumn(0)
+			+ c->popup()->verticalScrollBar()->sizeHint().width());
+	// Show completor popup
+	c->complete(cr);
+}
+
+} // namespace addons
+} // namespace gui
+} // namespace stamina

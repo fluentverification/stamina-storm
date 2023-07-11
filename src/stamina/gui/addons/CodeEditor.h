@@ -10,6 +10,7 @@
 #include <QTextEdit>
 #include <QPlainTextEdit>
 #include <QPainter>
+#include <QCompleter>
 
 #include "highlighter/Highlighter.h"
 
@@ -23,14 +24,21 @@ namespace stamina {
 
 				void lineNumberAreaPaintEvent(QPaintEvent * event);
 				uint16_t lineNumberAreaWidth();
+				void setCompleter(QCompleter * completer);
+				QCompleter * completer() const;
 			protected:
 				void resizeEvent(QResizeEvent * event) override;
+				void keyPressEvent(QKeyEvent * e) override;
+				void focusInEvent(QFocusEvent * e) override;
 			private slots:
 				void updateLineNumberAreaWidth(uint16_t newBlockCount);
 				void highlightCurrentLine();
 				void updateLineNumberArea(const QRect & rect, int16_t dy);
-
+				void insertCompletion(const QString & completion);
 			private:
+				QString textUnderCursor() const;
+
+				QCompleter * c = nullptr;
 				QWidget * lineNumberArea;
 				highlighter::Highlighter * hl;
 			};
