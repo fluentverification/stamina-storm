@@ -505,6 +505,7 @@ MainWindow::openModelFile() {
 		, this
 		, SLOT(openModelFromAcceptedPath())
 	);
+	ui.statusbar->showMessage(tr("Showing open dialog."));
 	ofdm->show();
 // 	QString openFileName = KFileDialog::getOpenFileName(this, i18n("Open model file"));
 }
@@ -581,6 +582,7 @@ MainWindow::saveModelFile() {
 		saveToActiveModelFile();
 	}
 	unsavedChangesModel = false;
+	ui.statusbar->showMessage(tr("Saved model file."));
 }
 
 void
@@ -617,6 +619,7 @@ MainWindow::openPropertyFile() {
 		, this
 		, SLOT(openPropertyFromAcceptedPath())
 	);
+	ui.statusbar->showMessage(tr("Showing open dialog."));
 	ofdp->show();
 }
 
@@ -629,6 +632,7 @@ MainWindow::savePropertyFile() {
 		saveToActivePropertiesFile();
 	}
 	unsavedChangesProperty = false;
+	ui.statusbar->showMessage(tr("Saved properties file."));
 }
 
 void
@@ -647,6 +651,7 @@ MainWindow::downloadFinishedModel(KJob* job) {
 	if (job->error()) {
 		KMessageBox::error(this, job->errorString());
 		activeModelFile.clear();
+		ui.statusbar->showMessage(tr("Error in opening model file."));
 		return;
 	}
 
@@ -655,7 +660,7 @@ MainWindow::downloadFinishedModel(KJob* job) {
 	ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	StaminaMessages::good("Succesfully loaded file into model editor!");
 	unsavedChangesModel = false;
-
+	ui.statusbar->showMessage(tr("Opened model file."));
 }
 
 void
@@ -663,6 +668,7 @@ MainWindow::downloadFinishedProperty(KJob* job) {
 	if (job->error()) {
 		KMessageBox::error(this, job->errorString());
 		activeModelFile.clear();
+		ui.statusbar->showMessage(tr("Error in opening property file."));
 		return;
 	}
 
@@ -671,7 +677,7 @@ MainWindow::downloadFinishedProperty(KJob* job) {
 	ui.propertiesEditor->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	StaminaMessages::good("Succesfully loaded file into property editor!");
 	unsavedChangesProperty = false;
-
+	ui.statusbar->showMessage(tr("Opened property file."));
 }
 
 void
@@ -766,13 +772,19 @@ MainWindow::checkModelAndProperties() {
 		bool shouldSave = KMessageBox::questionYesNo(0
 			, i18n("You have unsaved changes in either your model or properties file. These must be saved before checking. Save now?")
 		) == KMessageBox::Yes;
-		if (!shouldSave) { return; }
+		if (!shouldSave) {
+			ui.statusbar->showMessage(tr("Did not save model file."));
+			return;
+		}
 	}
 	else if (activeModelFile == "" || activePropertiesFile == "") {
 		bool shouldSave = KMessageBox::questionYesNo(0
 			, i18n("Your model or properties file has not been saved on the filesystem. Save now?")
 		) == KMessageBox::Yes;
-		if (!shouldSave) { return; }
+		if (!shouldSave) {
+			ui.statusbar->showMessage(tr("Did not save properties file."));
+			return;
+		}
 	}
 	saveModelFile();
 	savePropertyFile();
@@ -784,7 +796,9 @@ MainWindow::checkModelAndProperties() {
 	prefs->getPreferencesFromUI();
 	prefs->setOptionsFromPreferences();
 	Stamina s; // TODO: create constructor for stamina::Stamina class without struct args*
+	ui.statusbar->showMessage(tr("Running."));
 	s.run();
+	ui.statusbar->showMessage(tr("Finished."));
 	// auto staminaProcess = []() {
 	auto & resultsTable = s.getResultTable();
 	ui.simulationResultsTable->setRowCount(resultsTable.size());
