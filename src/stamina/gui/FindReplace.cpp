@@ -2,6 +2,8 @@
 
 #include <core/StaminaMessages.h>
 
+#include <KMessageBox>
+
 #include <QRegularExpression>
 
 namespace stamina {
@@ -94,8 +96,8 @@ FindReplace::find() {
 	findNext();
 }
 
-void
-FindReplace::findNext() {
+bool
+FindReplace::findNext(bool alertIfNotFound) {
 	StaminaMessages::info("findNext() callled");
 	QString expression = ui.findExpression->text();
 	bool useRegex = ui.findType->currentIndex() == 1;
@@ -104,7 +106,11 @@ FindReplace::findNext() {
 		editor->find(regexp);
 	}
 	else {
-		editor->find(expression);
+		bool found = editor->find(expression);
+		if (alertIfNotFound && !found) {
+			KMessageBox::sorry(nullptr, "The text could not be found!");
+		}
+		return found;
 	}
 
 }
@@ -112,11 +118,35 @@ FindReplace::findNext() {
 void
 FindReplace::replace() {
 	StaminaMessages::info("replace() callled");
+	bool canReplace = findNext(false);
+	if (canReplace) {
+		QTextCursor tc = editor->textCursor();
+		QString replaceValue = ui.replaceText->text();
+		tc.select(QTextCursor::WordUnderCursor);
+		tc.removeSelectedText();
+		tc.insertText(replaceValue);
+	}
+	else {
+		KMessageBox::sorry(nullptr, "Cannot replace text! The text could not be found!");
+	}
 }
 
 void
 FindReplace::replaceAll() {
 	StaminaMessages::info("replaceAll() callled");
+	QString expression = ui.findExpression->text();
+	QString replaceValue = ui.replaceText->text();
+	bool useRegex = ui.findType->currentIndex() == 1;
+	QString oldTxt = editor->toPlainText();
+	if (useRegex) {
+		QRegularExpression regexp(expression);
+		QString newTxt = oldTxt.replace(regexp, replaceValue);
+		editor->setPlainText(newTxt);
+	}
+	else {
+		QString newTxt = oldTxt.replace(expression, replaceValue);
+		editor->setPlainText(newTxt);
+	}
 }
 
 } // namespace gui

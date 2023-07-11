@@ -22,7 +22,7 @@ namespace stamina {
 			QPlainTextEdit * editor;
 		private slots:
 			void find();
-			void findNext();
+			bool findNext(bool alertIfNotFound=true);
 			void replace();
 			void replaceAll();
 		};
