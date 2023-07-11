@@ -215,7 +215,7 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 	if (!isShortcut && (
 			hasModifier // If there is a modifier
 			|| e->text().isEmpty() // Or there is no input
-			|| completionPrefix.length() < 3 // Or the prefix has a length less than 3
+			|| completionPrefix.length() < 2 // Or the prefix has a length less than 2
 			|| eow.contains(e->text().right(1)) // Or we are at EOW
 		)
 	) {
@@ -234,8 +234,6 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 			+ c->popup()->verticalScrollBar()->sizeHint().width());
 	// Show completor popup
 	c->complete(cr);
-	StaminaMessages::info("Showing popup");
-	c->popup()->show();
 }
 
 } // namespace addons
