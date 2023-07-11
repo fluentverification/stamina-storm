@@ -254,9 +254,11 @@ MainWindow::setupActions() {
 			int idx = this->ui.mainTabs->currentIndex();
 			if (idx == 0) {
 				modelFindReplace->show(false);
+				modelFindReplace->focusFind();
 			}
 			else if (idx == 1) {
 				propFindReplace->show(false);
+				propFindReplace->focusFind();
 			}
 		}
 	);
@@ -269,9 +271,11 @@ MainWindow::setupActions() {
 			int idx = this->ui.mainTabs->currentIndex();
 			if (idx == 0) {
 				modelFindReplace->show(true);
+				modelFindReplace->focusFind();
 			}
 			else if (idx == 1) {
 				propFindReplace->show(true);
+				propFindReplace->focusFind();
 			}
 		}
 	);

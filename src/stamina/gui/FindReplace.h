@@ -15,6 +15,7 @@ namespace stamina {
 			FindReplace(QWidget * parent = nullptr);
 			void place(QVBoxLayout * location = nullptr, QPlainTextEdit * editor = nullptr);
 			void show(bool replace = false);
+			void focusFind();
 		protected:
 			void setupActions();
 			Ui::FindReplace ui;

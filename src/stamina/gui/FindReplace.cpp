@@ -87,6 +87,27 @@ FindReplace::setupActions() {
 		, this
 		, SLOT(replaceAll())
 	);
+
+	// When return is pressed, the findExpression textbox will call findNext
+	connect(
+		ui.findExpression
+		, SIGNAL(returnPressed())
+		, this
+		, SLOT(findNext())
+	);
+
+	// For the replaceText textbox, we will call replace() (duh)
+	connect(
+		ui.replaceText
+		, SIGNAL(returnPressed())
+		, this
+		, SLOT(replace())
+	);
+}
+
+void
+FindReplace::focusFind() {
+	ui.findExpression->setFocus();
 }
 
 void
