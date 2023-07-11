@@ -57,6 +57,8 @@ namespace stamina {
 			bool modelWasBuilt;
 			// Hackey way to get the file dialog to stay open
 			bool stayOpen;
+			int modZoom = 0;
+			int propZoom = 0;
 
 
 		private slots:

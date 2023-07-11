@@ -5,6 +5,8 @@
 #include <QTextStream>
 #include <QByteArray>
 #include <QStringListModel>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <KTextEdit>
 #include <KLocalizedString>
@@ -96,10 +98,17 @@ MainWindow::setupActions() {
 		, SLOT(saveModelFileAs())
 	);
 	connect(
-		ui.actionAbout_STAMINA_2
+		ui.actionAbout_STAMINA
 		, SIGNAL(triggered())
 		, this
 		, SLOT(showAbout())
+	);
+
+	connect(
+		ui.actionAbout_Qt
+		, &QAction::triggered
+		, this
+		, &QApplication::aboutQt
 	);
 	// Actions which are connected to lambdas
 	connect(
@@ -133,7 +142,7 @@ MainWindow::setupActions() {
 		}
 	);
 	connect(
-		ui.actionModule_2
+		ui.actionModule
 		, &QAction::triggered
 		, this
 		, [this]() {
@@ -277,6 +286,104 @@ MainWindow::setupActions() {
 				propFindReplace->show(true);
 				propFindReplace->focusFind();
 			}
+		}
+	);
+	connect(
+		ui.actionShow_toolbar
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.mainToolBar->setVisible(this->ui.actionShow_toolbar->isChecked());
+		}
+	);
+	connect(
+		ui.actionZoom_In
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) {
+				ui.modelFile->zoomIn();
+				// modCompleter->zoomIn();
+				modZoom++;
+			}
+			else if (idx == 1) {
+				ui.propertiesEditor->zoomIn();
+				// propCompleter->zoomIn();
+				propZoom++;
+			}
+		}
+	);
+	connect(
+		ui.actionZoom_Out
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) {
+				ui.modelFile->zoomOut();
+				modZoom--;
+			}
+			else if (idx == 1) {
+				ui.propertiesEditor->zoomOut();
+				propZoom--;
+			}
+		}
+	);
+	connect(
+		ui.actionReset_Text_Size
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) {
+				if (modZoom > 0) {
+					ui.modelFile->zoomIn(-modZoom);
+				}
+				else {
+					ui.modelFile->zoomOut(-modZoom);
+				}
+			}
+			else if (idx == 1) {
+				if (propZoom > 0) {
+					ui.propertiesEditor->zoomIn(-propZoom);
+				}
+				else {
+					ui.propertiesEditor->zoomOut(-propZoom);
+				}
+			}
+		}
+	);
+	connect(
+		ui.actionShow_Statusbar
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.statusbar->setVisible(this->ui.actionShow_Statusbar->isChecked());
+		}
+	);
+	connect(
+		ui.actionLock_Toolbar
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.mainToolBar->setMovable(!this->ui.actionLock_Toolbar->isChecked());
+		}
+	);
+	connect(
+		ui.actionDocumentation
+		, &QAction::triggered
+		, this
+		, [this]() {
+			QDesktopServices::openUrl(QUrl("https://staminachecker.org/documentation/wiki/"));
+		}
+	);
+	connect(
+		ui.actionReport_A_Bug
+		, &QAction::triggered
+		, this
+		, [this]() {
+			QDesktopServices::openUrl(QUrl("https://github.com/fluentverification/stamina-storm/issues"));
 		}
 	);
 	// Non-action slots to connect

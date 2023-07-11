@@ -597,7 +597,7 @@
       <property name="title">
        <string>Model</string>
       </property>
-      <addaction name="actionModule_2"/>
+      <addaction name="actionModule"/>
       <addaction name="actionUnbounded_Variable"/>
       <addaction name="actionBounded_Variable"/>
      </widget>
@@ -642,15 +642,6 @@
      <addaction name="actionZoom_Out"/>
      <addaction name="actionReset_Text_Size"/>
     </widget>
-    <widget class="QMenu" name="menuToolbar_Position">
-     <property name="title">
-      <string>Toolbar Position</string>
-     </property>
-     <addaction name="actionTop"/>
-     <addaction name="actionBottom"/>
-     <addaction name="actionLeft"/>
-     <addaction name="actionRight"/>
-    </widget>
     <addaction name="actionModel_Editor"/>
     <addaction name="actionProperties_Editor"/>
     <addaction name="actionResults_Viewer"/>
@@ -661,7 +652,6 @@
     <addaction name="actionShow_Statusbar"/>
     <addaction name="separator"/>
     <addaction name="actionLock_Toolbar"/>
-    <addaction name="menuToolbar_Position"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -698,8 +688,8 @@
     <addaction name="actionDocumentation"/>
     <addaction name="actionReport_A_Bug"/>
     <addaction name="separator"/>
-    <addaction name="actionAbout_STORM_2"/>
-    <addaction name="actionAbout_STAMINA_2"/>
+    <addaction name="actionAbout_STORM"/>
+    <addaction name="actionAbout_STAMINA"/>
     <addaction name="separator"/>
     <addaction name="actionAbout_Qt"/>
     <addaction name="actionAbout_KF5"/>
@@ -854,7 +844,7 @@
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionModule_2">
+  <action name="actionModule">
    <property name="text">
     <string>Module</string>
    </property>
@@ -1068,11 +1058,6 @@
     <string>Model Checker Preferences</string>
    </property>
   </action>
-  <action name="actionAbout_STORM">
-   <property name="text">
-    <string>About STORM</string>
-   </property>
-  </action>
   <action name="actionSTAMINA_Iterative">
    <property name="checkable">
     <bool>true</bool>
@@ -1100,11 +1085,6 @@
     <string>STORM Explicit</string>
    </property>
   </action>
-  <action name="actionAbout_STAMINA">
-   <property name="text">
-    <string>About STAMINA</string>
-   </property>
-  </action>
   <action name="actionDocumentation">
    <property name="text">
     <string>Documentation</string>
@@ -1119,12 +1099,12 @@
     <string>Report A Bug</string>
    </property>
   </action>
-  <action name="actionAbout_STORM_2">
+  <action name="actionAbout_STORM">
    <property name="text">
     <string>About STORM</string>
    </property>
   </action>
-  <action name="actionAbout_STAMINA_2">
+  <action name="actionAbout_STAMINA">
    <property name="text">
     <string>About STAMINA</string>
    </property>
@@ -1174,45 +1154,10 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Lock Toolbar</string>
-   </property>
-  </action>
-  <action name="actionTop">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Top</string>
-   </property>
-  </action>
-  <action name="actionBottom">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Bottom</string>
-   </property>
-  </action>
-  <action name="actionLeft">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Left</string>
-   </property>
-  </action>
-  <action name="actionRight">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Right</string>
    </property>
   </action>
   <action name="actionForever_Property">
