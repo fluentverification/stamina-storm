@@ -6,7 +6,8 @@
 #include <iostream>
 
 #include <QPalette>
-
+#include <QAbstractItemView>
+#include <QScrollBar>
 
 namespace stamina {
 namespace gui {
@@ -164,7 +165,7 @@ CodeEditor::focusInEvent(QFocusEvent * e) {
 	if (c) {
 		c->setWidget(this);
 	}
-	QTextEdit::focusInEvent(e);
+	QPlainTextEdit::focusInEvent(e);
 }
 
 void
@@ -172,7 +173,7 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 	if (c && c->popup()->isVisible()) {
 		// Use these keys for the completer
 		switch (e->key()) {
-		case Qt::KeyEnter:
+		case Qt::Key_Enter:
 		case Qt::Key_Return:
 		case Qt::Key_Escape:
 		case Qt::Key_Tab:
@@ -194,7 +195,7 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 
 	if (!c || !isShortcut) {
 		// Forward onto the super class
-		QTextEdit::keyPressEvent(e);
+		QPlainTextEdit::keyPressEvent(e);
 	}
 
 	// Other events
@@ -213,17 +214,17 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 			hasModifier // If there is a modifier
 			|| e->text().isEmpty() // Or there is no input
 			|| completionPrefix.length() < 3 // Or the prefix has a length less than 3
-			|| eow.contains(e.text().right(1)) // Or we are at EOW
+			|| eow.contains(e->text().right(1)) // Or we are at EOW
 		)
 	) {
 		// Hide the popup
 		c->popup()->hide();
-		return
+		return;
 	}
 
 	if (completionPrefix != c->completionPrefix()) {
-		c->setCompletionPrefix(completionPrefix());
-		c->popup()->setCurrentIndex(c->completionMode()->index(0, 0));
+		c->setCompletionPrefix(completionPrefix);
+		c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
 	}
 
 	QRect cr = cursorRect();
