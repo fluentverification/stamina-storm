@@ -3,6 +3,8 @@
 
 #include "highlighter/PrismHighlighter.h"
 
+#include <core/StaminaMessages.h>
+
 #include <iostream>
 
 #include <QPalette>
@@ -232,6 +234,8 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 			+ c->popup()->verticalScrollBar()->sizeHint().width());
 	// Show completor popup
 	c->complete(cr);
+	StaminaMessages::info("Showing popup");
+	c->popup()->show();
 }
 
 } // namespace addons

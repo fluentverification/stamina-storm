@@ -749,6 +749,7 @@ MainWindow::modelFromFile(const QString & fileName, QCompleter * completer)
 {
 	QFile file(fileName);
 	if (!file.open(QFile::ReadOnly)) {
+		StaminaMessages::error("Keyword list is empty!");
 		return new QStringListModel(completer);
 	}
 
@@ -760,6 +761,7 @@ MainWindow::modelFromFile(const QString & fileName, QCompleter * completer)
 	while (!file.atEnd()) {
 		QByteArray line = file.readLine();
 		if (!line.isEmpty()) {
+			StaminaMessages::info("Adding line");
 			words << QString::fromUtf8(line.trimmed());
 		}
 	}

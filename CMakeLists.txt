@@ -110,7 +110,7 @@ set(GUI_FILES
 )
 
 set(GUI_RECS
-	${GUI_PREFIX}/resources/resources.qrc
+	${GUI_PREFIX}/resources.qrc
 )
 
 message("STORM_PATH is set as " ${STORM_PATH})
@@ -148,7 +148,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC stamina storm storm-parsers)
 # Stuff for the GUI
 if(BUILD_GUI)
 	set(GUI_EXECUTABLE_NAME xstamina)
-	add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES})
+	add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES} ${GUI_RECS})
 	target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC
 		Qt5::Widgets
 		KF5::CoreAddons
