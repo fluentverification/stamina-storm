@@ -73,6 +73,8 @@ namespace stamina {
 				, storm::prism::Program const& modulesFile
 			);
 			std::vector<ResultTableRow> & getResultTable() { return this->resultTable; }
+			uint64_t getStateCount() { return builder->getStateCount(); }
+			uint64_t getTransitionCount() { return builder->getTransitionCount(); }
 		private:
 			/**
 			* Result subclass (no private members since is a private subclass)

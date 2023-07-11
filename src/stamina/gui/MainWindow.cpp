@@ -15,15 +15,12 @@
 #include <KMessageBox>
 #include <KIO/Job>
 
-#include <stamina/Stamina.h>
 
 #include "MainWindow.h"
 
 #include <iostream>
 #include <regex>
 #include <filesystem>
-
-#include "stamina/Stamina.h"
 
 namespace stamina {
 namespace gui {
@@ -795,7 +792,6 @@ MainWindow::checkModelAndProperties() {
 	core::Options::properties_file = propFile;
 	prefs->getPreferencesFromUI();
 	prefs->setOptionsFromPreferences();
-	Stamina s; // TODO: create constructor for stamina::Stamina class without struct args*
 	ui.statusbar->showMessage(tr("Running."));
 	s.run();
 	ui.statusbar->showMessage(tr("Finished."));
@@ -826,6 +822,10 @@ MainWindow::checkModelAndProperties() {
 	}
 	// KMessageBox::
 	ui.actionResults_Viewer->trigger();
+	// Populate some of the labels
+	ui.statesLabel->setText(QString::number(s.getStateCount()));
+	ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
+	ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
 	// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 	// };
 	// QTimer::singleShot(0, this, staminaProcess);

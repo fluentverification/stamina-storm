@@ -15,6 +15,8 @@
 
 #include "addons/CodeEditor.h"
 
+#include <stamina/Stamina.h>
+
 namespace stamina {
 	namespace gui {
 
@@ -28,6 +30,9 @@ namespace stamina {
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();
 			void setupActions();
+
+		private:
+			Stamina s;
 			bool unsavedChangesModel;
 			bool unsavedChangesProperty;
 			bool modelActive; // If not model is active, then property is active

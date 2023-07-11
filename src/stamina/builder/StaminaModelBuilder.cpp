@@ -450,6 +450,19 @@ CompressedState &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getAbsorbingState() {
 	return this->absorbingState;
 }
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+uint64_t
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateCount() {
+	return static_cast<uint64_t>(stateStorage.getNumberOfStates());
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+uint64_t
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getTransitionCount() {
+	return numberTransitions;
+}
+
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::printTransitionActions() {

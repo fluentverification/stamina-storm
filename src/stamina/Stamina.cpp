@@ -20,9 +20,9 @@ using namespace stamina::core;
 /* ===== IMPLEMENTATION FOR `Stamina::Stamina` Methods ===== */
 
 // PUBLIC METHODS
-Stamina::Stamina(struct arguments * arguments) : modelModify(
+Stamina::Stamina(struct arguments * arguments) : modelModify(new util::ModelModify(
 	arguments->model_file
-	, arguments->properties_file
+	, arguments->properties_file)
 ) {
 	try {
 		Options::setArgs(arguments);
@@ -38,15 +38,15 @@ Stamina::Stamina(struct arguments * arguments) : modelModify(
 	}
 }
 
-Stamina::Stamina() : modelModify(
-	Options::model_file
-	, Options::properties_file
-) {
-	StaminaMessages::info("Starting STAMINA with kappa = " + std::to_string(Options::kappa) + " and reduction factor = " + std::to_string(Options::reduce_kappa));
-	bool good = Options::checkOptions();
-	if (!good) {
-		StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");
-	}
+Stamina::Stamina()
+	: modelModify(nullptr)
+{
+	StaminaMessages::info("Starting STAMINA");
+	StaminaMessages::warning("This constructor is only to be called from the GUI! It leaves the model and properties files unloaded until specified later.");
+	// bool good = Options::checkOptions();
+	// if (!good) {
+	// 	StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");
+	// }
 }
 
 Stamina::~Stamina() {
@@ -58,8 +58,8 @@ Stamina::run() {
 	initialize();
 	// Check each property in turn
 	for (auto & prop : *propertiesVector) {
-		auto propMin = modelModify.modifyProperty(prop, true);
-		auto propMax = modelModify.modifyProperty(prop, false);
+		auto propMin = modelModify->modifyProperty(prop, true);
+		auto propMax = modelModify->modifyProperty(prop, false);
 		// Re-initialize
 		// initialize();
 		modelChecker->modelCheckProperty(
@@ -77,6 +77,13 @@ Stamina::run() {
 
 void
 Stamina::initialize() {
+	// Check to see if we need to create a modelModify
+	// Since the GUI does not specify one immediately
+	if (!modelModify) {
+		// Create modelModify
+		std::shared_ptr<util::ModelModify> mModify(new util::ModelModify(Options::model_file, Options::properties_file));
+		modelModify = mModify;
+	}
 	StaminaMessages::info("Stamina version is: " + std::to_string(version::version_major) + "." + std::to_string(version::version_minor) + "." + std::to_string(version::version_sub_minor));
 	try {
 		std::allocator<StaminaModelChecker> alloc;
@@ -94,8 +101,8 @@ Stamina::initialize() {
 
 	// Load model file and properties file
 	try {
-		modelFile = modelModify.readModel();
-		propertiesVector = modelModify.createPropertiesList(modelFile);
+		modelFile = modelModify->readModel();
+		propertiesVector = modelModify->createPropertiesList(modelFile);
 		auto labels = modelFile->getLabels();
 		modelChecker->initialize(modelFile, propertiesVector);
 	}

@@ -171,6 +171,11 @@ namespace stamina {
 			 * Gets the absorbing state
 			 * */
 			CompressedState & getAbsorbingState();
+			/**
+			 * Gets the total count of (currently) built states
+			 * */
+			uint64_t getStateCount();
+			uint64_t getTransitionCount();
 		protected:
 			void purgeAbsorbingTransitions();
 			/**

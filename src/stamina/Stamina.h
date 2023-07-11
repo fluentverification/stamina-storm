@@ -47,11 +47,13 @@ namespace stamina {
 		* */
 		void initialize();
 		std::vector<core::StaminaModelChecker::ResultTableRow> & getResultTable() { return this->modelChecker->getResultTable(); }
+		uint64_t getStateCount() { return modelChecker->getStateCount(); }
+		uint64_t getTransitionCount() { return modelChecker->getTransitionCount(); }
 		/* Data Members */
 		std::shared_ptr<core::StaminaModelChecker> modelChecker;
 		std::shared_ptr<storm::prism::Program> modelFile;
 		std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
-		util::ModelModify modelModify;
+		std::shared_ptr<util::ModelModify> modelModify;
 	};
 }
 
