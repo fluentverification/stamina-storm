@@ -5,6 +5,7 @@
 #include <kfilecustomdialog.h>
 #include <QCloseEvent>
 #include <QCompleter>
+#include <QProgressBar>
 
 #include "ui/ui_MainWindow.h"
 
@@ -56,6 +57,9 @@ namespace stamina {
 			// Open file dialog
 			KFileCustomDialog * ofdm;
 			KFileCustomDialog * ofdp;
+			// The progress bar
+			QProgressBar * progress;
+			// Active files
 			QString activeModelFile;
 			QString activePropertiesFile;
 			QString baseWindowTitle;

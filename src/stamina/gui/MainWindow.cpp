@@ -7,6 +7,7 @@
 #include <QStringListModel>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QtConcurrent>
 
 #include <KTextEdit>
 #include <KLocalizedString>
@@ -39,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, propFindReplace(new FindReplace(this))
 	, modCompleter(new QCompleter(this))
 	, propCompleter(new QCompleter(this))
+	, progress(new QProgressBar(this))
 	, activeModelFile("")
 	, activePropertiesFile("")
 	, unsavedChangesModel(false)
@@ -49,6 +51,10 @@ MainWindow::MainWindow(QWidget *parent)
 	, stayOpen(true)
 {
 	setupActions();
+	progress->setRange(0, 0);
+	progress->setTextVisible(false);
+	ui.statusbar->addPermanentWidget(progress);
+	progress->hide();
 }
 
 void
@@ -793,41 +799,43 @@ MainWindow::checkModelAndProperties() {
 	prefs->getPreferencesFromUI();
 	prefs->setOptionsFromPreferences();
 	ui.statusbar->showMessage(tr("Running."));
-	s.run();
-	ui.statusbar->showMessage(tr("Finished."));
-	// auto staminaProcess = []() {
-	auto & resultsTable = s.getResultTable();
-	ui.simulationResultsTable->setRowCount(resultsTable.size());
-	int currentRow = 0;
-	for (auto & result : resultsTable) {
-		// The property name
-		ui.simulationResultsTable->setItem(
-			currentRow
-			, 0
-			, new QTableWidgetItem(QString::fromStdString(result.property))
-		);
-		// Minimum probability
-		ui.simulationResultsTable->setItem(
-			currentRow
-			, 1
-			, new QTableWidgetItem(QString::number(result.pMin))
-		);
-		// Maximum probability
-		ui.simulationResultsTable->setItem(
-			currentRow
-			, 2
-			, new QTableWidgetItem(QString::number(result.pMax))
-		);
-		currentRow++;
-	}
-	// KMessageBox::
-	ui.actionResults_Viewer->trigger();
-	// Populate some of the labels
-	ui.statesLabel->setText(QString::number(s.getStateCount()));
-	ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
-	ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
-	// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
-	// };
+	QtConcurrent::run([this]() {
+		progress->show();
+		s.run();
+		ui.statusbar->showMessage(tr("Finished."));
+		auto & resultsTable = s.getResultTable();
+		ui.simulationResultsTable->setRowCount(resultsTable.size());
+		int currentRow = 0;
+		for (auto & result : resultsTable) {
+			// The property name
+			ui.simulationResultsTable->setItem(
+				currentRow
+				, 0
+				, new QTableWidgetItem(QString::fromStdString(result.property))
+			);
+			// Minimum probability
+			ui.simulationResultsTable->setItem(
+				currentRow
+				, 1
+				, new QTableWidgetItem(QString::number(result.pMin))
+			);
+			// Maximum probability
+			ui.simulationResultsTable->setItem(
+				currentRow
+				, 2
+				, new QTableWidgetItem(QString::number(result.pMax))
+			);
+			currentRow++;
+		}
+		// KMessageBox::
+		ui.actionResults_Viewer->trigger();
+		// Populate some of the labels
+		ui.statesLabel->setText(QString::number(s.getStateCount()));
+		ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
+		ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
+		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
+		progress->hide();
+	});
 	// QTimer::singleShot(0, this, staminaProcess);
 }
 
