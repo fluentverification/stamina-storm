@@ -9,7 +9,11 @@ project(sstamina)               # Create project "sstamina"
 set(LIB_NAME stamina)
 set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-#set(CMAKE_BUILD_TYPE Debug)
+
+option(STAMINA_DEBUG "Include debug information in the executables" OFF)
+if (STAMINA_DEBUG)
+	set(CMAKE_BUILD_TYPE Debug)
+endif()
 
 # STAMINA Build
 # option(STAMINA_BUILD_TAG "Build tag information" "unspecified")
@@ -147,6 +151,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC stamina storm storm-parsers)
 
 # Stuff for the GUI
 if(BUILD_GUI)
+
+	add_compile_definitions(STAMINA_HAS_GUI)
+
 	set(GUI_EXECUTABLE_NAME xstamina)
 	add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES} ${GUI_RECS})
 	target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC

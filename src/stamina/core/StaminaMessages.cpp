@@ -10,6 +10,10 @@
 #include <iostream>
 #include <stdexcept>
 
+// #ifdef STAMINA_HAS_GUI
+// 	#include <KMessageBox>
+// #endif // STAMINA_HAS_GUI
+
 #define VERSION_MAJOR 2
 #define VERSION_MINOR 2.5
 
@@ -44,6 +48,9 @@ StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
 	std::cerr << BOLD("STAMINA encountered the following error and will now exit: ") << std::endl;
 	std::cerr << '\t' << err << std::endl;
 	if (raiseExceptionsRatherThanExit) {
+// #ifdef STAMINA_HAS_GUI
+// 		KMessageBox::sorry(nullptr, QString::fromStdString(err));
+// #endif // STAMINA_HAS_GUI
 		throw err; // TODO: throw some kind of exception rather than string
 	}
 	else {

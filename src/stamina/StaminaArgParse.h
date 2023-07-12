@@ -226,11 +226,11 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			break;
 		case 'v':
 			printf(
-					"STAMINA - STochiastic Approximate Model-checker for INfinite-state Analysis\n\tVersion %d.%d.%d\n\tBuild:%s\n"
+				"STAMINA - STochiastic Approximate Model-checker for INfinite-state Analysis\n\tVersion %d.%d.%d\n\tBuild: %s\n"
 				, version::version_major
 				, version::version_minor
 				, version::version_sub_minor
-				, BUILD_INFO
+				, "unspecified"
 			);
 			exit(0);
 		case 'b':
