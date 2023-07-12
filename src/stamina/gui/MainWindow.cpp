@@ -838,15 +838,20 @@ MainWindow::checkModelAndProperties() {
 		, &QPushButton::clicked
 		, this
 		, [this] () {
-			StaminaMessages::info("Killing running job.");
-			staminaJob.cancel();
-			killButton->setEnabled(false);
-			killButton->setText("Cancelling");
-			staminaJob.waitForFinished();
-			progress->hide();
-			killButton->hide();
-			StaminaMessages::warning("Killed running job!");
-			killButton->setText("");
+			QtConcurrent::run([this]() {
+				StaminaMessages::info("Killing running job.");
+				staminaJob.cancel();
+				killButton->setEnabled(false);
+				progress->setEnabled(false);
+				killButton->setText("Cancelling");
+				staminaJob.waitForFinished();
+				progress->hide();
+				killButton->hide();
+				StaminaMessages::warning("Killed running job!");
+				killButton->setText("");
+				killButton->setEnabled(true);
+				progress->setEnabled(true);
+			});
 		}
 	);
 	// QTimer::singleShot(0, this, staminaProcess);
