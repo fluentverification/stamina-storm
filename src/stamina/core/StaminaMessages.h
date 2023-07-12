@@ -83,6 +83,9 @@ namespace stamina {
 			static void debugPrint(std::string msg);
 	#endif
 			static void writeResults(ResultInformation resultInformation, std::ostream & out);
+			// The GUI needs us to raise exceptions because the exit() function will kill
+			// the entire program, which is usually fine in the CLI.
+			inline static bool raiseExceptionsRatherThanExit = false;
 		protected:
 			static const std::string horizontalSeparator;
 		};

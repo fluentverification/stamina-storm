@@ -5,10 +5,10 @@
 
 #include <stdlib.h>
 #include <iomanip>
-#include <stdlib.h>
 #include <string_view>
 #include <sstream>
 #include <iostream>
+#include <stdexcept>
 
 #define VERSION_MAJOR 2
 #define VERSION_MINOR 2.5
@@ -43,7 +43,12 @@ StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
 	std::cerr << BOLD(FRED("[ERROR]: "));
 	std::cerr << BOLD("STAMINA encountered the following error and will now exit: ") << std::endl;
 	std::cerr << '\t' << err << std::endl;
-	exit(err_num);
+	if (raiseExceptionsRatherThanExit) {
+		throw err; // TODO: throw some kind of exception rather than string
+	}
+	else {
+		exit(err_num);
+	}
 }
 
 void

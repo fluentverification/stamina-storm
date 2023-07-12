@@ -51,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, modelActive(true)
 	, stayOpen(true)
 {
+	// Make it so StaminaMessages doesn't kill the program
+	StaminaMessages::raiseExceptionsRatherThanExit = true;
 	ui.setupUi(this);
 	setupActions();
 	progress->setRange(0, 0);
@@ -822,8 +824,8 @@ MainWindow::checkModelAndProperties() {
 		try {
 			s.run();
 		}
-		catch (std::exception & e) {
-			std::string msg = std::string("Error got while running STAMINA: ") + e.what();
+		catch (std::string & e) {
+			std::string msg = std::string("Error got while running STAMINA: ") + e;
 			KMessageBox::sorry(nullptr, QString::fromStdString(msg));
 		}
 		ui.statusbar->showMessage(tr("Finished."));
