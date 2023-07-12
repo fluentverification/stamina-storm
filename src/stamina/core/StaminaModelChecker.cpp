@@ -193,9 +193,7 @@ StaminaModelChecker::modelCheckProperty(
 		reachThreshold = Options::kappa;
 
 		std::shared_ptr<CtmcModelChecker> checker = nullptr;
-		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 		model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
-
 
 		// Rebuild the initial state labels
 		labeling = &( model->getStateLabeling());
@@ -289,6 +287,25 @@ StaminaModelChecker::modelCheckProperty(
 	);
 	StaminaMessages::writeResults(r, std::cout);
 	return nullptr;
+}
+
+std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>>
+StaminaModelChecker::getLabelsAndCount() {
+	std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>> labelsAndCount(
+		new std::vector<std::pair<std::string, uint64_t>>()
+	);
+
+	// Get the the labelling from the model in case it wasn't updated in
+	// modelCheckProperty
+	labeling = &( model->getStateLabeling());
+	auto labels = labeling->getLabels();
+	for (auto & label : labels) {
+		labelsAndCount->push_back(std::make_pair(
+			label
+			, labeling->getStates(label).size()
+		));
+	}
+	return labelsAndCount;
 }
 
 bool

@@ -49,6 +49,9 @@ namespace stamina {
 		std::vector<core::StaminaModelChecker::ResultTableRow> & getResultTable() { return this->modelChecker->getResultTable(); }
 		uint64_t getStateCount() { return modelChecker->getStateCount(); }
 		uint64_t getTransitionCount() { return modelChecker->getTransitionCount(); }
+		std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>> getLabelsAndCount() {
+			return modelChecker->getLabelsAndCount();
+		}
 		/* Data Members */
 		std::shared_ptr<core::StaminaModelChecker> modelChecker;
 		std::shared_ptr<storm::prism::Program> modelFile;

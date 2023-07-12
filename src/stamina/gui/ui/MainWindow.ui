@@ -28,10 +28,16 @@
        </sizepolicy>
       </property>
       <property name="tabPosition">
-       <enum>QTabWidget::South</enum>
+       <enum>QTabWidget::West</enum>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
+      </property>
+      <property name="tabBarAutoHide">
+       <bool>true</bool>
       </property>
       <widget class="QWidget" name="modelTab">
        <attribute name="title">
@@ -288,66 +294,6 @@
              </item>
             </layout>
            </widget>
-           <widget class="QGroupBox" name="labelGroupBox">
-            <property name="title">
-             <string>Label Editor</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <widget class="QTableWidget" name="labelTabel">
-               <column>
-                <property name="text">
-                 <string>Name</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>Definition</string>
-                </property>
-               </column>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <item>
-                <widget class="QPushButton" name="createLabelButton">
-                 <property name="text">
-                  <string>Create Label</string>
-                 </property>
-                 <property name="icon">
-                  <iconset theme="label">
-                   <normaloff>.</normaloff>.</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="deleteLabelButton">
-                 <property name="text">
-                  <string>Delete Label</string>
-                 </property>
-                 <property name="icon">
-                  <iconset theme="delete">
-                   <normaloff>.</normaloff>.</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer_3">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
           </widget>
           <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="propertySideVBox">
@@ -419,35 +365,63 @@
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
-           <widget class="QGroupBox" name="counterExamplesGroup">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Counterexample paths to the property. Currently not implemented.</string>
-            </property>
+           <widget class="QGroupBox" name="labelGroupBox">
             <property name="title">
-             <string>Counterexamples</string>
+             <string>Label Editor</string>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
-              <widget class="QTableWidget" name="counterExamplesTable">
+              <widget class="QTableWidget" name="labelTable">
                <column>
                 <property name="text">
-                 <string>Violated Property</string>
+                 <string>Name</string>
                 </property>
                </column>
                <column>
                 <property name="text">
-                 <string>Path Length</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>Estimated Path Probability</string>
+                 <string>Definition</string>
                 </property>
                </column>
               </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QPushButton" name="createLabelButton">
+                 <property name="text">
+                  <string>Create Label</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="label">
+                   <normaloff>.</normaloff>.</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="deleteLabelButton">
+                 <property name="text">
+                  <string>Delete Label</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="delete">
+                   <normaloff>.</normaloff>.</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>

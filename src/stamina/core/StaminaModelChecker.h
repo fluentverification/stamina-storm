@@ -72,6 +72,13 @@ namespace stamina {
 				, storm::jani::Property propOriginal
 				, storm::prism::Program const& modulesFile
 			);
+			/**
+			 * Gets a list of the labels and the associated counts of states
+			 *
+			 * @return A (pointer to a) vector of pairs with a string and int, the string representing the name of the label and the
+			 * int being the count of states with that label.
+			 * */
+			std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>> getLabelsAndCount();
 			std::vector<ResultTableRow> & getResultTable() { return this->resultTable; }
 			uint64_t getStateCount() { return builder->getStateCount(); }
 			uint64_t getTransitionCount() { return builder->getTransitionCount(); }
@@ -140,6 +147,8 @@ namespace stamina {
 			/* Data Members */
 			std::shared_ptr<StaminaModelChecker::Result> min_results;
 			std::shared_ptr<StaminaModelChecker::Result> max_results;
+			// The model
+			std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
 			// The results for all of the properties we check
 			std::vector<ResultTableRow> resultTable;
 			std::shared_ptr<StaminaModelBuilder<double>> builder;

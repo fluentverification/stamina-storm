@@ -31,6 +31,8 @@ namespace stamina {
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();
 			void setupActions();
+			void populateLabelTable();
+			void populateResultsTable();
 
 		private:
 			Stamina s;

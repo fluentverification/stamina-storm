@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 	progress->setTextVisible(false);
 	ui.statusbar->addPermanentWidget(progress);
 	progress->hide();
+	ui.earlyTerminatedGroup->hide();
 }
 
 void
@@ -431,7 +432,7 @@ MainWindow::setupActions() {
 		, &QPushButton::clicked
 		, this
 		, [this]() {
-			ui.labelTabel->setRowCount(ui.labelTabel->rowCount() + 1);
+			ui.labelTable->setRowCount(ui.labelTable->rowCount() + 1);
 		}
 	);
 
@@ -804,40 +805,72 @@ MainWindow::checkModelAndProperties() {
 		progress->show();
 		s.run();
 		ui.statusbar->showMessage(tr("Finished."));
-		auto & resultsTable = s.getResultTable();
-		ui.simulationResultsTable->setRowCount(resultsTable.size());
-		int currentRow = 0;
-		for (auto & result : resultsTable) {
-			// The property name
-			ui.simulationResultsTable->setItem(
-				currentRow
-				, 0
-				, new QTableWidgetItem(QString::fromStdString(result.property))
-			);
-			// Minimum probability
-			ui.simulationResultsTable->setItem(
-				currentRow
-				, 1
-				, new QTableWidgetItem(QString::number(result.pMin))
-			);
-			// Maximum probability
-			ui.simulationResultsTable->setItem(
-				currentRow
-				, 2
-				, new QTableWidgetItem(QString::number(result.pMax))
-			);
-			currentRow++;
-		}
 		// KMessageBox::
 		ui.actionResults_Viewer->trigger();
+		populateResultsTable();
 		// Populate some of the labels
 		ui.statesLabel->setText(QString::number(s.getStateCount()));
 		ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
 		ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
 		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
+		populateLabelTable();
 		progress->hide();
 	});
 	// QTimer::singleShot(0, this, staminaProcess);
+}
+
+void
+MainWindow::populateResultsTable() {
+	auto & resultsTable = s.getResultTable();
+	ui.simulationResultsTable->setRowCount(resultsTable.size());
+	int currentRow = 0;
+	for (auto & result : resultsTable) {
+		// The property name
+		ui.simulationResultsTable->setItem(
+			currentRow
+			, 0
+			, new QTableWidgetItem(QString::fromStdString(result.property))
+		);
+		// Minimum probability
+		ui.simulationResultsTable->setItem(
+			currentRow
+			, 1
+			, new QTableWidgetItem(QString::number(result.pMin))
+		);
+		// Maximum probability
+		ui.simulationResultsTable->setItem(
+			currentRow
+			, 2
+			, new QTableWidgetItem(QString::number(result.pMax))
+		);
+		currentRow++;
+	}
+}
+
+void
+MainWindow::populateLabelTable() {
+	auto labelsAndCount = s.getLabelsAndCount();
+	ui.labelTable->setRowCount(labelsAndCount->size());
+	int currentRow = 0;
+	for (auto labelCountPair : *labelsAndCount) {
+		// The label name
+		auto labelItem = new QTableWidgetItem(QString::fromStdString(labelCountPair.first));
+		labelItem->setFlags(Qt::NoItemFlags);
+		ui.labelTable->setItem(
+			currentRow
+			, 0
+			, labelItem
+		);
+		// The label count
+		auto countItem = new QTableWidgetItem(QString::number(labelCountPair.second));
+		countItem->setFlags(Qt::NoItemFlags);
+		ui.labelTable->setItem(
+			currentRow
+			, 1
+			, countItem
+		);
+		currentRow++;
+	}
 }
 
 void
@@ -848,7 +881,7 @@ MainWindow::handleTabChange() {
 	// Disconnect the open and save actions
 	disconnect(ui.actionOpen, SIGNAL(triggered()), 0, 0);
 	disconnect(ui.actionSave, SIGNAL(triggered()), 0, 0);
-	if (tabIndex == 0) {
+	if (modelActive) {
 		connect(
 			ui.actionOpen
 			, SIGNAL(triggered())
@@ -861,12 +894,8 @@ MainWindow::handleTabChange() {
 			, this
 			, SLOT(saveModelFile())
 		);
-		this->setCaption(
-			(this->activeModelFile == "") ? "New Model File" : this->activeModelFile
-			+ ((this->unsavedChangesModel) ? "*" : "")
-		);
 	}
-	else if (tabIndex == 1) {
+	else {
 		connect(
 			ui.actionOpen
 			, SIGNAL(triggered())
@@ -879,6 +908,14 @@ MainWindow::handleTabChange() {
 			, this
 			, SLOT(savePropertyFile())
 		);
+	}
+	if (tabIndex == 0) {
+		this->setCaption(
+			(this->activeModelFile == "") ? "New Model File" : this->activeModelFile
+			+ ((this->unsavedChangesModel) ? "*" : "")
+		);
+	}
+	else if (tabIndex == 1) {
 		this->setCaption(
 			(this->activePropertiesFile == "") ? "New Properties File" : this->activePropertiesFile
 			+ ((this->unsavedChangesProperty) ? " * " : "")
