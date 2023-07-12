@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, modCompleter(new QCompleter(this))
 	, propCompleter(new QCompleter(this))
 	, progress(new QProgressBar(this))
+	, killButton(new QPushButton(this))
 	, activeModelFile("")
 	, activePropertiesFile("")
 	, unsavedChangesModel(false)
@@ -50,17 +51,27 @@ MainWindow::MainWindow(QWidget *parent)
 	, modelActive(true)
 	, stayOpen(true)
 {
+	ui.setupUi(this);
 	setupActions();
 	progress->setRange(0, 0);
 	progress->setTextVisible(false);
+	ui.statusbar->addPermanentWidget(killButton);
 	ui.statusbar->addPermanentWidget(progress);
+	QIcon icon;
+	QString iconThemeName = QString::fromUtf8("process-stop");
+	if (QIcon::hasThemeIcon(iconThemeName)) {
+		icon = QIcon::fromTheme(iconThemeName);
+	} else {
+		icon.addFile(QString::fromUtf8("."), QSize(), QIcon::Normal, QIcon::Off);
+	}
 	progress->hide();
+	killButton->hide();
+	killButton->setIcon(icon);
 	ui.earlyTerminatedGroup->hide();
 }
 
 void
-MainWindow::setupActions() {
-	ui.setupUi(this);
+MainWindow::setup() {
 	modelFindReplace->place(this->ui.modelFileLayout1, this->ui.modelFile);
 	propFindReplace->place(this->ui.propertySideVBox, this->ui.propertiesEditor);
 	// Set up the autocompleters
@@ -76,6 +87,10 @@ MainWindow::setupActions() {
 	propCompleter->setWrapAround(false);
 	ui.modelFile->setCompleter(modCompleter);
 	ui.propertiesEditor->setCompleter(propCompleter);
+}
+
+void
+MainWindow::setupActions() {
 	// Connect slots
 	connect(
 		ui.actionOpen
@@ -801,8 +816,9 @@ MainWindow::checkModelAndProperties() {
 	prefs->getPreferencesFromUI();
 	prefs->setOptionsFromPreferences();
 	ui.statusbar->showMessage(tr("Running."));
-	QtConcurrent::run([this]() {
+	staminaJob = QtConcurrent::run([this]() {
 		progress->show();
+		killButton->show();
 		s.run();
 		ui.statusbar->showMessage(tr("Finished."));
 		// KMessageBox::
@@ -815,7 +831,24 @@ MainWindow::checkModelAndProperties() {
 		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 		populateLabelTable();
 		progress->hide();
+		killButton->hide();
 	});
+	connect(
+		killButton
+		, &QPushButton::clicked
+		, this
+		, [this] () {
+			StaminaMessages::info("Killing running job.");
+			staminaJob.cancel();
+			killButton->setEnabled(false);
+			killButton->setText("Cancelling");
+			staminaJob.waitForFinished();
+			progress->hide();
+			killButton->hide();
+			StaminaMessages::warning("Killed running job!");
+			killButton->setText("");
+		}
+	);
 	// QTimer::singleShot(0, this, staminaProcess);
 }
 

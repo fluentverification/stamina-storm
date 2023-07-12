@@ -6,6 +6,7 @@
 #include <QCloseEvent>
 #include <QCompleter>
 #include <QProgressBar>
+#include <QFuture>
 
 #include "ui/ui_MainWindow.h"
 
@@ -30,6 +31,7 @@ namespace stamina {
 		private:
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();
+			void setup();
 			void setupActions();
 			void populateLabelTable();
 			void populateResultsTable();
@@ -61,11 +63,14 @@ namespace stamina {
 			KFileCustomDialog * ofdp;
 			// The progress bar
 			QProgressBar * progress;
+			QPushButton * killButton;
 			// Active files
 			QString activeModelFile;
 			QString activePropertiesFile;
 			QString baseWindowTitle;
 			bool modelWasBuilt;
+			// The running STAMINA job (so it can be killed)
+			QFuture<void> staminaJob;
 			// Hackey way to get the file dialog to stay open
 			bool stayOpen;
 			int modZoom = 0;
