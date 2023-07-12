@@ -455,7 +455,7 @@ MainWindow::saveToActiveModelFile() {
 		file.write(bArray);
 		file.commit();
 		unsavedChangesModel = false;
-		setCaption(baseWindowTitle);
+		// setCaption(baseWindowTitle);
 		stayOpen = false;
 	}
 	else {
@@ -691,15 +691,16 @@ MainWindow::showAbout() {
 void
 MainWindow::setModifiedModel() {
 	if (unsavedChangesModel) { return; }
-// 	baseWindowTitle = windowTitle();
-	setCaption(baseWindowTitle + " * ");
+	// baseWindowTitle = ;
+	setCaption(windowTitle() + " * ");
 	unsavedChangesModel = true;
 }
 
 void
 MainWindow::setModifiedProperties() {
 	if (unsavedChangesProperty) { return; }
-	setCaption(baseWindowTitle + " * ");
+	// baseWindowTitle = windowTitle();
+	setCaption(windowTitle() + " * ");
 	unsavedChangesProperty = true;
 }
 
@@ -880,7 +881,7 @@ MainWindow::handleTabChange() {
 		);
 		this->setCaption(
 			(this->activePropertiesFile == "") ? "New Properties File" : this->activePropertiesFile
-			+ ((this->unsavedChangesProperty) ? "*" : "")
+			+ ((this->unsavedChangesProperty) ? " * " : "")
 		);
 	}
 	else if (tabIndex == 2) {
