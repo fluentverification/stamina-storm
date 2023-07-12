@@ -819,7 +819,13 @@ MainWindow::checkModelAndProperties() {
 	staminaJob = QtConcurrent::run([this]() {
 		progress->show();
 		killButton->show();
-		s.run();
+		try {
+			s.run();
+		}
+		catch (std::exception & e) {
+			std::string msg = std::string("Error got while running STAMINA: ") + e.what();
+			KMessageBox::sorry(nullptr, QString::fromStdString(msg));
+		}
 		ui.statusbar->showMessage(tr("Finished."));
 		// KMessageBox::
 		ui.actionResults_Viewer->trigger();
