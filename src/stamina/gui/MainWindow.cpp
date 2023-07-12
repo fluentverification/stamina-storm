@@ -847,7 +847,7 @@ MainWindow::handleTabChange() {
 	// Disconnect the open and save actions
 	disconnect(ui.actionOpen, SIGNAL(triggered()), 0, 0);
 	disconnect(ui.actionSave, SIGNAL(triggered()), 0, 0);
-	if (modelActive) {
+	if (tabIndex == 0) {
 		connect(
 			ui.actionOpen
 			, SIGNAL(triggered())
@@ -860,8 +860,12 @@ MainWindow::handleTabChange() {
 			, this
 			, SLOT(saveModelFile())
 		);
+		this->setCaption(
+			(this->activeModelFile == "") ? "New Model File" : this->activeModelFile
+			+ ((this->unsavedChangesModel) ? "*" : "")
+		);
 	}
-	else {
+	else if (tabIndex == 1) {
 		connect(
 			ui.actionOpen
 			, SIGNAL(triggered())
@@ -874,6 +878,16 @@ MainWindow::handleTabChange() {
 			, this
 			, SLOT(savePropertyFile())
 		);
+		this->setCaption(
+			(this->activePropertiesFile == "") ? "New Properties File" : this->activePropertiesFile
+			+ ((this->unsavedChangesProperty) ? "*" : "")
+		);
+	}
+	else if (tabIndex == 2) {
+		this->setCaption("Results");
+	}
+	else {
+		this->setCaption("Logs");
 	}
 }
 
