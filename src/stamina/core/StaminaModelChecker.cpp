@@ -283,7 +283,7 @@ StaminaModelChecker::modelCheckProperty(
 	ResultInformation r(
 		min_results->result
 		, max_results->result
-		, 0 // TODO: Get actual number of states
+		, getStateCount()
 		, 1 // TODO: Actual number of initial states
 		, propOriginal.asPrismSyntax() // name?
 	);

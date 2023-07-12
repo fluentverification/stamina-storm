@@ -35,13 +35,13 @@ namespace stamina {
 			double pMin;
 			double pMax;
 			uint32_t numberStates;
-			uint8_t numberInitial;
+			uint32_t numberInitial;
 			std::string property;
 			ResultInformation(
 				double pMin
 				, double pMax
 				, uint32_t numberStates
-				, uint8_t numberInitial
+				, uint32_t numberInitial
 				, std::string property
 			) : pMin(pMin)
 				, pMax(pMax)
