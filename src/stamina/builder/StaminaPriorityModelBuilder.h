@@ -95,7 +95,8 @@ namespace stamina {
 			/*
 			 * Access to data members of parent class
 			 * */
-			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyExpression;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::leftPropertyExpression;
+			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::rightPropertyExpression;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::expressionManager;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::propertyFormula;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::generator;

@@ -170,16 +170,7 @@ StaminaModelChecker::modelCheckProperty(
 		// Get the expression for the current property
 		auto propertyFormula = propOriginal.getRawFormula();
 		StaminaMessages::info("Attempting to convert formula to expression:\n\t" + propertyFormula->toString());
-		if ((!propertyFormula->isPathFormula())
-			&& (
-				propertyFormula->isAtomicExpressionFormula()
-				|| propertyFormula->isBinaryBooleanStateFormula()
-				|| propertyFormula->isBooleanLiteralFormula()
-				|| propertyFormula->isUnaryBooleanStateFormula()
-			)
-		) {
-			builder->setPropertyFormula(propertyFormula, modulesFile);
-		}
+		builder->setPropertyFormula(propertyFormula, modulesFile);
 	}
 
 	// While we should not terminate

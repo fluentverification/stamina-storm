@@ -123,7 +123,7 @@ namespace stamina {
 			* */
 			void setLocalKappaToGlobal();
 			void printStateSpaceInformation();
-			storm::expressions::Expression * getPropertyExpression();
+			std::shared_ptr<storm::expressions::Expression> getPropertyExpression();
 			/**
 			* Sets the property formula for state space truncation optimization. Does not load
 			* or create an expression from the formula.
@@ -242,9 +242,10 @@ namespace stamina {
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 
-			storm::expressions::Expression * propertyExpression;
+			std::shared_ptr<storm::expressions::Expression> leftPropertyExpression;
+			std::shared_ptr<storm::expressions::Expression> rightPropertyExpression;
 			storm::expressions::ExpressionManager * expressionManager;
-			std::shared_ptr<const storm::logic::Formula> propertyFormula;
+			std::shared_ptr<const storm::logic::BoundedUntilFormula> propertyFormula;
 
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 
