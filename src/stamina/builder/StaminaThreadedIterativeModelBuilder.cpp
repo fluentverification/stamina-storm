@@ -159,7 +159,7 @@ StaminaThreadedIterativeModelBuilder<ValueType, RewardModelType, StateType>::bui
 		// Load state for us to use
 		this->generator->load(currentState);
 
-		if (this->formulaMatchesExpression) {
+		if (this->formulaMatchesExpression && !Options::no_prop_refine) {
 			storm::expressions::SimpleValuation valuation = this->generator->currentStateToSimpleValuation();
 			// bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
 			bool leftEvaluation = this->leftPropertyExpression->evaluateAsBool(&valuation);

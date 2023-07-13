@@ -424,7 +424,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
 
-		if (formulaMatchesExpression) {
+		if (formulaMatchesExpression && !Options::no_prop_refine) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
 			// bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
 			bool leftEvaluation = leftPropertyExpression->evaluateAsBool(&valuation);
