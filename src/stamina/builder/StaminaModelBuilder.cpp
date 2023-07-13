@@ -32,7 +32,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, localKappa(core::Options::kappa)
 	, numberTerminal(0)
 	, iteration(0)
-	, propertyExpression(nullptr)
+	, leftPropertyExpression(nullptr)
+	, rightPropertyExpression(nullptr)
 	, formulaMatchesExpression(true)
 	, modulesFile(modulesFile)
 	, options(options)
@@ -379,9 +380,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-storm::expressions::Expression *
+std::shared_ptr<storm::expressions::Expression>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPropertyExpression() {
-	return propertyExpression;
+	return rightPropertyExpression;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -391,7 +392,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setPropertyFormula(
 	, const storm::prism::Program & modulesFile
 ) {
 	formulaMatchesExpression = false;
-	propertyFormula = formula;
+	std::shared_ptr<const storm::logic::ProbabilityOperatorFormula> formulaProb
+		= std::static_pointer_cast<const storm::logic::ProbabilityOperatorFormula>(formula);
+	const storm::logic::BoundedUntilFormula & pathFormula
+		= static_cast<const storm::logic::BoundedUntilFormula &>(formulaProb->getSubformula());
+	propertyFormula = std::make_shared<storm::logic::BoundedUntilFormula>(pathFormula);
 	this->expressionManager = &modulesFile.getManager();
 }
 
@@ -402,15 +407,50 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 		return;
 	}
 	// If we are called here, we assume that core::Options::no_prop_refine is false
-	std::shared_ptr<storm::expressions::Expression> pExpression(
+	const storm::logic::StateFormula & leftStateFormula
+		= static_cast<const storm::logic::StateFormula &>(propertyFormula->getLeftSubformula());
+	const storm::logic::StateFormula & rightStateFormula
+		= static_cast<const storm::logic::StateFormula &>(propertyFormula->getRightSubformula());
+	// Make sure they are state formulas
+	if (!(leftStateFormula.isAtomicExpressionFormula()
+			|| leftStateFormula.isBinaryBooleanStateFormula()
+			|| leftStateFormula.isBooleanLiteralFormula()
+			|| leftStateFormula.isUnaryBooleanStateFormula()
+		)
+	) {
+		StaminaMessages::warning("Left sub formula should have been state formula. Cannot do property based refinement!");
+		return;
+	}
+	std::shared_ptr<storm::expressions::Expression> leftExpression(
 		// Invoke copy constructor
 		new storm::expressions::Expression(
-			propertyFormula->toExpression(
+			leftStateFormula.toExpression(
 				// Expression manager
 				*(this->expressionManager)
 			)
 		)
 	);
+	leftPropertyExpression = leftExpression;
+	if (!(rightStateFormula.isAtomicExpressionFormula()
+		|| rightStateFormula.isBinaryBooleanStateFormula()
+		|| rightStateFormula.isBooleanLiteralFormula()
+		|| rightStateFormula.isUnaryBooleanStateFormula()
+	)
+	) {
+		StaminaMessages::warning("Right sub formula should have been state formula. Cannot do property based refinement!");
+		return;
+	}
+	std::shared_ptr<storm::expressions::Expression> rightExpression(
+		// Invoke copy constructor
+		new storm::expressions::Expression(
+			rightStateFormula.toExpression(
+				// Expression manager
+				*(this->expressionManager)
+			)
+		)
+	);
+	rightPropertyExpression = rightExpression;
+	// Set this flag so that we know we've already done it.
 	formulaMatchesExpression = true;
 }
 

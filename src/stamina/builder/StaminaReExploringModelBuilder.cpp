@@ -82,7 +82,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	numberOfExploredStates = 0;
 	numberOfExploredStatesSinceLastMessage = 0;
 
-
 	auto timeOfStart = std::chrono::high_resolution_clock::now();
 	auto timeOfLastMessage = std::chrono::high_resolution_clock::now();
 
@@ -90,6 +89,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 	CompressedState currentState;
 
 	isInit = false;
+
 	// Perform a search through the model.
 	while (!statesToExplore.empty()) {
 		auto currentProbabilityStatePair = statesToExplore.front();
@@ -114,12 +114,21 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		// Load state for us to use
 		generator->load(currentState);
 
-		if (propertyExpression != nullptr) {
+		if (formulaMatchesExpression) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
-			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
-			// If the property does not hold at the current state, make it absorbing in the
-			// state graph and do not explore its successors
-			if (!evaluationAtCurrentState) {
+			// bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+			bool leftEvaluation = leftPropertyExpression->evaluateAsBool(&valuation);
+			bool rightEvaluation = rightPropertyExpression->evaluateAsBool(&valuation);;
+			// The left evaluation is, for a property P=?[ phi1 U[] phi2 ], the state evaluation
+			// of phi1(s), and the right evaluation is phi2(s). Our formula for early termination
+			// is !leftEvaluation || rightEvaluation, because
+			//   - If !leftEvaluation we know that the property ALREADY fails, so no further
+			//     exploration of the path will be useful
+			//   - If rightEvaluation is evaluated IN THIS EXPRESSION, then we know that
+			//     leftEvaluation evaluated to true. If leftEvaluation AND rightEvaluation
+			//     are both true (as would happen here), then we know that the property
+			//     SUCCEEDS, so again, no further evaluation needed
+			if (!leftEvaluation || rightEvaluation) {
 				this->createTransition(currentIndex, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
