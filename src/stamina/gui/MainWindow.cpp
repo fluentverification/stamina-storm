@@ -957,14 +957,14 @@ MainWindow::handleTabChange() {
 	}
 	if (tabIndex == 0) {
 		this->setCaption(
-			(this->activeModelFile == "") ? "New Model File" : this->activeModelFile
-			+ ((this->unsavedChangesModel) ? "*" : "")
+			((this->activeModelFile == "") ? "New Model File" : this->activeModelFile)
+			+ ((this->unsavedChangesModel) ? " *" : "")
 		);
 	}
 	else if (tabIndex == 1) {
 		this->setCaption(
-			(this->activePropertiesFile == "") ? "New Properties File" : this->activePropertiesFile
-			+ ((this->unsavedChangesProperty) ? " * " : "")
+			((this->activePropertiesFile == "") ? "New Properties File" : this->activePropertiesFile)
+			+ ((this->unsavedChangesProperty) ? " *" : "")
 		);
 	}
 	else if (tabIndex == 2) {
