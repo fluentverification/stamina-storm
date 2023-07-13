@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 	StaminaMessages::raiseExceptionsRatherThanExit = true;
 	ui.setupUi(this);
 	setupActions();
+	setup();
 	progress->setRange(0, 0);
 	progress->setTextVisible(false);
 	ui.statusbar->addPermanentWidget(killButton);
