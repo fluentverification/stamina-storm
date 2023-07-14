@@ -72,6 +72,11 @@ namespace stamina {
 				, storm::jani::Property propOriginal
 				, storm::prism::Program const& modulesFile
 			);
+			void checkFromBuiltModel(
+				storm::jani::Property propMin
+				, storm::jani::Property propMax
+				, storm::jani::Property propOriginal
+			);
 			/**
 			 * Gets a list of the labels and the associated counts of states
 			 *
@@ -149,6 +154,7 @@ namespace stamina {
 			std::shared_ptr<StaminaModelChecker::Result> max_results;
 			// The model
 			std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
+			std::shared_ptr<CtmcModelChecker> checker;
 			// The results for all of the properties we check
 			std::vector<ResultTableRow> resultTable;
 			std::shared_ptr<StaminaModelBuilder<double>> builder;
@@ -157,6 +163,7 @@ namespace stamina {
 			storm::expressions::ExpressionManager expressionManager;
 			storm::models::sparse::StateLabeling * labeling;
 			std::string preUntilLabel;
+			bool modelBuilt;
 		};
 	} // namespace core
 } // namespace stamina

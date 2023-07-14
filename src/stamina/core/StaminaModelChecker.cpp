@@ -36,6 +36,7 @@ StaminaModelChecker::StaminaModelChecker(
 	, std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector
 ) : modulesFile(modulesFile)
 	, propertiesVector(propertiesVector)
+	, modelBuilt(false)
 {
 	// Explicitly invoke model build
 	std::string iFilename = Options::import_filename;
@@ -105,6 +106,11 @@ StaminaModelChecker::modelCheckProperty(
 	, storm::jani::Property propOriginal
 	, storm::prism::Program const& modulesFile
 ) {
+	if (modelBuilt) {
+		StaminaMessages::info("Model is already built. Using existing model.");
+		checkFromBuiltModel(propMin, propMax, propOriginal);
+		return nullptr;
+	}
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
 	auto options = BuilderOptions(*propOriginal.getFilter().getFormula());
@@ -183,7 +189,7 @@ StaminaModelChecker::modelCheckProperty(
 		// Reset the reachability threshold
 		reachThreshold = Options::kappa;
 
-		std::shared_ptr<CtmcModelChecker> checker = nullptr;
+		checker = nullptr;
 		model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
 
 		// Rebuild the initial state labels
@@ -277,7 +283,62 @@ StaminaModelChecker::modelCheckProperty(
 		, propOriginal.asPrismSyntax() // name?
 	);
 	StaminaMessages::writeResults(r, std::cout);
+	modelBuilt = true;
 	return nullptr;
+}
+
+void
+StaminaModelChecker::checkFromBuiltModel(
+	storm::jani::Property propMin
+	, storm::jani::Property propMax
+	, storm::jani::Property propOriginal
+) {
+	if (!checker) {
+		checker = std::make_shared<CtmcModelChecker>(*model);
+	}
+	try {
+		// storm::Environment env;
+		// env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
+		auto result_lower = checker->check(
+			// env,
+			storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
+		);
+		min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+		auto result_upper = checker->check(
+			// env,
+			storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
+		);
+		max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+		// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
+		builder->printStateSpaceInformation();
+		StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+		"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
+		"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
+		"This gives us a window of " + std::to_string(max_results->result - min_results->result)
+		);
+
+	}
+	catch (std::exception& e) {
+		StaminaMessages::errorAndExit(e.what());
+	}
+	// Print results
+	std::stringstream resultInfo;
+	resultInfo.setf( std::ios::floatfield );
+	resultInfo << std::fixed << std::setprecision(12);
+	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
+	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
+	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	resultTable.push_back( { min_results->result, max_results->result, propOriginal.asPrismSyntax() } );
+	StaminaMessages::info(resultInfo.str());
+
+	ResultInformation r(
+		min_results->result
+		, max_results->result
+		, getStateCount()
+		, 1 // TODO: Actual number of initial states
+		, propOriginal.asPrismSyntax() // name?
+	);
+	StaminaMessages::writeResults(r, std::cout);
 }
 
 std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>>
