@@ -16,6 +16,6 @@ LineNumberArea::paintEvent(QPaintEvent * event) {
 	editor->lineNumberAreaPaintEvent(event);
 }
 
-}
-}
-}
+} // namespace addons
+} // namespace gui
+} // namespace stamina

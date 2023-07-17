@@ -26,6 +26,7 @@ namespace stamina {
 				uint16_t lineNumberAreaWidth();
 				void setCompleter(QCompleter * completer);
 				QCompleter * completer() const;
+				void setTabWidth(int numChars);
 			protected:
 				void resizeEvent(QResizeEvent * event) override;
 				void keyPressEvent(QKeyEvent * e) override;

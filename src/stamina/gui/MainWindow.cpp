@@ -90,6 +90,7 @@ MainWindow::setup() {
 	propCompleter->setWrapAround(false);
 	ui.modelFile->setCompleter(modCompleter);
 	ui.propertiesEditor->setCompleter(propCompleter);
+	prefs->setMainWindow(&ui);
 }
 
 void
@@ -163,6 +164,59 @@ MainWindow::setupActions() {
 			this->ui.actionProperties_Editor->setChecked(false);
 		}
 	);
+	// Edit Actions
+	connect(
+		ui.actionCut
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->cut(); }
+			else if (idx == 1) { this->ui.propertiesEditor->cut(); }
+		}
+	);
+	connect(
+		ui.actionCopy
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->copy(); }
+			else if (idx == 1) { this->ui.propertiesEditor->copy(); }
+		}
+	);
+	connect(
+		ui.actionPaste
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->paste(); }
+			else if (idx == 1) { this->ui.propertiesEditor->paste(); }
+		}
+	);
+	connect(
+		ui.actionUndo
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->undo(); }
+			else if (idx == 1) { this->ui.propertiesEditor->undo(); }
+		}
+	);
+	connect(
+		ui.actionRedo
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->redo(); }
+			else if (idx == 1) { this->ui.propertiesEditor->redo(); }
+		}
+	);
+	// TODO: connect the undoAvailable(bool) signal to something that controls
+	// the unsavedChanges* variables
 	connect(
 		ui.actionModule
 		, &QAction::triggered
@@ -961,18 +1015,31 @@ MainWindow::handleTabChange() {
 			((this->activeModelFile == "") ? "New Model File" : this->activeModelFile)
 			+ ((this->unsavedChangesModel) ? " *" : "")
 		);
+		this->ui.actionModel_Editor->setChecked(true);
+		this->ui.actionProperties_Editor->setChecked(false);
+		this->ui.actionResults_Viewer->setChecked(false);
+
 	}
 	else if (tabIndex == 1) {
 		this->setCaption(
 			((this->activePropertiesFile == "") ? "New Properties File" : this->activePropertiesFile)
 			+ ((this->unsavedChangesProperty) ? " *" : "")
 		);
+		this->ui.actionModel_Editor->setChecked(false);
+		this->ui.actionProperties_Editor->setChecked(true);
+		this->ui.actionResults_Viewer->setChecked(false);
 	}
 	else if (tabIndex == 2) {
 		this->setCaption("Results");
+		this->ui.actionModel_Editor->setChecked(false);
+		this->ui.actionProperties_Editor->setChecked(false);
+		this->ui.actionResults_Viewer->setChecked(true);
 	}
 	else {
 		this->setCaption("Logs");
+		this->ui.actionModel_Editor->setChecked(false);
+		this->ui.actionProperties_Editor->setChecked(false);
+		this->ui.actionResults_Viewer->setChecked(false);
 	}
 }
 

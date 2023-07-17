@@ -87,6 +87,13 @@ CodeEditor::completer() const {
 }
 
 void
+CodeEditor::setTabWidth(int numChars) {
+	QFontMetrics fm(this->font());
+	qreal width = numChars * fm.horizontalAdvance(QChar::Nbsp);
+	this->setTabStopDistance(width);
+}
+
+void
 CodeEditor::resizeEvent(QResizeEvent *e)
 {
 	QPlainTextEdit::resizeEvent(e);

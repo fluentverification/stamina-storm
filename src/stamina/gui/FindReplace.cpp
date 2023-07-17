@@ -129,7 +129,11 @@ FindReplace::findNext(bool alertIfNotFound) {
 	else {
 		bool found = editor->find(expression);
 		if (alertIfNotFound && !found) {
-			KMessageBox::sorry(nullptr, "The text could not be found!");
+			bool fromBeginning = KMessageBox::questionYesNo(nullptr, "The text could not be found! Search from the beginning?");
+			if (fromBeginning) {
+				editor->moveCursor(QTextCursor::Start);
+				findNext();
+			}
 		}
 		return found;
 	}
@@ -148,7 +152,11 @@ FindReplace::replace() {
 		tc.insertText(replaceValue);
 	}
 	else {
-		KMessageBox::sorry(nullptr, "Cannot replace text! The text could not be found!");
+		bool fromBeginning = KMessageBox::questionYesNo(nullptr, "Cannot replace text! The text could not be found! Search from beginning?");
+		if (fromBeginning) {
+			editor->moveCursor(QTextCursor::Start);
+			replace();
+		}
 	}
 }
 

@@ -56,7 +56,6 @@ ModelModify::createPropertiesList(
 	std::shared_ptr<storm::prism::Program> modelFile
 ) {
 	auto propertiesVector = std::make_shared<std::vector<storm::jani::Property>>(storm::api::parsePropertiesForPrismProgram(properties, *modelFile));
-	// TODO: Add in the modified properties
 	return propertiesVector;
 }
 

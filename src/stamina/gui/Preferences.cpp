@@ -9,7 +9,7 @@ namespace gui {
 
 const std::string PrefInfo::prefPath = ".xstaminarc";
 
-Preferences::Preferences(QWidget *parent)
+Preferences::Preferences(QWidget * parent)
 	: QDialog(parent)
 {
 	setupActions();
@@ -26,9 +26,12 @@ Preferences::show() {
 }
 
 void
-Preferences::hide() {
+Preferences::accept() {
 	getPreferencesFromUI();
+	StaminaMessages::info("Updating accepted preferences");
 	setOptionsFromPreferences();
+	setUIFromPreferences();
+	this->hide();
 }
 
 void
@@ -51,6 +54,12 @@ Preferences::setOptionsFromPreferences() {
 	}
 	// core::Options::method = PrefInfo::ModelBuilding::truncationMethod;
 	// core::Options::threads = PrefInfo::ModelBuilding::threads;
+}
+
+void
+Preferences::setUIFromPreferences() {
+	window->modelFile->setTabWidth(PrefInfo::General::tabSize);
+	window->propertiesEditor->setTabWidth(PrefInfo::General::tabSize);
 }
 
 void

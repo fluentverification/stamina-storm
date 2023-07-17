@@ -9,6 +9,7 @@
 #include "stamina/core/Options.h"
 
 #include "ui/ui_Preferences.h"
+#include "ui/ui_MainWindow.h"
 
 namespace stamina {
 	namespace gui {
@@ -96,17 +97,24 @@ namespace stamina {
 		public:
 			Preferences(QWidget * parent = 0);
 			void show();
-			void hide();
+			void accept() override;
+			Ui::MainWindow * getMainWindow() { return window; }
+			void setMainWindow(Ui::MainWindow * window) { this->window = window; }
 			/**
 			 * Sets the "options" values in Stamina::core::Options
 			 * from the preferences selected on this window.
 			 * */
 			void setOptionsFromPreferences();
+			/**
+			 * Sets preference info that updates the user interface
+			 * */
+			void setUIFromPreferences();
 			void getPreferencesFromUI();
 		private:
 			void setupActions();
 			// Data members
 			Ui::Preferences ui;
+			Ui::MainWindow * window;
 		};
 	}
 }
