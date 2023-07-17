@@ -200,7 +200,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
 					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentIndex);
-
 				}
 			}
 			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
