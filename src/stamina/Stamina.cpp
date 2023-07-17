@@ -21,9 +21,11 @@ using namespace stamina::core;
 
 // PUBLIC METHODS
 Stamina::Stamina(struct arguments * arguments) : modelModify(new util::ModelModify(
-	arguments->model_file
-	, arguments->properties_file)
-) {
+		arguments->model_file
+		, arguments->properties_file)
+	)
+	, wasInitialized(false)
+{
 	try {
 		Options::setArgs(arguments);
 	}
@@ -40,6 +42,7 @@ Stamina::Stamina(struct arguments * arguments) : modelModify(new util::ModelModi
 
 Stamina::Stamina()
 	: modelModify(nullptr)
+	, wasInitialized(false)
 {
 	StaminaMessages::info("Starting STAMINA");
 	StaminaMessages::warning("This constructor is only to be called from the GUI! It leaves the model and properties files unloaded until specified later.");
@@ -59,7 +62,6 @@ Stamina::run() {
 	// Create formulas vector
 	std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
 	for (auto & prop : *propertiesVector) {
-
 		auto formula = prop.getFilter().getFormula();
 		fv.push_back(formula);
 	}
@@ -79,12 +81,14 @@ Stamina::run() {
 	}
 	// Finished!
 	StaminaMessages::good("Finished running!");
+	storm::utility::cleanUp();
 }
 
 // PRIVATE METHODS
 
 void
 Stamina::initialize() {
+	if (wasInitialized) { return; }
 	// Check to see if we need to create a modelModify
 	// Since the GUI does not specify one immediately
 	if (!modelModify) {
@@ -101,7 +105,6 @@ Stamina::initialize() {
 	catch(const std::exception& e) {
 		StaminaMessages::errorAndExit("Failed to allocate memory for StaminaModelChecker!");
 	}
-
 	// Initialize loggers
 	storm::utility::setUp(); // TODO
 	// Set some settings objects.
@@ -120,6 +123,7 @@ Stamina::initialize() {
 		msg << "Got error when reading model or properties file:\n\t\t" << e.what();
 		StaminaMessages::errorAndExit(msg.str());
 	}
+	wasInitialized = true;
 }
 
 
