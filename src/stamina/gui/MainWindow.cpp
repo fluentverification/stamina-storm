@@ -951,6 +951,31 @@ MainWindow::populateResultsTable() {
 
 void
 MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> program) {
+	// We should only get CTMCs, but this will allow for other types to be shown
+	QTreeWidgetItem * typeItem = new QTreeWidgetItem(ui.modelInfoTree);
+	ui.modelInfoTree->addTopLevelItem(typeItem);
+	QString modelTypeText("Model Type: ");
+	switch (program->getModelType()) {
+		case storm::prism::Program::ModelType::DTMC:
+			modelTypeText += "DTMC";
+			break;
+		case storm::prism::Program::ModelType::CTMC:
+			modelTypeText += "CTMC";
+			break;
+		case storm::prism::Program::ModelType::MDP:
+		case storm::prism::Program::ModelType::CTMDP:
+		case storm::prism::Program::ModelType::MA:
+		case storm::prism::Program::ModelType::POMDP:
+		case storm::prism::Program::ModelType::PTA:
+		case storm::prism::Program::ModelType::SMG:
+			modelTypeText += "Unsupported by STAMINA";
+			break;
+		case storm::prism::Program::ModelType::UNDEFINED:
+		default:
+			modelTypeText += "UNDEFINED";
+	}
+	typeItem->setText(0, modelTypeText);
+
 	// Add constants to the tree
 	QTreeWidgetItem * constsItem = new QTreeWidgetItem(ui.modelInfoTree);
 	constsItem->setText(0, "Constants");
@@ -961,6 +986,7 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 			constant.getName() + " (Value: " + constant.getExpression().toString() + ")"
 		));
 	}
+
 	// Add variable list to the tree
 	QTreeWidgetItem * variablesItem = new QTreeWidgetItem(ui.modelInfoTree);
 	variablesItem->setText(0, "Variables");
@@ -970,6 +996,15 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 		varItem->setText(0, QString::fromStdString(
 			variable.getName() + " (Type: " + variable.getType().getStringRepresentation() + ")"
 		));
+	}
+	// Add formula list to the tree
+	QTreeWidgetItem * formulasItem = new QTreeWidgetItem(ui.modelInfoTree);
+	formulasItem->setText(0, "Formulas");
+	ui.modelInfoTree->addTopLevelItem(formulasItem);
+	for (auto & formula : program->getFormulas()) {
+		QTreeWidgetItem * formulaItem = new QTreeWidgetItem(formulasItem);
+		formulaItem->setText(0, QString::fromStdString(formula.getName()));
+		formulaItem->setToolTip(0, QString::fromStdString(formula.getExpression().toString()));
 	}
 
 	// Add modules to the tree

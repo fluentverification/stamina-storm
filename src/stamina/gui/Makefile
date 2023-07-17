@@ -1,4 +1,10 @@
 
+all:
+	uic ui/MainWindow.ui -o ui/ui_MainWindow.h
+	uic ui/About.ui -o ui/ui_About.h
+	uic ui/Preferences.ui -o ui/ui_Preferences.h
+	uic ui/PropertyWizard.ui -o ui/ui_PropertyWizard.h
+	uic ui/FindReplace.ui -o ui/ui_FindReplace.h
 
 # Main Window
 ui/ui_MainWindow.h:
