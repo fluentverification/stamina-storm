@@ -64,6 +64,8 @@ namespace stamina {
 			* @param propMax Maximum variant of the property to check
 			* @propOriginal The original version of the property to check
 			* @param modulesFile The modules file to work with
+			* @param formulasVector The vector of all properties (optional). If the model is to check multiple
+			* properties then this is required as labeling must be created which matches each one.
 			* @return A pointer to the result of the model checking
 			* */
 			std::unique_ptr<storm::modelchecker::CheckResult> modelCheckProperty(
@@ -71,6 +73,9 @@ namespace stamina {
 				, storm::jani::Property propMax
 				, storm::jani::Property propOriginal
 				, storm::prism::Program const& modulesFile
+				// We want to be conscious of all of the properties so that we can build associated labels
+				// if this is passed in null
+				, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
 			);
 			void checkFromBuiltModel(
 				storm::jani::Property propMin

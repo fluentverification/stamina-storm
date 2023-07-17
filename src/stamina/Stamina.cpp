@@ -56,6 +56,13 @@ Stamina::~Stamina() {
 void
 Stamina::run() {
 	initialize();
+	// Create formulas vector
+	std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
+	for (auto & prop : *propertiesVector) {
+
+		auto formula = prop.getFilter().getFormula();
+		fv.push_back(formula);
+	}
 	// Check each property in turn
 	for (auto & prop : *propertiesVector) {
 		auto propMin = modelModify->modifyProperty(prop, true);
@@ -67,6 +74,7 @@ Stamina::run() {
 			, propMax
 			, prop
 			, *modelFile
+			, fv
 		);
 	}
 	// Finished!

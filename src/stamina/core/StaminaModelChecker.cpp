@@ -105,6 +105,7 @@ StaminaModelChecker::modelCheckProperty(
 	, storm::jani::Property propMax
 	, storm::jani::Property propOriginal
 	, storm::prism::Program const& modulesFile
+	, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
 ) {
 	if (modelBuilt) {
 		StaminaMessages::info("Model is already built. Using existing model.");
@@ -113,7 +114,13 @@ StaminaModelChecker::modelCheckProperty(
 	}
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
-	auto options = BuilderOptions(*propOriginal.getFilter().getFormula());
+	storm::builder::BuilderOptions options;
+	// if (formulasVector) {
+		options = BuilderOptions(formulasVector);
+	// }
+	// else {
+	//	options = BuilderOptions(*propOriginal.getFilter().getFormula());
+	// }
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
