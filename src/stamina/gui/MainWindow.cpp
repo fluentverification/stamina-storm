@@ -893,6 +893,7 @@ MainWindow::checkModelAndProperties() {
 		ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
 		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 		populateLabelTable();
+		populateModelInformationTree(s.getModelFile());
 		progress->hide();
 		killButton->hide();
 	});
@@ -945,6 +946,66 @@ MainWindow::populateResultsTable() {
 			, new QTableWidgetItem(QString::number(result.pMax))
 		);
 		currentRow++;
+	}
+}
+
+void
+MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> program) {
+	// Add constants to the tree
+	QTreeWidgetItem * constsItem = new QTreeWidgetItem(ui.modelInfoTree);
+	constsItem->setText(0, "Constants");
+	ui.modelInfoTree->addTopLevelItem(constsItem);
+	for (auto & constant : program->getConstants()) {
+		QTreeWidgetItem * constItem = new QTreeWidgetItem(constsItem);
+		constItem->setText(0, QString::fromStdString(
+			constant.getName() + " (Value: " + constant.getExpression().toString() + ")"
+		));
+	}
+	// Add variable list to the tree
+	QTreeWidgetItem * variablesItem = new QTreeWidgetItem(ui.modelInfoTree);
+	variablesItem->setText(0, "Variables");
+	ui.modelInfoTree->addTopLevelItem(variablesItem);
+	for (auto & variable : program->getAllExpressionVariables()) {
+		QTreeWidgetItem * varItem = new QTreeWidgetItem(variablesItem);
+		varItem->setText(0, QString::fromStdString(
+			variable.getName() + " (Type: " + variable.getType().getStringRepresentation() + ")"
+		));
+	}
+
+	// Add modules to the tree
+	QTreeWidgetItem * modulesItem = new QTreeWidgetItem(ui.modelInfoTree);
+	modulesItem->setText(0, "Modules");
+	ui.modelInfoTree->addTopLevelItem(modulesItem);
+	for (auto & pModule : program->getModules()) {
+		QTreeWidgetItem * modItem = new QTreeWidgetItem(modulesItem);
+		modItem->setText(0, QString::fromStdString(
+			pModule.getName()
+		));
+		// Show the commands associated with the module
+		QTreeWidgetItem * moduleCommandsItem = new QTreeWidgetItem(modItem);
+		moduleCommandsItem->setText(0, "Commands");
+		for (auto & command : pModule.getCommands()) {
+			QTreeWidgetItem * commandsItem = new QTreeWidgetItem(moduleCommandsItem);
+			commandsItem->setText(0, QString::fromStdString(
+				command.getActionName() + " (guard: " + command.getGuardExpression().toString() + ")"
+			));
+			QTreeWidgetItem * updatesItem = new QTreeWidgetItem(commandsItem);
+			updatesItem->setText(0, "Updates:");
+			// Show the updates associated with the command
+			for (auto & update : command.getUpdates()) {
+				QTreeWidgetItem * updateItem = new QTreeWidgetItem(updatesItem);
+				updateItem->setText(0, QString::fromStdString(
+					update.getLikelihoodExpression ().toString()
+				));
+				// Show the assignments associated with the update
+				for (auto & assignment : update.getAssignments()) {
+					QTreeWidgetItem * assignmentItem = new QTreeWidgetItem(updateItem);
+					assignmentItem->setText(0, QString::fromStdString(
+						assignment.getExpression().toString()
+					));
+				}
+			}
+		}
 	}
 }
 

@@ -76,26 +76,6 @@
                 <string>Model</string>
                </property>
               </column>
-              <item>
-               <property name="text">
-                <string>Filename</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Type: CTMC</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Modules</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Variables</string>
-               </property>
-              </item>
              </widget>
             </item>
             <item>
