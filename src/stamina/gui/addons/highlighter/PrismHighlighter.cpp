@@ -38,12 +38,10 @@ PrismHighlighter::setupKeyWordPatterns() {
 	keywordFormat.setFontWeight(QFont::Bold);
 	const QString keywordPatterns[] = {
 		QStringLiteral("\\bA\\b")
-		, QStringLiteral("\\bbool\\b")
 		, QStringLiteral("\\bclock\\b")
 		, QStringLiteral("\\bconst\\b")
 		, QStringLiteral("\\bctmc\\b")
 		, QStringLiteral("\\bC\\b")
-		, QStringLiteral("\\bdouble\\b")
 		, QStringLiteral("\\bdtmc\\b")
 		, QStringLiteral("\\bE\\b")
 		, QStringLiteral("\\bendinit\\b")
@@ -53,17 +51,13 @@ PrismHighlighter::setupKeyWordPatterns() {
 		, QStringLiteral("\\bendrewards\\b")
 		, QStringLiteral("\\bendsystem\\b")
 		, QStringLiteral("\\bfalse\\b")
-		, QStringLiteral("\\bformula\\b")
 		, QStringLiteral("\\bfilter\\b")
 		, QStringLiteral("\\bfunc\\b")
 		, QStringLiteral("\\bF\\b")
 		, QStringLiteral("\\bglobal\\b")
 		, QStringLiteral("\\bG\\b")
 		, QStringLiteral("\\binit\\b")
-		, QStringLiteral("\\binvariant\\b")
 		, QStringLiteral("\\bI\\b")
-		, QStringLiteral("\\bint\\b")
-		, QStringLiteral("\\blabel\\b")
 		, QStringLiteral("\\bmax\\b")
 		, QStringLiteral("\\bmdp\\b")
 		, QStringLiteral("\\bmin\\b")
@@ -92,6 +86,21 @@ PrismHighlighter::setupKeyWordPatterns() {
 		, QStringLiteral("\\btrue\\b")
 		, QStringLiteral("\\bU\\b")
 		, QStringLiteral("\\bW\\b")
+	};
+
+	typeFormat.setForeground(cs->type);
+	typeFormat.setFontWeight(QFont::Bold);
+	typeFormat.setFontItalic(true);
+	const QString typePatterns[] = {
+		// Primitive types
+		QStringLiteral("\\bbool\\b")
+		, QStringLiteral("\\bdouble\\b")
+		, QStringLiteral("\\bint\\b")
+		// PRISM types
+		, QStringLiteral("\\binvariant\\b")
+		, QStringLiteral("\\bformula\\b")
+		, QStringLiteral("\\blabel\\b")
+
 	};
 
 	// String expressions
@@ -128,10 +137,17 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = constFormat;
 	highlightingRules.append(rule);
 
-	// Keywords have highest priority, with the exception of comments
+	// Keywords have highest priority, with the exception of comments and types
 	for (const QString &pattern : keywordPatterns) {
 		rule.pattern = QRegularExpression(pattern);
 		rule.format = keywordFormat;
+		highlightingRules.append(rule);
+	}
+
+	// Types have less priority than comments
+	for (const QString &pattern : typePatterns) {
+		rule.pattern = QRegularExpression(pattern);
+		rule.format = typeFormat;
 		highlightingRules.append(rule);
 	}
 
