@@ -52,7 +52,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QSplitter" name="splitter">
+         <widget class="QSplitter" name="modelSplitter">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -74,12 +74,15 @@
               </property>
               <property name="baseSize">
                <size>
-                <width>500</width>
+                <width>200</width>
                 <height>0</height>
                </size>
               </property>
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Model Parse Tree&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This parse tree is populated when the model is built and shows the heirarchy of the model, including constants, variables, formulas, modules, etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Model Parse Tree&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This parse tree is populated when the model is built and shows the heirarchy of the model, including constants, variables, formulas, modules, etc.&lt;/p&gt;&lt;p&gt;Additionally, on model-file saving (if there is an active properties' file) the model file will be parsed and this tree will be populated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="whatsThis">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The model information tree shows the parse tree of the model. It shows the type of the model (CTMC and DTMC are the only supported types for STAMINA), as well as all of the other explicitly defined things in the PRISM model, shown in heirarchy.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Modules: &lt;/span&gt;Modules are like namespaces. In PRISM syntax, these define scope. Anything defined in a module generally is only accessible to that module, unless defined as &amp;quot;global&amp;quot;.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Variables: &lt;/span&gt;Variables can hold data of different types.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Constants: &lt;/span&gt;Constants are like constants in any other language. They are unchanging variables that can be defined either explicitly in the file, or at runtime.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Formulas: &lt;/span&gt;Formulas allow the user to define rates or guard probabilities based on the current state-values of variables.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Updates: &lt;/span&gt;Updates allow variable values to update with probabilities and new values in state transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="alternatingRowColors">
                <bool>true</bool>
@@ -107,6 +110,12 @@
                <size>
                 <width>16777215</width>
                 <height>16777215</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
                </size>
               </property>
               <property name="title">
@@ -199,6 +208,12 @@
             </item>
             <item>
              <widget class="QPushButton" name="buildModelButton">
+              <property name="baseSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="text">
                <string>Build Model</string>
               </property>
@@ -244,7 +259,7 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QSplitter" name="splitter_2">
+          <widget class="QSplitter" name="propSplitter">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -522,6 +537,12 @@
            <layout class="QVBoxLayout" name="propertyLayout">
             <item>
              <widget class="QTableWidget" name="simulationResultsTable">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Results Table&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This table shows the results, P&lt;span style=&quot; vertical-align:sub;&quot;&gt;min&lt;/span&gt; and P&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt; (a.k.a., the upper and lower bounds of probability) for the properties under verification.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="whatsThis">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The values for P&lt;span style=&quot; vertical-align:sub;&quot;&gt;min &lt;/span&gt;and P&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt; are computed using one of the various STAMINA algorithms:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;STAMINA Re-Exploring: &lt;/span&gt;This algorithm is detailed in the associated VMCAI'22 paper STAMINA 2.0 was published in.&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;STAMINA Iterative: &lt;/span&gt;A variation on the re-exploring algorithm which includes dynamic programming improvements.&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;STAMINA Priority:&lt;/span&gt; An algorithm which prioritizes states with certain priority metrics that can be defined by the user.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="alternatingRowColors">
                <bool>true</bool>
               </property>

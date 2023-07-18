@@ -37,15 +37,23 @@ PropertyWizard::setupActions() {
 void
 PropertyWizard::insertOperand(QString opString, operandType_t opType) {
 	auto selectedItems = ui.propertyTree->selectedItems();
-	for (auto item : selectedItems) {
-		/* ui.propertyTree->insertTopLevelItem(
+	if (selectedItems.length() == 0) {
+		ui.propertyTree->insertTopLevelItem(
 			ui.propertyTree->currentColumn() + 1
 			, new QTreeWidgetItem(
 				ui.propertyTree
-				, item
 				, QStringList(QString(opString))
 			)
-		); */
+		);
+	}
+	for (auto item : selectedItems) {
+		 ui.propertyTree->insertTopLevelItem(
+			ui.propertyTree->currentColumn() + 1
+			, new QTreeWidgetItem(
+				item
+				, QStringList(QString(opString))
+			)
+		);
 	}
 }
 void

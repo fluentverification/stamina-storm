@@ -92,6 +92,13 @@ MainWindow::setup() {
 	ui.modelFile->setCompleter(modCompleter);
 	ui.propertiesEditor->setCompleter(propCompleter);
 	prefs->setMainWindow(&ui);
+	// Set the default sizes for the splitters
+	// QList<int> modelSizes = ui.modelSplitter->sizes();
+	// // int totalSize = modelSizes[0] + modelSizes[1];
+	// int s = modelSizes[0] / 2;
+	// modelSizes[0] -= s;
+	// modelSizes[1] += s;
+	// ui.modelSplitter->setSizes(modelSizes);
 }
 
 void
@@ -816,7 +823,7 @@ MainWindow::setModifiedModel() {
 	if (title[title.length() - 1] != '*') {
 		setCaption(windowTitle() + " *");
 	}
-	unsavedChangesModel = true;
+	unsavedChangesModel = true; // ui.modelFile->undoAvailable();
 }
 
 void
@@ -828,7 +835,7 @@ MainWindow::setModifiedProperties() {
 	if (title[title.length() - 1] != '*') {
 		setCaption(windowTitle() + " *");
 	}
-	unsavedChangesProperty = true;
+	unsavedChangesProperty = true; // ui.propertiesEditor->undoAvailable();
 }
 
 void
