@@ -501,11 +501,30 @@ MainWindow::setupActions() {
 	);
 
 	connect(
+		ui.deleteConstantButton
+		, &QPushButton::clicked
+		, this
+		, [this]() {
+			int row = ui.constantsTable->currentRow();
+			ui.constantsTable->removeRow(row);
+		}
+	);
+
+	connect(
 		ui.createLabelButton
 		, &QPushButton::clicked
 		, this
 		, [this]() {
 			ui.labelTable->setRowCount(ui.labelTable->rowCount() + 1);
+		}
+	);
+
+	connect(
+		ui.deleteLabelButton
+		, &QPushButton::clicked
+		, this
+		, [this]() {
+			ui.labelTable->removeRow(ui.labelTable->currentRow());
 		}
 	);
 
