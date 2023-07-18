@@ -73,7 +73,17 @@
               </property>
               <column>
                <property name="text">
-                <string>Model</string>
+                <string>Name</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Type</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Value or Formula</string>
                </property>
               </column>
              </widget>
