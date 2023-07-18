@@ -36,10 +36,17 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
+      <property name="documentMode">
+       <bool>true</bool>
+      </property>
       <property name="tabBarAutoHide">
        <bool>true</bool>
       </property>
       <widget class="QWidget" name="modelTab">
+       <attribute name="icon">
+        <iconset theme="code-block">
+         <normaloff>.</normaloff>.</iconset>
+       </attribute>
        <attribute name="title">
         <string>Model Editor</string>
        </attribute>
@@ -70,6 +77,12 @@
                 <width>500</width>
                 <height>0</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Model Parse Tree&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This parse tree is populated when the model is built and shows the heirarchy of the model, including constants, variables, formulas, modules, etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="alternatingRowColors">
+               <bool>true</bool>
               </property>
               <column>
                <property name="text">
@@ -117,6 +130,9 @@
                  </item>
                  <item>
                   <widget class="QLabel" name="statesLabel">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of states in the model. If the model is not built, will say &amp;quot;Model Not Built&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="text">
                     <string>Model Not Built</string>
                    </property>
@@ -141,6 +157,9 @@
                  </item>
                  <item>
                   <widget class="QLabel" name="initStatesLabel">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of initial states in the model. If the model is not built, will say &amp;quot;Model Not Built&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="text">
                     <string>Model Not Built</string>
                    </property>
@@ -165,6 +184,9 @@
                  </item>
                  <item>
                   <widget class="QLabel" name="transitionsLabel">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of transitions between states in the model. If the model is not built, will say &amp;quot;Model Not Built&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="text">
                     <string>Model Not Built</string>
                    </property>
@@ -181,8 +203,11 @@
                <string>Build Model</string>
               </property>
               <property name="icon">
-               <iconset theme="draw">
+               <iconset theme="run-build">
                 <normaloff>.</normaloff>.</iconset>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -206,6 +231,10 @@
        </layout>
       </widget>
       <widget class="QWidget" name="propertyTab">
+       <attribute name="icon">
+        <iconset theme="formula">
+         <normaloff>.</normaloff>.</iconset>
+       </attribute>
        <attribute name="title">
         <string>Properties Editor</string>
        </attribute>
@@ -226,6 +255,15 @@
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QTableWidget" name="constantsTable">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Constant Editor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Constant Editor allows you to specify constants which are not specified in the PRISM file to be included at runtime. This lets you use the same PRISM model file to check multiple types of models.&lt;/p&gt;&lt;p&gt;You can specify any constant name, and if the constant does not exist in the PRISM model it will be ignored.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="whatsThis">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The constants editor allows you to edit constants defined at runtime.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
                <column>
                 <property name="text">
                  <string>Name</string>
@@ -254,6 +292,9 @@
                   <iconset theme="add">
                    <normaloff>.</normaloff>.</iconset>
                  </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
                 </widget>
                </item>
                <item>
@@ -264,6 +305,9 @@
                  <property name="icon">
                   <iconset theme="delete">
                    <normaloff>.</normaloff>.</iconset>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -294,6 +338,9 @@
                 <family>Noto Sans Mono</family>
                </font>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Properties Editor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Properties Editor allows you to edit CSL or PCTL properties that can be checked against your PRISM model.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -307,6 +354,12 @@
                  <iconset theme="add">
                   <normaloff>.</normaloff>.</iconset>
                 </property>
+                <property name="default">
+                 <bool>false</bool>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item>
@@ -317,6 +370,9 @@
                 <property name="icon">
                  <iconset theme="delete">
                   <normaloff>.</normaloff>.</iconset>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -342,6 +398,10 @@
        </layout>
       </widget>
       <widget class="QWidget" name="resultsTab">
+       <attribute name="icon">
+        <iconset theme="milestone">
+         <normaloff>.</normaloff>.</iconset>
+       </attribute>
        <attribute name="title">
         <string>Results</string>
        </attribute>
@@ -362,6 +422,15 @@
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
               <widget class="QTableWidget" name="labelTable">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Label Editor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This allows you to edit custom labels and associate them with states. Built-in labels are disabled since they cannot be edited.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="sortingEnabled">
+                <bool>false</bool>
+               </property>
                <column>
                 <property name="text">
                  <string>Name</string>
@@ -385,6 +454,9 @@
                   <iconset theme="label">
                    <normaloff>.</normaloff>.</iconset>
                  </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
                 </widget>
                </item>
                <item>
@@ -395,6 +467,9 @@
                  <property name="icon">
                   <iconset theme="delete">
                    <normaloff>.</normaloff>.</iconset>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -422,6 +497,12 @@
             <layout class="QVBoxLayout" name="verticalLayout_7">
              <item>
               <widget class="QTableWidget" name="earlyTerminatedTable">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Early-Terminated States&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This table is populated with states who were truncated early due to their paths already being known to satisfy the property, or already being known not to.&lt;/p&gt;&lt;p&gt;This table does &lt;span style=&quot; font-style:italic;&quot;&gt;not &lt;/span&gt;include states whose reachabilities were low enough that they had to be connected to the absorbing state.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
                <column>
                 <property name="text">
                  <string>State ID</string>
@@ -437,28 +518,180 @@
             </layout>
            </widget>
           </widget>
-          <widget class="QTableWidget" name="simulationResultsTable">
-           <column>
-            <property name="text">
-             <string>Property</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>PMin</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>PMax</string>
-            </property>
-           </column>
+          <widget class="QWidget" name="verticalLayoutWidget">
+           <layout class="QVBoxLayout" name="propertyLayout">
+            <item>
+             <widget class="QTableWidget" name="simulationResultsTable">
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <column>
+               <property name="text">
+                <string>Property</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>PMin</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>PMax</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="resultsButtons">
+              <item>
+               <widget class="QPushButton" name="exportCSVButton">
+                <property name="text">
+                 <string>Export CSV</string>
+                </property>
+                <property name="icon">
+                 <iconset theme="document-export">
+                  <normaloff>.</normaloff>.</iconset>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="sortAscendingbutton">
+                <property name="toolTip">
+                 <string>Sort Descending (by Name)</string>
+                </property>
+                <property name="text">
+                 <string>Sort Ascending</string>
+                </property>
+                <property name="icon">
+                 <iconset theme="view-sort-ascending">
+                  <normaloff>.</normaloff>.</iconset>
+                </property>
+                <property name="autoRaise">
+                 <bool>true</bool>
+                </property>
+                <property name="arrowType">
+                 <enum>Qt::NoArrow</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="sortDescendingButton">
+                <property name="toolTip">
+                 <string>Sort Ascending (By Name)</string>
+                </property>
+                <property name="text">
+                 <string>Sort Descending</string>
+                </property>
+                <property name="icon">
+                 <iconset theme="view-sort-descending">
+                  <normaloff>.</normaloff>.</iconset>
+                </property>
+                <property name="autoRaise">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="increasePrecisionButton">
+                <property name="toolTip">
+                 <string>More Precision</string>
+                </property>
+                <property name="text">
+                 <string>More Precision</string>
+                </property>
+                <property name="icon">
+                 <iconset theme="format-precision-more">
+                  <normaloff>.</normaloff>.</iconset>
+                </property>
+                <property name="autoRaise">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="decreasePrecisionButton">
+                <property name="toolTip">
+                 <string>Less Precision</string>
+                </property>
+                <property name="text">
+                 <string>Less Precision</string>
+                </property>
+                <property name="icon">
+                 <iconset theme="format-precision-less">
+                  <normaloff>.</normaloff>.</iconset>
+                </property>
+                <property name="autoRaise">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="formatPercentButton">
+                <property name="text">
+                 <string>Format as a Percentage</string>
+                </property>
+                <property name="icon">
+                 <iconset theme="format-number-percent">
+                  <normaloff>.</normaloff>.</iconset>
+                </property>
+                <property name="autoRaise">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="logTab">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::DefaultContextMenu</enum>
+       </property>
+       <attribute name="icon">
+        <iconset theme="system-log-out">
+         <normaloff>.</normaloff>.</iconset>
+       </attribute>
        <attribute name="title">
         <string>Log</string>
        </attribute>
@@ -514,6 +747,9 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
+    <property name="tearOffEnabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>File</string>
     </property>
