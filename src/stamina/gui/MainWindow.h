@@ -36,6 +36,7 @@ namespace stamina {
 			void populateLabelTable();
 			void populateResultsTable();
 			void populateModelInformationTree(std::shared_ptr<storm::prism::Program> program);
+			void initializeModel();
 
 		private:
 			Stamina s;

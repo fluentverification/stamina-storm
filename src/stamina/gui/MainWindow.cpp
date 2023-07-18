@@ -465,13 +465,13 @@ MainWindow::setupActions() {
 	// Non-action slots to connect
 	connect(
 		ui.modelFile
-		, SIGNAL(textChanged())
+		, SIGNAL(textEdited())
 		, this
 		, SLOT(setModifiedModel())
 	);
 	connect(
 		ui.propertiesEditor
-		, SIGNAL(textChanged())
+		, SIGNAL(textEdited())
 		, this
 		, SLOT(setModifiedProperties())
 	);
@@ -651,14 +651,17 @@ MainWindow::openPropertyFromAcceptedPath() {
 
 void
 MainWindow::saveModelFile() {
+	if (!unsavedChangesModel) { return; }
 	if (this->activeModelFile == "") {
 		this->saveModelFileAs();
 	}
 	else {
 		saveToActiveModelFile();
 	}
+	setCaption(activeModelFile);
 	unsavedChangesModel = false;
 	ui.statusbar->showMessage(tr("Saved model file."));
+	initializeModel();
 }
 
 void
@@ -701,12 +704,14 @@ MainWindow::openPropertyFile() {
 
 void
 MainWindow::savePropertyFile() {
+	if (!unsavedChangesProperty) { return; }
 	if (this->activePropertiesFile == "") {
 		this->savePropertyFileAs();
 	}
 	else {
 		saveToActivePropertiesFile();
 	}
+	setCaption(activePropertiesFile);
 	unsavedChangesProperty = false;
 	ui.statusbar->showMessage(tr("Saved properties file."));
 }
@@ -763,17 +768,25 @@ MainWindow::showAbout() {
 
 void
 MainWindow::setModifiedModel() {
+	// TODO: There is a bug here that creates multiple '*' suffixes
 	if (unsavedChangesModel) { return; }
 	// baseWindowTitle = ;
-	setCaption(windowTitle() + " * ");
+	QString title = windowTitle();
+	if (title[title.length() - 1] != '*') {
+		setCaption(windowTitle() + " *");
+	}
 	unsavedChangesModel = true;
 }
 
 void
 MainWindow::setModifiedProperties() {
+	// TODO: There is a bug here that creates multiple '*' suffixes
 	if (unsavedChangesProperty) { return; }
 	// baseWindowTitle = windowTitle();
-	setCaption(windowTitle() + " * ");
+	QString title = windowTitle();
+	if (title[title.length() - 1] != '*') {
+		setCaption(windowTitle() + " *");
+	}
 	unsavedChangesProperty = true;
 }
 
@@ -840,6 +853,20 @@ MainWindow::showPropertyWizard() {
 	}
 	propWizard->show();
 	// TODO: connect the close() slot to appending to the text file
+}
+
+void
+MainWindow::initializeModel() {
+	if (activePropertiesFile == "") {
+		StaminaMessages::warning("Cannot initialize model tree without active property file!");
+		return;
+	}
+	std::string modFile = this->activeModelFile.toStdString();
+	std::string propFile = this->activePropertiesFile.toStdString();
+	core::Options::model_file = modFile;
+	core::Options::properties_file = propFile;
+	s.initialize();
+	populateModelInformationTree(s.getModelFile());
 }
 
 void
@@ -951,6 +978,16 @@ MainWindow::populateResultsTable() {
 
 void
 MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> program) {
+	// Clear the tree
+	ui.modelInfoTree->clear();
+
+	// Get the data models for the completers so we can add the module names, variable names, and
+	// formula names to them. Note modModel is the data model for the model file.
+	QStringListModel * modModel = (QStringListModel *) modCompleter->model();
+	QStringListModel * propModel = (QStringListModel *) propCompleter->model();
+	QStringList modStringList = modModel->data();
+	QStringList propStringList = propModel->data();
+
 	// We should only get CTMCs, but this will allow for other types to be shown
 	QTreeWidgetItem * typeItem = new QTreeWidgetItem(ui.modelInfoTree);
 	ui.modelInfoTree->addTopLevelItem(typeItem);
@@ -982,15 +1019,29 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	ui.modelInfoTree->addTopLevelItem(constsItem);
 	for (auto & constant : program->getConstants()) {
 		QTreeWidgetItem * constItem = new QTreeWidgetItem(constsItem);
-		constItem->setText(0, QString::fromStdString(
-			constant.getName()
-		));
+		QString constName = QString::fromStdString(constant.getName());
+		constItem->setText(0, constName);
 		constItem->setText(1, QString::fromStdString(
 			constant.getType().getStringRepresentation()
 		));
 		constItem->setText(2, QString::fromStdString(
 			constant.getExpression().toString()
 		));
+		// Insert into the completers
+		if (modModel->insertRow(0)) {
+			QModelIndex idx = modModel->index(0, 0);
+			modModel->setData(idx, constName);
+		}
+		else {
+			StaminaMessages::warning("Could not add constant to completer!");
+		}
+		if (propModel->insertRow(0)) {
+			QModelIndex idx = propModel->index(0, 0);
+			propModel->setData(idx, constName);
+		}
+		else {
+			StaminaMessages::warning("Could not add constant to completer!");
+		}
 	}
 
 	// Add variable list to the tree
@@ -999,12 +1050,26 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	ui.modelInfoTree->addTopLevelItem(variablesItem);
 	for (auto & variable : program->getAllExpressionVariables()) {
 		QTreeWidgetItem * varItem = new QTreeWidgetItem(variablesItem);
-		varItem->setText(0, QString::fromStdString(
-			variable.getName()
-		));
+		QString varName = QString::fromStdString(variable.getName());
+		varItem->setText(0, varName);
 		varItem->setText(1, QString::fromStdString(
 			variable.getType().getStringRepresentation()
 		));
+		// Insert this variable's name into our completers
+		if (modModel->insertRow(0)) {
+			QModelIndex idx = modModel->index(0, 0);
+			modModel->setData(idx, varName);
+		}
+		else {
+			StaminaMessages::warning("Could not add variable to completer!");
+		}
+		if (propModel->insertRow(0)) {
+			QModelIndex idx = propModel->index(0, 0);
+			propModel->setData(idx, varName);
+		}
+		else {
+			StaminaMessages::warning("Could not add variable to completer!");
+		}
 	}
 	// Add formula list to the tree
 	QTreeWidgetItem * formulasItem = new QTreeWidgetItem(ui.modelInfoTree);
@@ -1025,9 +1090,22 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	ui.modelInfoTree->addTopLevelItem(modulesItem);
 	for (auto & pModule : program->getModules()) {
 		QTreeWidgetItem * modItem = new QTreeWidgetItem(modulesItem);
-		modItem->setText(0, QString::fromStdString(
-			pModule.getName()
-		));
+		QString moduleName = QString::fromStdString(pModule.getName());
+		modItem->setText(0, moduleName);
+		if (modModel->insertRow(0)) {
+			QModelIndex idx = modModel->index(0, 0);
+			modModel->setData(idx, moduleName);
+		}
+		else {
+			StaminaMessages::warning("Could not add module to completer!");
+		}
+		if (propModel->insertRow(0)) {
+			QModelIndex idx = propModel->index(0, 0);
+			propModel->setData(idx, moduleName);
+		}
+		else {
+			StaminaMessages::warning("Could not add module to completer!");
+		}
 		// Show the commands associated with the module
 		QTreeWidgetItem * moduleCommandsItem = new QTreeWidgetItem(modItem);
 		moduleCommandsItem->setText(0, "Commands");
