@@ -113,7 +113,8 @@ FindReplace::focusFind() {
 void
 FindReplace::find() {
 	StaminaMessages::info("find() callled");
-	// TODO: move cursor to the beginning
+	// move cursor to the beginning since find() always searches from the start
+	editor->moveCursor(QTextCursor::Start);
 	findNext();
 }
 

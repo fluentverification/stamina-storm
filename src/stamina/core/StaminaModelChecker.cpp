@@ -115,12 +115,7 @@ StaminaModelChecker::modelCheckProperty(
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
 	storm::builder::BuilderOptions options;
-	// if (formulasVector) {
-		options = BuilderOptions(formulasVector);
-	// }
-	// else {
-	//	options = BuilderOptions(*propOriginal.getFilter().getFormula());
-	// }
+	options = BuilderOptions(formulasVector);
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
