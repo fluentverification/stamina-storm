@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, ofdm(new KFileCustomDialog(this))
 	, sfdp(new KFileCustomDialog(this))
 	, ofdp(new KFileCustomDialog(this))
+	, exportDialog(new KFileCustomDialog(this))
 	, about(new About(this))
 	, prefs(new Preferences(this))
 	, propWizard(new PropertyWizard(this))
@@ -465,13 +466,13 @@ MainWindow::setupActions() {
 	// Non-action slots to connect
 	connect(
 		ui.modelFile
-		, SIGNAL(textEdited())
+		, SIGNAL(textChanged())
 		, this
 		, SLOT(setModifiedModel())
 	);
 	connect(
 		ui.propertiesEditor
-		, SIGNAL(textEdited())
+		, SIGNAL(textChanged())
 		, this
 		, SLOT(setModifiedProperties())
 	);
@@ -513,6 +514,27 @@ MainWindow::setupActions() {
 		, SIGNAL(currentChanged(int))
 		, this
 		, SLOT(handleTabChange())
+	);
+
+	connect(
+		ui.exportCSVButton
+		, SIGNAL(clicked())
+		, this
+		, SLOT(exportCSV())
+	);
+
+	connect(
+		ui.sortAscendingButton
+		, &QToolButton::clicked
+		, this
+		, [this]() { this->ui.simulationResultsTable->sortByColumn(0, Qt::AscendingOrder); }
+	);
+
+	connect(
+		ui.sortDescendingButton
+		, &QToolButton::clicked
+		, this
+		, [this]() { this->ui.simulationResultsTable->sortByColumn(0, Qt::DescendingOrder); }
 	);
 }
 
@@ -870,6 +892,38 @@ MainWindow::initializeModel() {
 }
 
 void
+MainWindow::exportCSV() {
+	exportDialog->setOperationMode(KFileWidget::Saving);
+	exportDialog->fileWidget()->setFilter(QString("*.csv |CSV (Comma-Separated Value) Files"));
+	connect(
+		exportDialog->fileWidget()
+		, &KFileWidget::accepted
+		, this
+		, [this] () {
+			QString fileName = this->exportDialog->fileWidget()->selectedFile();
+			QString csvData;
+			for (int row = 0; row < ui.simulationResultsTable->rowCount(); row++) {
+				for (int col = 0; col < ui.simulationResultsTable->columnCount(); col++) {
+					csvData += ui.simulationResultsTable->item(row, col)
+						->text().replace(QString(","), QString("\\,"));
+					csvData += ",";
+				}
+				csvData += "\n";
+			}
+			QFile csvFile(fileName);
+			if (csvFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+				QTextStream out(&csvFile);
+				out << csvData;
+				csvFile.close();
+			}
+			ui.statusbar->showMessage(tr("Finished exporting results"));
+		}
+	);
+	ui.statusbar->showMessage(tr("Exporting results to CSV file"));
+	exportDialog->show();
+}
+
+void
 MainWindow::checkModelAndProperties() {
 	// Trigger save of model and properties file
 	if (unsavedChangesModel || unsavedChangesProperty) {
@@ -985,8 +1039,8 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	// formula names to them. Note modModel is the data model for the model file.
 	QStringListModel * modModel = (QStringListModel *) modCompleter->model();
 	QStringListModel * propModel = (QStringListModel *) propCompleter->model();
-	QStringList modStringList = modModel->data();
-	QStringList propStringList = propModel->data();
+	QStringList modStringList = modModel->stringList();
+	QStringList propStringList = propModel->stringList();
 
 	// We should only get CTMCs, but this will allow for other types to be shown
 	QTreeWidgetItem * typeItem = new QTreeWidgetItem(ui.modelInfoTree);
@@ -1018,30 +1072,28 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	constsItem->setText(0, "Constants");
 	ui.modelInfoTree->addTopLevelItem(constsItem);
 	for (auto & constant : program->getConstants()) {
-		QTreeWidgetItem * constItem = new QTreeWidgetItem(constsItem);
 		QString constName = QString::fromStdString(constant.getName());
+		QString typeString = QString::fromStdString(constant.getType().getStringRepresentation());
+		QString expressionString = QString::fromStdString(constant.getExpression().toString());
+		QTreeWidgetItem * constItem = new QTreeWidgetItem(constsItem);
 		constItem->setText(0, constName);
-		constItem->setText(1, QString::fromStdString(
-			constant.getType().getStringRepresentation()
-		));
-		constItem->setText(2, QString::fromStdString(
-			constant.getExpression().toString()
-		));
+		constItem->setText(1, typeString);
+		constItem->setText(2, expressionString);
 		// Insert into the completers
-		if (modModel->insertRow(0)) {
-			QModelIndex idx = modModel->index(0, 0);
-			modModel->setData(idx, constName);
-		}
-		else {
-			StaminaMessages::warning("Could not add constant to completer!");
-		}
-		if (propModel->insertRow(0)) {
-			QModelIndex idx = propModel->index(0, 0);
-			propModel->setData(idx, constName);
-		}
-		else {
-			StaminaMessages::warning("Could not add constant to completer!");
-		}
+		modStringList << constName;
+		propStringList << constName;
+		// We also have the constants table on the second tab
+		ui.constantsTable->setRowCount(ui.constantsTable->rowCount() + 1);
+		int row = ui.constantsTable->rowCount() - 1;
+		QTableWidgetItem * constTableItem = new QTableWidgetItem(constName);
+		QTableWidgetItem * typeItem = new QTableWidgetItem(typeString);
+		QTableWidgetItem * exprItem = new QTableWidgetItem(expressionString);
+		constTableItem->setFlags(Qt::NoItemFlags);
+		typeItem->setFlags(Qt::NoItemFlags);
+		exprItem->setFlags(Qt::NoItemFlags);
+		ui.constantsTable->setItem(row, 0, constTableItem);
+		ui.constantsTable->setItem(row, 1, typeItem);
+		ui.constantsTable->setItem(row, 2, exprItem);
 	}
 
 	// Add variable list to the tree
@@ -1056,20 +1108,8 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 			variable.getType().getStringRepresentation()
 		));
 		// Insert this variable's name into our completers
-		if (modModel->insertRow(0)) {
-			QModelIndex idx = modModel->index(0, 0);
-			modModel->setData(idx, varName);
-		}
-		else {
-			StaminaMessages::warning("Could not add variable to completer!");
-		}
-		if (propModel->insertRow(0)) {
-			QModelIndex idx = propModel->index(0, 0);
-			propModel->setData(idx, varName);
-		}
-		else {
-			StaminaMessages::warning("Could not add variable to completer!");
-		}
+		modStringList << varName;
+		propStringList << varName;
 	}
 	// Add formula list to the tree
 	QTreeWidgetItem * formulasItem = new QTreeWidgetItem(ui.modelInfoTree);
@@ -1092,20 +1132,8 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 		QTreeWidgetItem * modItem = new QTreeWidgetItem(modulesItem);
 		QString moduleName = QString::fromStdString(pModule.getName());
 		modItem->setText(0, moduleName);
-		if (modModel->insertRow(0)) {
-			QModelIndex idx = modModel->index(0, 0);
-			modModel->setData(idx, moduleName);
-		}
-		else {
-			StaminaMessages::warning("Could not add module to completer!");
-		}
-		if (propModel->insertRow(0)) {
-			QModelIndex idx = propModel->index(0, 0);
-			propModel->setData(idx, moduleName);
-		}
-		else {
-			StaminaMessages::warning("Could not add module to completer!");
-		}
+		modStringList << moduleName;
+		propStringList << moduleName;
 		// Show the commands associated with the module
 		QTreeWidgetItem * moduleCommandsItem = new QTreeWidgetItem(modItem);
 		moduleCommandsItem->setText(0, "Commands");
@@ -1135,6 +1163,9 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 			}
 		}
 	}
+
+	modModel->setStringList(modStringList);
+	propModel->setStringList(propStringList);
 }
 
 void

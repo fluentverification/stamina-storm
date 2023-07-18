@@ -569,7 +569,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QToolButton" name="sortAscendingbutton">
+               <widget class="QToolButton" name="sortAscendingButton">
                 <property name="toolTip">
                  <string>Sort Descending (by Name)</string>
                 </property>

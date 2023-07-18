@@ -60,6 +60,7 @@ namespace stamina {
 			// Save file dialog
 			KFileCustomDialog * sfdm;
 			KFileCustomDialog * sfdp;
+			KFileCustomDialog * exportDialog;
 			// Open file dialog
 			KFileCustomDialog * ofdm;
 			KFileCustomDialog * ofdp;
@@ -103,6 +104,7 @@ namespace stamina {
 			void handleTabChange();
 			// Method that gets a model from a filename
 			QAbstractItemModel * modelFromFile(const QString & fileName, QCompleter * completer);
+			void exportCSV();
 		};
 	} // namespace gui
 } // namespace stamina
