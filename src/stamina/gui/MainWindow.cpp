@@ -499,6 +499,13 @@ MainWindow::setupActions() {
 	);
 
 	connect(
+		ui.actionCheck_All_Properties
+		, SIGNAL(triggered())
+		, this
+		, SLOT(checkModelAndProperties())
+	);
+
+	connect(
 		ui.addConstantButton
 		, &QPushButton::clicked
 		, this
