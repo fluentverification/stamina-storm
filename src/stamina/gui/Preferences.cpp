@@ -52,7 +52,7 @@ Preferences::setOptionsFromPreferences() {
 	else if (PrefInfo::ModelBuilding::exportPerimeterStates) {
 		core::Options::export_perimeter_states = PrefInfo::ModelBuilding::perimeterStatesFile;
 	}
-	// core::Options::method = PrefInfo::ModelBuilding::truncationMethod;
+	core::Options::method = PrefInfo::ModelBuilding::truncationMethod;
 	// core::Options::threads = PrefInfo::ModelBuilding::threads;
 }
 

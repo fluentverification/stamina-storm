@@ -893,6 +893,7 @@ MainWindow::checkModelAndProperties() {
 		ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
 		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 		populateLabelTable();
+		populateModelInformationTree(s.getModelFile());
 		progress->hide();
 		killButton->hide();
 	});
@@ -945,6 +946,101 @@ MainWindow::populateResultsTable() {
 			, new QTableWidgetItem(QString::number(result.pMax))
 		);
 		currentRow++;
+	}
+}
+
+void
+MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> program) {
+	// We should only get CTMCs, but this will allow for other types to be shown
+	QTreeWidgetItem * typeItem = new QTreeWidgetItem(ui.modelInfoTree);
+	ui.modelInfoTree->addTopLevelItem(typeItem);
+	QString modelTypeText("Model Type: ");
+	switch (program->getModelType()) {
+		case storm::prism::Program::ModelType::DTMC:
+			modelTypeText += "DTMC";
+			break;
+		case storm::prism::Program::ModelType::CTMC:
+			modelTypeText += "CTMC";
+			break;
+		case storm::prism::Program::ModelType::MDP:
+		case storm::prism::Program::ModelType::CTMDP:
+		case storm::prism::Program::ModelType::MA:
+		case storm::prism::Program::ModelType::POMDP:
+		case storm::prism::Program::ModelType::PTA:
+		case storm::prism::Program::ModelType::SMG:
+			modelTypeText += "Unsupported by STAMINA";
+			break;
+		case storm::prism::Program::ModelType::UNDEFINED:
+		default:
+			modelTypeText += "UNDEFINED";
+	}
+	typeItem->setText(0, modelTypeText);
+
+	// Add constants to the tree
+	QTreeWidgetItem * constsItem = new QTreeWidgetItem(ui.modelInfoTree);
+	constsItem->setText(0, "Constants");
+	ui.modelInfoTree->addTopLevelItem(constsItem);
+	for (auto & constant : program->getConstants()) {
+		QTreeWidgetItem * constItem = new QTreeWidgetItem(constsItem);
+		constItem->setText(0, QString::fromStdString(
+			constant.getName() + " (Value: " + constant.getExpression().toString() + ")"
+		));
+	}
+
+	// Add variable list to the tree
+	QTreeWidgetItem * variablesItem = new QTreeWidgetItem(ui.modelInfoTree);
+	variablesItem->setText(0, "Variables");
+	ui.modelInfoTree->addTopLevelItem(variablesItem);
+	for (auto & variable : program->getAllExpressionVariables()) {
+		QTreeWidgetItem * varItem = new QTreeWidgetItem(variablesItem);
+		varItem->setText(0, QString::fromStdString(
+			variable.getName() + " (Type: " + variable.getType().getStringRepresentation() + ")"
+		));
+	}
+	// Add formula list to the tree
+	QTreeWidgetItem * formulasItem = new QTreeWidgetItem(ui.modelInfoTree);
+	formulasItem->setText(0, "Formulas");
+	ui.modelInfoTree->addTopLevelItem(formulasItem);
+	for (auto & formula : program->getFormulas()) {
+		QTreeWidgetItem * formulaItem = new QTreeWidgetItem(formulasItem);
+		formulaItem->setText(0, QString::fromStdString(formula.getName()));
+		formulaItem->setToolTip(0, QString::fromStdString(formula.getExpression().toString()));
+	}
+
+	// Add modules to the tree
+	QTreeWidgetItem * modulesItem = new QTreeWidgetItem(ui.modelInfoTree);
+	modulesItem->setText(0, "Modules");
+	ui.modelInfoTree->addTopLevelItem(modulesItem);
+	for (auto & pModule : program->getModules()) {
+		QTreeWidgetItem * modItem = new QTreeWidgetItem(modulesItem);
+		modItem->setText(0, QString::fromStdString(
+			pModule.getName()
+		));
+		// Show the commands associated with the module
+		QTreeWidgetItem * moduleCommandsItem = new QTreeWidgetItem(modItem);
+		moduleCommandsItem->setText(0, "Commands");
+		for (auto & command : pModule.getCommands()) {
+			QTreeWidgetItem * commandsItem = new QTreeWidgetItem(moduleCommandsItem);
+			commandsItem->setText(0, QString::fromStdString(
+				command.getActionName() + " (guard: " + command.getGuardExpression().toString() + ")"
+			));
+			QTreeWidgetItem * updatesItem = new QTreeWidgetItem(commandsItem);
+			updatesItem->setText(0, "Updates:");
+			// Show the updates associated with the command
+			for (auto & update : command.getUpdates()) {
+				QTreeWidgetItem * updateItem = new QTreeWidgetItem(updatesItem);
+				updateItem->setText(0, QString::fromStdString(
+					update.getLikelihoodExpression ().toString()
+				));
+				// Show the assignments associated with the update
+				for (auto & assignment : update.getAssignments()) {
+					QTreeWidgetItem * assignmentItem = new QTreeWidgetItem(updateItem);
+					assignmentItem->setText(0, QString::fromStdString(
+						assignment.getExpression().toString()
+					));
+				}
+			}
+		}
 	}
 }
 

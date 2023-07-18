@@ -403,12 +403,12 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
 	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
-		std::cout << "PiHat = " << piHat << std::endl;
-		std::cout << "cond = " << windowPower / Options::approx_factor << std::endl;
+		// std::cout << "PiHat = " << piHat << std::endl;
+		// std::cout << "cond = " << windowPower / Options::approx_factor << std::endl;
 		hold = false;
 		auto currentProbabilityStatePair = *statePriorityQueue.top();
 		currentProbabilityState = statePriorityQueue.top()->first;
-		std::cout << "Current pi: " << currentProbabilityState->pi << std::endl;
+		// std::cout << "Current pi: " << currentProbabilityState->pi << std::endl;
 		currentState = statePriorityQueue.top()->second;
 		currentIndex = currentProbabilityState->index;
 		statePriorityQueue.pop();
@@ -423,6 +423,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
+
+		// Load state for us to use
+		generator->load(currentState);
 
 		if (formulaMatchesExpression && !Options::no_prop_refine) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
@@ -448,9 +451,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				continue;
 			}
 		}
-
-		// Load state for us to use
-		generator->load(currentState);
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -568,7 +568,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				currentProbabilityState->deadlock = true;
 
 			}
-			++currentRow;
+			if (currentIndex >= currentRow) {
+				++currentRow;
+			}
 			firstChoiceOfState = false;
 		}
 
@@ -584,7 +586,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
 
-		++currentRowGroup;
+		if (currentRow >= currentRowGroup) {
+			++currentRowGroup;
+		}
 
 		++numberOfExploredStates;
 		windowPower = pow(Options::prob_win, Options::fudge_factor * (std::log10(std::max(numberOfExploredStates, (uint64_t) 2))));

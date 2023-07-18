@@ -205,7 +205,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
 					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentIndex);
-
 				}
 			}
 			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
@@ -260,7 +259,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 			}
 
-			++currentRow;
+			if (currentIndex >= currentRow) {
+				++currentRow;
+			}
 			firstChoiceOfState = false;
 		}
 
@@ -280,7 +281,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
 
-		++currentRowGroup;
+		if (currentRow >= currentRowGroup) {
+			++currentRowGroup;
+		}
 
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
