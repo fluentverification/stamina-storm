@@ -16,6 +16,7 @@
 #include <KMessageBox>
 #include <KIO/Job>
 
+#include <core/StateSpaceInformation.h>
 
 #include "MainWindow.h"
 
@@ -915,6 +916,49 @@ MainWindow::initializeModel() {
 	core::Options::properties_file = propFile;
 	s.initialize();
 	populateModelInformationTree(s.getModelFile());
+}
+
+void
+MainWindow::populateTruncatedStates() {
+	auto modelChecker = s.modelChecker;
+	auto perimeterStates = modelChecker->getPerimeterStates();
+	// Fill out headers
+	QStringList headers;
+	headers << "State ID" << "Estimated Reachability";
+	auto variableInformation = core::StateSpaceInformation::getVariableInformation();
+	auto integerVariables  = variableInformation.integerVariables;
+	auto booleanVariables  = variableInformation.booleanVariables;
+	auto locationVariables = variableInformation.locationVariables;
+	for (auto & iVar : integerVariables) {
+		headers << iVar.variable.getName().c_str();
+	}
+	for (auto & bVar : booleanVariables) {
+		headers << bVar.variable.getName().c_str();
+	}
+	for (auto & lVar : locationVariables) {
+		headers << lVar.variable.getName().c_str();
+	}
+	ui.earlyTerminatedTable->setColumnCount(
+		2 // Columns for the state ID and estimated reachability
+		+ integerVariables.size() // Columns for all of the integer variables
+		+ booleanVariables.size() // Columns for all of the boolean variables
+		+ locationVariables.size() // Columns for all of the location variables
+	);
+
+	// Fill out data in the table
+	for (auto & perimeterState : perimeterStates) {
+		int row = ui.earlyTerminatedTable->rowCount();
+		int col = 0;
+		// Insert the row for us to use
+		ui.earlyTerminatedTable->insertRow(row);
+		// State ID
+		ui.earlyTerminatedTable->setItem(row, col++, new QTableWidgetItem(QString::number(perimeterState->index)));
+		// Estimated reachability
+		ui.earlyTerminatedTable->setItem(row, col++, new QTableWidgetItem(QString::number(perimeterState->pi)));
+		// Integer variables
+		// for (
+	}
+	ui.earlyTerminatedTable->show();
 }
 
 void

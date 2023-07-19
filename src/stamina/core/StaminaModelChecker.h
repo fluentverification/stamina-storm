@@ -92,6 +92,7 @@ namespace stamina {
 			std::vector<ResultTableRow> & getResultTable() { return this->resultTable; }
 			uint64_t getStateCount() { return builder->getStateCount(); }
 			uint64_t getTransitionCount() { return builder->getTransitionCount(); }
+			std::vector<ProbabilityState<uint32_t> *> getPerimeterStates() { return builder->getPerimeterStatesAsProbabilityStates(); }
 		private:
 			/**
 			* Result subclass (no private members since is a private subclass)
@@ -127,8 +128,6 @@ namespace stamina {
 				std::string explanation;
 
 			};
-
-
 			/**
 			* Whether or not to terminate model check
 			*
@@ -139,6 +138,7 @@ namespace stamina {
 			* Writes perimeter states to a specified file.
 			* */
 			void writePerimeterStates(int numRefineIteration);
+
 			/**
 			* Prints all of the transition actions to a file.
 			* */

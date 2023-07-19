@@ -59,6 +59,7 @@ namespace stamina {
 			 * @return A vector of all perimeter states
 			 * */
 			std::vector<StateType> getPerimeterStates();
+			std::vector<ProbabilityStateType *> getPerimeterStatesAsProbStates();
 			/**
 			 * Gets the actual number of terminal states in the map
 			 * */

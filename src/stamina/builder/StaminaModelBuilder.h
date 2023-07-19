@@ -118,6 +118,7 @@ namespace stamina {
 			* @return a vector of all perimeter states
 			*/
 			std::vector<StateType> getPerimeterStates();
+			std::vector<ProbabilityState<StateType> *> getPerimeterStatesAsProbabilityStates();
 			/**
 			* Sets the value of &kappa; in Options to what we have stored locally here
 			* */

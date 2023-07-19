@@ -525,7 +525,7 @@
                </column>
                <column>
                 <property name="text">
-                 <string>Probability</string>
+                 <string>Estimated Reachability</string>
                 </property>
                </column>
               </widget>
