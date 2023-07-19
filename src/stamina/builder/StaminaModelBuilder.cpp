@@ -103,8 +103,13 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
 	std::vector<StateType> perimeterStates = stateMap.getPerimeterStates();
-
 	return perimeterStates;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::vector<ProbabilityState<StateType> *>
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStatesAsProbabilityStates() {
+	return stateMap.getPerimeterStatesAsProbStates();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

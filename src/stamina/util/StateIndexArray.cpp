@@ -103,6 +103,20 @@ StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStates() {
 }
 
 template <typename StateType, typename ProbabilityStateType>
+std::vector<ProbabilityStateType *>
+StateIndexArray<StateType, ProbabilityStateType>::getPerimeterStatesAsProbStates() {
+	std::vector<ProbabilityStateType *> perimeterStates;
+	for (auto subArray : stateArray) {
+		for (int i = 0; i < blockSize; i++) {
+			if (subArray.get()[i] != nullptr && subArray.get()[i]->isTerminal()) {
+				perimeterStates.push_back(subArray.get()[i]);
+			}
+		}
+	}
+	return perimeterStates;
+}
+
+template <typename StateType, typename ProbabilityStateType>
 uint32_t
 StateIndexArray<StateType, ProbabilityStateType>::sizeToActualSize(uint32_t size) {
 	while (size % blockSize != 0) {
