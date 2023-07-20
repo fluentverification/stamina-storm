@@ -1054,6 +1054,7 @@ MainWindow::checkModelAndProperties() {
 		progress->show();
 		killButton->show();
 		try {
+			ui.mainTabs->setCurrentIndex(3); // Show the logs while running.
 			s.run();
 		}
 		catch (std::string & e) {
@@ -1168,6 +1169,8 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	QTreeWidgetItem * constsItem = new QTreeWidgetItem(ui.modelInfoTree);
 	constsItem->setText(0, "Constants");
 	ui.modelInfoTree->addTopLevelItem(constsItem);
+	// ui.constantsTable->clear();
+	ui.constantsTable->setRowCount(0);
 	bool addedConsts = false;
 	for (auto & constant : program->getConstants()) {
 		addedConsts = true;

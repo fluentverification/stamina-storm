@@ -724,6 +724,31 @@
             <family>Noto Sans Mono</family>
            </font>
           </property>
+          <property name="styleSheet">
+           <string notr="true">.error:before {
+	content: &quot;[ERROR]&quot;;
+	font-weight: bold;
+	color: #c11a1a;
+}
+
+.warning:before {
+	content: &quot;[WARNING]&quot;;
+	font-weight: bold;
+	color: #c1ad15;
+}
+
+.info:before {
+	content: &quot;[INFO]&quot;;
+	font-weight: bold;
+	color: #1671c1;
+}
+
+.good:before {
+	content: &quot;[MESSAGE]&quot;;
+	font-weight: bold;
+	color: #2bc114;
+}</string>
+          </property>
           <property name="undoRedoEnabled">
            <bool>false</bool>
           </property>

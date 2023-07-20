@@ -17,7 +17,13 @@ endif()
 
 # STAMINA Build
 # option(STAMINA_BUILD_TAG "Build tag information" "unspecified")
-add_compile_definitions(BUILD_INFO "unspecified")
+execute_process(
+	COMMAND git rev-parse HEAD
+	WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+	OUTPUT_VARIABLE GIT_HASH
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_compile_definitions(STAMINA_BUILD_INFO="Debug Build")
 
 # Build options
 option(BUILD_GUI "Build XStamina GUI" OFF)
@@ -31,7 +37,6 @@ if (BUILD_GUI)
 	set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 	add_compile_definitions(STAMINA_HAS_GUI)
-	add_compile_definitions(STAMINA_BUILD_INFO="Unspecified")
 
 	include(KDEInstallDirs)
 	include(KDECMakeSettings)
