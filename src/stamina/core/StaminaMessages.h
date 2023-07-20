@@ -21,6 +21,10 @@
 	#define STAMINA_DEBUG_MESSAGE(x);
 #endif // DEBUG_PRINTS
 
+#ifdef STAMINA_HAS_GUI
+#include <functional>
+#endif // STAMINA_HAS_GUI
+
 namespace stamina {
 	namespace core {
 		/* ERRORS WE CAN GET */
@@ -86,6 +90,14 @@ namespace stamina {
 			// The GUI needs us to raise exceptions because the exit() function will kill
 			// the entire program, which is usually fine in the CLI.
 			inline static bool raiseExceptionsRatherThanExit = false;
+#ifdef STAMINA_HAS_GUI
+			// Since std::functions have a default constructor, we can leave these
+			inline static bool functionsSetup = false;
+			inline static std::function<void (std::string)> errCallback;
+			inline static std::function<void (std::string)> warnCallback;
+			inline static std::function<void (std::string)> infoCallback;
+			inline static std::function<void (std::string)> goodCallback;
+#endif // STAMINA_HAS_GUI
 		protected:
 			static const std::string horizontalSeparator;
 		};

@@ -20,6 +20,8 @@
 
 #include "MainWindow.h"
 
+#include "MessageBridge.h"
+
 #include <iostream>
 #include <regex>
 #include <filesystem>
@@ -56,6 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
 	// Make it so StaminaMessages doesn't kill the program
 	StaminaMessages::raiseExceptionsRatherThanExit = true;
 	ui.setupUi(this);
+	MessageBridge::logOutput = ui.logOutput;
+	MessageBridge::initMessageBridge();
 	setupActions();
 	setup();
 	progress->setRange(0, 0);
@@ -73,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent)
 	killButton->hide();
 	killButton->setIcon(icon);
 	ui.earlyTerminatedGroup->hide();
+	ui.constantsGroup->hide();
 }
 
 void
@@ -815,6 +820,7 @@ MainWindow::downloadFinishedProperty(KJob* job) {
 	StaminaMessages::good("Succesfully loaded file into property editor!");
 	unsavedChangesProperty = false;
 	ui.statusbar->showMessage(tr("Opened property file."));
+	initializeModel();
 }
 
 void
@@ -929,6 +935,11 @@ void
 MainWindow::populateTruncatedStates() {
 	auto modelChecker = s.modelChecker;
 	auto perimeterStates = modelChecker->getPerimeterStates();
+	// If there were no perimeter/early terminated states,
+	// then do not fill out or show the table
+	if (perimeterStates.size() == 0) {
+		return;
+	}
 	// Fill out headers
 	QStringList headers;
 	headers << "State ID" << "Estimated Reachability";
@@ -956,6 +967,8 @@ MainWindow::populateTruncatedStates() {
 	for (auto & perimeterState : perimeterStates) {
 		int row = ui.earlyTerminatedTable->rowCount();
 		int col = 0;
+		auto index = perimeterState->index;
+		// auto state = getState(index);
 		// Insert the row for us to use
 		ui.earlyTerminatedTable->insertRow(row);
 		// State ID
@@ -963,9 +976,15 @@ MainWindow::populateTruncatedStates() {
 		// Estimated reachability
 		ui.earlyTerminatedTable->setItem(row, col++, new QTableWidgetItem(QString::number(perimeterState->pi)));
 		// Integer variables
-		// for (
+		for (auto & iVar : integerVariables) {
+			uint_fast64_t bitOffset = iVar.bitOffset;
+			uint16_t bitWidth = iVar.bitWidth;
+			// uint_fast64_t value = perimeterState->state.getAsInt(bitOffset + 1, bitWidth - 1);
+
+			// ui.earlyTerminatedTable->setItem(row, col++, new QTableWidgetItem(QString::number(value)));
+		}
 	}
-	ui.earlyTerminatedTable->show();
+	ui.earlyTerminatedGroup->show();
 }
 
 void
@@ -1052,6 +1071,7 @@ MainWindow::checkModelAndProperties() {
 		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 		populateLabelTable();
 		populateModelInformationTree(s.getModelFile());
+		populateTruncatedStates();
 		progress->hide();
 		killButton->hide();
 	});
@@ -1148,7 +1168,9 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	QTreeWidgetItem * constsItem = new QTreeWidgetItem(ui.modelInfoTree);
 	constsItem->setText(0, "Constants");
 	ui.modelInfoTree->addTopLevelItem(constsItem);
+	bool addedConsts = false;
 	for (auto & constant : program->getConstants()) {
+		addedConsts = true;
 		QString constName = QString::fromStdString(constant.getName());
 		QString typeString = QString::fromStdString(constant.getType().getStringRepresentation());
 		QString expressionString = QString::fromStdString(constant.getExpression().toString());
@@ -1171,6 +1193,10 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 		ui.constantsTable->setItem(row, 0, constTableItem);
 		ui.constantsTable->setItem(row, 1, typeItem);
 		ui.constantsTable->setItem(row, 2, exprItem);
+	}
+	// Show the constants group box on the "Properties" tab if there are constants
+	if (addedConsts) {
+		ui.constantsGroup->show();
 	}
 
 	// Add variable list to the tree
@@ -1227,7 +1253,7 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 			// Show the updates associated with the command
 			for (auto & update : command.getUpdates()) {
 				QTreeWidgetItem * updateItem = new QTreeWidgetItem(updatesItem);
-				updateItem->setText(0, QString::fromStdString(
+				updateItem->setText(0, "Probability/Rate: " + QString::fromStdString(
 					update.getLikelihoodExpression().toString()
 				));
 				// Show the assignments associated with the update

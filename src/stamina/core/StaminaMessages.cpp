@@ -10,10 +10,6 @@
 #include <iostream>
 #include <stdexcept>
 
-// #ifdef STAMINA_HAS_GUI
-// 	#include <KMessageBox>
-// #endif // STAMINA_HAS_GUI
-
 #define VERSION_MAJOR 2
 #define VERSION_MINOR 2.5
 
@@ -36,7 +32,6 @@ StaminaMessages::initMessage() {
 	std::cout << "Model checker: Storm (https://stormchecker.org) - Licensed under the GPLv3" << std::endl;
 	std::cout << "Storm Authors: C Hensel, S Junges, J Katoen, T Quatmann, M Volk" << std::endl;
 	std::cout << horizontalSeparator << std::endl;
-
 }
 
 void
@@ -66,6 +61,10 @@ StaminaMessages::error(std::string err, uint8_t err_num) {
 	std::cerr << BOLD(FRED("[ERROR]: "));
 	std::cerr << BOLD("STAMINA encountered the following (possibly recoverable) error: ") << std::endl;
 	std::cerr << '\t' << err << std::endl;
+#ifdef STAMINA_HAS_GUI
+	if (!functionsSetup) { return; }
+	errCallback(err);
+#endif
 }
 
 void
@@ -74,6 +73,10 @@ StaminaMessages::warning(std::string warn) {
 		return;
 	}
 	std::cerr << BOLD(FYEL("[WARNING]: ")) << warn << std::endl;
+#ifdef STAMINA_HAS_GUI
+	if (!functionsSetup) { return; }
+	warnCallback(warn);
+#endif
 }
 
 void
@@ -82,6 +85,10 @@ StaminaMessages::info(std::string info) {
 		return;
 	}
 	std::cerr << BOLD(FBLU("[INFO]: ")) << info << std::endl;
+#ifdef STAMINA_HAS_GUI
+	if (!functionsSetup) { return; }
+	infoCallback(info);
+#endif
 }
 
 void
@@ -90,6 +97,10 @@ StaminaMessages::good(std::string good) {
 		return;
 	}
 	std::cerr << BOLD(FGRN("[MESSAGE]: ")) << good << std::endl;
+#ifdef STAMINA_HAS_GUI
+	if (!functionsSetup) { return; }
+	goodCallback(good);
+#endif
 }
 
 #ifdef DEBUG_PRINTS

@@ -97,6 +97,8 @@ namespace stamina {
 			* Gets the state ID of a state known to already exist. This does NOT perform state-space truncation for future states
 			* */
 			StateType getStateIndexIfKnown(CompressedState const& state);
+			/* CompressedState const & getStateFromIndex(StateType index)
+				{ return stateStorage.stateToId.getValue(index); } */
 			/**
 			* Accumulates all probabilities in T Map and returns
 			* */

@@ -230,7 +230,7 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 				, version::version_major
 				, version::version_minor
 				, version::version_sub_minor
-				, "unspecified"
+				, STAMINA_BUILD_INFO // "unspecified"
 			);
 			exit(0);
 		case 'b':

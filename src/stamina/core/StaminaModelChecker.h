@@ -93,6 +93,7 @@ namespace stamina {
 			uint64_t getStateCount() { return builder->getStateCount(); }
 			uint64_t getTransitionCount() { return builder->getTransitionCount(); }
 			std::vector<ProbabilityState<uint32_t> *> getPerimeterStates() { return builder->getPerimeterStatesAsProbabilityStates(); }
+			// const CompressedState & getState(uint32_t index) { return builder->getStateFromIndex(index); }
 		private:
 			/**
 			* Result subclass (no private members since is a private subclass)

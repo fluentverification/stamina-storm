@@ -30,6 +30,9 @@ if (BUILD_GUI)
 	find_package(ECM 1.0.0 REQUIRED NO_MODULE)
 	set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+	add_compile_definitions(STAMINA_HAS_GUI)
+	add_compile_definitions(STAMINA_BUILD_INFO="Unspecified")
+
 	include(KDEInstallDirs)
 	include(KDECMakeSettings)
 	#include(KDECompilerSettings)
@@ -105,6 +108,8 @@ set(GUI_FILES
 	${GUI_PREFIX}/Preferences.cpp
 	${GUI_PREFIX}/PropertyWizard.cpp
 	${GUI_PREFIX}/FindReplace.cpp
+	# Message Bridge
+	${GUI_PREFIX}/MessageBridge.cpp
 	# Code editing
 	${GUI_PREFIX}/addons/CodeEditor.cpp
 	${GUI_PREFIX}/addons/LineNumberArea.cpp
