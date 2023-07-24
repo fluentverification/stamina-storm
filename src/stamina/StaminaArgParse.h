@@ -74,8 +74,8 @@ static struct argp_option options[] = {
 		"Do not use property based refinement. If given, the model exploration method will reduce kappa and do property independent definement (default: off)"}
 // 	, {"cuddMaxMem", 'C', "memory", 0,
 // 		"Maximum CUDD memory, in the same format as PRISM (default: 1g)"}
-// 	, {"export", 'e', "filename", 0,
-// 		"Export model to a (text) file"}
+	, {"export", 'e', "filename", 0,
+		"Export model to a (text) file"}
 // 	, {"exportPerimeterStates", 'S', "filename", 0,
 // 		"Export perimeter states to a file. Please provide a filename. This will append to the file if it is existing"}
 // 	, {"import", 'i', "filename", 0,

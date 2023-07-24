@@ -112,6 +112,7 @@ namespace stamina {
 			uint64_t getStateCount() { return builder->getStateCount(); }
 			uint64_t getTransitionCount() { return builder->getTransitionCount(); }
 			std::vector<ProbabilityState<uint32_t> *> getPerimeterStates() { return builder->getPerimeterStatesAsProbabilityStates(); }
+			std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> getModel() { return model; };
 			// const CompressedState & getState(uint32_t index) { return builder->getStateFromIndex(index); }
 		private:
 			/**

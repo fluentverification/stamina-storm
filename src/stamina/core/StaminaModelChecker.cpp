@@ -85,13 +85,10 @@ StaminaModelChecker::~StaminaModelChecker() {
 	if (oFilename != "") {
 		StaminaMessages::info("Attempting to export model to " + oFilename);
 		try {
-			std::string transFile = oFilename + ".tra";
-			std::string stateRewardsFile = oFilename + "srew";
-			std::string transRewardsFile = oFilename + ".trew";
-			std::string statesFile = oFilename + ".sta";
-			std::string labelsFile = oFilename + ".lab";
-			// TODO: export model to explicit files
-			StaminaMessages::warning("Exporting model to explicit files not implemented yet!");
+			storm::api::exportSparseModelAsDot(
+				std::static_pointer_cast<storm::models::sparse::Model<double>>(model)
+				, oFilename
+			);
 		}
 		catch (const std::exception& e) {
 			std::stringstream ss;

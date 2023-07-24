@@ -167,6 +167,56 @@ MainWindow::setupActions() {
 	);
 	// Actions which are connected to lambdas
 	connect(
+		ui.actionExport
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (!modelWasBuilt) {
+				KMessageBox::sorry(this, "Cannot export model when it was not built!");
+				return;
+			}
+			auto model = s.modelChecker->getModel();
+			exportDialog->setOperationMode(KFileWidget::Saving);
+			exportDialog->fileWidget()->setFilter(QString("*.dot |Dot Format\n*.drdd |DRDD Format\n*.drn|DRN Format\n*.json|Explicit JSON Format"));
+			connect(
+				exportDialog->fileWidget()
+				, &KFileWidget::accepted
+				, this
+				, [this, model] () {
+					QString fileName = this->exportDialog->fileWidget()->selectedFile();
+					if (fileName.endsWith(".dot") || fileName.endsWith(".drdd")) {
+						storm::api::exportSparseModelAsDot(
+							std::static_pointer_cast<storm::models::sparse::Model<double>>(model)
+							, fileName.toStdString()
+						);
+						ui.statusbar->showMessage(tr("Finished exporting model (DOT Format)"));
+					}
+					else if (fileName.endsWith(".drn")) {
+						storm::api::exportSparseModelAsDrn(
+							std::static_pointer_cast<storm::models::sparse::Model<double>>(model)
+							, fileName.toStdString()
+						);
+						ui.statusbar->showMessage(tr("Finished exporting model (DRN Format)"));
+					}
+					else if (fileName.endsWith(".json")) {
+						storm::api::exportSparseModelAsJson(
+							std::static_pointer_cast<storm::models::sparse::Model<double>>(model)
+							, fileName.toStdString()
+						);
+						ui.statusbar->showMessage(tr("Finished exporting model (JSON Format)"));
+					}
+					else {
+						ui.statusbar->showMessage(tr("Could not export model"));
+						return;
+					}
+				}
+			);
+			ui.statusbar->showMessage(tr("Exporting logs to text file"));
+			exportDialog->show();
+		}
+	);
+
+	connect(
 		ui.actionModel_Editor
 		, &QAction::triggered
 		, this
@@ -1124,6 +1174,7 @@ MainWindow::checkModelAndProperties() {
 		ui.statesLabel->setText(QString::number(s.getStateCount()));
 		ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
 		ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
+		modelWasBuilt = true;
 		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 		populateLabelTable();
 		populateModelInformationTree(s.getModelFile());

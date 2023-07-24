@@ -100,7 +100,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 * For var < val, the distance is calculated as
 		 *       var - val
 		 *  d  = ---------
-		 *		  var
+		 *          var
 		 * since we want a higher d for a lower var
 		 * */
 		float var = children[0]->accumulate(state);
@@ -116,7 +116,7 @@ PriorityTree::OperatorNode::accumulate(CompressedState & state) {
 		 * For var > val, the distance is calculated as
 		 *       val - var
 		 *  d  = ---------
-		 *		  val
+		 *          val
 		 * since we want a higher d for a lower var
 		 * */
 		float var = children[0]->accumulate(state);
@@ -240,8 +240,8 @@ PriorityTree::createNodeFromExpression(storm::expressions::Expression & expressi
 	 * Else:
 	 *     Create an OperatorNode
 	 *     For each operand:
-	 *		 call createNodeFromExpression
-	 *		 append result as child of OperatorNode
+	 *         call createNodeFromExpression
+	 *         append result as child of OperatorNode
 	 *     return the OperatorNode
 	 * */
 	if (expression.hasNumericalType() && expression.isLiteral()) {
