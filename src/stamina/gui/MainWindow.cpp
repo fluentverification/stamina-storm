@@ -593,6 +593,44 @@ MainWindow::setupActions() {
 		, this
 		, [this]() { this->ui.simulationResultsTable->sortByColumn(0, Qt::DescendingOrder); }
 	);
+
+	connect(
+		ui.saveLogsButton
+		, &QToolButton::clicked
+		, this
+		, [this]() {
+			exportDialog->setOperationMode(KFileWidget::Saving);
+			exportDialog->fileWidget()->setFilter(QString("*.txt |Text files"));
+			connect(
+				exportDialog->fileWidget()
+				, &KFileWidget::accepted
+				, this
+				, [this] () {
+					QString fileName = this->exportDialog->fileWidget()->selectedFile();
+					QString logData = ui.logOutput->toPlainText();
+
+					QFile csvFile(fileName);
+					if (csvFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+						QTextStream out(&csvFile);
+						out << logData;
+						csvFile.close();
+					}
+					ui.statusbar->showMessage(tr("Finished exporting logs"));
+				}
+			);
+			ui.statusbar->showMessage(tr("Exporting logs to text file"));
+			exportDialog->show();
+		}
+	);
+
+	connect(
+		ui.clearLogsButton
+		, &QToolButton::clicked
+		, this
+		, [this]() {
+			ui.logOutput->setPlainText("");
+		}
+	);
 }
 
 void
@@ -725,7 +763,6 @@ MainWindow::openPropertyFromAcceptedPath() {
 		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinishedProperty(KJob*)));
 		job->exec();
 	}
-
 }
 
 void

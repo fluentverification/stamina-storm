@@ -27,6 +27,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="statusTip">
+       <string>Logs produced by STAMINA when running.</string>
+      </property>
       <property name="tabPosition">
        <enum>QTabWidget::West</enum>
       </property>
@@ -80,6 +83,9 @@
               </property>
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Model Parse Tree&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This parse tree is populated when the model is built and shows the heirarchy of the model, including constants, variables, formulas, modules, etc.&lt;/p&gt;&lt;p&gt;Additionally, on model-file saving (if there is an active properties' file) the model file will be parsed and this tree will be populated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="statusTip">
+               <string>The model heirarchy.</string>
               </property>
               <property name="whatsThis">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The model information tree shows the parse tree of the model. It shows the type of the model (CTMC and DTMC are the only supported types for STAMINA), as well as all of the other explicitly defined things in the PRISM model, shown in heirarchy.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Modules: &lt;/span&gt;Modules are like namespaces. In PRISM syntax, these define scope. Anything defined in a module generally is only accessible to that module, unless defined as &amp;quot;global&amp;quot;.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Variables: &lt;/span&gt;Variables can hold data of different types.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Constants: &lt;/span&gt;Constants are like constants in any other language. They are unchanging variables that can be defined either explicitly in the file, or at runtime.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Formulas: &lt;/span&gt;Formulas allow the user to define rates or guard probabilities based on the current state-values of variables.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Updates: &lt;/span&gt;Updates allow variable values to update with probabilities and new values in state transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -142,6 +148,9 @@
                    <property name="toolTip">
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of states in the model. If the model is not built, will say &amp;quot;Model Not Built&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
+                   <property name="statusTip">
+                    <string>Number of states in the (truncated) built model.</string>
+                   </property>
                    <property name="text">
                     <string>Model Not Built</string>
                    </property>
@@ -168,6 +177,9 @@
                   <widget class="QLabel" name="initStatesLabel">
                    <property name="toolTip">
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of initial states in the model. If the model is not built, will say &amp;quot;Model Not Built&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="statusTip">
+                    <string>Number of initial states (generally 1).</string>
                    </property>
                    <property name="text">
                     <string>Model Not Built</string>
@@ -196,6 +208,12 @@
                    <property name="toolTip">
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of transitions between states in the model. If the model is not built, will say &amp;quot;Model Not Built&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
+                   <property name="statusTip">
+                    <string>Number of transitions in the (truncated) built model.</string>
+                   </property>
+                   <property name="whatsThis">
+                    <string>Number of transitions in the (truncated) built model.</string>
+                   </property>
                    <property name="text">
                     <string>Model Not Built</string>
                    </property>
@@ -214,8 +232,14 @@
                 <height>0</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Build the model and check all current properties.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="statusTip">
+               <string>Builds the model and checks the properties in the associated properties file.</string>
+              </property>
               <property name="text">
-               <string>Build Model</string>
+               <string>Build Model and Check Properties</string>
               </property>
               <property name="icon">
                <iconset theme="run-build">
@@ -236,6 +260,15 @@
                <font>
                 <family>Noto Sans Mono</family>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>Model file editor</string>
+              </property>
+              <property name="statusTip">
+               <string>Syntax-highlighting enabled editor which allows you to write models in the PRISM language.</string>
+              </property>
+              <property name="whatsThis">
+               <string>Syntax-highlighting enabled editor which allows you to write models in the PRISM language.</string>
               </property>
              </widget>
             </item>
@@ -272,6 +305,9 @@
               <widget class="QTableWidget" name="constantsTable">
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Constant Editor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Constant Editor allows you to specify constants which are not specified in the PRISM file to be included at runtime. This lets you use the same PRISM model file to check multiple types of models.&lt;/p&gt;&lt;p&gt;You can specify any constant name, and if the constant does not exist in the PRISM model it will be ignored.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="statusTip">
+                <string>Constants, including undefined constants.</string>
                </property>
                <property name="whatsThis">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The constants editor allows you to edit constants defined at runtime.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -355,6 +391,9 @@
               </property>
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Properties Editor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Properties Editor allows you to edit CSL or PCTL properties that can be checked against your PRISM model.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="statusTip">
+               <string>The properties file, in PRISM CSL or PCTL syntax.</string>
               </property>
              </widget>
             </item>
@@ -440,6 +479,9 @@
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Label Editor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This allows you to edit custom labels and associate them with states. Built-in labels are disabled since they cannot be edited.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
+               <property name="statusTip">
+                <string>The state labelling in the built model.</string>
+               </property>
                <property name="alternatingRowColors">
                 <bool>true</bool>
                </property>
@@ -515,6 +557,9 @@
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Early-Terminated States&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This table is populated with states who were truncated early due to their paths already being known to satisfy the property, or already being known not to.&lt;/p&gt;&lt;p&gt;This table also includes states whose reachabilities were low enough that they were connected to the artificial absorbing state, created by STAMINA to represent the state space not explored, which may be infinite but have negligable reachability.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
+               <property name="statusTip">
+                <string>All states which have been truncated by the STAMINA algorithm or by early-termination due to the property under verification.</string>
+               </property>
                <property name="alternatingRowColors">
                 <bool>true</bool>
                </property>
@@ -539,6 +584,9 @@
              <widget class="QTableWidget" name="simulationResultsTable">
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Results Table&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This table shows the results, P&lt;span style=&quot; vertical-align:sub;&quot;&gt;min&lt;/span&gt; and P&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt; (a.k.a., the upper and lower bounds of probability) for the properties under verification.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="statusTip">
+               <string>The results, Pmin and Pmax, which are guaranteed to contain the actual probability of the property under verification.</string>
               </property>
               <property name="whatsThis">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The values for P&lt;span style=&quot; vertical-align:sub;&quot;&gt;min &lt;/span&gt;and P&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt; are computed using one of the various STAMINA algorithms:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;STAMINA Re-Exploring: &lt;/span&gt;This algorithm is detailed in the associated VMCAI'22 paper STAMINA 2.0 was published in.&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;STAMINA Iterative: &lt;/span&gt;A variation on the re-exploring algorithm which includes dynamic programming improvements.&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;STAMINA Priority:&lt;/span&gt; An algorithm which prioritizes states with certain priority metrics that can be defined by the user.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -756,8 +804,8 @@
            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans Mono'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans Mono'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textInteractionFlags">
            <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -766,6 +814,67 @@ p, li { white-space: pre-wrap; }
            <string>Log output will appear here when STAMINA is run.</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="logsButtons">
+          <item>
+           <widget class="QToolButton" name="saveLogsButton">
+            <property name="toolTip">
+             <string>Save logs to text file.</string>
+            </property>
+            <property name="statusTip">
+             <string>This button saves the logs on the screen to a text file.</string>
+            </property>
+            <property name="whatsThis">
+             <string>This button saves the logs on the screen to a text file.</string>
+            </property>
+            <property name="text">
+             <string>Save Logs</string>
+            </property>
+            <property name="icon">
+             <iconset theme="document-save"/>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="clearLogsButton">
+            <property name="toolTip">
+             <string>Clear all of the logs on the screen.</string>
+            </property>
+            <property name="statusTip">
+             <string>This button clears all logs on the screen.</string>
+            </property>
+            <property name="whatsThis">
+             <string>This button clears all logs on the screen.</string>
+            </property>
+            <property name="text">
+             <string>Clear Logs</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-clear-history"/>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QCheckBox" name="showStdOut">
@@ -799,7 +908,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1624</width>
-     <height>33</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
