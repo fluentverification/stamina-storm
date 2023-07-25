@@ -763,6 +763,7 @@ MainWindow::openModelFromAcceptedPath() {
 	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
 	activeModelFile = selectedFile;
 	if (selectedFile != "") {
+		mustRebuildModel = true;
 		QFileInfo info(selectedFile);
 		baseWindowTitle = info.fileName();
 		setCaption(baseWindowTitle);
@@ -1041,7 +1042,7 @@ MainWindow::initializeModel() {
 	core::Options::properties_file = propFile;
 	s.reInitialize();
 	populateModelInformationTree(s.getModelFile());
-	mustRebuildModel = false;
+	// mustRebuildModel = false;
 }
 
 void
@@ -1168,6 +1169,9 @@ MainWindow::checkModelAndProperties() {
 	staminaJob = QtConcurrent::run([this]() {
 		progress->show();
 		killButton->show();
+		if (mustRebuildModel) {
+			StaminaMessages::info("Model has changed, so we must rebuild.");
+		}
 		try {
 			ui.mainTabs->setCurrentIndex(3); // Show the logs while running.
 			s.run(mustRebuildModel);

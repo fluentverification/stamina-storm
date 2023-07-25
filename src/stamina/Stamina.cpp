@@ -58,7 +58,7 @@ Stamina::Stamina(struct arguments * arguments) : modelModify(new util::ModelModi
 		StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");
 	}
 	// Initialize loggers
-	storm::utility::setUp(); // TODO
+	storm::utility::setUp();
 	// Set some settings objects.
 	storm::settings::initializeAll("Stamina", "Stamina");
 }
@@ -69,6 +69,10 @@ Stamina::Stamina()
 {
 	StaminaMessages::info("Starting STAMINA");
 	StaminaMessages::warning("This constructor is only to be called from the GUI! It leaves the model and properties files unloaded until specified later.");
+	// Initialize loggers
+	storm::utility::setUp();
+	// Set some settings objects.
+	storm::settings::initializeAll("Stamina", "Stamina");
 	// bool good = Options::checkOptions();
 	// if (!good) {
 	// 	StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");
@@ -83,8 +87,11 @@ void
 Stamina::run(bool rebuild) {
 	if (rebuild) {
 		wasInitialized = false;
+		reInitialize();
 	}
-	initialize();
+	else {
+		initialize();
+	}
 	// Create formulas vector
 	std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
 	for (auto & prop : *propertiesVector) {
