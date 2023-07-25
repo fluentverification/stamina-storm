@@ -614,26 +614,26 @@ MainWindow::setupActions() {
 					KMessageBox::error(this, "No properties in current line!");
 					return;
 				}
-				for (auto & prop : property) {
-					// Check property
-					// Fill out stuff in GUI
-					staminaJob = QtConcurrent::run([this, prop]() {
-						progress->show();
-						killButton->show();
+				staminaJob = QtConcurrent::run([this, property]() {
+					progress->show();
+					killButton->show();
+					for (auto & prop : property) {
+						// Check property
+						// Fill out stuff in GUI
 						s.checkSingleProperty(prop);
-						populateLabelTable();
-						populateResultsTable();
-						populateModelInformationTree(s.getModelFile());
-						populateTruncatedStates();
 						// Populate some of the labels
-						ui.statesLabel->setText(QString::number(s.getStateCount()));
-						ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
-						ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
 						modelWasBuilt = true;
-						progress->hide();
-					});
-				}
-				ui.actionResults_Viewer->trigger();
+					}
+					ui.statesLabel->setText(QString::number(s.getStateCount()));
+					ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
+					ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
+					populateLabelTable();
+					populateResultsTable();
+					populateModelInformationTree(s.getModelFile());
+					populateTruncatedStates();
+					progress->hide();
+					ui.actionResults_Viewer->trigger();
+				});
 			}
 			catch (storm::exceptions::BaseException & e) {
 				KMessageBox::error(this
