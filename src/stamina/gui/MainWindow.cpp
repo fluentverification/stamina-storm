@@ -159,6 +159,16 @@ MainWindow::setupActions() {
 		, SLOT(saveModelFileAs())
 	);
 	connect(
+		ui.actionAbout_STORM
+		, &QAction::triggered
+		, this
+		, [this]() {
+			KMessageBox::about(this
+			, "Storm is a library which STAMINA tightly integrates with. It is an advanced, modern PMC engine. Licensed under the GPLv3.\nhttps://stormchecker.org");
+		}
+	);
+
+	connect(
 		ui.actionAbout_STAMINA
 		, SIGNAL(triggered())
 		, this
@@ -170,6 +180,16 @@ MainWindow::setupActions() {
 		, &QAction::triggered
 		, this
 		, &QApplication::aboutQt
+	);
+	connect(
+		ui.actionAbout_KF5
+		, &QAction::triggered
+		, this
+		, [this]() {
+			KMessageBox::about(this
+			, "STAMINA makes use of KDE's KFrameworks version 5, in additon to Qt. Licensed under the GPLv3.\nhttps://api.kde.org/frameworks\nDisclaimer: STAMINA is NOT a KDE project."
+			);
+		}
 	);
 	// Actions which are connected to lambdas
 	connect(
@@ -661,6 +681,15 @@ MainWindow::setupActions() {
 		, SIGNAL(triggered())
 		, this
 		, SLOT(checkModelAndProperties())
+	);
+
+	connect(
+		ui.actionCheck_Specific_Properties
+		, &QAction::triggered
+		, this
+		, [this]() {
+			KMessageBox::error(this, "Not implemented!");
+		}
 	);
 
 	connect(
