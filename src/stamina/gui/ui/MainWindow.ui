@@ -339,6 +339,9 @@
               <layout class="QHBoxLayout" name="constantsButtonGroup">
                <item>
                 <widget class="QPushButton" name="addConstantButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Add Constant</string>
                  </property>
@@ -353,6 +356,9 @@
                </item>
                <item>
                 <widget class="QPushButton" name="deleteConstantButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Delete Constant</string>
                  </property>
@@ -404,6 +410,9 @@
              <layout class="QHBoxLayout" name="propertyButtons">
               <item>
                <widget class="QPushButton" name="propertyWizardButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Property Wizard</string>
                 </property>
@@ -507,6 +516,9 @@
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
                 <widget class="QPushButton" name="createLabelButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Create Label</string>
                  </property>
@@ -521,6 +533,9 @@
                </item>
                <item>
                 <widget class="QPushButton" name="deleteLabelButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Delete Label</string>
                  </property>
@@ -689,6 +704,9 @@
               </item>
               <item>
                <widget class="QToolButton" name="increasePrecisionButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>More Precision</string>
                 </property>
@@ -706,6 +724,9 @@
               </item>
               <item>
                <widget class="QToolButton" name="decreasePrecisionButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Less Precision</string>
                 </property>
@@ -723,6 +744,9 @@
               </item>
               <item>
                <widget class="QToolButton" name="formatPercentButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Format as a Percentage</string>
                 </property>
