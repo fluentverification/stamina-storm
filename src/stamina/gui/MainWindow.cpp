@@ -588,6 +588,19 @@ MainWindow::setupActions() {
 	);
 
 	connect(
+		ui.deletePropertyButton
+		, &QPushButton::clicked
+		, this
+		, [this]() {
+			QTextCursor cursor = this->ui.propertiesEditor->textCursor();
+			cursor.select(QTextCursor::LineUnderCursor);
+			cursor.removeSelectedText();
+			cursor.deleteChar(); // delete newline
+			this->ui.propertiesEditor->setTextCursor(cursor);
+		}
+	);
+
+	connect(
 		ui.buildModelButton
 		, SIGNAL(clicked())
 		, this

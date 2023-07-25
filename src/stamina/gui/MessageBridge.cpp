@@ -58,6 +58,7 @@ MessageBridge::initMessageBridge() {
 		, std::placeholders::_1
 	);
 	StaminaMessages::functionsSetup = true;
+	StaminaMessages::raiseExceptionsRatherThanExit = true;
 }
 
 void
