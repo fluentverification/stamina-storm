@@ -1169,8 +1169,7 @@ MainWindow::checkModelAndProperties() {
 		killButton->show();
 		try {
 			ui.mainTabs->setCurrentIndex(3); // Show the logs while running.
-			s.run(mustRebuildModel); // TODO: Rebuild model has bug with Storm
-			// s.run(mustRebuildModel);
+			s.run(/* mustRebuildModel */);
 		}
 		catch (std::string & e) {
 			std::string msg = std::string("Error got while running STAMINA: ") + e;
