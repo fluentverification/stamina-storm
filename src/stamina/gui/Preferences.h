@@ -115,7 +115,7 @@ namespace stamina {
 			Q_OBJECT
 		public:
 			Preferences(QWidget * parent = 0);
-			void show();
+			void show(int tabIndex = 0);
 			void accept() override;
 			Ui::MainWindow * getMainWindow() { return window; }
 			void setMainWindow(Ui::MainWindow * window) { this->window = window; }

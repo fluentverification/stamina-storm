@@ -156,13 +156,37 @@ Stamina::initialize() {
 	wasInitialized = true;
 }
 
-void Stamina::reInitialize() {
+void
+Stamina::reInitialize() {
 	if (modelModify) {
 		modelModify->setModelAndProperties(Options::model_file, Options::properties_file);
 	}
 	wasInitialized = false;
 	initialize();
 
+}
+
+void
+Stamina::checkSingleProperty(const storm::jani::Property & property) {
+	// Create formulas vector
+	std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
+	for (auto & prop : *propertiesVector) {
+		auto formula = prop.getFilter().getFormula();
+		fv.push_back(formula);
+	}
+
+	auto propMin = modelModify->modifyProperty(property, true);
+	auto propMax = modelModify->modifyProperty(property, false);
+	// Re-initialize
+	// initialize();
+	modelChecker->modelCheckProperty(
+		propMin
+		, propMax
+		, property
+		, *modelFile
+		, fv
+		, false // Do NOT rebuild
+	);
 }
 
 /* ===== IMPLEMENTATION FOR OTHER CLASSES IN THE `stamina` NAMESPACE ===== */

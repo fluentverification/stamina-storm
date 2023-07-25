@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="prefTabs">
      <property name="focusPolicy">
       <enum>Qt::WheelFocus</enum>
      </property>
@@ -26,7 +26,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -179,7 +179,7 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout_2">
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="kappaLabel">
          <property name="text">
           <string>Kappa</string>
          </property>
@@ -215,6 +215,9 @@
        </item>
        <item row="12" column="0">
         <widget class="QLabel" name="label_6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>File to export transitions to</string>
          </property>
@@ -222,6 +225,9 @@
        </item>
        <item row="15" column="0">
         <widget class="QLabel" name="label_7">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>File to export perimeter states to</string>
          </property>
@@ -271,6 +277,9 @@
        </item>
        <item row="11" column="1">
         <widget class="QCheckBox" name="traExport">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Export Transitions</string>
          </property>
@@ -279,10 +288,17 @@
        <item row="12" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLineEdit" name="traFilePath"/>
+          <widget class="QLineEdit" name="traFilePath">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="traBrowse">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximumSize">
             <size>
              <width>100</width>
@@ -305,12 +321,15 @@
          <item>
           <widget class="QLineEdit" name="perimPath">
            <property name="enabled">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="perimBrowse">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximumSize">
             <size>
              <width>100</width>
@@ -415,7 +434,10 @@
         </widget>
        </item>
        <item row="16" column="0">
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="nThreadsLabel">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Number of threads to use</string>
          </property>
@@ -443,6 +465,9 @@
        </item>
        <item row="1" column="0">
         <widget class="QCheckBox" name="useCudd">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Use CUDD Library</string>
          </property>
@@ -453,6 +478,9 @@
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_11">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>CUDD Memory Limit</string>
          </property>
@@ -460,6 +488,9 @@
        </item>
        <item row="2" column="1">
         <widget class="QLineEdit" name="cuddMemoryLimit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>2G</string>
          </property>
@@ -467,6 +498,9 @@
        </item>
        <item row="3" column="0" colspan="2">
         <widget class="QCheckBox" name="stormVerboseLog">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>STORM Verbose log</string>
          </property>

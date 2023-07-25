@@ -40,8 +40,9 @@ Preferences::setupActions() {
 }
 
 void
-Preferences::show() {
-
+Preferences::show(int tabIndex) {
+	ui.prefTabs->setCurrentIndex(tabIndex);
+	this->exec();
 }
 
 void

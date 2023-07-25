@@ -256,7 +256,7 @@
            </layout>
           </widget>
           <widget class="QWidget" name="modelFileLayout">
-           <layout class="QVBoxLayout" name="modelFileLayout">
+           <layout class="QVBoxLayout" name="modelFileVBoxLayout">
             <item>
              <widget class="stamina::gui::addons::CodeEditor" name="modelFile">
               <property name="font">
@@ -489,7 +489,7 @@
                 <bool>true</bool>
                </property>
                <property name="sortingEnabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <column>
                 <property name="text">
@@ -564,6 +564,9 @@
                 <string>All states which have been truncated by the STAMINA algorithm or by early-termination due to the property under verification.</string>
                </property>
                <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="sortingEnabled">
                 <bool>true</bool>
                </property>
                <column>
@@ -807,8 +810,8 @@
            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans Mono'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans Mono'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textInteractionFlags">
            <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -900,7 +903,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1624</width>
-     <height>33</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -935,7 +938,6 @@ p, li { white-space: pre-wrap; }
     <addaction name="separator"/>
     <addaction name="actionExport"/>
     <addaction name="separator"/>
-    <addaction name="actionClose"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -1014,29 +1016,12 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>Check</string>
     </property>
-    <widget class="QMenu" name="menuModel_Checking_Engine">
-     <property name="title">
-      <string>Model Checking Engine</string>
-     </property>
-     <addaction name="actionStorm_Sylvan"/>
-    </widget>
-    <widget class="QMenu" name="menuModel_Building_Engine">
-     <property name="title">
-      <string>Model Building Engine</string>
-     </property>
-     <addaction name="actionSTAMINA_Iterative"/>
-     <addaction name="actionSTAMINA_Priority"/>
-     <addaction name="actionSTORM_Explicit"/>
-    </widget>
     <addaction name="actionCheck_Current_Property"/>
     <addaction name="actionCheck_All_Properties"/>
     <addaction name="actionCheck_Specific_Properties"/>
     <addaction name="separator"/>
-    <addaction name="menuModel_Checking_Engine"/>
-    <addaction name="separator"/>
-    <addaction name="actionModel_Checker_Preferences"/>
-    <addaction name="separator"/>
-    <addaction name="menuModel_Building_Engine"/>
+    <addaction name="actionModel_Building_Preferences"/>
+    <addaction name="actionModel_Checking_Preferences"/>
    </widget>
    <widget class="QMenu" name="menuHelp_2">
     <property name="title">
@@ -1410,9 +1395,9 @@ p, li { white-space: pre-wrap; }
     <string>Storm: Sylvan</string>
    </property>
   </action>
-  <action name="actionModel_Checker_Preferences">
+  <action name="actionModel_Building_Preferences">
    <property name="text">
-    <string>Model Checker Preferences</string>
+    <string>Model Building Preferences</string>
    </property>
   </action>
   <action name="actionSTAMINA_Iterative">
@@ -1443,6 +1428,10 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionDocumentation">
+   <property name="icon">
+    <iconset theme="help">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
    <property name="text">
     <string>Documentation</string>
    </property>
@@ -1462,6 +1451,10 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionAbout_STAMINA">
+   <property name="icon">
+    <iconset theme="help-about">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
    <property name="text">
     <string>About STAMINA</string>
    </property>
@@ -1530,6 +1523,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionBounded_Until_Property">
    <property name="text">
     <string>Bounded Until Property</string>
+   </property>
+  </action>
+  <action name="actionModel_Checking_Preferences">
+   <property name="text">
+    <string>Model Checking Preferences</string>
    </property>
   </action>
  </widget>

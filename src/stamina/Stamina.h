@@ -66,6 +66,7 @@ namespace stamina {
 		* */
 		void initialize();
 		void reInitialize();
+		void checkSingleProperty(const storm::jani::Property & property);
 		std::vector<core::StaminaModelChecker::ResultTableRow> & getResultTable() { return this->modelChecker->getResultTable(); }
 		uint64_t getStateCount() { return modelChecker->getStateCount(); }
 		std::shared_ptr<storm::prism::Program> getModelFile() { return modelFile; }

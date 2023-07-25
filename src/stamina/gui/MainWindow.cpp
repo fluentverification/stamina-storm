@@ -36,6 +36,8 @@
 
 #include <core/StateSpaceInformation.h>
 
+#include <storm-parsers/parser/FormulaParser.h>
+
 #include "MainWindow.h"
 
 #include "MessageBridge.h"
@@ -100,7 +102,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void
 MainWindow::setup() {
-	modelFindReplace->place(this->ui.modelFileLayout1, this->ui.modelFile);
+	modelFindReplace->place(this->ui.modelFileVBoxLayout, this->ui.modelFile);
 	propFindReplace->place(this->ui.propertySideVBox, this->ui.propertiesEditor);
 	// Set up the autocompleters
 	auto completerWordModFileModel = modelFromFile(":/resources/wordlist.txt", modCompleter);
@@ -176,7 +178,7 @@ MainWindow::setupActions() {
 		, this
 		, [this]() {
 			if (!modelWasBuilt) {
-				KMessageBox::sorry(this, "Cannot export model when it was not built!");
+				KMessageBox::error(this, "Cannot export model when it was not built!");
 				return;
 			}
 			auto model = s.modelChecker->getModel();
@@ -386,7 +388,7 @@ MainWindow::setupActions() {
 		, &QAction::triggered
 		, this
 		, [this]() {
-			KMessageBox::sorry(this, "Not currently supported!");
+			KMessageBox::error(this, "Not currently supported!");
 		}
 	);
 	connect(
@@ -533,6 +535,22 @@ MainWindow::setupActions() {
 		}
 	);
 	connect(
+		ui.actionModel_Building_Preferences
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->prefs->show(1);
+		}
+	);
+	connect(
+		ui.actionModel_Checking_Preferences
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->prefs->show(2);
+		}
+	);
+	connect(
 		ui.actionDocumentation
 		, &QAction::triggered
 		, this
@@ -574,6 +592,54 @@ MainWindow::setupActions() {
 		, SIGNAL(clicked())
 		, this
 		, SLOT(checkModelAndProperties())
+	);
+
+	connect(
+		ui.actionCheck_Current_Property
+		, &QAction::triggered
+		, this
+		, [this]() {
+			QTextCursor cursor = this->ui.propertiesEditor->textCursor();
+			cursor.select(QTextCursor::LineUnderCursor);
+			std::string prop = cursor.selectedText()
+								.replace(QChar(2029), "")
+								.toStdString();
+			StaminaMessages::info("Attempting to check specific property: " + prop);
+			// create property and check it
+			try {
+				auto program = s.getModelFile();
+				storm::parser::FormulaParser parser(*program);
+				auto property = parser.parseFromString(prop);
+				if (property.size() == 0) {
+					KMessageBox::error(this, "No properties in current line!");
+					return;
+				}
+				for (auto & prop : property) {
+					// Check property
+					// Fill out stuff in GUI
+					staminaJob = QtConcurrent::run([this, prop]() {
+						progress->show();
+						killButton->show();
+						s.checkSingleProperty(prop);
+						populateLabelTable();
+						populateResultsTable();
+						populateModelInformationTree(s.getModelFile());
+						populateTruncatedStates();
+						// Populate some of the labels
+						ui.statesLabel->setText(QString::number(s.getStateCount()));
+						ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
+						ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
+						modelWasBuilt = true;
+						progress->hide();
+					});
+				}
+			}
+			catch (storm::exceptions::BaseException & e) {
+				KMessageBox::error(this
+					, QString::fromStdString("Got error when trying to check property '" + prop + "':" + e.what())
+				);
+			}
+		}
 	);
 
 	connect(
@@ -1178,11 +1244,11 @@ MainWindow::checkModelAndProperties() {
 		}
 		catch (std::string & e) {
 			std::string msg = std::string("Error got while running STAMINA: ") + e;
-			KMessageBox::sorry(nullptr, QString::fromStdString(msg));
+			KMessageBox::error(nullptr, QString::fromStdString(msg));
 		}
 		catch (storm::exceptions::BaseException & e) {
 			std::string msg = std::string("Error in Storm: ") + e.what();
-			KMessageBox::sorry(nullptr, QString::fromStdString(msg));
+			KMessageBox::error(nullptr, QString::fromStdString(msg));
 		}
 		ui.statusbar->showMessage(tr("Finished."));
 		// KMessageBox::
