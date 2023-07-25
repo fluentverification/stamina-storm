@@ -65,6 +65,7 @@ namespace stamina {
 		* Initializes Stamina
 		* */
 		void initialize();
+		void reInitialize() { wasInitialized = false; initialize(); }
 		std::vector<core::StaminaModelChecker::ResultTableRow> & getResultTable() { return this->modelChecker->getResultTable(); }
 		uint64_t getStateCount() { return modelChecker->getStateCount(); }
 		std::shared_ptr<storm::prism::Program> getModelFile() { return modelFile; }

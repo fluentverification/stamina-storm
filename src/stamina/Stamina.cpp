@@ -57,6 +57,10 @@ Stamina::Stamina(struct arguments * arguments) : modelModify(new util::ModelModi
 	if (!good) {
 		StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");
 	}
+	// Initialize loggers
+	storm::utility::setUp(); // TODO
+	// Set some settings objects.
+	storm::settings::initializeAll("Stamina", "Stamina");
 }
 
 Stamina::Stamina()
@@ -128,10 +132,6 @@ Stamina::initialize() {
 	catch(const std::exception& e) {
 		StaminaMessages::errorAndExit("Failed to allocate memory for StaminaModelChecker!");
 	}
-	// Initialize loggers
-	storm::utility::setUp(); // TODO
-	// Set some settings objects.
-	storm::settings::initializeAll("Stamina", "Stamina");
 
 	// Load model file and properties file
 	try {

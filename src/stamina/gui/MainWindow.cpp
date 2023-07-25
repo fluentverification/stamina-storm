@@ -1039,8 +1039,9 @@ MainWindow::initializeModel() {
 	std::string propFile = this->activePropertiesFile.toStdString();
 	core::Options::model_file = modFile;
 	core::Options::properties_file = propFile;
-	s.initialize();
+	s.reInitialize();
 	populateModelInformationTree(s.getModelFile());
+	mustRebuildModel = false;
 }
 
 void
@@ -1169,10 +1170,14 @@ MainWindow::checkModelAndProperties() {
 		killButton->show();
 		try {
 			ui.mainTabs->setCurrentIndex(3); // Show the logs while running.
-			s.run(/* mustRebuildModel */);
+			s.run(mustRebuildModel);
 		}
 		catch (std::string & e) {
 			std::string msg = std::string("Error got while running STAMINA: ") + e;
+			KMessageBox::sorry(nullptr, QString::fromStdString(msg));
+		}
+		catch (storm::exceptions::BaseException & e) {
+			std::string msg = std::string("Error in Storm: ") + e.what();
 			KMessageBox::sorry(nullptr, QString::fromStdString(msg));
 		}
 		ui.statusbar->showMessage(tr("Finished."));
