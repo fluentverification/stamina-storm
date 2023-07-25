@@ -633,6 +633,7 @@ MainWindow::setupActions() {
 						progress->hide();
 					});
 				}
+				ui.actionResults_Viewer->trigger();
 			}
 			catch (storm::exceptions::BaseException & e) {
 				KMessageBox::error(this
