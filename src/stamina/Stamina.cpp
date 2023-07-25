@@ -87,7 +87,6 @@ void
 Stamina::run(bool rebuild) {
 	if (rebuild) {
 		wasInitialized = false;
-		modelModify->setModelAndProperties(Options::model_file, Options::properties_file);
 		reInitialize();
 	}
 	else {
@@ -157,7 +156,14 @@ Stamina::initialize() {
 	wasInitialized = true;
 }
 
+void Stamina::reInitialize() {
+	if (modelModify) {
+		modelModify->setModelAndProperties(Options::model_file, Options::properties_file);
+	}
+	wasInitialized = false;
+	initialize();
 
+}
 
 /* ===== IMPLEMENTATION FOR OTHER CLASSES IN THE `stamina` NAMESPACE ===== */
 
