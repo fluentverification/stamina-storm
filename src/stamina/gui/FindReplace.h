@@ -17,28 +17,36 @@
  *
  **/
 
-#ifndef STAMINA_ABOUT_H
-#define STAMINA_ABOUT_H
+#ifndef STAMINA_FIND_REPLACE_H
+#define STAMINA_FIND_REPLACE_H
 
-#include <KXmlGuiWindow>
-#include <QDialog>
+#include "ui/ui_FindReplace.h"
 
-#include "ui/ui_About.h"
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QPlainTextEdit>
 
 namespace stamina {
 	namespace gui {
-		class About : public QDialog {
+		class FindReplace : public QWidget {
 			Q_OBJECT
 		public:
-			About(QWidget * parent = 0);
-			void show();
-			void hide();
-		private:
+			FindReplace(QWidget * parent = nullptr);
+			void place(QVBoxLayout * location = nullptr, QPlainTextEdit * editor = nullptr);
+			void show(bool replace = false);
+			void focusFind();
+		protected:
 			void setupActions();
-			// Data members
-			Ui::About ui;
+			Ui::FindReplace ui;
+			QWidget * hostWidget;
+			QPlainTextEdit * editor;
+		private slots:
+			void find();
+			bool findNext(bool alertIfNotFound=true);
+			void replace();
+			void replaceAll();
 		};
 	}
 }
 
-#endif // STAMINA_ABOUT_H
+#endif // STAMINA_FIND_REPLACE_H

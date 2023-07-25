@@ -2,14 +2,7 @@
 
 ## Compile Instructions
 
-First, run `./CompileUiFiles.sh`. You will need Qt5+ and `uic` (the Qt UI compiler). Then do the following to use `cmake`:
-
-```bash
-mkdir build
-cd build
-cmake ..
-make -j$(nproc --all)
-```
+First, run `./CompileUiFiles.sh`. You will need Qt5+ and `uic` (the Qt UI compiler). Then, you can enable building the GUI in the main CMakeLists using `-DBUILD_GUI=On`.
 
 ## Dependencies:
 

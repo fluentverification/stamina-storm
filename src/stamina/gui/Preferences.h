@@ -1,10 +1,34 @@
+/**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
 #ifndef STAMINA_PREFERENCES_H
 #define STAMINA_PREFERENCES_H
 
 #include <KXmlGuiWindow>
 #include <QDialog>
+#include <cstdint>
+#include <string>
+
+#include "stamina/core/Options.h"
 
 #include "ui/ui_Preferences.h"
+#include "ui/ui_MainWindow.h"
 
 namespace stamina {
 	namespace gui {
@@ -18,9 +42,9 @@ namespace stamina {
 			struct General {
 				static void setDefaults();
 				// Auto-detect model file type from extension
-				inline static bool modelFileFromExtension;
+				// inline static bool modelFileFromExtension; // Depricated
 				// Save modified CSL properties file
-				inline static bool saveModifiedCSL;
+				// inline static bool saveModifiedCSL; // Depricated
 				// Truncate model
 				inline static bool truncateModel;
 				// Attempt to generate counterExamples
@@ -59,7 +83,7 @@ namespace stamina {
 				inline static bool exportPerimeterStates;
 				// File to export perimeter states to
 				inline static std::string perimeterStatesFile;
-				// Truncation method. TODO: import enum from stamina::core::Options
+				// Truncation method.
 				inline static uint8_t truncationMethod;
 				// Number of threads
 				inline static uint8_t threads;
@@ -91,12 +115,25 @@ namespace stamina {
 			Q_OBJECT
 		public:
 			Preferences(QWidget * parent = 0);
-			void show();
-			void hide();
+			void show(int tabIndex = 0);
+			void accept() override;
+			Ui::MainWindow * getMainWindow() { return window; }
+			void setMainWindow(Ui::MainWindow * window) { this->window = window; }
+			/**
+			 * Sets the "options" values in Stamina::core::Options
+			 * from the preferences selected on this window.
+			 * */
+			void setOptionsFromPreferences();
+			/**
+			 * Sets preference info that updates the user interface
+			 * */
+			void setUIFromPreferences();
+			void getPreferencesFromUI();
 		private:
 			void setupActions();
 			// Data members
 			Ui::Preferences ui;
+			Ui::MainWindow * window;
 		};
 	}
 }

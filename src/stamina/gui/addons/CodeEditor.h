@@ -1,5 +1,24 @@
+/**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
 /*
- * Code editor with line numbers--extends QTextEdit ~~KDE's KTextEdit~~
+ * Code editor with line numbers--extends QPlainTextEdit ~~KDE's KTextEdit~~
  * */
 
 #ifndef STAMINA_CODE_EDITOR_H
@@ -10,6 +29,7 @@
 #include <QTextEdit>
 #include <QPlainTextEdit>
 #include <QPainter>
+#include <QCompleter>
 
 #include "highlighter/Highlighter.h"
 
@@ -23,14 +43,22 @@ namespace stamina {
 
 				void lineNumberAreaPaintEvent(QPaintEvent * event);
 				uint16_t lineNumberAreaWidth();
+				void setCompleter(QCompleter * completer);
+				QCompleter * completer() const;
+				void setTabWidth(int numChars);
 			protected:
 				void resizeEvent(QResizeEvent * event) override;
+				void keyPressEvent(QKeyEvent * e) override;
+				void focusInEvent(QFocusEvent * e) override;
 			private slots:
 				void updateLineNumberAreaWidth(uint16_t newBlockCount);
 				void highlightCurrentLine();
 				void updateLineNumberArea(const QRect & rect, int16_t dy);
-
+				void insertCompletion(const QString & completion);
 			private:
+				QString textUnderCursor() const;
+
+				QCompleter * c = nullptr;
 				QWidget * lineNumberArea;
 				highlighter::Highlighter * hl;
 			};

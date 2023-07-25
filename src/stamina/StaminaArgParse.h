@@ -1,4 +1,23 @@
 /**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
+/**
 * Argument Parser for STAMINA using a lot of C-style stuff and argp
 *
 * Created on 8/17/2021 by Josh Jeppson
@@ -14,7 +33,7 @@
 #include <stdio.h>
 #include <cstdint>
 
-#define BUILD_INFO ""
+// #define BUILD_INFO ""
 
 enum STAMINA_METHODS {
 	ITERATIVE_METHOD = 0          // STAMINA 2.5
@@ -35,6 +54,8 @@ static char args_doc[] = "MODEL_FILE PROPERTIES_FILE";
 
 /**
 * Options understood by stamina, as well as documentation for those arguments
+*
+* Arguments commented out are those that we wish to add support for, but do not yet.
 * */
 static struct argp_option options[] = {
 	{"kappa", 'k', "double", 0,
@@ -51,27 +72,29 @@ static struct argp_option options[] = {
 		"Maximum number of iterations in the approximation (default 10)"}
 	, {"noPropRefine", 'R', 0, 0,
 		"Do not use property based refinement. If given, the model exploration method will reduce kappa and do property independent definement (default: off)"}
-	, {"cuddMaxMem", 'C', "memory", 0,
-		"Maximum CUDD memory, in the same format as PRISM (default: 1g)"}
+// 	, {"cuddMaxMem", 'C', "memory", 0,
+// 		"Maximum CUDD memory, in the same format as PRISM (default: 1g)"}
 	, {"export", 'e', "filename", 0,
 		"Export model to a (text) file"}
-	, {"exportPerimeterStates", 'S', "filename", 0,
-		"Export perimeter states to a file. Please provide a filename. This will append to the file if it is existing"}
-	, {"import", 'i', "filename", 0,
-		"Import model to a (text) file"}
-	, {"property", 'p', "propname", 0,
-		"Specify a certain property to check in a model file that contains many"}
-	, {"const", 'c', "\"C1=VAL,C2=VAL,C3=VAL\"", 0,
-		"Comma separated values for constants"}
+// 	, {"exportPerimeterStates", 'S', "filename", 0,
+// 		"Export perimeter states to a file. Please provide a filename. This will append to the file if it is existing"}
+// 	, {"import", 'i', "filename", 0,
+// 		"Import model from a series of text files"}
+// 	, {"property", 'p', "propname", 0,
+// 		"Specify a certain property to check in a model file that contains many"}
+// 	, {"const", 'c', "\"C1=VAL,C2=VAL,C3=VAL\"", 0,
+// 		"Comma separated values for constants"}
 	, {"exportTrans", 'a', "filename", 0,
 		"Export the list of transitions and actions to a specified file name, or to trans.txt if no file name is specified.\nTransitions are exported in the format <Source State Index> <Destination State Index> <Action Label>"}
 	/* Additional options. GNU argp shows args alphabetically */
-	, {"rankTransitions", 'T', 0, 0,
-		"Rank transitions before expanding (default: false)"}
+// 	, {"rankTransitions", 'T', 0, 0,
+// 		"Rank transitions before expanding (default: false)"}
 	, {"maxIterations", 'M', "int", 0,
 		"Maximum iteration for solution (default: 10000)"}
-	, {"maxStates", 'V', "integer", 0,
-		"The maximum number of states to explore in an iteration (default 2000000)"}
+//	, {"maxStates", 'V', "integer", 0,
+//		"The maximum number of states to explore in an iteration (default 2000000)"}
+	, {"quiet", 'q', 0, 0,
+		"Do not emit any warning, info, or error messages"}
 	, {"iterative", 'I', 0, 0,
 		"Use the STAMINA 2.5 method (iterative)"}
 	, {"priority", 'P', 0, 0,
@@ -127,6 +150,7 @@ struct arguments {
 	bool preterminate;
 	uint8_t event;
 	double distance_weight;
+	bool quiet;
 };
 
 /**
@@ -221,11 +245,11 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			break;
 		case 'v':
 			printf(
-					"STAMINA - STochiastic Approximate Model-checker for INfinite-state Analysis\n\tVersion %d.%d.%d\n\tBuild:%s\n"
+				"STAMINA - STochiastic Approximate Model-checker for INfinite-state Analysis\n\tVersion %d.%d.%d\n\tBuild: %s\n"
 				, version::version_major
 				, version::version_minor
 				, version::version_sub_minor
-				, BUILD_INFO
+				, STAMINA_BUILD_INFO // "unspecified"
 			);
 			exit(0);
 		case 'b':
@@ -246,6 +270,9 @@ parse_opt(int key, char * arg, struct argp_state * state) {
 			arguments->distance_weight = (double) atof(arg);
 			break;
 
+		case 'q':
+			arguments->quiet = true;
+			break;
 		// model and properties file
 		case ARGP_KEY_ARG:
 			// get model file

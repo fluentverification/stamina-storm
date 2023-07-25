@@ -17,28 +17,29 @@
  *
  **/
 
-#ifndef STAMINA_ABOUT_H
-#define STAMINA_ABOUT_H
+/**
+ * A simple bridge class to let StaminaMessages append text to the log viewer
+ * in the GUI.
+ * */
+#ifndef STAMINA_GUI_MESSAGEBRIDGE_H
+#define STAMINA_GUI_MESSAGEBRIDGE_H
 
-#include <KXmlGuiWindow>
-#include <QDialog>
+#include "MainWindow.h"
 
-#include "ui/ui_About.h"
+#include <string>
 
 namespace stamina {
 	namespace gui {
-		class About : public QDialog {
-			Q_OBJECT
+		class MessageBridge {
 		public:
-			About(QWidget * parent = 0);
-			void show();
-			void hide();
-		private:
-			void setupActions();
-			// Data members
-			Ui::About ui;
+			inline static QTextEdit * logOutput = nullptr;
+			static void initMessageBridge();
+			static void error(std::string err);
+			static void warning(std::string warn);
+			static void info(std::string info);
+			static void good(std::string good);
 		};
-	}
-}
+	} // namespace gui
+} // namespace stamina
 
-#endif // STAMINA_ABOUT_H
+#endif // STAMINA_GUI_MESSAGEBRIDGE

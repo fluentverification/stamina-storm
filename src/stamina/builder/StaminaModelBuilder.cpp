@@ -1,4 +1,23 @@
 /**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
+/**
 * Implementation for StaminaModelBuilder methods.
 *
 * Created by Josh Jeppson on 8/17/2021
@@ -32,7 +51,8 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::StaminaModelBuilder(
 	, localKappa(core::Options::kappa)
 	, numberTerminal(0)
 	, iteration(0)
-	, propertyExpression(nullptr)
+	, leftPropertyExpression(nullptr)
+	, rightPropertyExpression(nullptr)
 	, formulaMatchesExpression(true)
 	, modulesFile(modulesFile)
 	, options(options)
@@ -102,8 +122,13 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 std::vector<StateType>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStates() {
 	std::vector<StateType> perimeterStates = stateMap.getPerimeterStates();
-
 	return perimeterStates;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+std::vector<ProbabilityState<StateType> *>
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPerimeterStatesAsProbabilityStates() {
+	return stateMap.getPerimeterStatesAsProbStates();
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -379,9 +404,9 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectTerminalState
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
-storm::expressions::Expression *
+std::shared_ptr<storm::expressions::Expression>
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getPropertyExpression() {
-	return propertyExpression;
+	return rightPropertyExpression;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>
@@ -391,7 +416,11 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::setPropertyFormula(
 	, const storm::prism::Program & modulesFile
 ) {
 	formulaMatchesExpression = false;
-	propertyFormula = formula;
+	std::shared_ptr<const storm::logic::ProbabilityOperatorFormula> formulaProb
+		= std::static_pointer_cast<const storm::logic::ProbabilityOperatorFormula>(formula);
+	const storm::logic::BoundedUntilFormula & pathFormula
+		= static_cast<const storm::logic::BoundedUntilFormula &>(formulaProb->getSubformula());
+	propertyFormula = std::make_shared<storm::logic::BoundedUntilFormula>(pathFormula);
 	this->expressionManager = &modulesFile.getManager();
 }
 
@@ -402,15 +431,50 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::loadPropertyExpressi
 		return;
 	}
 	// If we are called here, we assume that core::Options::no_prop_refine is false
-	std::shared_ptr<storm::expressions::Expression> pExpression(
+	const storm::logic::StateFormula & leftStateFormula
+		= static_cast<const storm::logic::StateFormula &>(propertyFormula->getLeftSubformula());
+	const storm::logic::StateFormula & rightStateFormula
+		= static_cast<const storm::logic::StateFormula &>(propertyFormula->getRightSubformula());
+	// Make sure they are state formulas
+	if (!(leftStateFormula.isAtomicExpressionFormula()
+			|| leftStateFormula.isBinaryBooleanStateFormula()
+			|| leftStateFormula.isBooleanLiteralFormula()
+			|| leftStateFormula.isUnaryBooleanStateFormula()
+		)
+	) {
+		StaminaMessages::warning("Left sub formula should have been state formula. Cannot do property based refinement!");
+		return;
+	}
+	std::shared_ptr<storm::expressions::Expression> leftExpression(
 		// Invoke copy constructor
 		new storm::expressions::Expression(
-			propertyFormula->toExpression(
+			leftStateFormula.toExpression(
 				// Expression manager
 				*(this->expressionManager)
 			)
 		)
 	);
+	leftPropertyExpression = leftExpression;
+	if (!(rightStateFormula.isAtomicExpressionFormula()
+		|| rightStateFormula.isBinaryBooleanStateFormula()
+		|| rightStateFormula.isBooleanLiteralFormula()
+		|| rightStateFormula.isUnaryBooleanStateFormula()
+	)
+	) {
+		StaminaMessages::warning("Right sub formula should have been state formula. Cannot do property based refinement!");
+		return;
+	}
+	std::shared_ptr<storm::expressions::Expression> rightExpression(
+		// Invoke copy constructor
+		new storm::expressions::Expression(
+			rightStateFormula.toExpression(
+				// Expression manager
+				*(this->expressionManager)
+			)
+		)
+	);
+	rightPropertyExpression = rightExpression;
+	// Set this flag so that we know we've already done it.
 	formulaMatchesExpression = true;
 }
 
@@ -443,6 +507,24 @@ template <typename ValueType, typename RewardModelType, typename StateType>
 util::StateIndexArray<StateType, ProbabilityState<StateType>> &
 StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateMap() {
 	return this->stateMap;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+CompressedState &
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getAbsorbingState() {
+	return this->absorbingState;
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+uint64_t
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getStateCount() {
+	return static_cast<uint64_t>(stateStorage.getNumberOfStates());
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+uint64_t
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::getTransitionCount() {
+	return numberTransitions;
 }
 
 template <typename ValueType, typename RewardModelType, typename StateType>

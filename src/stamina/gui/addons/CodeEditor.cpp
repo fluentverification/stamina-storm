@@ -1,12 +1,34 @@
+/**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
 #include "CodeEditor.h"
 #include "LineNumberArea.h"
 
 #include "highlighter/PrismHighlighter.h"
 
+#include <core/StaminaMessages.h>
+
 #include <iostream>
 
 #include <QPalette>
-
+#include <QAbstractItemView>
+#include <QScrollBar>
 
 namespace stamina {
 namespace gui {
@@ -56,6 +78,38 @@ CodeEditor::updateLineNumberArea(const QRect & rect, int16_t dy) {
 	if (rect.contains(viewport()->rect())) {
 		updateLineNumberAreaWidth(0);
 	}
+}
+
+void
+CodeEditor::setCompleter(QCompleter * completer) {
+	if (c) {
+		c->disconnect(this);
+	}
+	c = completer;
+	if (!completer) {
+		return;
+	}
+	completer->setWidget(this);
+	completer->setCompletionMode(QCompleter::PopupCompletion);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	QObject::connect(
+		completer
+		, QOverload<const QString &>::of(&QCompleter::activated)
+		, this
+		, &CodeEditor::insertCompletion
+	);
+}
+
+QCompleter *
+CodeEditor::completer() const {
+	return c;
+}
+
+void
+CodeEditor::setTabWidth(int numChars) {
+	QFontMetrics fm(this->font());
+	qreal width = numChars * fm.horizontalAdvance(QChar::Nbsp);
+	this->setTabStopDistance(width);
 }
 
 void
@@ -116,6 +170,98 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 	}
 }
 
+void
+CodeEditor::insertCompletion(const QString & completion) {
+	if (c->widget() != this) { return; }
+	QTextCursor tc = textCursor();
+	int remaining = completion.length() - c->completionPrefix().length();
+	tc.movePosition(QTextCursor::Left);
+	tc.movePosition(QTextCursor::EndOfWord);
+	tc.insertText(completion.right(remaining));
+	setTextCursor(tc);
 }
+
+QString
+CodeEditor::textUnderCursor() const {
+	QTextCursor tc = textCursor();
+	tc.select(QTextCursor::WordUnderCursor);
+	return tc.selectedText();
 }
+
+void
+CodeEditor::focusInEvent(QFocusEvent * e) {
+	if (c) {
+		c->setWidget(this);
+	}
+	QPlainTextEdit::focusInEvent(e);
 }
+
+void
+CodeEditor::keyPressEvent(QKeyEvent * e) {
+	if (c && c->popup()->isVisible()) {
+		// Use these keys for the completer
+		switch (e->key()) {
+		case Qt::Key_Enter:
+		case Qt::Key_Return:
+		case Qt::Key_Escape:
+		case Qt::Key_Tab:
+		case Qt::Key_Backtab:
+			e->ignore();
+			return;
+		default:
+			break;
+		}
+	}
+
+	// Detect Ctl + E shortcut
+	const bool isShortcut = (
+		// Control key is pressed
+		e->modifiers().testFlag(Qt::ControlModifier)
+		// And E key is pressed
+		&& e->key() == Qt::Key_E
+	);
+
+	if (!c || !isShortcut) {
+		// Forward onto the super class
+		QPlainTextEdit::keyPressEvent(e);
+	}
+
+	// Other events
+	const bool ctlOrShift = e->modifiers().testFlag(Qt::ControlModifier)
+						|| e->modifiers().testFlag(Qt::ShiftModifier);
+
+	if (!c || (ctlOrShift && e->text().isEmpty())) { return; }
+
+	// Test if end of word
+	static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-=");
+	const bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctlOrShift;
+
+	// Get prefix for completion
+	QString completionPrefix = textUnderCursor();
+	if (!isShortcut && (
+			hasModifier // If there is a modifier
+			|| e->text().isEmpty() // Or there is no input
+			|| completionPrefix.length() < 2 // Or the prefix has a length less than 2
+			|| eow.contains(e->text().right(1)) // Or we are at EOW
+		)
+	) {
+		// Hide the popup
+		c->popup()->hide();
+		return;
+	}
+
+	if (completionPrefix != c->completionPrefix()) {
+		c->setCompletionPrefix(completionPrefix);
+		c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
+	}
+
+	QRect cr = cursorRect();
+	cr.setWidth(c->popup()->sizeHintForColumn(0)
+			+ c->popup()->verticalScrollBar()->sizeHint().width());
+	// Show completor popup
+	c->complete(cr);
+}
+
+} // namespace addons
+} // namespace gui
+} // namespace stamina

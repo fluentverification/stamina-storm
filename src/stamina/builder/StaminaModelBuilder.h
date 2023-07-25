@@ -1,4 +1,23 @@
 /**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
+/**
 * Stamina Model Builder Class
 * Created by Josh Jeppson on 8/17/2021
 *
@@ -97,6 +116,8 @@ namespace stamina {
 			* Gets the state ID of a state known to already exist. This does NOT perform state-space truncation for future states
 			* */
 			StateType getStateIndexIfKnown(CompressedState const& state);
+			/* CompressedState const & getStateFromIndex(StateType index)
+				{ return stateStorage.stateToId.getValue(index); } */
 			/**
 			* Accumulates all probabilities in T Map and returns
 			* */
@@ -118,12 +139,13 @@ namespace stamina {
 			* @return a vector of all perimeter states
 			*/
 			std::vector<StateType> getPerimeterStates();
+			std::vector<ProbabilityState<StateType> *> getPerimeterStatesAsProbabilityStates();
 			/**
 			* Sets the value of &kappa; in Options to what we have stored locally here
 			* */
 			void setLocalKappaToGlobal();
 			void printStateSpaceInformation();
-			storm::expressions::Expression * getPropertyExpression();
+			std::shared_ptr<storm::expressions::Expression> getPropertyExpression();
 			/**
 			* Sets the property formula for state space truncation optimization. Does not load
 			* or create an expression from the formula.
@@ -166,6 +188,16 @@ namespace stamina {
 			 * Prints the transition list to a .tra file. Reads the static `Options` class.
 			 * */
 			void printTransitionActions();
+
+			/**
+			 * Gets the absorbing state
+			 * */
+			CompressedState & getAbsorbingState();
+			/**
+			 * Gets the total count of (currently) built states
+			 * */
+			uint64_t getStateCount();
+			uint64_t getTransitionCount();
 		protected:
 			void purgeAbsorbingTransitions();
 			/**
@@ -232,9 +264,10 @@ namespace stamina {
 
 			std::function<StateType (CompressedState const&)> terminalStateToIdCallback;
 
-			storm::expressions::Expression * propertyExpression;
+			std::shared_ptr<storm::expressions::Expression> leftPropertyExpression;
+			std::shared_ptr<storm::expressions::Expression> rightPropertyExpression;
 			storm::expressions::ExpressionManager * expressionManager;
-			std::shared_ptr<const storm::logic::Formula> propertyFormula;
+			std::shared_ptr<const storm::logic::BoundedUntilFormula> propertyFormula;
 
 			std::shared_ptr<storm::generator::PrismNextStateGenerator<ValueType, StateType>> generator;
 

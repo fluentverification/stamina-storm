@@ -1,3 +1,22 @@
+/**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
 #include "PrismHighlighter.h"
 
 #include <QStringLiteral>
@@ -38,12 +57,10 @@ PrismHighlighter::setupKeyWordPatterns() {
 	keywordFormat.setFontWeight(QFont::Bold);
 	const QString keywordPatterns[] = {
 		QStringLiteral("\\bA\\b")
-		, QStringLiteral("\\bbool\\b")
 		, QStringLiteral("\\bclock\\b")
 		, QStringLiteral("\\bconst\\b")
 		, QStringLiteral("\\bctmc\\b")
 		, QStringLiteral("\\bC\\b")
-		, QStringLiteral("\\bdouble\\b")
 		, QStringLiteral("\\bdtmc\\b")
 		, QStringLiteral("\\bE\\b")
 		, QStringLiteral("\\bendinit\\b")
@@ -53,17 +70,13 @@ PrismHighlighter::setupKeyWordPatterns() {
 		, QStringLiteral("\\bendrewards\\b")
 		, QStringLiteral("\\bendsystem\\b")
 		, QStringLiteral("\\bfalse\\b")
-		, QStringLiteral("\\bformula\\b")
 		, QStringLiteral("\\bfilter\\b")
 		, QStringLiteral("\\bfunc\\b")
 		, QStringLiteral("\\bF\\b")
 		, QStringLiteral("\\bglobal\\b")
 		, QStringLiteral("\\bG\\b")
 		, QStringLiteral("\\binit\\b")
-		, QStringLiteral("\\binvariant\\b")
 		, QStringLiteral("\\bI\\b")
-		, QStringLiteral("\\bint\\b")
-		, QStringLiteral("\\blabel\\b")
 		, QStringLiteral("\\bmax\\b")
 		, QStringLiteral("\\bmdp\\b")
 		, QStringLiteral("\\bmin\\b")
@@ -94,11 +107,20 @@ PrismHighlighter::setupKeyWordPatterns() {
 		, QStringLiteral("\\bW\\b")
 	};
 
-	for (const QString &pattern : keywordPatterns) {
-		rule.pattern = QRegularExpression(pattern);
-		rule.format = keywordFormat;
-		highlightingRules.append(rule);
-	}
+	typeFormat.setForeground(cs->type);
+	typeFormat.setFontWeight(QFont::Bold);
+	typeFormat.setFontItalic(true);
+	const QString typePatterns[] = {
+		// Primitive types
+		QStringLiteral("\\bbool\\b")
+		, QStringLiteral("\\bdouble\\b")
+		, QStringLiteral("\\bint\\b")
+		// PRISM types
+		, QStringLiteral("\\binvariant\\b")
+		, QStringLiteral("\\bformula\\b")
+		, QStringLiteral("\\blabel\\b")
+
+	};
 
 	// String expressions
 	classFormat.setFontWeight(QFont::Bold);
@@ -133,6 +155,20 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z_]+\\b"));
 	rule.format = constFormat;
 	highlightingRules.append(rule);
+
+	// Keywords have highest priority, with the exception of comments and types
+	for (const QString &pattern : keywordPatterns) {
+		rule.pattern = QRegularExpression(pattern);
+		rule.format = keywordFormat;
+		highlightingRules.append(rule);
+	}
+
+	// Types have less priority than comments
+	for (const QString &pattern : typePatterns) {
+		rule.pattern = QRegularExpression(pattern);
+		rule.format = typeFormat;
+		highlightingRules.append(rule);
+	}
 
 	// Single line comments
 	singleLineCommentFormat.setForeground(cs->comment);

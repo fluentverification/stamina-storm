@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
-    <height>654</height>
+    <width>779</width>
+    <height>736</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="prefTabs">
      <property name="focusPolicy">
       <enum>Qt::WheelFocus</enum>
      </property>
@@ -26,7 +26,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -37,21 +37,30 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="1">
-        <widget class="QCheckBox" name="checkBox_4">
+        <widget class="QCheckBox" name="modelFileTypeAutoDetect">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Auto-detect model file type from extension</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QCheckBox" name="checkBox_5">
+        <widget class="QCheckBox" name="saveModifiedCSL">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Save modified CSL properties file</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QCheckBox" name="checkBox_6">
+        <widget class="QCheckBox" name="truncateModel">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Truncate Model</string>
          </property>
@@ -61,24 +70,36 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QCheckBox" name="checkBox_7">
+        <widget class="QCheckBox" name="genCounterexamples">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Generate Counterexamples</string>
          </property>
          <property name="checked">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QCheckBox" name="checkBox_8">
+        <widget class="QCheckBox" name="createRefinedProperties">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Create refined properties</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QCheckBox" name="checkBox_11">
+        <widget class="QCheckBox" name="verboseLog">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Include verbose log messages</string>
          </property>
@@ -104,7 +125,7 @@
          </property>
          <layout class="QFormLayout" name="formLayout_5">
           <item row="4" column="1">
-           <widget class="QRadioButton" name="radioButton_6">
+           <widget class="QRadioButton" name="useTabs">
             <property name="text">
              <string>Use Tabs</string>
             </property>
@@ -114,14 +135,17 @@
            </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QRadioButton" name="radioButton_7">
+           <widget class="QRadioButton" name="useSpaces">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
-             <string>Use Spaces</string>
+             <string>Use Spaces (not yet implemented)</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="KComboBox" name="kcombobox">
+           <widget class="KComboBox" name="tabSize">
             <item>
              <property name="text">
               <string>8</string>
@@ -147,7 +171,7 @@
            </widget>
           </item>
           <item row="6" column="1">
-           <widget class="QCheckBox" name="checkBox_14">
+           <widget class="QCheckBox" name="allowCodeFolding">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -170,7 +194,7 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout_2">
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="kappaLabel">
          <property name="text">
           <string>Kappa</string>
          </property>
@@ -206,6 +230,9 @@
        </item>
        <item row="12" column="0">
         <widget class="QLabel" name="label_6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>File to export transitions to</string>
          </property>
@@ -213,6 +240,9 @@
        </item>
        <item row="15" column="0">
         <widget class="QLabel" name="label_7">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>File to export perimeter states to</string>
          </property>
@@ -226,42 +256,45 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="rKappa">
          <property name="text">
           <string>1.25</string>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QLineEdit" name="lineEdit_4">
+        <widget class="QLineEdit" name="w">
          <property name="text">
           <string>1e-3</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="earlyTerminationProperty">
          <property name="text">
           <string>Early Termination Using Property</string>
          </property>
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QLineEdit" name="lineEdit_2">
+        <widget class="QLineEdit" name="maxIterations">
          <property name="text">
           <string>1000</string>
          </property>
         </widget>
        </item>
        <item row="9" column="1">
-        <widget class="QLineEdit" name="lineEdit_3">
+        <widget class="QLineEdit" name="maxApproxIterations">
          <property name="text">
           <string>10</string>
          </property>
         </widget>
        </item>
        <item row="11" column="1">
-        <widget class="QCheckBox" name="checkBox_2">
+        <widget class="QCheckBox" name="traExport">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Export Transitions</string>
          </property>
@@ -270,10 +303,17 @@
        <item row="12" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLineEdit" name="lineEdit_5"/>
+          <widget class="QLineEdit" name="traFilePath">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="traBrowse">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximumSize">
             <size>
              <width>100</width>
@@ -294,10 +334,17 @@
        <item row="15" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLineEdit" name="lineEdit_6"/>
+          <widget class="QLineEdit" name="perimPath">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="perimBrowse">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximumSize">
             <size>
              <width>100</width>
@@ -322,14 +369,14 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QRadioButton" name="radioButton_5">
+           <widget class="QRadioButton" name="reExploring">
             <property name="text">
-             <string>Re-exploring (depricated)</string>
+             <string>Re-exploring</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton">
+           <widget class="QRadioButton" name="iterative">
             <property name="text">
              <string>Iterative</string>
             </property>
@@ -339,21 +386,27 @@
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton_2">
+           <widget class="QRadioButton" name="priority">
             <property name="text">
              <string>Priority</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton_3">
+           <widget class="QRadioButton" name="heuristic">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Heuristic</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton_4">
+           <widget class="QRadioButton" name="priorityHeuristic">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Priority Heuristic</string>
             </property>
@@ -376,7 +429,10 @@
         </spacer>
        </item>
        <item row="14" column="1">
-        <widget class="QCheckBox" name="checkBox_3">
+        <widget class="QCheckBox" name="exportPerimeterStates">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Export Perimeter States</string>
          </property>
@@ -384,13 +440,19 @@
        </item>
        <item row="16" column="1">
         <widget class="QSpinBox" name="numberThreads">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimum">
           <number>1</number>
          </property>
         </widget>
        </item>
        <item row="16" column="0">
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="nThreadsLabel">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Number of threads to use</string>
          </property>
@@ -404,7 +466,10 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout_3">
        <item row="0" column="0">
-        <widget class="QCheckBox" name="checkBox_9">
+        <widget class="QCheckBox" name="useSylvan">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Use Sylvan Library</string>
          </property>
@@ -414,7 +479,10 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QCheckBox" name="checkBox_13">
+        <widget class="QCheckBox" name="useCudd">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Use CUDD Library</string>
          </property>
@@ -425,20 +493,29 @@
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_11">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>CUDD Memory Limit</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_10">
+        <widget class="QLineEdit" name="cuddMemoryLimit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>2G</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0" colspan="2">
-        <widget class="QCheckBox" name="checkBox_10">
+        <widget class="QCheckBox" name="stormVerboseLog">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>STORM Verbose log</string>
          </property>
@@ -460,6 +537,9 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tab_4">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <attribute name="title">
        <string>Counter-Example Generation</string>
       </attribute>
@@ -528,11 +608,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_5">
-      <attribute name="title">
-       <string>Property Refinement</string>
-      </attribute>
-     </widget>
     </widget>
    </item>
    <item>
@@ -555,7 +630,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../resources/resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

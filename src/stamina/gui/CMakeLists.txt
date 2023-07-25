@@ -30,21 +30,21 @@ find_package(KF5KIO)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 set(xstamina_SRCS
-	main.cpp
-	MainWindow.cpp
-	About.cpp
-	Preferences.cpp
-	PropertyWizard.cpp
+	${GUI_PREFIX}/main.cpp
+	${GUI_PREFIX}/MainWindow.cpp
+	${GUI_PREFIX}/About.cpp
+	${GUI_PREFIX}/Preferences.cpp
+	${GUI_PREFIX}/PropertyWizard.cpp
 	# Code editing
-	addons/CodeEditor.cpp
-	addons/LineNumberArea.cpp
+	${GUI_PREFIX}/addons/CodeEditor.cpp
+	${GUI_PREFIX}/addons/LineNumberArea.cpp
 	# Syntax Highlighting
-	addons/highlighter/Highlighter.cpp
-	addons/highlighter/PrismHighlighter.cpp
+	${GUI_PREFIX}/addons/highlighter/Highlighter.cpp
+	${GUI_PREFIX}/addons/highlighter/PrismHighlighter.cpp
 )
 
 set(xstamina_RECS
-	resources/resources.qrc
+	${GUI_PREFIX}/resources/resources.qrc
 )
 
 add_executable(xstamina ${xstamina_SRCS})
@@ -60,6 +60,13 @@ target_link_libraries(xstamina
 target_link_libraries(xstamina KF5::KIOCore KF5::KIOFileWidgets KF5::KIOWidgets KF5::KIONTLM)
 
 target_link_libraries(xstamina KF5::TextEditor)
+
+set(STAMINA_PATH TODO)
+message("STAMINA_PATH is set as " ${STAMINA_PATH})
+# find_package(stamina REQUIRED PATHS ${STAMINA_PATH})
+target_include_directories(xstamina PUBLIC ${STAMINA_PATH})
+
+target_link_libraries(xstamina stamina)
 
 install(TARGETS xstamina  ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(FILES mainWindow.ui DESTINATION ${KXMLGUI_INSTALL_DIR}/xstamina)

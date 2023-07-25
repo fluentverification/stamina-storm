@@ -1,4 +1,23 @@
 /**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
+/**
 * Implementation for methods for StaminaModelChecker
 *
 * Created by Josh Jeppson on 8/17/2021
@@ -36,6 +55,7 @@ StaminaModelChecker::StaminaModelChecker(
 	, std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector
 ) : modulesFile(modulesFile)
 	, propertiesVector(propertiesVector)
+	, modelBuilt(false)
 {
 	// Explicitly invoke model build
 	std::string iFilename = Options::import_filename;
@@ -65,13 +85,10 @@ StaminaModelChecker::~StaminaModelChecker() {
 	if (oFilename != "") {
 		StaminaMessages::info("Attempting to export model to " + oFilename);
 		try {
-			std::string transFile = oFilename + ".tra";
-			std::string stateRewardsFile = oFilename + "srew";
-			std::string transRewardsFile = oFilename + ".trew";
-			std::string statesFile = oFilename + ".sta";
-			std::string labelsFile = oFilename + ".lab";
-			// TODO: export model to explicit files
-			StaminaMessages::warning("Exporting model to explicit files not implemented yet!");
+			storm::api::exportSparseModelAsDot(
+				std::static_pointer_cast<storm::models::sparse::Model<double>>(model)
+				, oFilename
+			);
 		}
 		catch (const std::exception& e) {
 			std::stringstream ss;
@@ -104,10 +121,18 @@ StaminaModelChecker::modelCheckProperty(
 	, storm::jani::Property propMax
 	, storm::jani::Property propOriginal
 	, storm::prism::Program const& modulesFile
+	, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
+	, bool forceRebuildModel
 ) {
+	if (modelBuilt && !forceRebuildModel) {
+		StaminaMessages::info("Model is already built. Using existing model.");
+		checkFromBuiltModel(propMin, propMax, propOriginal);
+		return nullptr;
+	}
 	// Create allocators for shared pointers
 	std::allocator<Result> allocatorResult;
-	auto options = BuilderOptions(*propOriginal.getFilter().getFormula());
+	storm::builder::BuilderOptions options;
+	options = BuilderOptions(formulasVector);
 	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
 	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
 	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
@@ -170,16 +195,7 @@ StaminaModelChecker::modelCheckProperty(
 		// Get the expression for the current property
 		auto propertyFormula = propOriginal.getRawFormula();
 		StaminaMessages::info("Attempting to convert formula to expression:\n\t" + propertyFormula->toString());
-		if ((!propertyFormula->isPathFormula())
-			&& (
-				propertyFormula->isAtomicExpressionFormula()
-				|| propertyFormula->isBinaryBooleanStateFormula()
-				|| propertyFormula->isBooleanLiteralFormula()
-				|| propertyFormula->isUnaryBooleanStateFormula()
-			)
-		) {
-			builder->setPropertyFormula(propertyFormula, modulesFile);
-		}
+		builder->setPropertyFormula(propertyFormula, modulesFile);
 	}
 
 	// While we should not terminate
@@ -192,10 +208,8 @@ StaminaModelChecker::modelCheckProperty(
 		// Reset the reachability threshold
 		reachThreshold = Options::kappa;
 
-		std::shared_ptr<CtmcModelChecker> checker = nullptr;
-		std::shared_ptr<storm::models::sparse::Ctmc<double, storm::models::sparse::StandardRewardModel<double>>> model;
+		checker = nullptr;
 		model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
-
 
 		// Rebuild the initial state labels
 		labeling = &( model->getStateLabeling());
@@ -221,12 +235,14 @@ StaminaModelChecker::modelCheckProperty(
 				storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
 			);
 			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+			// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
 			builder->printStateSpaceInformation();
 			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
 				"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
 				"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
 				"This gives us a window of " + std::to_string(max_results->result - min_results->result)
 			);
+
 		}
 		catch (std::exception& e) {
 			StaminaMessages::errorAndExit(e.what());
@@ -275,17 +291,92 @@ StaminaModelChecker::modelCheckProperty(
 	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
 	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	resultTable.push_back( { min_results->result, max_results->result, propOriginal.asPrismSyntax() } );
 	StaminaMessages::info(resultInfo.str());
 
 	ResultInformation r(
 		min_results->result
 		, max_results->result
-		, 0 // TODO: Get actual number of states
+		, getStateCount()
 		, 1 // TODO: Actual number of initial states
 		, propOriginal.asPrismSyntax() // name?
 	);
 	StaminaMessages::writeResults(r, std::cout);
+	modelBuilt = true;
 	return nullptr;
+}
+
+void
+StaminaModelChecker::checkFromBuiltModel(
+	storm::jani::Property propMin
+	, storm::jani::Property propMax
+	, storm::jani::Property propOriginal
+) {
+	if (!checker) {
+		checker = std::make_shared<CtmcModelChecker>(*model);
+	}
+	try {
+		// storm::Environment env;
+		// env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
+		auto result_lower = checker->check(
+			// env,
+			storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
+		);
+		min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+		auto result_upper = checker->check(
+			// env,
+			storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
+		);
+		max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+		// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
+		builder->printStateSpaceInformation();
+		StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+		"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
+		"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
+		"This gives us a window of " + std::to_string(max_results->result - min_results->result)
+		);
+
+	}
+	catch (std::exception& e) {
+		StaminaMessages::errorAndExit(e.what());
+	}
+	// Print results
+	std::stringstream resultInfo;
+	resultInfo.setf( std::ios::floatfield );
+	resultInfo << std::fixed << std::setprecision(12);
+	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
+	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
+	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	resultTable.push_back( { min_results->result, max_results->result, propOriginal.asPrismSyntax() } );
+	StaminaMessages::info(resultInfo.str());
+
+	ResultInformation r(
+		min_results->result
+		, max_results->result
+		, getStateCount()
+		, 1 // TODO: Actual number of initial states
+		, propOriginal.asPrismSyntax() // name?
+	);
+	StaminaMessages::writeResults(r, std::cout);
+}
+
+std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>>
+StaminaModelChecker::getLabelsAndCount() {
+	std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>> labelsAndCount(
+		new std::vector<std::pair<std::string, uint64_t>>()
+	);
+
+	// Get the the labelling from the model in case it wasn't updated in
+	// modelCheckProperty
+	labeling = &( model->getStateLabeling());
+	auto labels = labeling->getLabels();
+	for (auto & label : labels) {
+		labelsAndCount->push_back(std::make_pair(
+			label
+			, labeling->getStates(label).size()
+		));
+	}
+	return labelsAndCount;
 }
 
 bool

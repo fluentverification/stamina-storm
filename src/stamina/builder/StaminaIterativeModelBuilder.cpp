@@ -1,3 +1,22 @@
+/**
+ * STAMINA - the [ST]ochasic [A]pproximate [M]odel-checker for [IN]finite-state [A]nalysis
+ * Copyright (C) 2023 Fluent Verification, Utah State University
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ **/
+
 #include "StaminaIterativeModelBuilder.h"
 #include "core/StateSpaceInformation.h"
 
@@ -115,13 +134,24 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			generator->addStateValuation(currentIndex, stateAndChoiceInformationBuilder.stateValuationsBuilder());
 		}
 
+		// Load state for us to use
+		generator->load(currentState);
 
-		if (propertyExpression != nullptr) {
+		if (formulaMatchesExpression && !Options::no_prop_refine) {
 			storm::expressions::SimpleValuation valuation = generator->currentStateToSimpleValuation();
-			bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
-			// If the property does not hold at the current state, make it absorbing in the
-			// state graph and do not explore its successors
-			if (!evaluationAtCurrentState) {
+			// bool evaluationAtCurrentState = propertyExpression->evaluateAsBool(&valuation);
+			bool leftEvaluation = leftPropertyExpression->evaluateAsBool(&valuation);
+			bool rightEvaluation = rightPropertyExpression->evaluateAsBool(&valuation);;
+			// The left evaluation is, for a property P=?[ phi1 U[] phi2 ], the state evaluation
+			// of phi1(s), and the right evaluation is phi2(s). Our formula for early termination
+			// is !leftEvaluation || rightEvaluation, because
+			//   - If !leftEvaluation we know that the property ALREADY fails, so no further
+			//     exploration of the path will be useful
+			//   - If rightEvaluation is evaluated IN THIS EXPRESSION, then we know that
+			//     leftEvaluation evaluated to true. If leftEvaluation AND rightEvaluation
+			//     are both true (as would happen here), then we know that the property
+			//     SUCCEEDS, so again, no further evaluation needed
+			if (!leftEvaluation || rightEvaluation) {
 				this->createTransition(currentIndex, currentIndex, 1.0);
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
@@ -152,9 +182,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// that when we flush this queue, it will be ignored
 			currentProbabilityState->wasPutInTerminalQueue = false;
 		}
-
-		// Load state for us to use
-		generator->load(currentState);
 
 		// We assume that if we make it here, our state is either nonterminal, or its reachability probability
 		// is greater than kappa
@@ -197,7 +224,6 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			if (stateAndChoiceInformationBuilder.isBuildChoiceLabels() && choice.hasLabels()) {
 				for (auto const& label : choice.getLabels()) {
 					stateAndChoiceInformationBuilder.addChoiceLabel(label, currentIndex);
-
 				}
 			}
 			if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins() && choice.hasOriginData()) {
@@ -252,7 +278,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 
 			}
 
-			++currentRow;
+			if (currentIndex >= currentRow) {
+				++currentRow;
+			}
 			firstChoiceOfState = false;
 		}
 
@@ -272,7 +300,9 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 		currentProbabilityState->setTerminal(false);
 		currentProbabilityState->setPi(0.0);
 
-		++currentRowGroup;
+		if (currentRow >= currentRowGroup) {
+			++currentRowGroup;
+		}
 
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
