@@ -95,6 +95,7 @@ namespace stamina {
 				// We want to be conscious of all of the properties so that we can build associated labels
 				// if this is passed in null
 				, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
+				, bool forceRebuildModel=false
 			);
 			void checkFromBuiltModel(
 				storm::jani::Property propMin

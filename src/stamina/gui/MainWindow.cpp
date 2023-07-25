@@ -123,6 +123,10 @@ MainWindow::setup() {
 	// modelSizes[0] -= s;
 	// modelSizes[1] += s;
 	// ui.modelSplitter->setSizes(modelSizes);
+	sfdm->moveToThread(this->thread());
+	ofdm->moveToThread(this->thread());
+	sfdp->moveToThread(this->thread());
+	ofdp->moveToThread(this->thread());
 }
 
 void
@@ -758,12 +762,6 @@ MainWindow::openModelFromAcceptedPath() {
 	QString selectedFile = ofdm->fileWidget()->selectedFile();
 	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
 	activeModelFile = selectedFile;
-	disconnect(
-		ofdm->fileWidget()
-		, SIGNAL(accepted())
-		, 0
-		, 0
-	);
 	if (selectedFile != "") {
 		QFileInfo info(selectedFile);
 		baseWindowTitle = info.fileName();
@@ -791,7 +789,13 @@ MainWindow::openModelFromAcceptedPath() {
 			}
 		}
 	}
-
+	ofdm->hide();
+	disconnect(
+		ofdm->fileWidget()
+		, SIGNAL(accepted())
+		, 0
+		, 0
+	);
 }
 
 void
@@ -799,12 +803,6 @@ MainWindow::openPropertyFromAcceptedPath() {
 	QString selectedFile = ofdp->fileWidget()->selectedFile();
 	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
 	activePropertiesFile = selectedFile;
-	disconnect(
-		ofdp->fileWidget()
-		, SIGNAL(accepted())
-		, 0
-		, 0
-	);
 	if (selectedFile != "") {
 		QFileInfo info(selectedFile);
 		baseWindowTitle = info.fileName();
@@ -813,6 +811,13 @@ MainWindow::openPropertyFromAcceptedPath() {
 		connect(job, SIGNAL(result(KJob *)), this, SLOT(downloadFinishedProperty(KJob*)));
 		job->exec();
 	}
+	ofdp->hide();
+	disconnect(
+		ofdp->fileWidget()
+		, SIGNAL(accepted())
+		, 0
+		, 0
+	);
 }
 
 void
@@ -908,6 +913,7 @@ MainWindow::downloadFinishedModel(KJob* job) {
 	StaminaMessages::good("Succesfully loaded file into model editor!");
 	unsavedChangesModel = false;
 	ui.statusbar->showMessage(tr("Opened model file."));
+	disconnect(job, SIGNAL(result(KJob *)), 0, 0);
 }
 
 void
@@ -925,6 +931,7 @@ MainWindow::downloadFinishedProperty(KJob* job) {
 	StaminaMessages::good("Succesfully loaded file into property editor!");
 	unsavedChangesProperty = false;
 	ui.statusbar->showMessage(tr("Opened property file."));
+	disconnect(job, SIGNAL(result(KJob *)), 0, 0);
 	initializeModel();
 }
 
@@ -1135,6 +1142,7 @@ MainWindow::checkModelAndProperties() {
 			ui.statusbar->showMessage(tr("Did not save model file."));
 			return;
 		}
+		mustRebuildModel = true;
 	}
 	else if (activeModelFile == "" || activePropertiesFile == "") {
 		bool shouldSave = KMessageBox::questionYesNo(0
@@ -1144,6 +1152,7 @@ MainWindow::checkModelAndProperties() {
 			ui.statusbar->showMessage(tr("Did not save properties file."));
 			return;
 		}
+		mustRebuildModel = true;
 	}
 	saveModelFile();
 	savePropertyFile();
@@ -1160,7 +1169,8 @@ MainWindow::checkModelAndProperties() {
 		killButton->show();
 		try {
 			ui.mainTabs->setCurrentIndex(3); // Show the logs while running.
-			s.run();
+			s.run(mustRebuildModel); // TODO: Rebuild model has bug with Storm
+			// s.run(mustRebuildModel);
 		}
 		catch (std::string & e) {
 			std::string msg = std::string("Error got while running STAMINA: ") + e;

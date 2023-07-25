@@ -76,7 +76,10 @@ Stamina::~Stamina() {
 }
 
 void
-Stamina::run() {
+Stamina::run(bool rebuild) {
+	if (rebuild) {
+		wasInitialized = false;
+	}
 	initialize();
 	// Create formulas vector
 	std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
@@ -96,6 +99,7 @@ Stamina::run() {
 			, prop
 			, *modelFile
 			, fv
+			, rebuild
 		);
 	}
 	// Finished!

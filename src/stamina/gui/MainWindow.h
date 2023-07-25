@@ -98,6 +98,8 @@ namespace stamina {
 			bool stayOpen;
 			int modZoom = 0;
 			int propZoom = 0;
+			// If the model has been changed and should be rebuilt
+			bool mustRebuildModel = false;
 
 
 		private slots:

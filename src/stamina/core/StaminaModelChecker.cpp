@@ -122,8 +122,9 @@ StaminaModelChecker::modelCheckProperty(
 	, storm::jani::Property propOriginal
 	, storm::prism::Program const& modulesFile
 	, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
+	, bool forceRebuildModel
 ) {
-	if (modelBuilt) {
+	if (modelBuilt && !forceRebuildModel) {
 		StaminaMessages::info("Model is already built. Using existing model.");
 		checkFromBuiltModel(propMin, propMax, propOriginal);
 		return nullptr;

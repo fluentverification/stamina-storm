@@ -59,7 +59,7 @@ namespace stamina {
 		/**
 		* Runs stamina
 		* */
-		void run();
+		void run(bool rebuild=false);
 		/* Data Members */
 		/**
 		* Initializes Stamina
