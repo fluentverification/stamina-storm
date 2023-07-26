@@ -24,7 +24,8 @@ jobs:
       run: apt install libqt5-dev libkf5xmlgui-dev libkf5textwidgets-dev libkf5kio-dev libkf5texteditor-dev qtbase5-dev qtdeclarative5-dev libqt5svg5-dev libkf5i18n-dev libkf5coreaddons-dev extra-cmake-modules && make
 
     - name: Build Storm
-      run: git clone https://github.com/moves-rwth/storm ${{github.workspace}}/storm && cmake ${{github.workspace}}/storm -B ${{github.workspace}}/storm/build && cmake --build ${{github.workspace}}/storm/build
+      run: git clone https://github.com/moves-rwth/storm ${{github.workspace}}/storm
+      # && cmake ${{github.workspace}}/storm -B ${{github.workspace}}/storm/build && cmake --build ${{github.workspace}}/storm/build
 
 
       - name: Configure CMake
