@@ -18,22 +18,29 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Get Dependencies
+      run: apt install libqt5-dev libkf5xmlgui-dev libkf5textwidgets-dev libkf5kio-dev libkf5texteditor-dev qtbase5-dev qtdeclarative5-dev libqt5svg5-dev libkf5i18n-dev libkf5coreaddons-dev extra-cmake-modules
+
+
     - name: UIC Build
       # Install the necessary stuff for the GUI
       working-directory: ${{github.workspace}}/src/stamina/gui
-      run: apt install libqt5-dev libkf5xmlgui-dev libkf5textwidgets-dev libkf5kio-dev libkf5texteditor-dev qtbase5-dev qtdeclarative5-dev libqt5svg5-dev libkf5i18n-dev libkf5coreaddons-dev extra-cmake-modules && make
+
+    - name: Clone Storm
+      run: git clone https://github.com/moves-rwth/storm ${{github.workspace}}/storm
+
+    - name: Configure Storm Cmake
+      run: cmake ${{github.workspace}}/storm -B ${{github.workspace}}/storm/build
 
     - name: Build Storm
-      run: git clone https://github.com/moves-rwth/storm ${{github.workspace}}/storm
-      # && cmake ${{github.workspace}}/storm -B ${{github.workspace}}/storm/build && cmake --build ${{github.workspace}}/storm/build
+      run: cmake --build ${{github.workspace}}/storm/build
 
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DBUILD_GUI=On -DSTORM_PATH=${{github.workspace}}/storm
 
-      - name: Configure CMake
-          run: cmake -B ${{github.workspace}}/build -DBUILD_GUI=On -DSTORM_PATH=${{github.workspace}}/storm
-
-      - name: Build
-          # Build your program with the given configuration
-          run: cmake --build ${{github.workspace}}/build
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build
 
       # Will add this when we add unit tests
       # - name: Test
