@@ -1042,7 +1042,9 @@ MainWindow::downloadFinishedProperty(KJob* job) {
 	unsavedChangesProperty = false;
 	ui.statusbar->showMessage(tr("Opened property file."));
 	disconnect(job, SIGNAL(result(KJob *)), 0, 0);
-	initializeModel();
+	if (activeModelFile != "") {
+		initializeModel();
+	}
 }
 
 void
