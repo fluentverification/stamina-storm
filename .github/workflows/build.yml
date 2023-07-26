@@ -25,6 +25,7 @@ jobs:
     - name: UIC Build
       # Install the necessary stuff for the GUI
       working-directory: ${{github.workspace}}/src/stamina/gui
+      run: make
 
     - name: Clone Storm
       run: git clone https://github.com/moves-rwth/storm ${{github.workspace}}/storm
