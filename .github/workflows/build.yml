@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Get Dependencies
-      run: apt install libqt5-dev libkf5xmlgui-dev libkf5textwidgets-dev libkf5kio-dev libkf5texteditor-dev qtbase5-dev qtdeclarative5-dev libqt5svg5-dev libkf5i18n-dev libkf5coreaddons-dev extra-cmake-modules
+      run: sudo apt-get install -y libqt5-dev libkf5xmlgui-dev libkf5textwidgets-dev libkf5kio-dev libkf5texteditor-dev qtbase5-dev qtdeclarative5-dev libqt5svg5-dev libkf5i18n-dev libkf5coreaddons-dev extra-cmake-modules
 
 
     - name: UIC Build
