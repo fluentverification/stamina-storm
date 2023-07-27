@@ -23,6 +23,7 @@
 
 #include <core/StaminaMessages.h>
 #include <ANSIColors.h>
+#include <KMessageBox>
 
 namespace stamina {
 namespace gui {
@@ -55,6 +56,10 @@ MessageBridge::initMessageBridge() {
 	);
 	StaminaMessages::goodCallback = std::bind(
 		&MessageBridge::good
+		, std::placeholders::_1
+	);
+	StaminaMessages::criticalCallback = std::bind(
+		&MessageBridge::critical
 		, std::placeholders::_1
 	);
 	StaminaMessages::functionsSetup = true;
@@ -90,6 +95,13 @@ MessageBridge::good(std::string good) {
 		logOutput->append("<b style='color: #28c11d'>[MESSAGE]:</b>&nbsp;<span class=good>"
 			+ sanitize(QString::fromStdString(good)) + "</span>");
 	}
+}
+
+void
+MessageBridge::critical(std::string crit) {
+	error(crit);
+	KMessageBox::error(nullptr, QString::fromStdString(crit));
+	throw std::exception();
 }
 
 } // namespace gui

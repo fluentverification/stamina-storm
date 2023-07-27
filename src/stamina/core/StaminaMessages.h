@@ -116,6 +116,7 @@ namespace stamina {
 			inline static std::function<void (std::string)> warnCallback;
 			inline static std::function<void (std::string)> infoCallback;
 			inline static std::function<void (std::string)> goodCallback;
+			inline static std::function<void (std::string)> criticalCallback;
 #endif // STAMINA_HAS_GUI
 		protected:
 			static const std::string horizontalSeparator;

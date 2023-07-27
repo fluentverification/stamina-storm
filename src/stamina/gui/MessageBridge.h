@@ -38,6 +38,8 @@ namespace stamina {
 			static void warning(std::string warn);
 			static void info(std::string info);
 			static void good(std::string good);
+			// This one also displays a messagebox
+			static void critical(std::string crit);
 		};
 	} // namespace gui
 } // namespace stamina

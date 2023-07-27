@@ -943,6 +943,7 @@ MainWindow::saveModelFile() {
 	unsavedChangesModel = false;
 	ui.statusbar->showMessage(tr("Saved model file."));
 	initializeModel();
+	mustRebuildModel = true;
 }
 
 void
@@ -995,6 +996,7 @@ MainWindow::savePropertyFile() {
 	setCaption(activePropertiesFile);
 	unsavedChangesProperty = false;
 	ui.statusbar->showMessage(tr("Saved properties file."));
+	mustRebuildModel = true;
 }
 
 void
@@ -1151,8 +1153,19 @@ MainWindow::initializeModel() {
 	std::string propFile = this->activePropertiesFile.toStdString();
 	core::Options::model_file = modFile;
 	core::Options::properties_file = propFile;
-	s.reInitialize();
-	populateModelInformationTree(s.getModelFile());
+	try {
+		s.reInitialize();
+		populateModelInformationTree(s.getModelFile());
+	}
+	catch (storm::exceptions::BaseException & e) {
+		std::string msg = "Caught exception when trying to parse PRISM file (this may be a syntax error):\n";
+		msg += e.what();
+		KMessageBox::error(this, QString::fromStdString(msg));
+		StaminaMessages::error(msg);
+	}
+	catch (std::exception & e) {
+		StaminaMessages::warning("Catching and ignoring exception (If you get this after an [ERROR] it is safe to ignore)");
+	}
 	// mustRebuildModel = false;
 }
 
