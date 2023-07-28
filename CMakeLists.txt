@@ -5,8 +5,9 @@
 ##
 
 cmake_minimum_required(VERSION 3.10)
-project(sstamina)			   # Create project "sstamina"
+project(stamina)			   # Create project "stamina"
 set(LIB_NAME stamina)
+set(CLI_EXECUTABLE_NAME sstamina)
 set(CMAKE_CXX_STANDARD 17)			# Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -151,13 +152,13 @@ find_package(storm REQUIRED PATHS ${STORM_PATH})
 # First, create a library with all of the source files in LIB_FILES
 # Add executable target with source files listed in SOURCE_FILES variable
 add_library(${LIB_NAME} SHARED ${LIB_FILES})
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${CLI_EXECUTABLE_NAME} ${SOURCE_FILES})
 
 target_include_directories(${LIB_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
-target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
+target_include_directories(${CLI_EXECUTABLE_NAME} PUBLIC ${SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${STORM_PATH} ${LIB_PATH})
 
 target_link_libraries(${LIB_NAME} PUBLIC storm storm-parsers)
-target_link_libraries(${PROJECT_NAME} PUBLIC stamina storm storm-parsers)
+target_link_libraries(${CLI_EXECUTABLE_NAME} PUBLIC stamina storm storm-parsers)
 
 # Stuff for the GUI
 if(BUILD_GUI)
@@ -184,12 +185,10 @@ if(BUILD_GUI)
 endif()
 
 # Install stuff
-install(TARGETS ${GUI_EXECUTABLE_NAME}
-	CONFIGURATIONS Debug
-	RUNTIME DESTINATION Debug/bin)
-install(TARGETS ${GUI_EXECUTABLE_NAME}
-	CONFIGURATIONS Release
-	RUNTIME DESTINATION Release/bin)
+install(TARGETS ${GUI_EXECUTABLE_NAME} CONFIGURATIONS Release RUNTIME DESTINATION bin)
+install(TARGETS ${CLI_EXECUTABLE_NAME} CONFIGURATIONS Release RUNTIME DESTINATION bin)
+# This installs libstamina
+install(TARGETS ${LIB_NAME} CONFIGURATIONS Release ARCHIVE DESTINATION lib)
 
 option(BUILD_CPACK "Creates/includes CPack file" Off)
 if (BUILD_CPACK)
