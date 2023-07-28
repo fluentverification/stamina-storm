@@ -5,9 +5,9 @@
 ##
 
 cmake_minimum_required(VERSION 3.10)
-project(sstamina)               # Create project "sstamina"
+project(sstamina)			   # Create project "sstamina"
 set(LIB_NAME stamina)
-set(CMAKE_CXX_STANDARD 17)            # Enable c++17 standard
+set(CMAKE_CXX_STANDARD 17)			# Enable c++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 option(STAMINA_DEBUG "Include debug information in the executables" OFF)
@@ -137,8 +137,8 @@ set(CUDD_PATH ${STORM_PATH}/storm/resources/3rdparty/cudd-3.0.0/cplusplus)
 find_package(Boost)
 if (Boost_FOUND)
 	message("BOOST found!")
-    include_directories(${Boost_INCLUDE_DIRS})
-    include_directories(${Boost_INCLUDES})
+	include_directories(${Boost_INCLUDE_DIRS})
+	include_directories(${Boost_INCLUDES})
 endif (Boost_FOUND)
 
 find_package(storm REQUIRED PATHS ${STORM_PATH})
@@ -181,4 +181,25 @@ if(BUILD_GUI)
 
 	target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC stamina storm storm-parsers)
 
+endif()
+
+# Install stuff
+install(TARGETS ${GUI_EXECUTABLE_NAME}
+	CONFIGURATIONS Debug
+	RUNTIME DESTINATION Debug/bin)
+install(TARGETS ${GUI_EXECUTABLE_NAME}
+	CONFIGURATIONS Release
+	RUNTIME DESTINATION Release/bin)
+
+option(BUILD_CPACK "Creates/includes CPack file" Off)
+if (BUILD_CPACK)
+	set(CPACK_PACKAGE_VERSION_MAJOR "0")
+	set(CPACK_PACKAGE_VERSION_MINOR "2")
+	set(CPACK_PACKAGE_VERSION_PATCH "5")
+	set(CPACK_PACKAGE_DESCRIPTION "STAMINA - the STochastic Approximate Model-checker for INfinite-state Analysis")
+	set(CPACK_PACKAGE_CONTACT "Josh Jeppson <joshua.jeppson@usu.edu>")
+	set(CPACK_DEBIAN_PACKAGE_DEPENDS "libkf5xmlgui-dev,libkf5textwidgets-dev,libkf5kio-dev,libkf5texteditor-dev,qtbase5-dev,qtdeclarative5-dev,libqt5svg5-dev,libkf5i18n-dev,libkf5coreaddons-dev,extra-cmake-modules,libboost-all-dev,libcln-dev,libgmp-dev,libginac-dev,automake,libglpk-dev,libhwloc-dev,libz3-dev,libxerces-c-dev,libeigen3-dev")
+	set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${CPACK_PACKAGE_CONTACT})
+
+	include(CPack)
 endif()
