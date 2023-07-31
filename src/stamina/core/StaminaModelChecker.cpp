@@ -312,6 +312,7 @@ StaminaModelChecker::checkFromBuiltModel(
 	, storm::jani::Property propMax
 	, storm::jani::Property propOriginal
 ) {
+	StaminaMessages::info("Using existing built model");
 	if (!checker) {
 		checker = std::make_shared<CtmcModelChecker>(*model);
 	}

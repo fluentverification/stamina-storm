@@ -63,16 +63,18 @@ Stamina::Stamina(struct arguments * arguments) : modelModify(new util::ModelModi
 	storm::settings::initializeAll("Stamina", "Stamina");
 }
 
-Stamina::Stamina()
+Stamina::Stamina(bool init)
 	: modelModify(nullptr)
 	, wasInitialized(false)
 {
-	StaminaMessages::info("Starting STAMINA");
-	StaminaMessages::warning("This constructor is only to be called from the GUI! It leaves the model and properties files unloaded until specified later.");
-	// Initialize loggers
-	storm::utility::setUp();
-	// Set some settings objects.
-	storm::settings::initializeAll("Stamina", "Stamina");
+	if (init) {
+		StaminaMessages::info("Starting STAMINA");
+		StaminaMessages::warning("This constructor is only to be called from the GUI! It leaves the model and properties files unloaded until specified later.");
+		// Initialize loggers
+		storm::utility::setUp();
+		// Set some settings objects.
+		storm::settings::initializeAll("Stamina", "Stamina");
+	}
 	// bool good = Options::checkOptions();
 	// if (!good) {
 	// 	StaminaMessages::errorAndExit("One or more parameters passed in were invalid.");

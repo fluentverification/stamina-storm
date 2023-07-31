@@ -51,7 +51,7 @@ namespace stamina {
 		* @param arguments Arguments struct from StaminaArgParse
 		* */
 		Stamina(struct arguments * arguments);
-		Stamina();
+		Stamina(bool init = true);
 		/**
 		* Destructor. Cleans up memory
 		* */

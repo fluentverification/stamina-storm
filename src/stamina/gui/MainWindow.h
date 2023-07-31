@@ -59,7 +59,7 @@ namespace stamina {
 			void populateTruncatedStates();
 
 		private:
-			Stamina s;
+			Stamina * s;
 			bool unsavedChangesModel;
 			bool unsavedChangesProperty;
 			bool modelActive; // If not model is active, then property is active
@@ -100,6 +100,7 @@ namespace stamina {
 			int propZoom = 0;
 			// If the model has been changed and should be rebuilt
 			bool mustRebuildModel = false;
+			bool init = true;
 
 
 		private slots:

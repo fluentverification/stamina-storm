@@ -75,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, modelWasBuilt(false)
 	, modelActive(true)
 	, stayOpen(true)
+	, s(nullptr)
 {
 	// Make it so StaminaMessages doesn't kill the program
 	StaminaMessages::raiseExceptionsRatherThanExit = true;
@@ -203,7 +204,7 @@ MainWindow::setupActions() {
 				KMessageBox::error(this, "Cannot export model when it was not built!");
 				return;
 			}
-			auto model = s.modelChecker->getModel();
+			auto model = s->modelChecker->getModel();
 			exportDialog->setOperationMode(KFileWidget::Saving);
 			exportDialog->fileWidget()->setFilter(QString("*.dot |Dot Format\n*.drdd |DRDD Format\n*.drn|DRN Format\n*.json|Explicit JSON Format"));
 			connect(
@@ -640,9 +641,11 @@ MainWindow::setupActions() {
 								.replace(QChar(2029), "")
 								.toStdString();
 			StaminaMessages::info("Attempting to check specific property: " + prop);
+			// if (s && mustRebuildModel) { delete s; s = nullptr; }
+			// if (!s) { s = new Stamina(); }
 			// create property and check it
 			try {
-				auto program = s.getModelFile();
+				auto program = s->getModelFile();
 				storm::parser::FormulaParser parser(*program);
 				auto property = parser.parseFromString(prop);
 				if (property.size() == 0) {
@@ -655,16 +658,16 @@ MainWindow::setupActions() {
 					for (auto & prop : property) {
 						// Check property
 						// Fill out stuff in GUI
-						s.checkSingleProperty(prop);
+						s->checkSingleProperty(prop);
 						// Populate some of the labels
 						modelWasBuilt = true;
 					}
-					ui.statesLabel->setText(QString::number(s.getStateCount()));
+					ui.statesLabel->setText(QString::number(s->getStateCount()));
 					ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
-					ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
+					ui.transitionsLabel->setText(QString::number(s->getTransitionCount()));
 					populateLabelTable();
 					populateResultsTable();
-					populateModelInformationTree(s.getModelFile());
+					populateModelInformationTree(s->getModelFile());
 					populateTruncatedStates();
 					progress->hide();
 					ui.actionResults_Viewer->trigger();
@@ -1156,8 +1159,10 @@ MainWindow::initializeModel() {
 	core::Options::model_file = modFile;
 	core::Options::properties_file = propFile;
 	try {
-		s.reInitialize();
-		populateModelInformationTree(s.getModelFile());
+		if (s && mustRebuildModel) { delete s; s = nullptr; }
+		if (!s) { s = new Stamina(init); init = false;}
+		s->reInitialize();
+		populateModelInformationTree(s->getModelFile());
 	}
 	catch (storm::exceptions::BaseException & e) {
 		std::string msg = "Caught exception when trying to parse PRISM file (this may be a syntax error):\n";
@@ -1173,7 +1178,7 @@ MainWindow::initializeModel() {
 
 void
 MainWindow::populateTruncatedStates() {
-	auto modelChecker = s.modelChecker;
+	auto modelChecker = s->modelChecker;
 	auto perimeterStates = modelChecker->getPerimeterStates();
 	// If there were no perimeter/early terminated states,
 	// then do not fill out or show the table
@@ -1261,6 +1266,7 @@ MainWindow::exportCSV() {
 
 void
 MainWindow::checkModelAndProperties() {
+
 	// Trigger save of model and properties file
 	if (unsavedChangesModel || unsavedChangesProperty) {
 		bool shouldSave = KMessageBox::questionYesNo(0
@@ -1292,6 +1298,8 @@ MainWindow::checkModelAndProperties() {
 	prefs->getPreferencesFromUI();
 	prefs->setOptionsFromPreferences();
 	ui.statusbar->showMessage(tr("Running."));
+	// if (s && mustRebuildModel) { delete s; s = nullptr; }
+	// if (!s) { s = new Stamina(); }
 	// staminaJob = QtConcurrent::run([this]() {
 	progress->show();
 	killButton->show();
@@ -1314,13 +1322,13 @@ MainWindow::checkModelAndProperties() {
 				return;
 			}
 			// Populate some of the labels
-			ui.statesLabel->setText(QString::number(s.getStateCount()));
+			ui.statesLabel->setText(QString::number(s->getStateCount()));
 			ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
-			ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
+			ui.transitionsLabel->setText(QString::number(s->getTransitionCount()));
 			modelWasBuilt = true;
 			// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
 			populateLabelTable();
-			populateModelInformationTree(s.getModelFile());
+			populateModelInformationTree(s->getModelFile());
 			populateTruncatedStates();
 			progress->hide();
 			killButton->hide();
@@ -1328,7 +1336,7 @@ MainWindow::checkModelAndProperties() {
 		}
 		, Qt::DirectConnection
 	);
-	workerThread->setStaminaInstance(&this->s);
+	workerThread->setStaminaInstance(this->s);
 	workerThread->setMustRebuildModel(mustRebuildModel);
 	workerThread->start();
 	connect(
@@ -1354,7 +1362,7 @@ MainWindow::checkModelAndProperties() {
 
 void
 MainWindow::populateResultsTable() {
-	auto & resultsTable = s.getResultTable();
+	auto & resultsTable = s->getResultTable();
 	ui.simulationResultsTable->setRowCount(resultsTable.size());
 	int currentRow = 0;
 	for (auto & result : resultsTable) {
@@ -1528,7 +1536,7 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 
 void
 MainWindow::populateLabelTable() {
-	auto labelsAndCount = s.getLabelsAndCount();
+	auto labelsAndCount = s->getLabelsAndCount();
 	ui.labelTable->setRowCount(labelsAndCount->size());
 	int currentRow = 0;
 	for (auto labelCountPair : *labelsAndCount) {
