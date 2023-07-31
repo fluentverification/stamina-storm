@@ -192,4 +192,4 @@ install(TARGETS ${CLI_EXECUTABLE_NAME} CONFIGURATIONS Release RUNTIME DESTINATIO
 # This installs libstamina
 install(TARGETS ${LIB_NAME} CONFIGURATIONS Release ARCHIVE DESTINATION lib)
 
-include(CPackConfig.cmake)
+include(StaminaCPackConfig.cmake)

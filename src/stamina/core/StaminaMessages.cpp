@@ -62,10 +62,10 @@ StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
 	std::cerr << BOLD("STAMINA encountered the following error and will now exit: ") << std::endl;
 	std::cerr << '\t' << err << std::endl;
 #ifdef STAMINA_HAS_GUI
-	if (!functionsSetup) { return; }
+	if (!functionsSetup) { exit(err_num); }
 	criticalCallback(err);
 	return;
-#endif
+#else
 	if (raiseExceptionsRatherThanExit) {
 // #ifdef STAMINA_HAS_GUI
 // 		KMessageBox::sorry(nullptr, QString::fromStdString(err));
@@ -75,6 +75,7 @@ StaminaMessages::errorAndExit(std::string err, uint8_t err_num) {
 	else {
 		exit(err_num);
 	}
+#endif
 }
 
 void
