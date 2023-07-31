@@ -41,6 +41,7 @@ CodeEditor::CodeEditor(QWidget * parent)
 	lineNumberArea = new LineNumberArea(this);
 
 	connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
+	connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::indentNextLine);
 	connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
 	connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
 
@@ -204,9 +205,12 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 		case Qt::Key_Enter:
 		case Qt::Key_Return:
 		case Qt::Key_Escape:
-		case Qt::Key_Tab:
 		case Qt::Key_Backtab:
 			e->ignore();
+			return;
+		case Qt::Key_Tab:
+			e->ignore();
+			changeIndent();
 			return;
 		default:
 			break;
@@ -260,6 +264,66 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 			+ c->popup()->verticalScrollBar()->sizeHint().width());
 	// Show completor popup
 	c->complete(cr);
+}
+
+void
+CodeEditor::changeIndent(bool increase) {
+	QTextCursor cursor = textCursor();
+	if (!cursor.hasSelection()) {
+		return;
+	}
+
+	// Get the start and end position
+	// anchor() is the start of selection and position() is the end
+	int startPos = cursor.anchor();
+	int endPos = cursor.position();
+	if (startPos > endPos) {
+		std::swap(startPos, endPos);
+	}
+
+	// Get the start and end blocks
+	cursor.setPosition(startPos, QTextCursor::MoveAnchor);
+	int startBlock = cursor.block().blockNumber();
+	cursor.setPosition(endPos, QTextCursor::MoveAnchor);
+	int endBlock = cursor.block().blockNumber();
+
+	// Do indent
+	int blockDiff = endBlock - startBlock;
+
+	cursor.setPosition(startPos, QTextCursor::MoveAnchor);
+	cursor.beginEditBlock();
+
+	for (int i = 0; i <= blockDiff; i++) {
+		cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+		if (increase) {
+			cursor.insertText(CodeEditor::indent);
+		}
+		else {
+			// TODO
+		}
+		cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+	}
+
+	cursor.endEditBlock();
+}
+
+void
+CodeEditor::indentNextLine() {
+	QTextCursor cursor = textCursor();
+
+	// Get previous line and count of indentation at the beginning of it
+	int indentationCount = 0;
+	QTextBlock before = cursor.block().previous();
+	QString lastLine = before.text();
+	while (lastLine.startsWith(CodeEditor::indent)) {
+		indentationCount++;
+		lastLine.remove(0, CodeEditor::indent.size());
+	}
+
+	// Insert indentation
+	for (int i = 0; i < indentationCount; i++) {
+		cursor.insertText(CodeEditor::indent);
+	}
 }
 
 } // namespace addons
