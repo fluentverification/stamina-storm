@@ -17,3 +17,14 @@ src/stamina/gui/ui/ui_MainWindow.h
 src/stamina/gui/ui/ui_Preferences.h
 src/stamina/gui/ui/ui_PropertyWizard.h
 src/stamina/gui/ui/ui_FindReplace.h
+
+# Build Autogen and moc
+CMakeCache.txt
+CMakefiles
+cmake_install.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+ecm_uninstall.cmake
+*_autogen
+prefix.sh
+
