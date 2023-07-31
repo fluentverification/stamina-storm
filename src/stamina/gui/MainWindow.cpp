@@ -41,6 +41,7 @@
 #include "MainWindow.h"
 
 #include "MessageBridge.h"
+#include "GuiWorkerThread.h"
 
 #include <iostream>
 #include <regex>
@@ -90,7 +91,8 @@ MainWindow::MainWindow(QWidget *parent)
 	QString iconThemeName = QString::fromUtf8("process-stop");
 	if (QIcon::hasThemeIcon(iconThemeName)) {
 		icon = QIcon::fromTheme(iconThemeName);
-	} else {
+	}
+	else {
 		icon.addFile(QString::fromUtf8("."), QSize(), QIcon::Normal, QIcon::Off);
 	}
 	progress->hide();
@@ -1290,59 +1292,61 @@ MainWindow::checkModelAndProperties() {
 	prefs->getPreferencesFromUI();
 	prefs->setOptionsFromPreferences();
 	ui.statusbar->showMessage(tr("Running."));
-	staminaJob = QtConcurrent::run([this]() {
-		progress->show();
-		killButton->show();
-		if (mustRebuildModel) {
-			StaminaMessages::info("Model has changed, so we must rebuild.");
+	// staminaJob = QtConcurrent::run([this]() {
+	progress->show();
+	killButton->show();
+	if (mustRebuildModel) {
+		StaminaMessages::info("Model has changed, so we must rebuild.");
+	}
+	// Declare parent so it gets deleted
+	GuiWorkerThread * workerThread = new GuiWorkerThread(this);
+	connect(
+		workerThread
+		, &QThread::finished
+		, workerThread
+		, [this, workerThread]() {
+			StaminaMessages::info("Called 'finished()' lambda");
+			ui.statusbar->showMessage(tr("Finished."));
+			// KMessageBox::
+			ui.actionResults_Viewer->trigger();
+			populateResultsTable();
+			if (!workerThread->wasSuccessful()) {
+				return;
+			}
+			// Populate some of the labels
+			ui.statesLabel->setText(QString::number(s.getStateCount()));
+			ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
+			ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
+			modelWasBuilt = true;
+			// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
+			populateLabelTable();
+			populateModelInformationTree(s.getModelFile());
+			populateTruncatedStates();
+			progress->hide();
+			killButton->hide();
+			// delete workerThread;
 		}
-		try {
-			ui.mainTabs->setCurrentIndex(3); // Show the logs while running.
-			s.run(mustRebuildModel);
-		}
-		catch (std::string & e) {
-			std::string msg = std::string("Error got while running STAMINA: ") + e;
-			KMessageBox::error(nullptr, QString::fromStdString(msg));
-		}
-		catch (storm::exceptions::BaseException & e) {
-			std::string msg = std::string("Error in Storm: ") + e.what();
-			KMessageBox::error(nullptr, QString::fromStdString(msg));
-		}
-		ui.statusbar->showMessage(tr("Finished."));
-		// KMessageBox::
-		ui.actionResults_Viewer->trigger();
-		populateResultsTable();
-		// Populate some of the labels
-		ui.statesLabel->setText(QString::number(s.getStateCount()));
-		ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
-		ui.transitionsLabel->setText(QString::number(s.getTransitionCount()));
-		modelWasBuilt = true;
-		// ui.mainTabs->setCurrentIndex(2); // 2 is the index of the "results" tab
-		populateLabelTable();
-		populateModelInformationTree(s.getModelFile());
-		populateTruncatedStates();
-		progress->hide();
-		killButton->hide();
-	});
+		, Qt::DirectConnection
+	);
+	workerThread->setStaminaInstance(&this->s);
+	workerThread->setMustRebuildModel(mustRebuildModel);
+	workerThread->start();
 	connect(
 		killButton
 		, &QPushButton::clicked
 		, this
-		, [this] () {
-			QtConcurrent::run([this]() {
-				StaminaMessages::info("Killing running job.");
-				staminaJob.cancel();
-				killButton->setEnabled(false);
-				progress->setEnabled(false);
-				killButton->setText("Cancelling");
-				staminaJob.waitForFinished();
-				progress->hide();
-				killButton->hide();
-				StaminaMessages::warning("Killed running job!");
-				killButton->setText("");
-				killButton->setEnabled(true);
-				progress->setEnabled(true);
-			});
+		, [this, workerThread] () {
+			StaminaMessages::info("Killing running job.");
+			workerThread->exit(1);
+			killButton->setEnabled(false);
+			progress->setEnabled(false);
+			killButton->setText("Cancelling");
+			progress->hide();
+			killButton->hide();
+			StaminaMessages::warning("Killed running job!");
+			killButton->setText("");
+			killButton->setEnabled(true);
+			progress->setEnabled(true);
 		}
 	);
 	// QTimer::singleShot(0, this, staminaProcess);

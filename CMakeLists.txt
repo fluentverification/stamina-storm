@@ -122,6 +122,8 @@ set(GUI_FILES
 	# Syntax Highlighting
 	${GUI_PREFIX}/addons/highlighter/Highlighter.cpp
 	${GUI_PREFIX}/addons/highlighter/PrismHighlighter.cpp
+	# Header only
+	${GUI_PREFIX}/GuiWorkerThread.h
 )
 
 set(GUI_RECS
