@@ -205,15 +205,25 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 		case Qt::Key_Enter:
 		case Qt::Key_Return:
 		case Qt::Key_Escape:
+		case Qt::Key_Tab:
 		case Qt::Key_Backtab:
 			e->ignore();
 			return;
-		case Qt::Key_Tab:
+		default:
+			break;
+		}
+	}
+	else {
+		bool cursorHasSelection = textCursor().hasSelection();
+		if (cursorHasSelection && e->key() == Qt::Key_Tab) {
 			e->ignore();
 			changeIndent();
 			return;
-		default:
-			break;
+		}
+		else if (cursorHasSelection && e->key() == Qt::Key_Backtab) {
+			e->ignore();
+			changeIndent(false);
+			return;
 		}
 	}
 
