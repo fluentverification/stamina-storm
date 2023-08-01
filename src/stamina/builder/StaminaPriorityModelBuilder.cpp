@@ -465,6 +465,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
+				piHat -= currentProbabilityState->getPi();
 				numberTerminal++;
 				// Do NOT place this in the deque of states we should start with next iteration
 				continue;
@@ -488,16 +489,16 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 #ifdef DIE_ON_DEADLOCK
 			StaminaMessages::errorAndExit("Behavior for state " + std::to_string(currentIndex) + " was empty!");
 #elif defined WARN_ON_DEADLOCK
-
 			StaminaMessages::warning("State value caused empty behavior:\n" + StateSpaceInformation::stateToString(currentState));
 #endif // DIE_ON_DEADLOCK / WARN_ON_DEADLOCK
 			// If we are not yet aware that this is a deadlock state
 			// we should make future iterations aware of this
+			this->createTransition(currentIndex, currentIndex, 1.0);
 			if (!currentProbabilityState->deadlock) {
-				this->createTransition(currentIndex, currentIndex, 1.0);
 				stateStorage.deadlockStateIndices.push_back(currentIndex);
 				// Make absorbing
 				currentProbabilityState->deadlock = true;
+				piHat -= currentProbabilityState->getPi();
 			}
 			continue;
 		}

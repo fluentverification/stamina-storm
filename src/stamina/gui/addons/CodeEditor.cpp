@@ -291,7 +291,7 @@ void
 CodeEditor::changeIndent(bool increase) {
 	QTextCursor cursor = textCursor();
 	if (!cursor.hasSelection()) {
-		return;
+		cursor.select(QTextCursor::LineUnderCursor);
 	}
 
 	// Get the start and end position

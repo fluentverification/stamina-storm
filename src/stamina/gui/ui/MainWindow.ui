@@ -1575,6 +1575,9 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Increase Indent</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Tab</string>
+   </property>
   </action>
   <action name="actionDecrease_Indent">
    <property name="icon">
@@ -1584,7 +1587,7 @@ p, li { white-space: pre-wrap; }
     <string>Decrease Indent</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Tab</string>
+    <string>Ctrl+Shift+Tab</string>
    </property>
   </action>
   <action name="actionComment_Lines">
