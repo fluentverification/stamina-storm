@@ -995,6 +995,16 @@ p, li { white-space: pre-wrap; }
      <addaction name="menuModel"/>
      <addaction name="menuProperties"/>
     </widget>
+    <widget class="QMenu" name="menuToggle_Comment">
+     <property name="title">
+      <string>Toggle Comment</string>
+     </property>
+     <property name="icon">
+      <iconset theme="format-text-code"/>
+     </property>
+     <addaction name="actionComment_Lines"/>
+     <addaction name="actionUncomment_Lines"/>
+    </widget>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
@@ -1006,6 +1016,10 @@ p, li { white-space: pre-wrap; }
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionIncrease_Indent"/>
+    <addaction name="actionDecrease_Indent"/>
+    <addaction name="menuToggle_Comment"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
@@ -1552,6 +1566,47 @@ p, li { white-space: pre-wrap; }
   <action name="actionModel_Checking_Preferences">
    <property name="text">
     <string>Model Checking Preferences</string>
+   </property>
+  </action>
+  <action name="actionIncrease_Indent">
+   <property name="icon">
+    <iconset theme="format-indent-more"/>
+   </property>
+   <property name="text">
+    <string>Increase Indent</string>
+   </property>
+  </action>
+  <action name="actionDecrease_Indent">
+   <property name="icon">
+    <iconset theme="format-indent-less"/>
+   </property>
+   <property name="text">
+    <string>Decrease Indent</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Tab</string>
+   </property>
+  </action>
+  <action name="actionComment_Lines">
+   <property name="icon">
+    <iconset theme="dialog-messages"/>
+   </property>
+   <property name="text">
+    <string>Comment Lines</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+/</string>
+   </property>
+  </action>
+  <action name="actionUncomment_Lines">
+   <property name="icon">
+    <iconset theme="delete-comment"/>
+   </property>
+   <property name="text">
+    <string>Uncomment Lines</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+/</string>
    </property>
   </action>
  </widget>

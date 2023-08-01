@@ -46,6 +46,9 @@ namespace stamina {
 				void setCompleter(QCompleter * completer);
 				QCompleter * completer() const;
 				void setTabWidth(int numChars);
+			public slots:
+				void changeIndent(bool increase = true);
+				void changeComment(bool uncomment = false);
 			protected:
 				void resizeEvent(QResizeEvent * event) override;
 				void keyPressEvent(QKeyEvent * e) override;
@@ -55,7 +58,6 @@ namespace stamina {
 				void highlightCurrentLine();
 				void updateLineNumberArea(const QRect & rect, int16_t dy);
 				void insertCompletion(const QString & completion);
-				void changeIndent(bool increase = true);
 				void indentNextLine();
 			private:
 				QString textUnderCursor() const;
@@ -64,6 +66,7 @@ namespace stamina {
 				QWidget * lineNumberArea;
 				highlighter::Highlighter * hl;
 				inline static QString indent = "\t";
+				inline static QString comment = "//";
 			};
 		}
 	}

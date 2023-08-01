@@ -326,6 +326,52 @@ MainWindow::setupActions() {
 			else if (idx == 1) { this->ui.propertiesEditor->redo(); }
 		}
 	);
+
+	connect(
+		ui.actionIncrease_Indent
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->changeIndent(); }
+			else if (idx == 1) { this->ui.propertiesEditor->changeIndent(); }
+		}
+	);
+
+
+	connect(
+		ui.actionDecrease_Indent
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->changeIndent(false); }
+			else if (idx == 1) { this->ui.propertiesEditor->changeIndent(false); }
+		}
+	);
+
+	connect(
+		ui.actionComment_Lines
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->changeComment(); }
+			else if (idx == 1) { this->ui.propertiesEditor->changeComment(); }
+		}
+	);
+
+	connect(
+		ui.actionUncomment_Lines
+		, &QAction::triggered
+		, this
+		, [this]() {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->ui.modelFile->changeComment(true); }
+			else if (idx == 1) { this->ui.propertiesEditor->changeComment(true); }
+		}
+	);
+
 	// TODO: connect the undoAvailable(bool) signal to something that controls
 	// the unsavedChanges* variables
 	connect(

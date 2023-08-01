@@ -225,7 +225,18 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 			changeIndent(false);
 			return;
 		}
+		// Detect Ctl + / Shortcut
+		else if (// Control key is pressed
+			e->modifiers().testFlag(Qt::ControlModifier)
+			// and '/' key is pressed
+			&& e->key() == Qt::Key_Slash) {
+			const bool uncomment = e->modifiers().testFlag(Qt::ShiftModifier);
+			StaminaMessages::info("Commenting/uncommenting");
+			changeComment(uncomment);
+			return;
+		}
 	}
+
 
 	// Detect Ctl + E shortcut
 	const bool isShortcut = (
@@ -313,6 +324,50 @@ CodeEditor::changeIndent(bool increase) {
 				cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
 			}
 			if (cursor.selectedText() == CodeEditor::indent) {
+				cursor.removeSelectedText();
+			}
+		}
+		cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+	}
+
+	cursor.endEditBlock();
+}
+
+void
+CodeEditor::changeComment(bool uncomment) {
+	QTextCursor cursor = textCursor();
+	if (!cursor.hasSelection()) {
+		cursor.select(QTextCursor::LineUnderCursor);
+	}
+
+	int startPos = cursor.anchor();
+	int endPos = cursor.position();
+	if (startPos > endPos) {
+		std::swap(startPos, endPos);
+	}
+
+	// Get the start and end blocks
+	cursor.setPosition(startPos, QTextCursor::MoveAnchor);
+	int startBlock = cursor.block().blockNumber();
+	cursor.setPosition(endPos, QTextCursor::MoveAnchor);
+	int endBlock = cursor.block().blockNumber();
+
+	// Do comment
+	int blockDiff = endBlock - startBlock;
+
+	cursor.setPosition(startPos, QTextCursor::MoveAnchor);
+	cursor.beginEditBlock();
+
+	for (int i = 0; i <= blockDiff; i++) {
+		cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+		if (!uncomment) {
+			cursor.insertText(CodeEditor::comment);
+		}
+		else {
+			for (int j = 0; j < CodeEditor::comment.size(); j++) {
+				cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+			}
+			if (cursor.selectedText() == CodeEditor::comment) {
 				cursor.removeSelectedText();
 			}
 		}
