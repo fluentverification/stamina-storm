@@ -409,6 +409,13 @@ CodeEditor::changeComment(bool uncomment) {
 
 void
 CodeEditor::indentNextLine() {
+	int bc = blockCount();
+	if (bc < lastBlockCount) {
+		lastBlockCount = blockCount();
+		return;
+	}
+	lastBlockCount = blockCount();
+
 	QTextCursor cursor = textCursor();
 
 	// Get previous line and count of indentation at the beginning of it

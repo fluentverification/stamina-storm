@@ -64,6 +64,7 @@ namespace stamina {
 				QString textUnderCursor() const;
 				int getNextPosition(QString findPattern);
 
+				int lastBlockCount = 0; // So we can see on block count changed whether we added or removed.
 				QCompleter * c = nullptr;
 				QWidget * lineNumberArea;
 				highlighter::Highlighter * hl;

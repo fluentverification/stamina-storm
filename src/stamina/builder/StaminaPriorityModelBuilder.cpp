@@ -421,8 +421,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	bool hold = true;
 	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
-	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
-		// std::cout << "PiHat = " << piHat << std::endl;
+	while (hold || (!statePriorityQueue.empty() && (piHat > std::max(windowPower / Options::approx_factor, 1e-14)))) {
+		std::cout << "PiHat = " << piHat << std::endl;
 		// std::cout << "cond = " << windowPower / Options::approx_factor << std::endl;
 		hold = false;
 		auto currentProbabilityStatePair = *statePriorityQueue.top();
@@ -465,10 +465,9 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				// We treat this state as terminal even though it is also absorbing and does not
 				// go to our artificial absorbing state
 				currentProbabilityState->terminal = true;
-				// if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
-					// numberTerminal--;
-					piHat -= currentProbabilityState->getPi();
-				// }
+
+				piHat -= currentProbabilityState->getPi();
+
 				// numberTerminal++;
 				// Do NOT place this in the deque of states we should start with next iteration
 				continue;
@@ -502,10 +501,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 				// Make absorbing
 				currentProbabilityState->deadlock = true;
 			}
-			// if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
-				// numberTerminal--;
-				piHat -= currentProbabilityState->getPi();
-			// }
+
+			piHat -= currentProbabilityState->getPi();
 			continue;
 		}
 
@@ -603,8 +600,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 		currentProbabilityState->isNew = false;
 
 		if (currentProbabilityState->isTerminal() && numberTerminal > 0) {
-			numberTerminal--;
 			piHat -= currentProbabilityState->getPi();
+			numberTerminal--;
 		}
 		else if (currentProbabilityState->isTerminal()) {
 			StaminaMessages::error("numberTerminal is equal to " + std::to_string(numberTerminal));
