@@ -357,6 +357,7 @@ CodeEditor::changeIndent(bool increase) {
 	}
 
 	cursor.endEditBlock();
+	this->setFocus(Qt::TabFocusReason);
 }
 
 void
@@ -401,6 +402,7 @@ CodeEditor::changeComment(bool uncomment) {
 	}
 
 	cursor.endEditBlock();
+	this->setFocus(Qt::ShortcutFocusReason);
 }
 
 void
