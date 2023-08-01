@@ -1324,7 +1324,7 @@ MainWindow::checkModelAndProperties() {
 		}
 		mustRebuildModel = true;
 	}
-	else if (activeModelFile == "" || activePropertiesFile == "") {
+	if (activeModelFile == "" || activePropertiesFile == "") {
 		bool shouldSave = KMessageBox::questionYesNo(0
 			, i18n("Your model or properties file has not been saved on the filesystem. Save now?")
 		) == KMessageBox::Yes;
