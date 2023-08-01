@@ -1000,7 +1000,8 @@ p, li { white-space: pre-wrap; }
       <string>Toggle Comment</string>
      </property>
      <property name="icon">
-      <iconset theme="format-text-code"/>
+      <iconset theme="format-text-code">
+       <normaloff>.</normaloff>.</iconset>
      </property>
      <addaction name="actionComment_Lines"/>
      <addaction name="actionUncomment_Lines"/>
@@ -1106,6 +1107,12 @@ p, li { white-space: pre-wrap; }
    <addaction name="actionCopy"/>
    <addaction name="actionPaste"/>
    <addaction name="separator"/>
+   <addaction name="actionIncrease_Indent"/>
+   <addaction name="actionDecrease_Indent"/>
+   <addaction name="separator"/>
+   <addaction name="actionComment_Lines"/>
+   <addaction name="actionUncomment_Lines"/>
+   <addaction name="separator"/>
    <addaction name="actionCheck_Current_Property"/>
    <addaction name="actionCheck_All_Properties"/>
    <addaction name="actionCheck_Specific_Properties"/>
@@ -1187,6 +1194,9 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Export</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+E</string>
+   </property>
   </action>
   <action name="actionCut">
    <property name="icon">
@@ -1228,10 +1238,16 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Module</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+M</string>
+   </property>
   </action>
   <action name="actionUnbounded_Variable">
    <property name="text">
     <string>Variable</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+V</string>
    </property>
   </action>
   <action name="actionBounded_Variable">
@@ -1552,10 +1568,16 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Forever Property</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
   </action>
   <action name="actionUntil_Property">
    <property name="text">
     <string>Until Property</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+U</string>
    </property>
   </action>
   <action name="actionBounded_Until_Property">
@@ -1570,7 +1592,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionIncrease_Indent">
    <property name="icon">
-    <iconset theme="format-indent-more"/>
+    <iconset theme="format-indent-more">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Increase Indent</string>
@@ -1581,7 +1604,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionDecrease_Indent">
    <property name="icon">
-    <iconset theme="format-indent-less"/>
+    <iconset theme="format-indent-less">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Decrease Indent</string>
@@ -1592,7 +1616,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionComment_Lines">
    <property name="icon">
-    <iconset theme="dialog-messages"/>
+    <iconset theme="dialog-messages">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Comment Lines</string>
@@ -1603,7 +1628,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionUncomment_Lines">
    <property name="icon">
-    <iconset theme="delete-comment"/>
+    <iconset theme="delete-comment">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Uncomment Lines</string>
