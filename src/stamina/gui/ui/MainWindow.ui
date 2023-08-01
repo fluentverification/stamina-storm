@@ -1239,7 +1239,7 @@ p, li { white-space: pre-wrap; }
     <string>Module</string>
    </property>
    <property name="shortcut">
-    <string>Alt+M</string>
+    <string>Ctrl+Alt+M</string>
    </property>
   </action>
   <action name="actionUnbounded_Variable">
@@ -1247,12 +1247,15 @@ p, li { white-space: pre-wrap; }
     <string>Variable</string>
    </property>
    <property name="shortcut">
-    <string>Alt+V</string>
+    <string>Ctrl+Alt+V</string>
    </property>
   </action>
   <action name="actionBounded_Variable">
    <property name="text">
     <string>Bounded Variable</string>
+   </property>
+   <property name="shortcut">
+    <string/>
    </property>
   </action>
   <action name="actionFind">
@@ -1503,6 +1506,9 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>About STORM</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
   </action>
   <action name="actionAbout_STAMINA">
    <property name="icon">
@@ -1511,6 +1517,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>About STAMINA</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
    </property>
   </action>
   <action name="actionAbout_Qt">
@@ -1521,6 +1530,9 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>About Qt</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
+   </property>
   </action>
   <action name="actionAbout_KF5">
    <property name="icon">
@@ -1529,6 +1541,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>About KF5</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
    </property>
   </action>
   <action name="actionShow_toolbar">
@@ -1569,7 +1584,7 @@ p, li { white-space: pre-wrap; }
     <string>Forever Property</string>
    </property>
    <property name="shortcut">
-    <string>Alt+P</string>
+    <string>Ctrl+Alt+F</string>
    </property>
   </action>
   <action name="actionUntil_Property">
@@ -1577,7 +1592,7 @@ p, li { white-space: pre-wrap; }
     <string>Until Property</string>
    </property>
    <property name="shortcut">
-    <string>Alt+U</string>
+    <string>Ctrl+Alt+U</string>
    </property>
   </action>
   <action name="actionBounded_Until_Property">

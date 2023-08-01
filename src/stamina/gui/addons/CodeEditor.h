@@ -62,12 +62,14 @@ namespace stamina {
 				void indentNextLine();
 			private:
 				QString textUnderCursor() const;
+				int getNextPosition(QString findPattern);
 
 				QCompleter * c = nullptr;
 				QWidget * lineNumberArea;
 				highlighter::Highlighter * hl;
 				inline static QString indent = "\t";
 				inline static QString comment = "//";
+				inline static QStringList indentables = {"module", "init", "invariant", "observables", "rewards", "system"};
 			};
 		}
 	}

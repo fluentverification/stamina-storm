@@ -31,6 +31,8 @@
 #include <QScrollBar>
 #include <QStringListModel>
 
+#define END_OF_DOCUMENT 99999999
+
 namespace stamina {
 namespace gui {
 namespace addons {
@@ -246,7 +248,7 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 			changeIndent();
 			return;
 		}
-		else if (cursorHasSelection && e->key() == Qt::Key_Backtab) {
+		else if (e->key() == Qt::Key_Backtab) {
 			e->ignore();
 			changeIndent(false);
 			return;
@@ -418,10 +420,50 @@ CodeEditor::indentNextLine() {
 		lastLine.remove(0, CodeEditor::indent.size());
 	}
 
+	// Indent next line if line starts with 'module' or another indentable
+	QTextBlockFormat format;
+	for (QString & indentable : CodeEditor::indentables) {
+		if (lastLine.startsWith(indentable)) {
+			// we can insert 'endmodule' or the other end+indentable here too
+			int cursorPosition = cursor.position();
+			QString endIndentable = "end" + indentable;
+			int nextEndPos = getNextPosition(endIndentable);
+			int nextIndentPos = getNextPosition(indentable);
+			// If the next instance of `module` is sooner than the next instance of endmodule
+			if (nextIndentPos < nextEndPos || nextEndPos == END_OF_DOCUMENT) {
+				StaminaMessages::info("Line starts with: "
+					+ lastLine.toStdString() + " so inserting end (positions: "
+					+ std::to_string(nextIndentPos) + " / " + std::to_string(nextEndPos) + ")");
+				// Insert indentation
+				cursor.insertBlock(format);
+				for (int i = 0; i < indentationCount; i++) {
+					cursor.insertText(CodeEditor::indent);
+				}
+				cursor.insertText(endIndentable);
+				cursor.setPosition(cursorPosition);
+			}
+			indentationCount++;
+			break;
+		}
+	}
+	// cursor.insertBlock(format);
 	// Insert indentation
 	for (int i = 0; i < indentationCount; i++) {
 		cursor.insertText(CodeEditor::indent);
 	}
+
+	this->setTextCursor(cursor);
+}
+
+int
+CodeEditor::getNextPosition(QString findPattern) {
+	QTextCursor cursor = textCursor();
+	int position = cursor.position();
+	bool found = this->find(findPattern);
+	int nextPosition = found ? cursor.position() : END_OF_DOCUMENT;
+	cursor.setPosition(position);
+	this->setTextCursor(cursor);
+	return nextPosition;
 }
 
 } // namespace addons
