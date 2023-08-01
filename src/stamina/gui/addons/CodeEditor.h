@@ -46,6 +46,7 @@ namespace stamina {
 				void setCompleter(QCompleter * completer);
 				QCompleter * completer() const;
 				void setTabWidth(int numChars);
+				void addWordToModel(QString word);
 			public slots:
 				void changeIndent(bool increase = true);
 				void changeComment(bool uncomment = false);

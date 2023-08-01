@@ -1481,6 +1481,9 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	for (auto & constant : program->getConstants()) {
 		addedConsts = true;
 		QString constName = QString::fromStdString(constant.getName());
+		// Add to the completers in the text-editors as well
+		ui.modelFile->addWordToModel(constName);
+		ui.propertiesEditor->addWordToModel(constName);
 		QString typeString = QString::fromStdString(constant.getType().getStringRepresentation());
 		QString expressionString = QString::fromStdString(constant.getExpression().toString());
 		QTreeWidgetItem * constItem = new QTreeWidgetItem(constsItem);
@@ -1515,6 +1518,9 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	for (auto & variable : program->getAllExpressionVariables()) {
 		QTreeWidgetItem * varItem = new QTreeWidgetItem(variablesItem);
 		QString varName = QString::fromStdString(variable.getName());
+		// Add to the completers in the text-editors as well
+		ui.modelFile->addWordToModel(varName);
+		ui.propertiesEditor->addWordToModel(varName);
 		varItem->setText(0, varName);
 		varItem->setText(1, QString::fromStdString(
 			variable.getType().getStringRepresentation()
@@ -1529,7 +1535,10 @@ MainWindow::populateModelInformationTree(std::shared_ptr<storm::prism::Program> 
 	ui.modelInfoTree->addTopLevelItem(formulasItem);
 	for (auto & formula : program->getFormulas()) {
 		QTreeWidgetItem * formulaItem = new QTreeWidgetItem(formulasItem);
-		formulaItem->setText(0, QString::fromStdString(formula.getName()));
+		QString formulaName = QString::fromStdString(formula.getName());
+		ui.modelFile->addWordToModel(formulaName);
+		ui.propertiesEditor->addWordToModel(formulaName);
+		formulaItem->setText(0, formulaName);
 		formulaItem->setText(1, QString::fromStdString(formula.getType().getStringRepresentation()));
 		QString exprString = QString::fromStdString(formula.getExpression().toString());
 		formulaItem->setText(2, exprString);

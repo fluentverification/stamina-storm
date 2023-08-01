@@ -29,6 +29,7 @@
 #include <QPalette>
 #include <QAbstractItemView>
 #include <QScrollBar>
+#include <QStringListModel>
 
 namespace stamina {
 namespace gui {
@@ -111,6 +112,31 @@ CodeEditor::setTabWidth(int numChars) {
 	QFontMetrics fm(this->font());
 	qreal width = numChars * fm.horizontalAdvance(QChar::Nbsp);
 	this->setTabStopDistance(width);
+}
+
+void
+CodeEditor::addWordToModel(QString word) {
+	if (!c) {
+		StaminaMessages::warning("Cannot add word to model when no completer exists!");
+		return;
+	}
+	QStringListModel * model = qobject_cast<QStringListModel*>(c->model());
+	if (model) {
+		bool matched = false;
+		for (QString w : model->stringList()) {
+			if (w == word) {
+				matched = true;
+				break;
+			}
+		}
+		if (!matched) {
+			StaminaMessages::info("Adding word to model: " + word.toStdString());
+			model->setStringList(model->stringList() << word);
+		}
+	}
+	else {
+		StaminaMessages::warning("Cast to QStringListModel * failed! (got NULL)");
+	}
 }
 
 void
