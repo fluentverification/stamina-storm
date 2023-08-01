@@ -309,7 +309,12 @@ CodeEditor::changeIndent(bool increase) {
 			cursor.insertText(CodeEditor::indent);
 		}
 		else {
-			// TODO
+			for (int j = 0; j < CodeEditor::indent.size(); j++) {
+				cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+			}
+			if (cursor.selectedText() == CodeEditor::indent) {
+				cursor.removeSelectedText();
+			}
 		}
 		cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
 	}
