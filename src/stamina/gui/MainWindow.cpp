@@ -619,6 +619,51 @@ MainWindow::setupModelActions() {
 			populateModelInformationTree(program);
 		}
 	);
+
+	connect(
+		ui.actionState_Graph
+		, &QAction::triggered
+		, this
+		, [this]() { KMessageBox::error(this, "Not implemented!"); }
+	);
+
+	connect(
+		ui.actionTransition_Matrix
+		, &QAction::triggered
+		, this
+		, [this]() { KMessageBox::error(this, "Not implemented!"); }
+	);
+
+	connect(
+		ui.actionConstants
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.actionProperties_Editor->trigger();
+			this->ui.constantsGroup->setVisible(true);
+			this->ui.constantsTable->setFocus();
+		}
+	);
+
+	connect(
+		ui.actionParse_Tree
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.actionModel_Editor->trigger();
+			this->ui.modelInfoTree->setFocus();
+		}
+	);
+
+	connect(
+		ui.actionClear_Built_Model
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.modelInfoTree->clear();
+			this->ui.constantsTable->clear();
+		}
+	);
 }
 
 void
