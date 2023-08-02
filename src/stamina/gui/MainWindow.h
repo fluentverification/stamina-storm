@@ -52,6 +52,16 @@ namespace stamina {
 			void saveToActivePropertiesFile();
 			void setup();
 			void setupActions();
+			// Setup actions for each menu
+			void setupFileActions();
+			void setupEditActions();
+			void setupViewActions();
+			void setupModelActions();
+			void setupCheckActions();
+			void setupHelpActions();
+			// Setup button slots
+			void setupButtons();
+			// Populates various tables
 			void populateLabelTable();
 			void populateResultsTable();
 			void populateModelInformationTree(std::shared_ptr<storm::prism::Program> program);

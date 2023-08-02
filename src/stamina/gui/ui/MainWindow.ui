@@ -1075,9 +1075,29 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionAbout_Qt"/>
     <addaction name="actionAbout_KF5"/>
    </widget>
+   <widget class="QMenu" name="menuModel_2">
+    <property name="title">
+     <string>Model</string>
+    </property>
+    <widget class="QMenu" name="menuShow">
+     <property name="title">
+      <string>Show</string>
+     </property>
+     <addaction name="actionState_Graph"/>
+     <addaction name="actionTransition_Matrix"/>
+     <addaction name="actionConstants"/>
+     <addaction name="actionParse_Tree"/>
+    </widget>
+    <addaction name="actionBuild_Model"/>
+    <addaction name="actionParse_Model"/>
+    <addaction name="menuShow"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_Built_Model"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
+   <addaction name="menuModel_2"/>
    <addaction name="menuHelp"/>
    <addaction name="menuHelp_2"/>
   </widget>
@@ -1651,6 +1671,73 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+/</string>
+   </property>
+  </action>
+  <action name="actionBuild_Model">
+   <property name="icon">
+    <iconset theme="run-build">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Build Model</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+B</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionView_State_Graph">
+   <property name="text">
+    <string>View State Graph</string>
+   </property>
+  </action>
+  <action name="actionView_Transition_Matrix">
+   <property name="text">
+    <string>View Transition Matrix</string>
+   </property>
+  </action>
+  <action name="actionState_Graph">
+   <property name="icon">
+    <iconset theme="distribute-graph">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>State Graph</string>
+   </property>
+  </action>
+  <action name="actionTransition_Matrix">
+   <property name="icon">
+    <iconset theme="labplot-matrix">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Transition Matrix</string>
+   </property>
+  </action>
+  <action name="actionConstants">
+   <property name="text">
+    <string>Constants</string>
+   </property>
+  </action>
+  <action name="actionParse_Tree">
+   <property name="text">
+    <string>Parse Tree</string>
+   </property>
+  </action>
+  <action name="actionClear_Built_Model">
+   <property name="icon">
+    <iconset theme="run-build-clean">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Built Model</string>
+   </property>
+  </action>
+  <action name="actionParse_Model">
+   <property name="text">
+    <string>Parse Model</string>
    </property>
   </action>
  </widget>
