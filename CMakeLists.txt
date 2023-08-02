@@ -130,7 +130,12 @@ set(GUI_RECS
 	${GUI_PREFIX}/resources.qrc
 )
 
+option(STAMINA_BUILD_STORM "Build Storm in this directory and package with STAMINA" OFF)
 message("STORM_PATH is set as " ${STORM_PATH})
+if (STAMINA_BUILD_STORM)
+	include(${STORM_PATH}/CMakeLists.txt)
+	set(STORM_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
 
 set(LOCAL_PATH /usr/lib)
 set(LIB_PATH ${STORM_PATH}/lib)

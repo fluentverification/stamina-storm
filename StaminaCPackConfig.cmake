@@ -5,6 +5,10 @@ if (BUILD_CPACK)
 	set(CPACK_PACKAGE_VERSION_PATCH "5")
 	set(CPACK_PACKAGE_DESCRIPTION "STAMINA - the STochastic Approximate Model-checker for INfinite-state Analysis")
 	set(CPACK_PACKAGE_CONTACT "Josh Jeppson <joshua.jeppson@usu.edu>")
+	set(CPACK_PACKAGE_VENDOR "FLUENT Verification, Utah State University")
+	set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
+	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/doc/staminaLogo.svg)
+	set(CPACK_PACKAGE_HOMEPAGE_URL "https://staminachecker.org")
 
 	# Debian packaging information
 	include(InstallRequiredSystemLibraries)
