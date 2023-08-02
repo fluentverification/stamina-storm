@@ -1738,38 +1738,6 @@ void
 MainWindow::handleTabChange() {
 	int tabIndex = ui.mainTabs->currentIndex();
 	modelActive = tabIndex != 1;
-	// StaminaMessages::info("Model active is " + std::to_string(modelActive));
-	// Disconnect the open and save actions
-	// disconnect(ui.actionOpen, SIGNAL(triggered()), 0, 0);
-	// disconnect(ui.actionSave, SIGNAL(triggered()), 0, 0);
-	// if (modelActive) {
-	// 	connect(
-	// 		ui.actionOpen
-	// 		, SIGNAL(triggered())
-	// 		, this
-	// 		, SLOT(openModelFile())
-	// 	);
-	// 	connect(
-	// 		ui.actionSave
-	// 		, SIGNAL(triggered())
-	// 		, this
-	// 		, SLOT(saveModelFile())
-	// 	);
-	// }
-	// else {
-	// 	connect(
-	// 		ui.actionOpen
-	// 		, SIGNAL(triggered())
-	// 		, this
-	// 		, SLOT(openPropertyFile())
-	// 	);
-	// 	connect(
-	// 		ui.actionSave
-	// 		, SIGNAL(triggered())
-	// 		, this
-	// 		, SLOT(savePropertyFile())
-	// 	);
-	// }
 	if (tabIndex == 0) {
 		this->setCaption(
 			((this->activeModelFile == "") ? "New Model File" : this->activeModelFile)

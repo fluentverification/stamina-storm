@@ -1745,7 +1745,7 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>stamina::gui::addons::CodeEditor</class>
    <extends>QPlainTextEdit</extends>
-   <header>../addons/CodeEditor.h</header>
+   <header location="global">stamina/gui/addons/CodeEditor.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -27,8 +27,8 @@
 
 #include "stamina/core/Options.h"
 
-#include "ui/ui_Preferences.h"
-#include "ui/ui_MainWindow.h"
+#include <ui_Preferences.h>
+#include <ui_MainWindow.h>
 
 namespace stamina {
 	namespace gui {

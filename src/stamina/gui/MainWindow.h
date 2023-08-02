@@ -27,7 +27,7 @@
 #include <QProgressBar>
 #include <QFuture>
 
-#include "ui/ui_MainWindow.h"
+#include <ui_MainWindow.h>
 
 #include "About.h"
 #include "Preferences.h"
