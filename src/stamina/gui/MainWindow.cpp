@@ -139,9 +139,13 @@ MainWindow::setupActions() {
 	// Connect slots
 	connect(
 		ui.actionOpen
-		, SIGNAL(triggered())
+		, &QAction::triggered
 		, this
-		, SLOT(openModelFile())
+		, [this] () {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->openModelFile(); }
+			else if (idx == 1) { this->openPropertyFile(); }
+		}
 	);
 	connect(
 		ui.actionPreferences
@@ -151,15 +155,23 @@ MainWindow::setupActions() {
 	);
 	connect(
 		ui.actionSave
-		, SIGNAL(triggered())
+		, &QAction::triggered
 		, this
-		, SLOT(saveModelFile())
+		, [this] () {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->saveModelFile(); }
+			else if (idx == 1) { this->savePropertyFile(); }
+		}
 	);
 	connect(
 		ui.actionSave_As
-		, SIGNAL(triggered())
+		, &QAction::triggered
 		, this
-		, SLOT(saveModelFileAs())
+		, [this] () {
+			int idx = this->ui.mainTabs->currentIndex();
+			if (idx == 0) { this->saveModelFileAs(); }
+			else if (idx == 1) { this->savePropertyFileAs(); }
+		}
 	);
 	connect(
 		ui.actionAbout_STORM
@@ -167,7 +179,7 @@ MainWindow::setupActions() {
 		, this
 		, [this]() {
 			KMessageBox::about(this
-			, "Storm is a library which STAMINA tightly integrates with. It is an advanced, modern PMC engine. Licensed under the GPLv3.\nhttps://stormchecker.org");
+			, "Storm is a library which STAMINA tightly integrates with. It is an advanced, modern PMC engine. Licensed under the GPLv3.\nStorm is developed at RWTH Aachen University by Hensel, Junges, Katoen, Quatmann, Volk, etc.\n\nhttps://stormchecker.org\n\nThe developers of STAMINA would like to thank the Storm developers for their assistance in helping us integrate STAMINA closely into the Storm PMC engine.");
 		}
 	);
 
@@ -190,7 +202,7 @@ MainWindow::setupActions() {
 		, this
 		, [this]() {
 			KMessageBox::about(this
-			, "STAMINA makes use of KDE's KFrameworks version 5, in additon to Qt. Licensed under the GPLv3.\nhttps://api.kde.org/frameworks\nDisclaimer: STAMINA is NOT a KDE project."
+			, "STAMINA makes use of KDE's KFrameworks version 5, in additon to Qt. Licensed under the GPLv3. Specifically, STAMINA uses KFileCustomDialog, KMessageBox, KIO::Job, KWidgetsAddons, and other portions of the framework.\n\nhttps://api.kde.org/frameworks\nDisclaimer: STAMINA is NOT a KDE project."
 			);
 		}
 	);
@@ -883,7 +895,7 @@ MainWindow::saveToActivePropertiesFile() {
 		stayOpen = false;
 	}
 	else {
-		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
+		StaminaMessages::error("No active properties file exists! (This is a bug, please report.)");
 	}
 }
 
@@ -983,9 +995,12 @@ MainWindow::openPropertyFromAcceptedPath() {
 
 void
 MainWindow::saveModelFile() {
-	if (!unsavedChangesModel) { return; }
 	if (this->activeModelFile == "") {
 		this->saveModelFileAs();
+	}
+	else if (!unsavedChangesModel) {
+		StaminaMessages::info("Will not save model file as no changes to it.");
+		return;
 	}
 	else {
 		saveToActiveModelFile();
@@ -1037,9 +1052,12 @@ MainWindow::openPropertyFile() {
 
 void
 MainWindow::savePropertyFile() {
-	if (!unsavedChangesProperty) { return; }
 	if (this->activePropertiesFile == "") {
 		this->savePropertyFileAs();
+	}
+	else if (!unsavedChangesProperty) {
+		StaminaMessages::info("Will not save since no changes made");
+		return;
 	}
 	else {
 		saveToActivePropertiesFile();
@@ -1059,6 +1077,8 @@ MainWindow::savePropertyFileAs() {
 		, this
 		, SLOT(setActivePropertyFileAndSave())
 	);
+	sfdp->show();
+	sfdp->fileWidget()->setFilter(QString("*.csl *.pctl|PRISM Property Files"));
 }
 
 void
@@ -1111,7 +1131,7 @@ MainWindow::setModifiedModel() {
 	if (unsavedChangesModel) { return; }
 	// baseWindowTitle = ;
 	QString title = windowTitle();
-	if (title[title.length() - 1] != '*') {
+	if (title.length() > 1 && title[title.length() - 1] != '*') {
 		setCaption(windowTitle() + " *");
 	}
 	unsavedChangesModel = true; // ui.modelFile->undoAvailable();
@@ -1123,7 +1143,7 @@ MainWindow::setModifiedProperties() {
 	if (unsavedChangesProperty) { return; }
 	// baseWindowTitle = windowTitle();
 	QString title = windowTitle();
-	if (title[title.length() - 1] != '*') {
+	if (title.length() > 1 && title[title.length() - 1] != '*') {
 		setCaption(windowTitle() + " *");
 	}
 	unsavedChangesProperty = true; // ui.propertiesEditor->undoAvailable();
@@ -1621,36 +1641,36 @@ MainWindow::handleTabChange() {
 	modelActive = tabIndex != 1;
 	// StaminaMessages::info("Model active is " + std::to_string(modelActive));
 	// Disconnect the open and save actions
-	disconnect(ui.actionOpen, SIGNAL(triggered()), 0, 0);
-	disconnect(ui.actionSave, SIGNAL(triggered()), 0, 0);
-	if (modelActive) {
-		connect(
-			ui.actionOpen
-			, SIGNAL(triggered())
-			, this
-			, SLOT(openModelFile())
-		);
-		connect(
-			ui.actionSave
-			, SIGNAL(triggered())
-			, this
-			, SLOT(saveModelFile())
-		);
-	}
-	else {
-		connect(
-			ui.actionOpen
-			, SIGNAL(triggered())
-			, this
-			, SLOT(openPropertyFile())
-		);
-		connect(
-			ui.actionSave
-			, SIGNAL(triggered())
-			, this
-			, SLOT(savePropertyFile())
-		);
-	}
+	// disconnect(ui.actionOpen, SIGNAL(triggered()), 0, 0);
+	// disconnect(ui.actionSave, SIGNAL(triggered()), 0, 0);
+	// if (modelActive) {
+	// 	connect(
+	// 		ui.actionOpen
+	// 		, SIGNAL(triggered())
+	// 		, this
+	// 		, SLOT(openModelFile())
+	// 	);
+	// 	connect(
+	// 		ui.actionSave
+	// 		, SIGNAL(triggered())
+	// 		, this
+	// 		, SLOT(saveModelFile())
+	// 	);
+	// }
+	// else {
+	// 	connect(
+	// 		ui.actionOpen
+	// 		, SIGNAL(triggered())
+	// 		, this
+	// 		, SLOT(openPropertyFile())
+	// 	);
+	// 	connect(
+	// 		ui.actionSave
+	// 		, SIGNAL(triggered())
+	// 		, this
+	// 		, SLOT(savePropertyFile())
+	// 	);
+	// }
 	if (tabIndex == 0) {
 		this->setCaption(
 			((this->activeModelFile == "") ? "New Model File" : this->activeModelFile)

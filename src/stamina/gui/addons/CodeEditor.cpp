@@ -172,7 +172,7 @@ CodeEditor::highlightCurrentLine()
 	setExtraSelections(extraSelections);
 }
 
-void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
+void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent * event)
 {
 	QPainter painter(lineNumberArea);
 	painter.fillRect(event->rect(), QColor(this->palette().color(QPalette::Window)).darker(100)); //  QColor(Qt::darkGray).darker(400)
