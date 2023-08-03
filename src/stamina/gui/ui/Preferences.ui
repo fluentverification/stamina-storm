@@ -137,10 +137,10 @@
           <item row="5" column="1">
            <widget class="QRadioButton" name="useSpaces">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
-             <string>Use Spaces (not yet implemented)</string>
+             <string>Use Spaces</string>
             </property>
            </widget>
           </item>

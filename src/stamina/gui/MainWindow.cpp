@@ -121,6 +121,7 @@ MainWindow::setup() {
 	ui.modelFile->setCompleter(modCompleter);
 	ui.propertiesEditor->setCompleter(propCompleter);
 	prefs->setMainWindow(&ui);
+	prefs->setUIFromPreferences();
 	// Set the default sizes for the splitters
 	// QList<int> modelSizes = ui.modelSplitter->sizes();
 	// // int totalSize = modelSizes[0] + modelSizes[1];

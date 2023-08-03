@@ -242,14 +242,14 @@ CodeEditor::keyPressEvent(QKeyEvent * e) {
 		}
 	}
 	else {
-		bool cursorHasSelection = textCursor().hasSelection();
-		if (cursorHasSelection && e->key() == Qt::Key_Tab) {
-			e->ignore();
+		// bool cursorHasSelection = textCursor().hasSelection();
+		if (e->key() == Qt::Key_Tab) {
+			// e->ignore();
 			changeIndent();
 			return;
 		}
 		else if (e->key() == Qt::Key_Backtab) {
-			e->ignore();
+			// e->ignore();
 			changeIndent(false);
 			return;
 		}

@@ -80,6 +80,16 @@ void
 Preferences::setUIFromPreferences() {
 	window->modelFile->setTabWidth(PrefInfo::General::tabSize);
 	window->propertiesEditor->setTabWidth(PrefInfo::General::tabSize);
+	QString indentation = "";
+	if (PrefInfo::General::useTabs) {
+		indentation += "\t";
+	}
+	else {
+		for (int i = 0; i < PrefInfo::General::tabSize; i++) {
+			indentation += " ";
+		}
+	}
+	addons::CodeEditor::setIndent(indentation);
 }
 
 void
