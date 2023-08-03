@@ -90,6 +90,7 @@ Preferences::setUIFromPreferences() {
 			indentation += " ";
 		}
 	}
+	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
 	addons::CodeEditor::setIndent(indentation);
 }
 
