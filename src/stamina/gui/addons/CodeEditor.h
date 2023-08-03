@@ -48,6 +48,7 @@ namespace stamina {
 				void setTabWidth(int numChars);
 				void addWordToModel(QString word);
 				static void setIndent(QString idt) { indent = idt; }
+				static QString getIndent() { return indent; }
 			public slots:
 				void changeIndent(bool increase = true);
 				void changeComment(bool uncomment = false);

@@ -129,6 +129,8 @@ namespace stamina {
 			 * */
 			void setUIFromPreferences();
 			void getPreferencesFromUI();
+		private slots:
+			void replaceAllIndentation();
 		private:
 			void setupActions();
 			// Data members

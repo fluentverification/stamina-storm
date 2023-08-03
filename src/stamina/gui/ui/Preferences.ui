@@ -123,24 +123,17 @@
          <property name="title">
           <string>Editor Settings</string>
          </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
          <layout class="QFormLayout" name="formLayout_5">
-          <item row="4" column="1">
-           <widget class="QRadioButton" name="useTabs">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>Use Tabs</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QRadioButton" name="useSpaces">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>Use Spaces</string>
+             <string>Tab Size</string>
             </property>
            </widget>
           </item>
@@ -163,10 +156,23 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_12">
+          <item row="3" column="1">
+           <widget class="QRadioButton" name="useTabs">
             <property name="text">
-             <string>Tab Size</string>
+             <string>Use Tabs</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QRadioButton" name="useSpaces">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Use Spaces</string>
             </property>
            </widget>
           </item>
@@ -180,6 +186,22 @@
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QPushButton" name="replaceAllIndentationButton">
+            <property name="text">
+             <string>Replace All Indentation In Open Files</string>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+            <property name="default">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
             </property>
            </widget>
           </item>

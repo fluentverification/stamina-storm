@@ -37,6 +37,7 @@ Preferences::Preferences(QWidget * parent)
 void
 Preferences::setupActions() {
 	ui.setupUi(this);
+	connect(ui.replaceAllIndentationButton, SIGNAL(clicked()), this, SLOT(replaceAllIndentation()));
 }
 
 void
@@ -170,6 +171,28 @@ Preferences::getPreferencesFromUI() {
 	// TODO
 	// The Counterexamples tab
 	// Add these when Counterexamples are supported in stamina
+}
+
+void
+Preferences::replaceAllIndentation() {
+	QString oldIndentation = addons::CodeEditor::getIndent();
+	setUIFromPreferences();
+	QString newIndent = addons::CodeEditor::getIndent();
+	bool canReplaceMod = window->modelFile->find(oldIndentation);
+	while (canReplaceMod) {
+		QTextCursor curs = window->modelFile->textCursor();
+		curs.removeSelectedText();
+		curs.insertText(newIndent);
+		canReplaceMod = window->modelFile->find(oldIndentation);
+	}
+
+	bool canReplaceProp = window->propertiesEditor->find(oldIndentation);
+	while (canReplaceProp) {
+		QTextCursor curs = window->propertiesEditor->textCursor();
+		curs.removeSelectedText();
+		curs.insertText(newIndent);
+		canReplaceProp = window->propertiesEditor->find(oldIndentation);
+	}
 }
 
 } // namespace gui

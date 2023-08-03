@@ -30,8 +30,14 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
       <property name="statusTip">
        <string>Logs produced by STAMINA when running.</string>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
       </property>
       <property name="tabPosition">
        <enum>QTabWidget::West</enum>
@@ -43,6 +49,9 @@
        <number>0</number>
       </property>
       <property name="documentMode">
+       <bool>true</bool>
+      </property>
+      <property name="movable">
        <bool>true</bool>
       </property>
       <property name="tabBarAutoHide">
@@ -93,6 +102,9 @@
               <property name="whatsThis">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The model information tree shows the parse tree of the model. It shows the type of the model (CTMC and DTMC are the only supported types for STAMINA), as well as all of the other explicitly defined things in the PRISM model, shown in heirarchy.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Modules: &lt;/span&gt;Modules are like namespaces. In PRISM syntax, these define scope. Anything defined in a module generally is only accessible to that module, unless defined as &amp;quot;global&amp;quot;.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Variables: &lt;/span&gt;Variables can hold data of different types.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Constants: &lt;/span&gt;Constants are like constants in any other language. They are unchanging variables that can be defined either explicitly in the file, or at runtime.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Formulas: &lt;/span&gt;Formulas allow the user to define rates or guard probabilities based on the current state-values of variables.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Updates: &lt;/span&gt;Updates allow variable values to update with probabilities and new values in state transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
+              <property name="frameShadow">
+               <enum>QFrame::Sunken</enum>
+              </property>
               <property name="alternatingRowColors">
                <bool>true</bool>
               </property>
@@ -129,6 +141,9 @@
               </property>
               <property name="title">
                <string>Model Information</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
                <item>
@@ -273,6 +288,12 @@
               <property name="whatsThis">
                <string>Syntax-highlighting enabled editor which allows you to write models in the PRISM language.</string>
               </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Sunken</enum>
+              </property>
              </widget>
             </item>
            </layout>
@@ -302,6 +323,9 @@
            <widget class="QGroupBox" name="constantsGroup">
             <property name="title">
              <string>Constant Editor</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
@@ -485,6 +509,9 @@
             <property name="title">
              <string>Label Editor</string>
             </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
               <widget class="QTableWidget" name="labelTable">
@@ -568,6 +595,9 @@
            <widget class="QGroupBox" name="earlyTerminatedGroup">
             <property name="title">
              <string>Early-terminated States</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_7">
              <item>
