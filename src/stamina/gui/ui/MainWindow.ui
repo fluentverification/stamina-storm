@@ -1012,11 +1012,22 @@ p, li { white-space: pre-wrap; }
      <addaction name="menuModel_File"/>
      <addaction name="actionProperties_File"/>
     </widget>
+    <widget class="QMenu" name="menuImport">
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <property name="icon">
+      <iconset theme="document-import"/>
+     </property>
+     <addaction name="actionImport_JANI"/>
+     <addaction name="actionImport_SBML"/>
+    </widget>
     <addaction name="menuNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
+    <addaction name="menuImport"/>
     <addaction name="actionExport"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -1795,6 +1806,25 @@ p, li { white-space: pre-wrap; }
   <action name="actionParse_Model">
    <property name="text">
     <string>Parse Model</string>
+   </property>
+  </action>
+  <action name="actionImport_JANI">
+   <property name="icon">
+    <iconset theme="code-context"/>
+   </property>
+   <property name="text">
+    <string>Import JANI</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+I</string>
+   </property>
+  </action>
+  <action name="actionImport_SBML">
+   <property name="icon">
+    <iconset theme="dialog-xml-editor"/>
+   </property>
+   <property name="text">
+    <string>Import SBML</string>
    </property>
   </action>
  </widget>

@@ -10,11 +10,15 @@ if (BUILD_CPACK)
 	set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 	set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/doc/staminaLogo.svg)
 	set(CPACK_PACKAGE_HOMEPAGE_URL "https://staminachecker.org")
+	set(CPACK_ARCHIVE_COMPONENT_INSTALL 1)
 
 	# Debian packaging information
 	include(InstallRequiredSystemLibraries)
 	set(CPACK_DEBIAN_PACKAGE_DEPENDS "breeze-icon-theme,libkf5xmlgui-dev,libkf5textwidgets-dev,libkf5kio-dev,libkf5texteditor-dev,qtbase5-dev,qtdeclarative5-dev,libqt5svg5-dev,libkf5i18n-dev,libkf5coreaddons-dev,extra-cmake-modules,libboost-all-dev,libcln-dev,libgmp-dev,libginac-dev,automake,libglpk-dev,libhwloc-dev,libz3-dev,libxerces-c-dev,libeigen3-dev")
 	set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${CPACK_PACKAGE_CONTACT})
+
+	set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
+	set(CPACK_DEB_COMPONENT_INSTALL YES)
 
 	include(CPack)
 endif()
