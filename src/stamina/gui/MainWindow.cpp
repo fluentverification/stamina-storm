@@ -99,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
 	progress->hide();
 	killButton->hide();
 	killButton->setIcon(icon);
+	killButton->setFlat(true);
 	ui.earlyTerminatedGroup->hide();
 	ui.constantsGroup->hide();
 }
@@ -698,6 +699,7 @@ MainWindow::setupCheckActions() {
 				staminaJob = QtConcurrent::run([this, property]() {
 					progress->show();
 					killButton->show();
+					bool modelBuiltPreviously = this->modelWasBuilt;
 					for (auto & prop : property) {
 						// Check property
 						// Fill out stuff in GUI
@@ -708,9 +710,11 @@ MainWindow::setupCheckActions() {
 					ui.statesLabel->setText(QString::number(s->getStateCount()));
 					ui.initStatesLabel->setText(QString::number(1)); // TODO: actually get, although we only support models with one initial state
 					ui.transitionsLabel->setText(QString::number(s->getTransitionCount()));
-					populateLabelTable();
-					populateResultsTable();
-					populateModelInformationTree(s->getModelFile());
+					if (!modelBuiltPreviously) {
+						populateLabelTable();
+						populateResultsTable();
+						populateModelInformationTree(s->getModelFile());
+					}
 					populateTruncatedStates();
 					progress->hide();
 					ui.actionResults_Viewer->trigger();

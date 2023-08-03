@@ -179,6 +179,8 @@ Preferences::replaceAllIndentation() {
 	QString oldIndentation = addons::CodeEditor::getIndent();
 	setUIFromPreferences();
 	QString newIndent = addons::CodeEditor::getIndent();
+	QTextCursor oldCursMod = window->modelFile->textCursor();
+	window->modelFile->moveCursor(QTextCursor::Start);
 	bool canReplaceMod = window->modelFile->find(oldIndentation);
 	while (canReplaceMod) {
 		QTextCursor curs = window->modelFile->textCursor();
@@ -186,7 +188,10 @@ Preferences::replaceAllIndentation() {
 		curs.insertText(newIndent);
 		canReplaceMod = window->modelFile->find(oldIndentation);
 	}
+	window->modelFile->setTextCursor(oldCursMod);
 
+	QTextCursor oldCursProp = window->propertiesEditor->textCursor();
+	window->propertiesEditor->moveCursor(QTextCursor::Start);
 	bool canReplaceProp = window->propertiesEditor->find(oldIndentation);
 	while (canReplaceProp) {
 		QTextCursor curs = window->propertiesEditor->textCursor();
@@ -194,6 +199,8 @@ Preferences::replaceAllIndentation() {
 		curs.insertText(newIndent);
 		canReplaceProp = window->propertiesEditor->find(oldIndentation);
 	}
+
+	window->propertiesEditor->setTextCursor(oldCursProp);
 }
 
 } // namespace gui
