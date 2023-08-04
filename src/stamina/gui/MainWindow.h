@@ -46,7 +46,8 @@ namespace stamina {
 
 		public:
 			MainWindow(QWidget * parent = 0);
-
+			void setActiveModelFileName(QString modelFileName);
+			void setActivePropFileName(QString propFileName);
 		private:
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();

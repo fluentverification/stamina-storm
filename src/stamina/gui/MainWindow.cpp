@@ -105,6 +105,16 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void
+MainWindow::setActiveModelFileName(QString modelFileName) {
+	this->activeModelFile = modelFileName;
+}
+
+void
+MainWindow::setActivePropFileName(QString propFileName) {
+	this->activePropertiesFile = propFileName;
+}
+
+void
 MainWindow::setup() {
 	modelFindReplace->place(this->ui.modelFileVBoxLayout, this->ui.modelFile);
 	propFindReplace->place(this->ui.propertySideVBox, this->ui.propertiesEditor);
@@ -818,6 +828,7 @@ MainWindow::setupHelpActions() {
 
 void
 MainWindow::setupButtons() {
+	// TODO: use modificationChanged signal instead
 	connect(
 		ui.modelFile
 		, SIGNAL(textChanged())

@@ -66,6 +66,7 @@ void
 parse_positional_arguments(const QStringList & args, MainWindow * window) {
 	if (args.size() > 0) {
 		core::StaminaMessages::info("Opening model file: " + args[0].toStdString());
+		window->setActiveModelFileName(args[0]);
 		KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(args[0]));
 		QApplication::connect(job, SIGNAL(result(KJob *)), window, SLOT(downloadFinishedModel(KJob*)));
 		job->exec();
@@ -73,12 +74,14 @@ parse_positional_arguments(const QStringList & args, MainWindow * window) {
 		std::string propFileName = baseFileName + ".csl";
 		if (args.size() > 1) {
 			core::StaminaMessages::info("Opening property file: " + args[1].toStdString());
+			window->setActivePropFileName(args[1]);
 			KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(args[1]));
 			QApplication::connect(job, SIGNAL(result(KJob *)), window, SLOT(downloadFinishedProperty(KJob*)));
 			job->exec();
 		}
 		else if (std::filesystem::exists(propFileName)) {
 			QString propFileQString = QString::fromStdString(propFileName);
+			window->setActivePropFileName(propFileQString);
 			core::StaminaMessages::info("Opening property file: " + propFileName);
 			KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(propFileQString));
 			QApplication::connect(job, SIGNAL(result(KJob *)), window, SLOT(downloadFinishedProperty(KJob*)));
