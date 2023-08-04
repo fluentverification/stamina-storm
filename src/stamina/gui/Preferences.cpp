@@ -79,10 +79,12 @@ Preferences::setOptionsFromPreferences() {
 
 void
 Preferences::setUIFromPreferences() {
-	window->modelFile->setTabWidth(PrefInfo::General::tabSize);
-	window->propertiesEditor->setTabWidth(PrefInfo::General::tabSize);
+	// Set the font first because the tab size uses the font size to determine
+	// how many pixels the indent should be
 	window->modelFile->setFont(PrefInfo::General::editorFont);
 	window->propertiesEditor->setFont(PrefInfo::General::editorFont);
+	window->modelFile->setTabWidth(PrefInfo::General::tabSize);
+	window->propertiesEditor->setTabWidth(PrefInfo::General::tabSize);
 	QString indentation = "";
 	if (PrefInfo::General::useTabs) {
 		indentation += "\t";
