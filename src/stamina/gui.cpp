@@ -18,16 +18,20 @@
  **/
 
 #include <cstdlib>
+#include <regex>
+#include <filesystem>
 
 #include <QApplication>
 #include <QCommandLineParser>
 
 #include <KAboutData>
 #include <KLocalizedString>
+#include <KIO/Job>
 
 #include "gui/MainWindow.h"
 
 #include "core/Options.h"
+#include "core/StaminaMessages.h"
 #include "StaminaArgParse.h"
 
 namespace stamina {
@@ -56,6 +60,35 @@ set_default_values() {
 	core::Options::quiet = false;
 }
 
+namespace gui {
+
+void
+parse_positional_arguments(const QStringList & args, MainWindow * window) {
+	if (args.size() > 0) {
+		core::StaminaMessages::info("Opening model file: " + args[0].toStdString());
+		KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(args[0]));
+		QApplication::connect(job, SIGNAL(result(KJob *)), window, SLOT(downloadFinishedModel(KJob*)));
+		job->exec();
+		std::string baseFileName = std::regex_replace(args[0].toStdString(), std::regex("\\.prism|\\.sm"), "");
+		std::string propFileName = baseFileName + ".csl";
+		if (args.size() > 1) {
+			core::StaminaMessages::info("Opening property file: " + args[1].toStdString());
+			KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(args[1]));
+			QApplication::connect(job, SIGNAL(result(KJob *)), window, SLOT(downloadFinishedProperty(KJob*)));
+			job->exec();
+		}
+		else if (std::filesystem::exists(propFileName)) {
+			QString propFileQString = QString::fromStdString(propFileName);
+			core::StaminaMessages::info("Opening property file: " + propFileName);
+			KIO::Job * job = KIO::storedGet(QUrl::fromLocalFile(propFileQString));
+			QApplication::connect(job, SIGNAL(result(KJob *)), window, SLOT(downloadFinishedProperty(KJob*)));
+			job->exec();
+		}
+	}
+}
+
+} // namespace gui
+
 } // namespace stamina
 
 int main (int argc, char *argv[])
@@ -71,7 +104,7 @@ int main (int argc, char *argv[])
 						 // A displayable program name string. (displayName)
 						 i18n("STAMINA"),
 						 // The program version string. (version)
-						 QStringLiteral("2.5"),
+						 QStringLiteral("0.2.5"),
 						 // Short description of what the app does. (shortDescription)
 						 i18n("Infinite state space truncation tool")
 						 // The license this code is released under
@@ -92,11 +125,16 @@ int main (int argc, char *argv[])
 	QCommandLineParser parser;
 	parser.addHelpOption();
 	parser.addVersionOption();
+	parser.addPositionalArgument("model-file", "The model file in PRISM model definition syntax");
+	parser.addPositionalArgument("properties-file", "The properties file in PRISM CSL or PCTL syntax");
 	aboutData.setupCommandLine(&parser);
 	parser.process(app);
 	aboutData.processCommandLine(&parser);
 
+	const QStringList args = parser.positionalArguments();
+
 	stamina::gui::MainWindow * window = new stamina::gui::MainWindow();
+	parse_positional_arguments(args, window);
 	window->show();
 
 	return app.exec();
