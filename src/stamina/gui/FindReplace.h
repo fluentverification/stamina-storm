@@ -20,7 +20,7 @@
 #ifndef STAMINA_FIND_REPLACE_H
 #define STAMINA_FIND_REPLACE_H
 
-#include "ui/ui_FindReplace.h"
+#include <ui_FindReplace.h>
 
 #include <QWidget>
 #include <QVBoxLayout>

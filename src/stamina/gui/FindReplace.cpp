@@ -167,7 +167,7 @@ FindReplace::replace() {
 	if (canReplace) {
 		QTextCursor tc = editor->textCursor();
 		QString replaceValue = ui.replaceText->text();
-		tc.select(QTextCursor::WordUnderCursor);
+		// tc.select(QTextCursor::WordUnderCursor);
 		tc.removeSelectedText();
 		tc.insertText(replaceValue);
 	}

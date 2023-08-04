@@ -20,7 +20,7 @@
 #ifndef STAMINA_PROPERTY_WIZARD_H
 #define STAMINA_PROPERTY_WIZARD_H
 
-#include "ui/ui_PropertyWizard.h"
+#include <ui_PropertyWizard.h>
 
 #include <QDialog>
 #include <QString>

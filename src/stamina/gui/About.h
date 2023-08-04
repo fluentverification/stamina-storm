@@ -23,7 +23,7 @@
 #include <KXmlGuiWindow>
 #include <QDialog>
 
-#include "ui/ui_About.h"
+#include <ui_About.h>
 
 namespace stamina {
 	namespace gui {

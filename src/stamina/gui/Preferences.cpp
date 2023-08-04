@@ -37,6 +37,7 @@ Preferences::Preferences(QWidget * parent)
 void
 Preferences::setupActions() {
 	ui.setupUi(this);
+	connect(ui.replaceAllIndentationButton, SIGNAL(clicked()), this, SLOT(replaceAllIndentation()));
 }
 
 void
@@ -78,8 +79,23 @@ Preferences::setOptionsFromPreferences() {
 
 void
 Preferences::setUIFromPreferences() {
+	// Set the font first because the tab size uses the font size to determine
+	// how many pixels the indent should be
+	window->modelFile->setFont(PrefInfo::General::editorFont);
+	window->propertiesEditor->setFont(PrefInfo::General::editorFont);
 	window->modelFile->setTabWidth(PrefInfo::General::tabSize);
 	window->propertiesEditor->setTabWidth(PrefInfo::General::tabSize);
+	QString indentation = "";
+	if (PrefInfo::General::useTabs) {
+		indentation += "\t";
+	}
+	else {
+		for (int i = 0; i < PrefInfo::General::tabSize; i++) {
+			indentation += " ";
+		}
+	}
+	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
+	addons::CodeEditor::setIndent(indentation);
 }
 
 void
@@ -89,6 +105,23 @@ Preferences::getPreferencesFromUI() {
 	PrefInfo::General::generateCounterexamples = ui.genCounterexamples->isChecked();
 	PrefInfo::General::createRefinedProperties = ui.createRefinedProperties->isChecked();
 	PrefInfo::General::verboseLog = ui.verboseLog->isChecked();
+	bool validFontSize;
+	int fontSize = (int) ui.fontSizeComboBox->currentText().toInt(&validFontSize);
+	if (validFontSize) {
+		PrefInfo::General::editorFont = ui.fontComboBox->currentFont();
+		PrefInfo::General::editorFont.setPointSize(fontSize);
+	}
+	else {
+		// Text was not valid as an integer
+		std::string msg = "The text \"" + ui.fontSizeComboBox->currentText().toStdString() + "\" could not be parsed to an integer!";
+		StaminaMessages::error(msg);
+		QMessageBox::critical(
+			this
+			, "Parsing Error"
+			, QString::fromStdString(msg)
+		);
+
+	}
 	bool validInteger;
 	auto tSize = (uint8_t) ui.tabSize->currentText().toInt(&validInteger);
 	if (validInteger) {
@@ -160,6 +193,35 @@ Preferences::getPreferencesFromUI() {
 	// TODO
 	// The Counterexamples tab
 	// Add these when Counterexamples are supported in stamina
+}
+
+void
+Preferences::replaceAllIndentation() {
+	QString oldIndentation = addons::CodeEditor::getIndent();
+	setUIFromPreferences();
+	QString newIndent = addons::CodeEditor::getIndent();
+	QTextCursor oldCursMod = window->modelFile->textCursor();
+	window->modelFile->moveCursor(QTextCursor::Start);
+	bool canReplaceMod = window->modelFile->find(oldIndentation);
+	while (canReplaceMod) {
+		QTextCursor curs = window->modelFile->textCursor();
+		curs.removeSelectedText();
+		curs.insertText(newIndent);
+		canReplaceMod = window->modelFile->find(oldIndentation);
+	}
+	window->modelFile->setTextCursor(oldCursMod);
+
+	QTextCursor oldCursProp = window->propertiesEditor->textCursor();
+	window->propertiesEditor->moveCursor(QTextCursor::Start);
+	bool canReplaceProp = window->propertiesEditor->find(oldIndentation);
+	while (canReplaceProp) {
+		QTextCursor curs = window->propertiesEditor->textCursor();
+		curs.removeSelectedText();
+		curs.insertText(newIndent);
+		canReplaceProp = window->propertiesEditor->find(oldIndentation);
+	}
+
+	window->propertiesEditor->setTextCursor(oldCursProp);
 }
 
 } // namespace gui

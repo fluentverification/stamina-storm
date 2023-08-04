@@ -27,8 +27,8 @@
 
 #include "stamina/core/Options.h"
 
-#include "ui/ui_Preferences.h"
-#include "ui/ui_MainWindow.h"
+#include <ui_Preferences.h>
+#include <ui_MainWindow.h>
 
 namespace stamina {
 	namespace gui {
@@ -53,6 +53,8 @@ namespace stamina {
 				inline static bool createRefinedProperties;
 				// Include verbose log messages
 				inline static bool verboseLog;
+				// The Font
+				inline static QFont editorFont;
 				// Tab size
 				inline static uint8_t tabSize;
 				// Use tabs or spaces
@@ -129,6 +131,8 @@ namespace stamina {
 			 * */
 			void setUIFromPreferences();
 			void getPreferencesFromUI();
+		private slots:
+			void replaceAllIndentation();
 		private:
 			void setupActions();
 			// Data members

@@ -34,6 +34,8 @@ if (BUILD_GUI)
 	set(QT_MIN_VERSION "5.3.0")
 	set(KF5_MIN_VERSION "5.2.0")
 
+	set(CMAKE_AUTOUIC OFF)
+
 	find_package(ECM 1.0.0 REQUIRED NO_MODULE)
 	set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -126,6 +128,14 @@ set(GUI_FILES
 	${GUI_PREFIX}/GuiWorkerThread.h
 )
 
+set(UIC_UI_FILES
+	${GUI_PREFIX}/ui/MainWindow.ui
+	${GUI_PREFIX}/ui/About.ui
+	${GUI_PREFIX}/ui/Preferences.ui
+	${GUI_PREFIX}/ui/PropertyWizard.ui
+	${GUI_PREFIX}/ui/FindReplace.ui
+)
+
 set(GUI_RECS
 	${GUI_PREFIX}/resources.qrc
 )
@@ -172,8 +182,10 @@ if(BUILD_GUI)
 
 	add_compile_definitions(STAMINA_HAS_GUI)
 
+	qt5_wrap_ui(UI_HEADERS ${UIC_UI_FILES})
+
 	set(GUI_EXECUTABLE_NAME xstamina)
-	add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES} ${GUI_RECS})
+	add_executable(${GUI_EXECUTABLE_NAME} ${GUI_FILES} ${UI_HEADERS} ${GUI_RECS})
 	target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC
 		Qt5::Widgets
 		KF5::CoreAddons
@@ -192,9 +204,13 @@ if(BUILD_GUI)
 endif()
 
 # Install stuff
-install(TARGETS ${GUI_EXECUTABLE_NAME} CONFIGURATIONS Release RUNTIME DESTINATION bin)
-install(TARGETS ${CLI_EXECUTABLE_NAME} CONFIGURATIONS Release RUNTIME DESTINATION bin)
+# install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+if (BUILD_GUI)
+	install(TARGETS ${GUI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applications)
+endif()
+
+install(TARGETS ${CLI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applications)
 # This installs libstamina
-install(TARGETS ${LIB_NAME} CONFIGURATIONS Release ARCHIVE DESTINATION lib)
+install(TARGETS ${LIB_NAME} RUNTIME DESTINATION lib COMPONENT libraries)
 
 include(StaminaCPackConfig.cmake)
