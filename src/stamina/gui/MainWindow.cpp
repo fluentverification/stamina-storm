@@ -831,15 +831,15 @@ MainWindow::setupButtons() {
 	// TODO: use modificationChanged signal instead
 	connect(
 		ui.modelFile
-		, SIGNAL(textChanged())
+		, SIGNAL(modificationChanged(bool))
 		, this
-		, SLOT(setModifiedModel())
+		, SLOT(setModifiedModel(bool))
 	);
 	connect(
 		ui.propertiesEditor
-		, SIGNAL(textChanged())
+		, SIGNAL(modificationChanged(bool))
 		, this
-		, SLOT(setModifiedProperties())
+		, SLOT(setModifiedProperties(bool))
 	);
 
 	connect(
@@ -986,7 +986,7 @@ MainWindow::saveToActiveModelFile() {
 		bArray.append(ui.modelFile->toPlainText().toUtf8());
 		file.write(bArray);
 		file.commit();
-		unsavedChangesModel = false;
+		// unsavedChangesModel = false;
 		// setCaption(baseWindowTitle);
 		stayOpen = false;
 	}
@@ -1006,8 +1006,8 @@ MainWindow::saveToActivePropertiesFile() {
 		bArray.append(ui.propertiesEditor->toPlainText().toUtf8());
 		file.write(bArray);
 		file.commit();
-		unsavedChangesProperty = false;
-		setCaption(baseWindowTitle);
+		// unsavedChangesProperty = false;
+		// setCaption(baseWindowTitle);
 		stayOpen = false;
 	}
 	else {
@@ -1122,7 +1122,7 @@ MainWindow::saveModelFile() {
 		saveToActiveModelFile();
 	}
 	setCaption(activeModelFile);
-	unsavedChangesModel = false;
+	this->ui.modelFile->document()->setModified(false);
 	ui.statusbar->showMessage(tr("Saved model file."));
 	initializeModel();
 	mustRebuildModel = true;
@@ -1179,7 +1179,7 @@ MainWindow::savePropertyFile() {
 		saveToActivePropertiesFile();
 	}
 	setCaption(activePropertiesFile);
-	unsavedChangesProperty = false;
+	this->ui.propertiesEditor->document()->setModified(false);
 	ui.statusbar->showMessage(tr("Saved properties file."));
 	mustRebuildModel = true;
 }
@@ -1210,9 +1210,10 @@ MainWindow::downloadFinishedModel(KJob* job) {
 
 	ui.modelFile->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	StaminaMessages::good("Succesfully loaded file into model editor!");
-	unsavedChangesModel = false;
+	// unsavedChangesModel = false;
 	ui.statusbar->showMessage(tr("Opened model file."));
 	disconnect(job, SIGNAL(result(KJob *)), 0, 0);
+	ui.modelFile->document()->setModified(false);
 }
 
 void
@@ -1228,12 +1229,13 @@ MainWindow::downloadFinishedProperty(KJob* job) {
 
 	ui.propertiesEditor->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 	StaminaMessages::good("Succesfully loaded file into property editor!");
-	unsavedChangesProperty = false;
+	// unsavedChangesProperty = false;
 	ui.statusbar->showMessage(tr("Opened property file."));
 	disconnect(job, SIGNAL(result(KJob *)), 0, 0);
 	if (activeModelFile != "") {
 		initializeModel();
 	}
+	ui.propertiesEditor->document()->setModified(false);
 }
 
 void
@@ -1242,27 +1244,31 @@ MainWindow::showAbout() {
 }
 
 void
-MainWindow::setModifiedModel() {
-	// TODO: There is a bug here that creates multiple '*' suffixes
-	if (unsavedChangesModel) { return; }
-	// baseWindowTitle = ;
-	QString title = windowTitle();
-	if (title.length() > 1 && title[title.length() - 1] != '*') {
-		setCaption(windowTitle() + " *");
+MainWindow::setModifiedModel(bool modifiedModel) {
+	unsavedChangesModel = modifiedModel;
+	if (unsavedChangesModel) {
+		QString title = windowTitle();
+		if (title.length() > 1 && title[title.length() - 1] != '*') {
+			setCaption(windowTitle() + " *");
+		}
 	}
-	unsavedChangesModel = true; // ui.modelFile->undoAvailable();
+	else {
+		setCaption(activeModelFile != "" ? activeModelFile : "New Model File");
+	}
 }
 
 void
-MainWindow::setModifiedProperties() {
-	// TODO: There is a bug here that creates multiple '*' suffixes
-	if (unsavedChangesProperty) { return; }
-	// baseWindowTitle = windowTitle();
-	QString title = windowTitle();
-	if (title.length() > 1 && title[title.length() - 1] != '*') {
-		setCaption(windowTitle() + " *");
+MainWindow::setModifiedProperties(bool modifiedProperties) {
+	unsavedChangesProperty = modifiedProperties;
+	if (unsavedChangesProperty) {
+		QString title = windowTitle();
+		if (title.length() > 1 && title[title.length() - 1] != '*') {
+			setCaption(windowTitle() + " *");
+		}
 	}
-	unsavedChangesProperty = true; // ui.propertiesEditor->undoAvailable();
+	else {
+		setCaption(activePropertiesFile != "" ? activePropertiesFile : "New Properties File");
+	}
 }
 
 void

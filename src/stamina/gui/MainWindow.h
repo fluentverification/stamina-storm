@@ -127,8 +127,8 @@ namespace stamina {
 			void downloadFinishedModel(KJob * job);
 			void downloadFinishedProperty(KJob * job);
 			void showAbout();
-			void setModifiedModel();
-			void setModifiedProperties();
+			void setModifiedModel(bool modifiedModel);
+			void setModifiedProperties(bool modifiedProperties);
 			void setActiveModelFileAndSave();
 			void setActivePropertyFileAndSave();
 			void closeEvent(QCloseEvent *event);
