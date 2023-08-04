@@ -1017,7 +1017,8 @@ p, li { white-space: pre-wrap; }
       <string>Import</string>
      </property>
      <property name="icon">
-      <iconset theme="document-import"/>
+      <iconset theme="document-import">
+       <normaloff>.</normaloff>.</iconset>
      </property>
      <addaction name="actionImport_JANI"/>
      <addaction name="actionImport_SBML"/>
@@ -1089,6 +1090,8 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionIncrease_Indent"/>
     <addaction name="actionDecrease_Indent"/>
     <addaction name="menuToggle_Comment"/>
+    <addaction name="separator"/>
+    <addaction name="actionWord_Wrap"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
@@ -1810,7 +1813,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionImport_JANI">
    <property name="icon">
-    <iconset theme="code-context"/>
+    <iconset theme="code-context">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Import JANI</string>
@@ -1821,10 +1825,25 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionImport_SBML">
    <property name="icon">
-    <iconset theme="dialog-xml-editor"/>
+    <iconset theme="dialog-xml-editor">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Import SBML</string>
+   </property>
+  </action>
+  <action name="actionWord_Wrap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="text-wrap"/>
+   </property>
+   <property name="text">
+    <string>Word Wrap</string>
    </property>
   </action>
  </widget>

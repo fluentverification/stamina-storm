@@ -81,6 +81,8 @@ void
 Preferences::setUIFromPreferences() {
 	window->modelFile->setTabWidth(PrefInfo::General::tabSize);
 	window->propertiesEditor->setTabWidth(PrefInfo::General::tabSize);
+	window->modelFile->setFont(PrefInfo::General::editorFont);
+	window->propertiesEditor->setFont(PrefInfo::General::editorFont);
 	QString indentation = "";
 	if (PrefInfo::General::useTabs) {
 		indentation += "\t";
@@ -101,6 +103,23 @@ Preferences::getPreferencesFromUI() {
 	PrefInfo::General::generateCounterexamples = ui.genCounterexamples->isChecked();
 	PrefInfo::General::createRefinedProperties = ui.createRefinedProperties->isChecked();
 	PrefInfo::General::verboseLog = ui.verboseLog->isChecked();
+	bool validFontSize;
+	int fontSize = (int) ui.fontSizeComboBox->currentText().toInt(&validFontSize);
+	if (validFontSize) {
+		PrefInfo::General::editorFont = ui.fontComboBox->currentFont();
+		PrefInfo::General::editorFont.setPointSize(fontSize);
+	}
+	else {
+		// Text was not valid as an integer
+		std::string msg = "The text \"" + ui.fontSizeComboBox->currentText().toStdString() + "\" could not be parsed to an integer!";
+		StaminaMessages::error(msg);
+		QMessageBox::critical(
+			this
+			, "Parsing Error"
+			, QString::fromStdString(msg)
+		);
+
+	}
 	bool validInteger;
 	auto tSize = (uint8_t) ui.tabSize->currentText().toInt(&validInteger);
 	if (validInteger) {

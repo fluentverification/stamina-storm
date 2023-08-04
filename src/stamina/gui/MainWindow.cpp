@@ -131,6 +131,14 @@ MainWindow::setup() {
 	propCompleter->setWrapAround(false);
 	ui.modelFile->setCompleter(modCompleter);
 	ui.propertiesEditor->setCompleter(propCompleter);
+	ui.modelFile->setWordWrapMode(
+		ui.actionWord_Wrap->isChecked() ?
+		QTextOption::WrapAnywhere : QTextOption::NoWrap
+	);
+	ui.propertiesEditor->setWordWrapMode(
+		ui.actionWord_Wrap->isChecked() ?
+		QTextOption::WrapAnywhere : QTextOption::NoWrap
+	);
 	prefs->setMainWindow(&ui);
 	prefs->getPreferencesFromUI();
 	prefs->setUIFromPreferences();
@@ -485,6 +493,21 @@ MainWindow::setupEditActions() {
 			int idx = this->ui.mainTabs->currentIndex();
 			if (idx == 0) { this->ui.modelFile->changeComment(true); }
 			else if (idx == 1) { this->ui.propertiesEditor->changeComment(true); }
+		}
+	);
+	connect(
+		ui.actionWord_Wrap
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.modelFile->setWordWrapMode(
+				this->ui.actionWord_Wrap->isChecked() ?
+				QTextOption::WrapAnywhere : QTextOption::NoWrap
+			);
+			this->ui.propertiesEditor->setWordWrapMode(
+				this->ui.actionWord_Wrap->isChecked() ?
+				QTextOption::WrapAnywhere : QTextOption::NoWrap
+			);
 		}
 	);
 	connect(

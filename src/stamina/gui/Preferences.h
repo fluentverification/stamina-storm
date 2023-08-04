@@ -53,6 +53,8 @@ namespace stamina {
 				inline static bool createRefinedProperties;
 				// Include verbose log messages
 				inline static bool verboseLog;
+				// The Font
+				inline static QFont editorFont;
 				// Tab size
 				inline static uint8_t tabSize;
 				// Use tabs or spaces
