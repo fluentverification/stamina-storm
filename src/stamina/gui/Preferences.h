@@ -131,6 +131,11 @@ namespace stamina {
 			 * */
 			void setUIFromPreferences();
 			void getPreferencesFromUI();
+			/**
+			 * Functions for reading and writing from the settings object
+			 * */
+			void readSettingsFromFile();
+			void writeSettingsToFile();
 		private slots:
 			void replaceAllIndentation();
 		private:
