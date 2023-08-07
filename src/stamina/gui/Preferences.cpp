@@ -20,6 +20,8 @@
 #include "Preferences.h"
 
 #include <QMessageBox>
+#include <QSettings>
+
 #include "stamina/StaminaArgParse.h"
 #include "stamina/core/StaminaMessages.h"
 
@@ -32,6 +34,7 @@ Preferences::Preferences(QWidget * parent)
 	: QDialog(parent)
 {
 	setupActions();
+	readSettingsFromFile();
 }
 
 void
@@ -52,6 +55,7 @@ Preferences::accept() {
 	StaminaMessages::info("Updating accepted preferences");
 	setOptionsFromPreferences();
 	setUIFromPreferences();
+	writeSettingsToFile();
 	this->hide();
 }
 
@@ -193,6 +197,37 @@ Preferences::getPreferencesFromUI() {
 	// TODO
 	// The Counterexamples tab
 	// Add these when Counterexamples are supported in stamina
+}
+
+void
+Preferences::readSettingsFromFile() {
+	QSettings settings(QSettings::UserScope, "FLUENT Verification", "xSTAMINA");
+	StaminaMessages::info("Reading preferences from: " + settings.fileName().toStdString());
+	settings.beginGroup("General");
+	getPreferencesFromUI();
+	QString editorFontFamily = settings.value("editorFontFamily", PrefInfo::General::editorFont.family()).toString();
+	int editorFontPoint = settings.value("editorFontSize", PrefInfo::General::editorFont.pointSize()).toInt();
+	PrefInfo::General::editorFont.setFamily(editorFontFamily);
+	PrefInfo::General::editorFont.setPointSize(editorFontPoint); // = QFont(editorFontFamily, editorFontPoint);
+	ui.fontComboBox->setCurrentFont(PrefInfo::General::editorFont);
+	ui.fontSizeComboBox->setCurrentText(QString::number(editorFontPoint));
+	PrefInfo::General::tabSize = settings.value("tabSize", PrefInfo::General::tabSize).toInt();
+	ui.tabSize->setCurrentText(QString::number(PrefInfo::General::tabSize));
+	PrefInfo::General::useTabs = settings.value("useTabs", PrefInfo::General::useTabs) == "true";
+	ui.useTabs->setChecked(PrefInfo::General::useTabs);
+	settings.endGroup();
+}
+
+void
+Preferences::writeSettingsToFile() {
+	QSettings settings(QSettings::UserScope, "FLUENT Verification", "xSTAMINA");
+	StaminaMessages::info("Writing preferences to: " + settings.fileName().toStdString());
+	settings.beginGroup("General");
+	settings.setValue("editorFontFamily", PrefInfo::General::editorFont.family());
+	settings.setValue("editorFontSize", PrefInfo::General::editorFont.pointSize());
+	settings.setValue("tabSize", PrefInfo::General::tabSize);
+	settings.setValue("useTabs", PrefInfo::General::useTabs);
+	settings.endGroup();
 }
 
 void
