@@ -24,7 +24,6 @@
 #ifndef STAMINA_CODE_EDITOR_H
 #define STAMINA_CODE_EDITOR_H
 
-#include "ktextedit.h"
 #include <cstdint>
 #include <QTextEdit>
 #include <QPlainTextEdit>

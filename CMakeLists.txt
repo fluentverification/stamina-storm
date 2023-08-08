@@ -196,7 +196,7 @@ if(BUILD_GUI)
 		KF5::KIOFileWidgets
 		KF5::KIOWidgets
 		KF5::KIONTLM
-		KF5::TextEditor
+		# KF5::TextEditor
 	)
 
 	target_link_libraries(${GUI_EXECUTABLE_NAME} PUBLIC stamina storm storm-parsers)
