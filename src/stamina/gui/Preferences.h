@@ -20,7 +20,6 @@
 #ifndef STAMINA_PREFERENCES_H
 #define STAMINA_PREFERENCES_H
 
-#include <KXmlGuiWindow>
 #include <QDialog>
 #include <cstdint>
 #include <string>
