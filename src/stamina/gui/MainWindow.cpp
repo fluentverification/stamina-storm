@@ -1012,6 +1012,10 @@ MainWindow::saveToActiveModelFile() {
 		// unsavedChangesModel = false;
 		// setCaption(baseWindowTitle);
 		stayOpen = false;
+		if (s) {
+			delete s;
+			s = nullptr;
+		}
 	}
 	else {
 		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
@@ -1091,6 +1095,11 @@ MainWindow::openModelFromAcceptedPath() {
 			, i18n("There appears to be a property file in this directory with the same base name as the model file you opened. Would you like to open this property file as well?")
 			) == KMessageBox::Yes;
 			if (shouldOpenPropFile) {
+				// Get a new instance of MainWindow::s
+				if (s) {
+					delete s;
+					s = nullptr;
+				}
 				QString pFileName = QString::fromStdString(propFileName);
 				QFileInfo pInfo(pFileName);
 				activePropertiesFile = pFileName;
