@@ -3,6 +3,9 @@
     <file>resources/dark/prism.svg</file>
     <file>resources/light/prism.svg</file>
     <file>resources/staminaIcon.svg</file>
+    <!-- Icon Themes -->
+    <file>resources/icons/breeze-icons/icons/index.theme</file>
+    <file>resources/icons/breeze-icons/icons-dark/index.theme</file>
   </qresource>
   <qresource prefix="/">
     <file>resources/wordlist.txt</file>
