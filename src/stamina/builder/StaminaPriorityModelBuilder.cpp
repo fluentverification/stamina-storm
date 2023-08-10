@@ -421,8 +421,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	bool hold = true;
 	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
-	while (hold || (!statePriorityQueue.empty() && (piHat > std::max(windowPower / Options::approx_factor, 1e-14)))) {
-		std::cout << "PiHat = " << piHat << std::endl;
+	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
+		// std::cout << "PiHat = " << piHat << std::endl;
 		// std::cout << "cond = " << windowPower / Options::approx_factor << std::endl;
 		hold = false;
 		auto currentProbabilityStatePair = *statePriorityQueue.top();
