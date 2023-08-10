@@ -136,12 +136,6 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = numberFormat;
 	highlightingRules.append(rule);
 
-	// String literals
-	quotationFormat.setForeground(cs->string);
-	rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
-	rule.format = quotationFormat;
-	highlightingRules.append(rule);
-
 	// Functions
 	functionFormat.setFontItalic(true);
 	functionFormat.setForeground(cs->function);
@@ -156,7 +150,7 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = constFormat;
 	highlightingRules.append(rule);
 
-	// Keywords have highest priority, with the exception of comments and types
+	// Keywords have highest priority, with the exception of comments, strings, and types
 	for (const QString &pattern : keywordPatterns) {
 		rule.pattern = QRegularExpression(pattern);
 		rule.format = keywordFormat;
@@ -169,6 +163,12 @@ PrismHighlighter::setupKeyWordPatterns() {
 		rule.format = typeFormat;
 		highlightingRules.append(rule);
 	}
+
+	// String literals
+	quotationFormat.setForeground(cs->string);
+	rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
+	rule.format = quotationFormat;
+	highlightingRules.append(rule);
 
 	// Single line comments
 	singleLineCommentFormat.setForeground(cs->comment);
