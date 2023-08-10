@@ -459,6 +459,11 @@ CodeEditor::indentNextLine() {
 		cursor.insertText(CodeEditor::indent);
 	}
 
+	// Insert comment if last line has it
+	if (lastLine.startsWith("//")) {
+		cursor.insertText("//");
+	}
+
 	this->setTextCursor(cursor);
 }
 
