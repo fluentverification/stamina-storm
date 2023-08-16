@@ -77,6 +77,17 @@ Preferences::accept() {
 	setOptionsFromPreferences();
 	setUIFromPreferences();
 	writeSettingsToFile();
+	addons::highlighter::ColorScheme colorScheme(
+		ui.keywordColor->color()
+		, ui.commentColor->color()
+		, ui.numberColor->color()
+		, ui.typeColor->color()
+		, ui.functionColor->color()
+		, ui.stringColor->color()
+		, ui.constantsColor->color()
+	);
+	window->modelFile->setColorsFromScheme(&colorScheme);
+	window->propertiesEditor->setColorsFromScheme(&colorScheme);
 	this->hide();
 }
 
@@ -121,17 +132,6 @@ Preferences::setUIFromPreferences() {
 	}
 	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
 	addons::CodeEditor::setIndent(indentation);
-	addons::highlighter::ColorScheme colorScheme(
-		ui.keywordColor->color()
-		, ui.commentColor->color()
-		, ui.numberColor->color()
-		, ui.typeColor->color()
-		, ui.functionColor->color()
-		, ui.stringColor->color()
-		, ui.constantsColor->color()
-	);
-	window->modelFile->setColorsFromScheme(&colorScheme);
-	window->propertiesEditor->setColorsFromScheme(&colorScheme);
 }
 
 void

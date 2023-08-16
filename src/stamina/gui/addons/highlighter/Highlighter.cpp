@@ -46,7 +46,8 @@ Highlighter::setColorsFromScheme(ColorScheme * colors) {
 	functionFormat.setForeground(colors->function);
 	numberFormat.setForeground(colors->number);
 	constFormat.setForeground(colors->constant);
-	colorsWereSetup = true;
+	setupKeyWordPatterns();
+	// colorsWereSetup = true;
 }
 
 ColorScheme *
@@ -54,7 +55,7 @@ Highlighter::getColorsAsScheme() {
 	if (!colorsWereSetup) {
 		StaminaMessages::warning("Colors were not set up!");
 	}
-	// StaminaMessages::info(keywordFormat.foreground().color().name().toStdString());
+	StaminaMessages::info(keywordFormat.foreground().color().name().toStdString());
 	return new ColorScheme(
 		// Keywords
 		keywordFormat.foreground().color()

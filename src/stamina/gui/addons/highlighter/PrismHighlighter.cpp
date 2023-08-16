@@ -45,11 +45,15 @@ PrismHighlighter::PrismHighlighter(QTextDocument * parent, bool darkMode)
 void
 PrismHighlighter::setupKeyWordPatterns() {
 	ColorScheme * cs;
-	if (darkMode) {
+	if (darkMode && !colorsWereSetup) {
 		cs = &ColorSchemes::darkMode;
 	}
-	else {
+	else if (!colorsWereSetup) {
 		cs = &ColorSchemes::lightMode;
+	}
+	else {
+		cs = getColorsAsScheme();
+		highlightingRules.clear();
 	}
 	HighlightingRule rule;
 
@@ -181,7 +185,12 @@ PrismHighlighter::setupKeyWordPatterns() {
 
 	commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
 	commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
-	colorsWereSetup = true;
+	if (colorsWereSetup) {
+		delete cs;
+	}
+	else {
+		colorsWereSetup = true;
+	}
 }
 
 
