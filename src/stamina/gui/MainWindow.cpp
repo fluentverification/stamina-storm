@@ -140,9 +140,13 @@ MainWindow::setup() {
 		QTextOption::WrapAnywhere : QTextOption::NoWrap
 	);
 	prefs->setMainWindow(&ui);
+	// TODO: This region is really hackey.
+	prefs->preloadColors();
+	prefs->readSettingsFromFile();
+	prefs->setColorsFromPrefs();
 	prefs->getPreferencesFromUI();
 	prefs->setUIFromPreferences();
-	prefs->preload();
+	prefs->setColorsFromPrefs();
 	// Set the default sizes for the splitters
 	// QList<int> modelSizes = ui.modelSplitter->sizes();
 	// // int totalSize = modelSizes[0] + modelSizes[1];
@@ -171,7 +175,7 @@ MainWindow::setupActions() {
 
 void
 MainWindow::setupFileActions() {
-	// New
+	// The "New" SubMenu
 	connect(
 		ui.actionPRISM_Language
 		, &QAction::triggered

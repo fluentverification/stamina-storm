@@ -55,7 +55,7 @@ Highlighter::getColorsAsScheme() {
 	if (!colorsWereSetup) {
 		StaminaMessages::warning("Colors were not set up!");
 	}
-	StaminaMessages::info(keywordFormat.foreground().color().name().toStdString());
+	// StaminaMessages::info(keywordFormat.foreground().color().name().toStdString());
 	return new ColorScheme(
 		// Keywords
 		keywordFormat.foreground().color()

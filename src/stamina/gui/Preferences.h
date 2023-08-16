@@ -130,7 +130,9 @@ namespace stamina {
 			 * */
 			void setUIFromPreferences();
 			void getPreferencesFromUI();
-			void preload();
+			void preloadColors();
+			void setColorsFromPrefs();
+
 			/**
 			 * Functions for reading and writing from the settings object
 			 * */

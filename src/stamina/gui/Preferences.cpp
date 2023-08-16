@@ -32,6 +32,7 @@ const std::string PrefInfo::prefPath = ".xstaminarc";
 
 Preferences::Preferences(QWidget * parent)
 	: QDialog(parent)
+	, window((Ui::MainWindow * ) parent)
 {
 	setupActions();
 	readSettingsFromFile();
@@ -50,7 +51,7 @@ Preferences::show(int tabIndex) {
 }
 
 void
-Preferences::preload() {
+Preferences::preloadColors() {
 	StaminaMessages::info("Reading color scheme");
 	// ui.editorBaseColor->setColor(
 	auto colorScheme = window->modelFile->getColorsAsScheme();
@@ -71,12 +72,7 @@ Preferences::preload() {
 }
 
 void
-Preferences::accept() {
-	getPreferencesFromUI();
-	StaminaMessages::info("Updating accepted preferences");
-	setOptionsFromPreferences();
-	setUIFromPreferences();
-	writeSettingsToFile();
+Preferences::setColorsFromPrefs() {
 	addons::highlighter::ColorScheme colorScheme(
 		ui.keywordColor->color()
 		, ui.commentColor->color()
@@ -88,6 +84,16 @@ Preferences::accept() {
 	);
 	window->modelFile->setColorsFromScheme(&colorScheme);
 	window->propertiesEditor->setColorsFromScheme(&colorScheme);
+}
+
+void
+Preferences::accept() {
+	getPreferencesFromUI();
+	StaminaMessages::info("Updating accepted preferences");
+	setOptionsFromPreferences();
+	setUIFromPreferences();
+	writeSettingsToFile();
+	setColorsFromPrefs();
 	this->hide();
 }
 
@@ -249,13 +255,48 @@ Preferences::readSettingsFromFile() {
 	ui.useTabs->setChecked(PrefInfo::General::useTabs);
 	settings.endGroup();
 	settings.beginGroup("SyntaxColors");
-	ui.keywordColor->setColor(QColor(settings.value("keywords").toString()));
-	ui.commentColor->setColor(QColor(settings.value("comments").toString()));
-	ui.numberColor->setColor(QColor(settings.value("numbers").toString()));
-	ui.typeColor->setColor(QColor(settings.value("types").toString()));
-	ui.functionColor->setColor(QColor(settings.value("functions").toString()));
-	ui.stringColor->setColor(QColor(settings.value("strings").toString()));
-	ui.constantsColor->setColor(QColor(settings.value("constants").toString()));
+	ui.keywordColor->setColor(
+		QColor(settings.value(
+			"keywords"
+			, ui.keywordColor->color().name()
+		).toString())
+	);
+	ui.commentColor->setColor(
+		QColor(settings.value(
+			"comments"
+			, ui.commentColor->color().name()
+		).toString())
+	);
+	ui.numberColor->setColor(
+		QColor(settings.value(
+			"numbers"
+			, ui.numberColor->color()
+		).toString())
+	);
+	ui.typeColor->setColor(
+		QColor(settings.value(
+			"types"
+			, ui.typeColor->color()
+		).toString())
+	);
+	ui.functionColor->setColor(
+		QColor(settings.value(
+			"functions"
+			, ui.functionColor->color()
+		).toString())
+	);
+	ui.stringColor->setColor(
+		QColor(settings.value(
+			"strings"
+			, ui.stringColor->color()
+		).toString())
+	);
+	ui.constantsColor->setColor(
+		QColor(settings.value(
+			"constants"
+			, ui.stringColor->color()
+		).toString())
+	);
 	settings.endGroup();
 }
 
