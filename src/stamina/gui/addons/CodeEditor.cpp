@@ -156,7 +156,7 @@ CodeEditor::getColorsAsScheme() {
 }
 
 void
-CodeEditor::resizeEvent(QResizeEvent *e)
+CodeEditor::resizeEvent(QResizeEvent * e)
 {
 	QPlainTextEdit::resizeEvent(e);
 

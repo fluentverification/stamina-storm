@@ -357,20 +357,21 @@
             </property>
            </widget>
           </item>
-          <item row="16" column="1">
-           <widget class="QCheckBox" name="allowCodeFolding">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
+          <item row="7" column="1">
+           <widget class="QLabel" name="label_20">
             <property name="text">
-             <string>Allow code folding (not yet implemented)</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+             <string>Text editor colors</string>
             </property>
            </widget>
           </item>
-          <item row="9" column="1">
+          <item row="8" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Keyword</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
            <widget class="KColorCombo" name="keywordColor">
             <property name="color">
              <color>
@@ -381,87 +382,76 @@
             </property>
            </widget>
           </item>
-          <item row="10" column="1">
-           <widget class="KColorCombo" name="commentColor"/>
-          </item>
-          <item row="11" column="1">
-           <widget class="KColorCombo" name="numberColor"/>
-          </item>
-          <item row="12" column="1">
-           <widget class="KColorCombo" name="typeColor"/>
-          </item>
           <item row="9" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Keyword</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="1">
-           <widget class="KColorCombo" name="editorBaseColor"/>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>General Text</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
            <widget class="QLabel" name="label_15">
             <property name="text">
              <string>Comment</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="0">
+          <item row="9" column="1">
+           <widget class="KColorCombo" name="commentColor"/>
+          </item>
+          <item row="10" column="0">
            <widget class="QLabel" name="label_16">
             <property name="text">
              <string>Numerics</string>
             </property>
            </widget>
           </item>
-          <item row="14" column="1">
-           <widget class="KColorCombo" name="stringColor"/>
+          <item row="10" column="1">
+           <widget class="KColorCombo" name="numberColor"/>
           </item>
-          <item row="15" column="1">
-           <widget class="KColorCombo" name="constantsColor"/>
-          </item>
-          <item row="14" column="0">
-           <widget class="QLabel" name="label_18">
+          <item row="11" column="0">
+           <widget class="QLabel" name="label_21">
             <property name="text">
-             <string>String</string>
+             <string>Datatypes</string>
             </property>
            </widget>
           </item>
-          <item row="15" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>Constant</string>
-            </property>
-           </widget>
+          <item row="11" column="1">
+           <widget class="KColorCombo" name="typeColor"/>
           </item>
-          <item row="7" column="1">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Text editor colors</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="1">
-           <widget class="KColorCombo" name="functionColor"/>
-          </item>
-          <item row="13" column="0">
+          <item row="12" column="0">
            <widget class="QLabel" name="label_17">
             <property name="text">
              <string>Function</string>
             </property>
            </widget>
           </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label_21">
+          <item row="12" column="1">
+           <widget class="KColorCombo" name="functionColor"/>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_18">
             <property name="text">
-             <string>Datatypes</string>
+             <string>String</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="1">
+           <widget class="KColorCombo" name="stringColor"/>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Constant</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="1">
+           <widget class="KColorCombo" name="constantsColor"/>
+          </item>
+          <item row="15" column="1">
+           <widget class="QCheckBox" name="allowCodeFolding">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Allow code folding (not yet implemented)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
