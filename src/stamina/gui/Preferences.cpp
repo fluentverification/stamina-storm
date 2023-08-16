@@ -248,6 +248,15 @@ Preferences::readSettingsFromFile() {
 	PrefInfo::General::useTabs = settings.value("useTabs", PrefInfo::General::useTabs) == "true";
 	ui.useTabs->setChecked(PrefInfo::General::useTabs);
 	settings.endGroup();
+	settings.beginGroup("SyntaxColors");
+	ui.keywordColor->setColor(QColor(settings.value("keywords").toString()));
+	ui.commentColor->setColor(QColor(settings.value("comments").toString()));
+	ui.numberColor->setColor(QColor(settings.value("numbers").toString()));
+	ui.typeColor->setColor(QColor(settings.value("types").toString()));
+	ui.functionColor->setColor(QColor(settings.value("functions").toString()));
+	ui.stringColor->setColor(QColor(settings.value("strings").toString()));
+	ui.constantsColor->setColor(QColor(settings.value("constants").toString()));
+	settings.endGroup();
 }
 
 void
@@ -259,6 +268,17 @@ Preferences::writeSettingsToFile() {
 	settings.setValue("editorFontSize", PrefInfo::General::editorFont.pointSize());
 	settings.setValue("tabSize", PrefInfo::General::tabSize);
 	settings.setValue("useTabs", PrefInfo::General::useTabs);
+	settings.endGroup();
+	settings.beginGroup("SyntaxColors");
+
+	settings.setValue("keywords", ui.keywordColor->color().name());
+	settings.setValue("comments", ui.commentColor->color());
+	settings.setValue("numbers", ui.numberColor->color());
+	settings.setValue("types", ui.typeColor->color());
+	settings.setValue("functions", ui.functionColor->color());
+	settings.setValue("strings", ui.stringColor->color());
+	settings.setValue("constants", ui.constantsColor->color());
+
 	settings.endGroup();
 }
 
