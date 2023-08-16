@@ -142,6 +142,18 @@ CodeEditor::addWordToModel(QString word) {
 }
 
 void
+CodeEditor::setColorsFromScheme(highlighter::ColorScheme * colors) {
+	if (!hl) { return; }
+	hl->setColorsFromScheme(colors);
+}
+
+highlighter::ColorScheme *
+CodeEditor::getColorsAsScheme() {
+	if (!hl) { return nullptr; }
+	return hl->getColorsAsScheme();
+}
+
+void
 CodeEditor::resizeEvent(QResizeEvent *e)
 {
 	QPlainTextEdit::resizeEvent(e);

@@ -130,6 +130,7 @@ namespace stamina {
 			 * */
 			void setUIFromPreferences();
 			void getPreferencesFromUI();
+			void preload();
 			/**
 			 * Functions for reading and writing from the settings object
 			 * */

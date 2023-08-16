@@ -22,6 +22,8 @@
 #include <QRegularExpressionMatchIterator>
 #include <QRegularExpression>
 
+#include <core/StaminaMessages.h>
+
 namespace stamina {
 namespace gui {
 namespace addons {
@@ -30,7 +32,45 @@ namespace highlighter {
 Highlighter::Highlighter(QTextDocument * parent)
 	: QSyntaxHighlighter(parent)
 {
+	// Intentionally left empty
+}
 
+void
+Highlighter::setColorsFromScheme(ColorScheme * colors) {
+	keywordFormat.setForeground(colors->keyword);
+	typeFormat.setForeground(colors->type);
+	classFormat.setForeground(colors->type);
+	singleLineCommentFormat.setForeground(colors->comment);
+	multiLineCommentFormat.setForeground(colors->comment);
+	quotationFormat.setForeground(colors->string);
+	functionFormat.setForeground(colors->function);
+	numberFormat.setForeground(colors->number);
+	constFormat.setForeground(colors->constant);
+	colorsWereSetup = true;
+}
+
+ColorScheme *
+Highlighter::getColorsAsScheme() {
+	if (!colorsWereSetup) {
+		StaminaMessages::warning("Colors were not set up!");
+	}
+	// StaminaMessages::info(keywordFormat.foreground().color().name().toStdString());
+	return new ColorScheme(
+		// Keywords
+		keywordFormat.foreground().color()
+		// Comments
+		, singleLineCommentFormat.foreground().color()
+		// Numbers
+		, numberFormat.foreground().color()
+		// Types
+		, typeFormat.foreground().color()
+		// Functions
+		, functionFormat.foreground().color()
+		// Strings
+		, quotationFormat.foreground().color()
+		// Constants
+		, constFormat.foreground().color()
+	);
 }
 
 void Highlighter::highlightBlock(const QString &text)

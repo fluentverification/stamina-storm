@@ -181,6 +181,7 @@ PrismHighlighter::setupKeyWordPatterns() {
 
 	commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
 	commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
+	colorsWereSetup = true;
 }
 
 

@@ -142,6 +142,7 @@ MainWindow::setup() {
 	prefs->setMainWindow(&ui);
 	prefs->getPreferencesFromUI();
 	prefs->setUIFromPreferences();
+	prefs->preload();
 	// Set the default sizes for the splitters
 	// QList<int> modelSizes = ui.modelSplitter->sizes();
 	// // int totalSize = modelSizes[0] + modelSizes[1];

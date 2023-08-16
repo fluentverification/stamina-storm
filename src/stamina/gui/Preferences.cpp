@@ -50,6 +50,27 @@ Preferences::show(int tabIndex) {
 }
 
 void
+Preferences::preload() {
+	StaminaMessages::info("Reading color scheme");
+	// ui.editorBaseColor->setColor(
+	auto colorScheme = window->modelFile->getColorsAsScheme();
+	if (colorScheme) {
+		ui.keywordColor->setColor(colorScheme->keyword);
+		ui.commentColor->setColor(colorScheme->comment);
+		ui.numberColor->setColor(colorScheme->number);
+		ui.typeColor->setColor(colorScheme->type);
+		ui.functionColor->setColor(colorScheme->function);
+		ui.stringColor->setColor(colorScheme->string);
+		ui.constantsColor->setColor(colorScheme->constant);
+		// colorScheme is not a QObject!
+		delete colorScheme;
+	}
+	else {
+		StaminaMessages::warning("Cannot set color scheme!");
+	}
+}
+
+void
 Preferences::accept() {
 	getPreferencesFromUI();
 	StaminaMessages::info("Updating accepted preferences");
@@ -100,6 +121,17 @@ Preferences::setUIFromPreferences() {
 	}
 	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
 	addons::CodeEditor::setIndent(indentation);
+	addons::highlighter::ColorScheme colorScheme(
+		ui.keywordColor->color()
+		, ui.commentColor->color()
+		, ui.numberColor->color()
+		, ui.typeColor->color()
+		, ui.functionColor->color()
+		, ui.stringColor->color()
+		, ui.constantsColor->color()
+	);
+	window->modelFile->setColorsFromScheme(&colorScheme);
+	window->propertiesEditor->setColorsFromScheme(&colorScheme);
 }
 
 void
