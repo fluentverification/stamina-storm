@@ -129,6 +129,13 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = classFormat;
 	highlightingRules.append(rule);
 
+	// Constants
+	constFormat.setFontItalic(true);
+	constFormat.setForeground(cs->constant);
+	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z0-9_]+\\b"));
+	rule.format = constFormat;
+	highlightingRules.append(rule);
+
 	// Numbers
 	numberFormat.setFontWeight(QFont::Bold);
 	numberFormat.setForeground(cs->number);
@@ -141,13 +148,6 @@ PrismHighlighter::setupKeyWordPatterns() {
 	functionFormat.setForeground(cs->function);
 	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
 	rule.format = functionFormat;
-	highlightingRules.append(rule);
-
-	// Constants
-	constFormat.setFontItalic(true);
-	constFormat.setForeground(cs->constant);
-	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z_]+\\b"));
-	rule.format = constFormat;
 	highlightingRules.append(rule);
 
 	// Keywords have highest priority, with the exception of comments, strings, and types

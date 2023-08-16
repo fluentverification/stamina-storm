@@ -462,6 +462,10 @@ CodeEditor::indentNextLine() {
 	// Insert comment if last line has it
 	if (lastLine.startsWith("//")) {
 		cursor.insertText("//");
+		// Some people, like me, like spaces after our single-line comments
+		if (lastLine.size() > 3 && lastLine[2] == ' ') {
+			cursor.insertText(" ");
+		}
 	}
 
 	this->setTextCursor(cursor);
