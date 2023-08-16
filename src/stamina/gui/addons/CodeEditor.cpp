@@ -145,6 +145,8 @@ void
 CodeEditor::setColorsFromScheme(highlighter::ColorScheme * colors) {
 	if (!hl) { return; }
 	hl->setColorsFromScheme(colors);
+	// Invoke the highlighter's event
+	hl->rehighlight();
 }
 
 highlighter::ColorScheme *
