@@ -272,12 +272,12 @@ Preferences::writeSettingsToFile() {
 	settings.beginGroup("SyntaxColors");
 
 	settings.setValue("keywords", ui.keywordColor->color().name());
-	settings.setValue("comments", ui.commentColor->color());
-	settings.setValue("numbers", ui.numberColor->color());
-	settings.setValue("types", ui.typeColor->color());
-	settings.setValue("functions", ui.functionColor->color());
-	settings.setValue("strings", ui.stringColor->color());
-	settings.setValue("constants", ui.constantsColor->color());
+	settings.setValue("comments", ui.commentColor->color().name());
+	settings.setValue("numbers", ui.numberColor->color().name());
+	settings.setValue("types", ui.typeColor->color().name());
+	settings.setValue("functions", ui.functionColor->color().name());
+	settings.setValue("strings", ui.stringColor->color().name());
+	settings.setValue("constants", ui.constantsColor->color().name());
 
 	settings.endGroup();
 }
