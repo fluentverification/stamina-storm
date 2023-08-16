@@ -94,8 +94,8 @@ parse_positional_arguments(const QStringList & args, MainWindow * window) {
 
 } // namespace stamina
 
-int main (int argc, char *argv[])
-{
+int
+main (int argc, char ** argv) {
 	stamina::set_default_values();
 	QApplication app(argc, argv);
 
@@ -103,9 +103,9 @@ int main (int argc, char *argv[])
 
 	KAboutData aboutData(
 						 // The program name used internally. (componentName)
-						 QStringLiteral("stamina"),
+						 QStringLiteral("xstamina"),
 						 // A displayable program name string. (displayName)
-						 i18n("STAMINA"),
+						 i18n("xSTAMINA"),
 						 // The program version string. (version)
 						 QStringLiteral("0.2.5"),
 						 // Short description of what the app does. (shortDescription)
@@ -113,14 +113,14 @@ int main (int argc, char *argv[])
 						 // The license this code is released under
 						 , KAboutLicense::GPL,
 						 // Copyright Statement (copyrightStatement = QString())
-						 i18n("(c) 2022"),
+						 i18n("(c) 2022-2023"),
 						 // Optional text shown in the About box.
 						 // Can contain any information desired. (otherText)
 						 i18n("Developed at Utah State University"),
 						 // The program homepage string. (homePageAddress = QString())
 						 QStringLiteral("https://staminachecker.org/"),
 						 // The bug report email address
-						 QStringLiteral("[email protected]"));
+						 QStringLiteral("staminamodelchecker [at] gmail [dot] com"));
 	aboutData.addAuthor(i18n("Joshua Jeppson"), i18n("Principle Developer"), QStringLiteral("[email protected]"),
 						QStringLiteral("https://ifndefjosh.github.io"), QStringLiteral("OSC Username"));
 	KAboutData::setApplicationData(aboutData);
