@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef MODELMODIFY_H
-#define MODELMODIFY_H
+#ifndef STAMINA_UTIL_MODELMODIFY_H
+#define STAMINA_UTIL_MODELMODIFY_H
 
 #include <vector>
 
@@ -98,4 +98,4 @@ namespace stamina {
 	} // namespace util
 } // namespace stamina
 
-#endif // MODEL_MODIFY_H
+#endif // STAMINA_UTIL_MODELMODIFY_H

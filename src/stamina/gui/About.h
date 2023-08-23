@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_ABOUT_H
-#define STAMINA_ABOUT_H
+#ifndef STAMINA_GUI_ABOUT_H
+#define STAMINA_GUI_ABOUT_H
 
 #include <KXmlGuiWindow>
 #include <QDialog>
@@ -41,4 +41,4 @@ namespace stamina {
 	}
 }
 
-#endif // STAMINA_ABOUT_H
+#endif // STAMINA_GUI_ABOUT_H

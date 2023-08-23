@@ -21,8 +21,8 @@
  * Code editor with line numbers--extends QPlainTextEdit ~~KDE's KTextEdit~~
  * */
 
-#ifndef STAMINA_CODE_EDITOR_H
-#define STAMINA_CODE_EDITOR_H
+#ifndef STAMINA_GUI_ADDONS_CODE_EDITOR_H
+#define STAMINA_GUI_ADDONS_CODE_EDITOR_H
 
 #include <cstdint>
 #include <QTextEdit>
@@ -78,4 +78,4 @@ namespace stamina {
 		}
 	}
 }
-#endif // STAMINA_CODE_EDITOR_H
+#endif // STAMINA_GUI_ADDONS_CODE_EDITOR_H

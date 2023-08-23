@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_PREFERENCES_H
-#define STAMINA_PREFERENCES_H
+#ifndef STAMINA_GUI_PREFERENCES_H
+#define STAMINA_GUI_PREFERENCES_H
 
 #include <QDialog>
 #include <cstdint>
@@ -149,4 +149,4 @@ namespace stamina {
 	}
 }
 
-#endif // STAMINA_PREFERENCES_H
+#endif // STAMINA_GUI_PREFERENCES_H

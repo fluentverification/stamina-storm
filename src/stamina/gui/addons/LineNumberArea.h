@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_LINE_NUMBER_AREA_H
-#define STAMINA_LINE_NUMBER_AREA_H
+#ifndef STAMINA_GUI_ADDONS_LINE_NUMBER_AREA_H
+#define STAMINA_GUI_ADDONS_LINE_NUMBER_AREA_H
 
 #include <QWidget>
 #include <ktextedit.h>
@@ -43,4 +43,4 @@ namespace stamina {
 		}
 	}
 }
-#endif // STAMINA_LINE_NUMBER_AREA_H
+#endif // STAMINA_GUI_ADDONS_LINE_NUMBER_AREA_H

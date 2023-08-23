@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_STAMINA
-#define STAMINA_STAMINA
+#ifndef STAMINA_STAMINA_H
+#define STAMINA_STAMINA_H
 
 #include <iostream>
 #include <ostream>
@@ -83,4 +83,4 @@ namespace stamina {
 	};
 }
 
-#endif // STAMINA_STAMINA
+#endif // STAMINA_STAMINA_H
