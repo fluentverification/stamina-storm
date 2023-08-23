@@ -33,6 +33,7 @@ namespace stamina {
 		class MessageBridge {
 		public:
 			inline static QTextEdit * logOutput = nullptr;
+			inline static QStatusBar * statusBar = nullptr;
 			static void initMessageBridge();
 			static void error(std::string err);
 			static void warning(std::string warn);

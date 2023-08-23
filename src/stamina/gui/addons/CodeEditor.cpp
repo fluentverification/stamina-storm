@@ -132,7 +132,7 @@ CodeEditor::addWordToModel(QString word) {
 			}
 		}
 		if (!matched) {
-			StaminaMessages::info("Adding word to model: " + word.toStdString());
+			// StaminaMessages::info("Adding word to model: " + word.toStdString());
 			model->setStringList(model->stringList() << word);
 		}
 	}

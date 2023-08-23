@@ -81,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
 	StaminaMessages::raiseExceptionsRatherThanExit = true;
 	ui.setupUi(this);
 	MessageBridge::logOutput = ui.logOutput;
+	MessageBridge::statusBar = ui.statusbar;
 	MessageBridge::initMessageBridge();
 	setupActions();
 	setup();
