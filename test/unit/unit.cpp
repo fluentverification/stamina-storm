@@ -31,6 +31,7 @@
 
 #include <stamina/util/ModelModify.h>
 #include <stamina/util/StateIndexArray.h>
+#include <stamina/util/StateMemoryPool.h>
 #include <stamina/builder/ProbabilityState.h>
 
 #include <storm-parsers/parser/FormulaParser.h>
@@ -86,6 +87,27 @@ BOOST_AUTO_TEST_CASE( StateIndexArray_Basic ) {
 	ProbabilityState<uint32_t> * one = (ProbabilityState<uint32_t> *) 1;
 	ProbabilityState<uint32_t> * two = (ProbabilityState<uint32_t> *) 2;
 	ProbabilityState<uint32_t> * three = (ProbabilityState<uint32_t> *) 3;
+	ProbabilityState<uint32_t> * mrNullPointer = nullptr;
+	sia.put(1, one);
+	sia.put(2, two);
+	sia.put(3, three);
+	sia.put(0, mrNullPointer);
+
+	BOOST_TEST( sia.get(1) == one );
+	BOOST_TEST( sia.get(2) == two );
+	BOOST_TEST( sia.get(3) == three );
+
+	BOOST_TEST( sia.get(0) == nullptr );
+}
+
+BOOST_AUTO_TEST_CASE( StateIndexArray_Advanced ) {
+	StateIndexArray<uint32_t, ProbabilityState<uint32_t>> sia;
+	StateMemoryPool<ProbabilityState<uint32_t>> memPool;
+
+	// Don't try to dereference any of these
+	ProbabilityState<uint32_t> * one = memPool.allocate();
+	ProbabilityState<uint32_t> * two = memPool.allocate();
+	ProbabilityState<uint32_t> * three = memPool.allocate();
 	ProbabilityState<uint32_t> * mrNullPointer = nullptr;
 	sia.put(1, one);
 	sia.put(2, two);
