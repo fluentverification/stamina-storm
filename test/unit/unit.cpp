@@ -121,5 +121,14 @@ BOOST_AUTO_TEST_CASE( StateIndexArray_Advanced ) {
 	BOOST_TEST( sia.get(0) == nullptr );
 }
 
+BOOST_AUTO_TEST_CASE( StateMemoryPool_Basic ) {
+	StateMemoryPool<ProbabilityState<uint32_t>> memPool;
+	const int NUM_TEST = 100;
+	for (int i = 0; i < NUM_TEST; i++) {
+		auto pState = memPool.allocate();
+		BOOST_TEST( pState != nullptr );
+	}
+}
+
 // =======================================================================================
 
