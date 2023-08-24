@@ -5,10 +5,12 @@
 ##
 
 cmake_minimum_required(VERSION 3.10)
-project(stamina)			   # Create project "stamina"
+# Create project "stamina"
+project(stamina)
 set(LIB_NAME stamina)
 set(CLI_EXECUTABLE_NAME sstamina)
-set(CMAKE_CXX_STANDARD 17)			# Enable c++17 standard
+# Enable c++17 standard
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 option(STAMINA_DEBUG "Include debug information in the executables" OFF)
@@ -49,15 +51,15 @@ if (BUILD_GUI)
 	find_package(KF5TextEditor)
 
 	find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
-		Core	# QCommandLineParser, QStringLiteral
-		Widgets # QApplication
+		Core         # QCommandLineParser, QStringLiteral
+		Widgets      # QApplication
 	)
 
 	find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
-		CoreAddons	  # KAboutData
-		I18n			# KLocalizedString
-		XmlGui		  # KXmlGuiWindow
-		TextWidgets	 # KTextEdit
+		CoreAddons        # KAboutData
+		I18n              # KLocalizedString
+		XmlGui            # KXmlGuiWindow
+		TextWidgets       # KTextEdit
 	)
 	find_package(KF5KIO)
 
@@ -214,3 +216,11 @@ install(TARGETS ${CLI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applica
 install(TARGETS ${LIB_NAME} RUNTIME DESTINATION lib COMPONENT libraries)
 
 include(StaminaCPackConfig.cmake)
+
+# Tests are not included in packaging
+
+option(STAMINA_BUILD_TESTS "Build STAMINA unit tests" OFF)
+
+if (STAMINA_BUILD_TESTS)
+	include(test/unit/CMakeLists.txt)
+endif()
