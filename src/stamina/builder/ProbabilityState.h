@@ -34,6 +34,8 @@ namespace stamina {
 		class ProbabilityState {
 		public:
 			StateType index;
+			double pi;
+			bool terminal;
 			uint8_t iterationLastSeen;
 			bool assignedInRemapping;
 			bool isNew;
@@ -68,7 +70,9 @@ namespace stamina {
 				, isNew(other.isNew)
 				, preTerminated(other.preTerminated)
 				, preTerminatedTransitions(other.preTerminatedTransitions)
+				, wasPutInTerminalQueue(other.wasPutInTerminalQueue)
 				, deadlock(other.deadlock)
+				, iterationLastSeen(other.iterationLastSeen)
 			{
 				// Intentionally left empty
 			}
@@ -109,8 +113,7 @@ namespace stamina {
 			inline bool operator<(const ProbabilityState & rhs) const {
 				return index < rhs.index;
 			}
-			double pi;
-			bool terminal;
+
 
 		};
 

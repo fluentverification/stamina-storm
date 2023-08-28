@@ -37,6 +37,7 @@ pointer_is_valid(T * pointer) {
 #ifdef WINDOWS
 	__try {
 		auto val = *pointer;
+		return true;
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER) {
 		return false;

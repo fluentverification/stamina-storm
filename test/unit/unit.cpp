@@ -27,8 +27,10 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <string>
-#include <cstdint>
 #include <iostream>
+
+#include <cstring> // For memcmp
+#include <cstdint>
 
 #include <stamina/util/ModelModify.h>
 #include <stamina/util/StateIndexArray.h>
@@ -61,8 +63,6 @@ BOOST_AUTO_TEST_CASE( Helper_Tests ) {
 	BOOST_TEST( pointer_is_valid<int>(bar) );
 	delete bar;
 }
-
-// =======================================================================================
 
 // =======================================================================================
 // This unit test checks to see if the ModelModify creates the right modified properties
@@ -179,4 +179,21 @@ BOOST_AUTO_TEST_CASE( StateMemoryPool_Advanced ) {
 }
 
 // =======================================================================================
+// Tests that check the ProbabilityState class
+// =======================================================================================
 
+BOOST_AUTO_TEST_CASE( ProbabilityState_Basic ) {
+	ProbabilityStateComparison<uint16_t> cmp;
+	ProbabilityState<uint16_t> p1(1, 0.5, false, 2);
+	ProbabilityState<uint16_t> p2(2, 0.2, false, 3);
+	// BOOST_TEST( p1 != p2 );
+	BOOST_TEST( memcmp(&p1, &p2, sizeof(ProbabilityState<uint16_t>)) != 0 );
+	BOOST_TEST( !cmp(&p1, &p2) );
+	BOOST_TEST( cmp(&p2, &p1) );
+	// Now test copy constructor
+	p2 = p1;
+	// BOOST_TEST( p1 == p2 );
+	BOOST_TEST( !cmp(&p1, &p2) );
+	BOOST_TEST( memcmp(&p1, &p2, sizeof(ProbabilityState<uint16_t>)) == 0 );
+
+}
