@@ -28,13 +28,17 @@
 
 #include <string>
 #include <cstdint>
+#include <iostream>
 
 #include <stamina/util/ModelModify.h>
 #include <stamina/util/StateIndexArray.h>
 #include <stamina/util/StateMemoryPool.h>
 #include <stamina/builder/ProbabilityState.h>
+#include <stamina/core/Options.h>
 
 #include <storm-parsers/parser/FormulaParser.h>
+
+#include "helper.h"
 
 namespace bt = boost::unit_test;
 using namespace stamina;
@@ -42,10 +46,31 @@ using namespace stamina::util;
 using namespace stamina::builder;
 
 // =======================================================================================
+// A quick test to ensure that helper works correctly
+// =======================================================================================
+
+BOOST_AUTO_TEST_CASE( Helper_Tests ) {
+#ifndef WINDOWS
+	setup_signal_handling();
+#endif
+	core::Options::quiet = true;
+	int foo = 10;
+	int * bar = new int;
+	*bar = 10;
+	BOOST_TEST( pointer_is_valid<int>(&foo) );
+	BOOST_TEST( pointer_is_valid<int>(bar) );
+	delete bar;
+}
+
+// =======================================================================================
+
+// =======================================================================================
 // This unit test checks to see if the ModelModify creates the right modified properties
 // and parses the property correctly.
 // =======================================================================================
+
 BOOST_AUTO_TEST_CASE( ModelModify_Basic ) {
+	core::Options::quiet = true;
 	std::string modelFile = "../test/models/simple.prism";
 	std::string propFile = "../test/models/simple.csl";
 	ModelModify mod(modelFile, propFile);
@@ -78,7 +103,13 @@ BOOST_AUTO_TEST_CASE( ModelModify_Basic ) {
 	auto propMaxExpected = parser.parseFromString("P=? [true U[0,1] (\"Absorbing\" | (First < 20) & (Second >= 20))];")[0];
 	// BOOST_TEST(*propMin.getRawFormula() == *propMinExpected.getRawFormula());
 	// BOOST_TEST(*propMax.getRawFormula() == *propMaxExpected.getRawFormula());
+
+	// TODO: Actually check expressions
 }
+
+// =======================================================================================
+// Tests to ensure that the state index array should work as they should.
+// =======================================================================================
 
 BOOST_AUTO_TEST_CASE( StateIndexArray_Basic ) {
 	StateIndexArray<uint32_t, ProbabilityState<uint32_t>> sia;
@@ -99,6 +130,8 @@ BOOST_AUTO_TEST_CASE( StateIndexArray_Basic ) {
 
 	BOOST_TEST( sia.get(0) == nullptr );
 }
+
+// =======================================================================================
 
 BOOST_AUTO_TEST_CASE( StateIndexArray_Advanced ) {
 	StateIndexArray<uint32_t, ProbabilityState<uint32_t>> sia;
@@ -121,12 +154,27 @@ BOOST_AUTO_TEST_CASE( StateIndexArray_Advanced ) {
 	BOOST_TEST( sia.get(0) == nullptr );
 }
 
+// =======================================================================================
+// Tests to ensure that the StateMemoryPool always returns valid memory
+// =======================================================================================
+
 BOOST_AUTO_TEST_CASE( StateMemoryPool_Basic ) {
 	StateMemoryPool<ProbabilityState<uint32_t>> memPool;
-	const int NUM_TEST = 100;
+	const int NUM_TEST = 1000;
 	for (int i = 0; i < NUM_TEST; i++) {
 		auto pState = memPool.allocate();
 		BOOST_TEST( pState != nullptr );
+	}
+}
+
+// =======================================================================================
+
+BOOST_AUTO_TEST_CASE( StateMemoryPool_Advanced ) {
+	StateMemoryPool<ProbabilityState<uint32_t>> memPool;
+	const int NUM_TEST = 1000;
+	for (int i = 0; i < NUM_TEST; i++) {
+		auto pState = memPool.allocate();
+		BOOST_TEST( pointer_is_valid<ProbabilityState<uint32_t>>(pState) );
 	}
 }
 
