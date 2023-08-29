@@ -3,6 +3,7 @@ build
 bin
 tmp
 doxysite
+release
 storm
 *.o
 *.out
