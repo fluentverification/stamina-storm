@@ -37,6 +37,7 @@
 #include <stamina/util/StateMemoryPool.h>
 #include <stamina/builder/ProbabilityState.h>
 #include <stamina/core/Options.h>
+#include <stamina/Stamina.h>
 
 #include <storm-parsers/parser/FormulaParser.h>
 
@@ -46,6 +47,8 @@ namespace bt = boost::unit_test;
 using namespace stamina;
 using namespace stamina::util;
 using namespace stamina::builder;
+
+using namespace stamina_test;
 
 // =======================================================================================
 // A quick test to ensure that helper works correctly
@@ -186,14 +189,26 @@ BOOST_AUTO_TEST_CASE( ProbabilityState_Basic ) {
 	ProbabilityStateComparison<uint16_t> cmp;
 	ProbabilityState<uint16_t> p1(1, 0.5, false, 2);
 	ProbabilityState<uint16_t> p2(2, 0.2, false, 3);
-	// BOOST_TEST( p1 != p2 );
 	BOOST_TEST( memcmp(&p1, &p2, sizeof(ProbabilityState<uint16_t>)) != 0 );
 	BOOST_TEST( !cmp(&p1, &p2) );
 	BOOST_TEST( cmp(&p2, &p1) );
 	// Now test copy constructor
 	p2 = p1;
-	// BOOST_TEST( p1 == p2 );
 	BOOST_TEST( !cmp(&p1, &p2) );
 	BOOST_TEST( memcmp(&p1, &p2, sizeof(ProbabilityState<uint16_t>)) == 0 );
 
+}
+
+// =======================================================================================
+
+BOOST_AUTO_TEST_CASE( Results_Basic ) {
+	set_default_values();
+	std::string modelFile = "../test/models/simple.prism";
+	std::string propFile = "../test/models/simple.csl";
+	core::Options::model_file = modelFile;
+	core::Options::properties_file = propFile;
+	Stamina s;
+	s.run();
+	std::cerr << "[WARNING (Unit Tests)] This test not implemented." << std::endl;
+	BOOST_TEST( true );
 }
