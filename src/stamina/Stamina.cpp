@@ -104,18 +104,23 @@ Stamina::run(bool rebuild) {
 	}
 	// Check each property in turn
 	for (auto & prop : *propertiesVector) {
-		auto propMin = modelModify->modifyProperty(prop, true);
-		auto propMax = modelModify->modifyProperty(prop, false);
-		// Re-initialize
-		// initialize();
-		modelChecker->modelCheckProperty(
-			propMin
-			, propMax
-			, prop
-			, *modelFile
-			, fv
-			, rebuild
-		);
+		if (prop.getRawFormula()->isProbabilityOperatorFormula()) {
+			auto propMin = modelModify->modifyProperty(prop, true);
+			auto propMax = modelModify->modifyProperty(prop, false);
+			// Re-initialize
+			// initialize();
+			modelChecker->modelCheckProperty(
+				propMin
+				, propMax
+				, prop
+				, *modelFile
+				, fv
+				, rebuild
+			);
+		}
+		else {
+			StaminaMessages::warning("The formula is not a probability operator formula! STAMINA can only give an estimate of the value");
+		}
 	}
 	// Finished!
 	StaminaMessages::good("Finished running!");
