@@ -18,15 +18,7 @@ if (STAMINA_DEBUG)
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-# STAMINA Build
-# option(STAMINA_BUILD_TAG "Build tag information" "unspecified")
-execute_process(
-	COMMAND git rev-parse HEAD
-	WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-	OUTPUT_VARIABLE GIT_HASH
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-add_compile_definitions(STAMINA_BUILD_INFO="Debug Build")
+include(StaminaVersion.cmake)
 
 # Build options
 option(BUILD_GUI "Build XStamina GUI" OFF)

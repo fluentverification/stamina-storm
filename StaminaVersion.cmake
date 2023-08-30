@@ -1,0 +1,17 @@
+set(STAMINA_VERSION_MAJOR "0")
+set(STAMINA_VERSION_MINOR "2")
+set(STAMINA_VERSION_PATCH "5")
+
+# STAMINA Build
+# option(STAMINA_BUILD_TAG "Build tag information" "unspecified")
+execute_process(
+	COMMAND git rev-parse HEAD
+	WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+	OUTPUT_VARIABLE GIT_HASH
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_compile_definitions(STAMINA_BUILD_INFO="commit-${GIT_HASH}")
+
+add_compile_definitions(STAMINA_VERSION_MAJOR=${STAMINA_VERSION_MAJOR})
+add_compile_definitions(STAMINA_VERSION_MINOR=${STAMINA_VERSION_MINOR})
+add_compile_definitions(STAMINA_VERSION_PATCH=${STAMINA_VERSION_PATCH})
