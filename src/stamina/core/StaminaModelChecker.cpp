@@ -316,7 +316,7 @@ StaminaModelChecker::estimateResultProperty(
 	if (modelBuilt && !forceRebuildModel) {
 		StaminaMessages::info("Model is already built. Using existing model.");
 		// TODO
-		// checkFromBuiltModel(propMin, propMax, propOriginal);
+		checkFromBuiltModel(propOriginal, propOriginal, propOriginal, true);
 		return nullptr;
 	}
 	// Create allocators for shared pointers
@@ -382,7 +382,8 @@ StaminaModelChecker::estimateResultProperty(
 	if (!Options::no_prop_refine) {
 		// Get the expression for the current property
 		StaminaMessages::warning("Cannot use lack of property refinement on estimated models");
-		builder->setPropertyFormula(nullptr, modulesFile);
+		// builder->setPropertyFormula(nullptr, modulesFile);
+		Options::no_prop_refine = true;
 	}
 
 	// While we should not terminate
@@ -421,8 +422,7 @@ StaminaModelChecker::estimateResultProperty(
 			// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
 			builder->printStateSpaceInformation();
 			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
-			"\tEstimated Results: " + std::to_string(min_results->result) + "\n" +
-			"This gives us a window of " + std::to_string(max_results->result - min_results->result)
+				"\tEstimated Results: " + std::to_string(min_results->result) + "\n"
 			);
 
 		}
@@ -492,6 +492,7 @@ StaminaModelChecker::checkFromBuiltModel(
 	storm::jani::Property propMin
 	, storm::jani::Property propMax
 	, storm::jani::Property propOriginal
+	, bool isEstimate
 ) {
 	StaminaMessages::info("Using existing built model");
 	if (!checker) {
@@ -505,18 +506,26 @@ StaminaModelChecker::checkFromBuiltModel(
 			storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 		);
 		min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
-		auto result_upper = checker->check(
-			// env,
-			storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
-		);
-		max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
-		// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
-		builder->printStateSpaceInformation();
-		StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
-		"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
-		"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
-		"This gives us a window of " + std::to_string(max_results->result - min_results->result)
-		);
+		if (!isEstimate) {
+			auto result_upper = checker->check(
+				// env,
+				storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
+			);
+			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+			// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
+			builder->printStateSpaceInformation();
+			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+				"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
+				"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
+				"This gives us a window of " + std::to_string(max_results->result - min_results->result)
+			);
+		}
+		else {
+			builder->printStateSpaceInformation();
+			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+				"\tEstimated Results: " + std::to_string(min_results->result) + "\n"
+			);
+		}
 
 	}
 	catch (std::exception& e) {
@@ -527,8 +536,13 @@ StaminaModelChecker::checkFromBuiltModel(
 	resultInfo.setf( std::ios::floatfield );
 	resultInfo << std::fixed << std::setprecision(12);
 	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
-	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
-	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	if (isEstimate) {
+		resultInfo << "\t" << BOLD(FMAG("Result (Estimate): ")) << min_results->result << std::endl;
+	}
+	else {
+		resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
+		resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	}
 	resultTable.push_back( { min_results->result, max_results->result, propOriginal.asPrismSyntax() } );
 	StaminaMessages::info(resultInfo.str());
 
@@ -539,7 +553,7 @@ StaminaModelChecker::checkFromBuiltModel(
 		, 1 // TODO: Actual number of initial states
 		, propOriginal.asPrismSyntax() // name?
 	);
-	StaminaMessages::writeResults(r, std::cout);
+	StaminaMessages::writeResults(r, std::cout, isEstimate);
 }
 
 std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>>

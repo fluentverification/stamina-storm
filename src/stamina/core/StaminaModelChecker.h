@@ -116,6 +116,7 @@ namespace stamina {
 				storm::jani::Property propMin
 				, storm::jani::Property propMax
 				, storm::jani::Property propOriginal
+				, bool isEstimate = false
 			);
 			/**
 			 * Gets a list of the labels and the associated counts of states

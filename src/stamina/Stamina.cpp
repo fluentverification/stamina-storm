@@ -120,6 +120,12 @@ Stamina::run(bool rebuild) {
 		}
 		else {
 			StaminaMessages::warning("The formula is not a probability operator formula! STAMINA can only give an estimate of the value");
+			modelChecker->estimateResultProperty(
+				prop
+				, *modelFile
+				, fv
+				, rebuild
+			);
 		}
 	}
 	// Finished!
