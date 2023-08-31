@@ -144,6 +144,9 @@
               <property name="currentText">
                <string>Hack</string>
               </property>
+              <property name="frame">
+               <bool>false</bool>
+              </property>
               <property name="fontFilters">
                <set>QFontComboBox::MonospacedFonts</set>
               </property>
@@ -161,6 +164,9 @@
               </property>
               <property name="currentText">
                <string>8</string>
+              </property>
+              <property name="frame">
+               <bool>false</bool>
               </property>
               <item>
                <property name="text">
@@ -304,6 +310,9 @@
             <property name="currentText">
              <string>8</string>
             </property>
+            <property name="frame">
+             <bool>false</bool>
+            </property>
             <item>
              <property name="text">
               <string>8</string>
@@ -353,94 +362,222 @@
              <bool>false</bool>
             </property>
             <property name="flat">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item row="7" column="1">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Text editor colors</string>
+           <widget class="KCollapsibleGroupBox" name="kcollapsiblegroupbox">
+            <property name="title">
+             <string>Editor Colors</string>
             </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Keyword</string>
+            <property name="expanded">
+             <bool>true</bool>
             </property>
+            <layout class="QFormLayout" name="formLayout_6">
+             <item row="1" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="KColorButton" name="foregroundColor">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <property name="color">
+                  <color>
+                   <red>255</red>
+                   <green>255</green>
+                   <blue>255</blue>
+                  </color>
+                 </property>
+                 <property name="defaultColor">
+                  <color>
+                   <red>255</red>
+                   <green>255</green>
+                   <blue>255</blue>
+                  </color>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="KColorButton" name="backgroundColor">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="useDesktopDefaults">
+                 <property name="whatsThis">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Use desktop environment or OS's defaults&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Most desktop environments such as KDE, GNOME, Xfce, etc., on Linux have a default color pallete (which you can often customize) and other OSs such as Windows and MacOS also provide default palletes for uniform color theming between your applications.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;When checked, this checkbox overrides the foreground and background colors applied to the code editors and uses the OS's (or DE's) defaults.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Use desktop environment's default colors</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>From theme</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QComboBox" name="themeComboBox">
+                 <property name="frame">
+                  <bool>false</bool>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Colorful</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Desaturated</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="resetToThemeButton">
+                 <property name="text">
+                  <string>Reset To Theme</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="edit-undo">
+                   <normaloff>.</normaloff>.</iconset>
+                 </property>
+                 <property name="autoRaise">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>Keyword</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="KColorCombo" name="keywordColor">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+               <property name="color">
+                <color>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>123</blue>
+                </color>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>Comment</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="KColorCombo" name="commentColor">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_16">
+               <property name="text">
+                <string>Numerics</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="KColorCombo" name="numberColor">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_21">
+               <property name="text">
+                <string>Datatypes</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="KColorCombo" name="typeColor">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
+              <widget class="QLabel" name="label_17">
+               <property name="text">
+                <string>Functions</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <widget class="KColorCombo" name="functionColor">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <widget class="QLabel" name="label_18">
+               <property name="text">
+                <string>String</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="KColorCombo" name="stringColor">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
+              <widget class="QLabel" name="label_19">
+               <property name="text">
+                <string>Constant</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="1">
+              <widget class="KColorCombo" name="constantsColor"/>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_20">
+               <property name="text">
+                <string>Foreground and Background</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
-          </item>
-          <item row="8" column="1">
-           <widget class="KColorCombo" name="keywordColor">
-            <property name="color">
-             <color>
-              <red>255</red>
-              <green>0</green>
-              <blue>123</blue>
-             </color>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Comment</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <widget class="KColorCombo" name="commentColor"/>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>Numerics</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="KColorCombo" name="numberColor"/>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>Datatypes</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="KColorCombo" name="typeColor"/>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Function</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="1">
-           <widget class="KColorCombo" name="functionColor"/>
-          </item>
-          <item row="13" column="0">
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>String</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="1">
-           <widget class="KColorCombo" name="stringColor"/>
-          </item>
-          <item row="14" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>Constant</string>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="1">
-           <widget class="KColorCombo" name="constantsColor"/>
           </item>
           <item row="15" column="1">
            <widget class="QCheckBox" name="allowCodeFolding">
@@ -899,6 +1036,17 @@
    <class>KComboBox</class>
    <extends>QComboBox</extends>
    <header>kcombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KCollapsibleGroupBox</class>
+   <extends>QWidget</extends>
+   <header>kcollapsiblegroupbox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>KColorButton</class>
+   <extends>QPushButton</extends>
+   <header>kcolorbutton.h</header>
   </customwidget>
   <customwidget>
    <class>KColorCombo</class>

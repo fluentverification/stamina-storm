@@ -13,6 +13,10 @@ set(CLI_EXECUTABLE_NAME sstamina)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(MACOSX TRUE)
+endif()
+
 option(STAMINA_DEBUG "Include debug information in the executables" OFF)
 if (STAMINA_DEBUG)
 	set(CMAKE_BUILD_TYPE Debug)
@@ -199,13 +203,14 @@ endif()
 
 # Install stuff
 # install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+# MacOS requires a MACOSX_BUNDLE setting
 if (BUILD_GUI)
-	install(TARGETS ${GUI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applications)
+	install(TARGETS ${GUI_EXECUTABLE_NAME} RUNTIME DESTINATION bin BUNDLE DESTINATION bin COMPONENT applications)
 endif()
+install(TARGETS ${CLI_EXECUTABLE_NAME} RUNTIME DESTINATION bin BUNDLE DESTINATION  bin COMPONENT applications)
 
-install(TARGETS ${CLI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applications)
 # This installs libstamina
-install(TARGETS ${LIB_NAME} RUNTIME DESTINATION lib COMPONENT libraries)
+install(TARGETS ${LIB_NAME} RUNTIME DESTINATION lib BUNDLE DESTINATION  lib COMPONENT libraries)
 
 include(StaminaCPackConfig.cmake)
 
