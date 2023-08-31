@@ -205,7 +205,7 @@ endif()
 
 install(TARGETS ${CLI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applications)
 # This installs libstamina
-install(TARGETS ${LIB_NAME} RUNTIME DESTINATION lib COMPONENT libraries)
+install(TARGETS ${LIB_NAME} RUNTIME DESTINATION . BUNDLE DESTINATION  lib COMPONENT libraries)
 
 include(StaminaCPackConfig.cmake)
 
