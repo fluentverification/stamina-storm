@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>779</width>
+    <width>780</width>
     <height>899</height>
    </rect>
   </property>
@@ -380,7 +380,7 @@
                <item>
                 <widget class="KColorButton" name="foregroundColor">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
@@ -404,7 +404,7 @@
                <item>
                 <widget class="KColorButton" name="backgroundColor">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
@@ -567,7 +567,11 @@
               </widget>
              </item>
              <item row="9" column="1">
-              <widget class="KColorCombo" name="constantsColor"/>
+              <widget class="KColorCombo" name="constantsColor">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_20">
