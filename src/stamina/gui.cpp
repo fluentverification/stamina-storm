@@ -18,6 +18,7 @@
  **/
 
 #include <cstdlib>
+#include <csignal>
 #include <regex>
 #include <filesystem>
 
@@ -90,12 +91,24 @@ parse_positional_arguments(const QStringList & args, MainWindow * window) {
 	}
 }
 
+void
+handle_signals(int signal) {
+	// Test to see if we received
+	if (signal == SIGSEGV) {
+		StaminaMessages::errorAndExit("STAMINA has experienced an internal error (Segmentation Fault). Please report this bug to us on our GitHub page.");
+	}
+	else {
+		// TODO
+	}
+}
+
 } // namespace gui
 
 } // namespace stamina
 
 int
 main (int argc, char ** argv) {
+	signal(SIGSEGV, stamina::gui::handle_signals);
 	stamina::set_default_values();
 	QApplication app(argc, argv);
 
