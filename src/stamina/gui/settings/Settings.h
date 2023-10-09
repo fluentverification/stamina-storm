@@ -71,9 +71,14 @@ namespace stamina {
 					QString name;
 					QSet<Setting> settings;
 				};
-				Settings() = default;
+				/**
+				 * Constructor. Sets up UI
+				 * */
+				Settings();
+				virtual void createSettings();
+				void createUI();
 
-				QSet<Category> settingCategories;
+				QSet<Category> categories;
 			};
 		}
 	}
