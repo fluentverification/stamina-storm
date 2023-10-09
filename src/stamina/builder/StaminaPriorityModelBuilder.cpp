@@ -669,7 +669,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 			// actually create the transition
 			this->createTransition(transition.from, 0, transition.transition);
 			// Make preterminated state have a self loop
-			this->createTransition(transition.to, transition.to, 1.0);
+			// this->createTransition(transition.to, transition.to, 1.0);
 			numberOfPreTerminatedTransitions++;
 		}
 	}

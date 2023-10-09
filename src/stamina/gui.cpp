@@ -45,7 +45,7 @@ set_default_values() {
 	core::Options::kappa = 1.0;
 	core::Options::reduce_kappa = 1.25; // 2.0;
 	core::Options::approx_factor = 2.0;
-	core::Options::fudge_factor = 1.0;
+	core::Options::fudge_factor = 1.255;
 	core::Options::prob_win = 1.0e-3;
 	core::Options::max_approx_count = 10;
 	core::Options::no_prop_refine = false;
