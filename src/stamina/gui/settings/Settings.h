@@ -29,6 +29,14 @@
 namespace stamina {
 	namespace gui {
 		namespace settings {
+			enum SettingTypes {
+				INTEGER
+				, DOUBLE
+				, BOOLEAN
+				, STRING
+				, FILENAME
+			};
+			typedef enum SettingTypes SettingType;
 			class Settings : QWidget {
 				Q_OBJECT
 			public:
@@ -48,12 +56,14 @@ namespace stamina {
 					Setting(
 						QString name
 						, QString description
-						, std::function<QVariant(void)> get
+						// , std::function<QVariant(void)> get
 						, std::function<void(QVariant)> set
+						, SettingType type
 					) : name(name)
 						, description(description)
-						, get(get)
+						// , get(get)
 						, set(set)
+						, type(type)
 					{  /* Intentionally left empty */ }
 					QString name;
 					QString description;
@@ -62,6 +72,12 @@ namespace stamina {
 					 * */
 					std::function<QVariant(void)> get;
 					std::function<void(QVariant)> set;
+					// How the QVariant should be interpreted
+					SettingType type;
+					/**
+					 * Creates a GUI element for the setting
+					 * */
+					QWidget * createWidget(QWidget * parent);
 				};
 				class Category {
 				public:
