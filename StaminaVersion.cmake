@@ -13,8 +13,10 @@ if (STAMINA_INCLUDE_GIT_BUILD_INFO)
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
 	add_compile_definitions(STAMINA_BUILD_INFO="commit-${GIT_HASH}")
-else() 
+elseif(STAMINA_DEBUG) 
 	add_compile_definitions(STAMINA_BUILD_INFO="debug-build")
+else()
+	add_compile_definitions(STAMINA_BUILD_INFO="release-build")
 endif()
 
 add_compile_definitions(STAMINA_VERSION_MAJOR=${STAMINA_VERSION_MAJOR})

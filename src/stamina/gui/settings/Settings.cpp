@@ -14,6 +14,7 @@ Settings::Settings() {
 void
 Settings::createSettings() {
 	// Creates a list of settings that can be modified
+
 }
 
 void
@@ -107,7 +108,7 @@ Settings::Setting::createWidget(QWidget * parent) {
 				this->set(QVariant(checkBox->checkState() == Qt::Checked));
 			}
 		);
-		return (QSpinBox *) checkBox;
+		return (QWidget *) checkBox;
 	case STRING:
 		QLineEdit * lineEdit = new QLineEdit(parent);
 		get = [lineEdit]() { return lineEdit->text(); }
@@ -120,8 +121,35 @@ Settings::Setting::createWidget(QWidget * parent) {
 				this->set(QVariant(value));
 			}
 		);
+		return (QWidget *) lineEdit;
 	case FILENAME:
-		// TODO
+		QHBoxLayout * layout             = new QHBoxLayout(parent);
+		QLineEdit   * fileNameLineEdit   = new QLineEdit(parent);
+		QPushButton * fileSelectorButton = new QPushButton(parent, "...");
+		layout->addWidget(fileNameLineEdit);
+		layout->addWidget(fileSelectorButton);
+		get = [fileNameLineEdit]() { return fileNameLineEdit->text(); }
+		connect(
+			fileSelectorButton
+			, &QPushButton::clicked
+			, parent
+			, [fileNameLineEdit]() {
+				QString fileName = QFileDialog::getOpenFileName(parent, tr("Open File"));
+				if (fileName != "") {
+					fileNameLineEdit->setText(fileName);
+				}
+				this->set(QVariant(fileNameLineEdit->text()));
+			}
+		);
+		connect(
+			fileNameLineEdit
+			, &QLineEdit::editingFinished
+			, parent
+			, [this, fileNameLineEdit]() {
+				this->set(QVariant(fileNameLineEdit->text()));
+			}
+		);
+		return (QWidget *) layout;
 	}
 }
 
