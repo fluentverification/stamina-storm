@@ -16,7 +16,7 @@ namespace stamina {
 			 *
 			 * @param ragtimer_filename the (relative) filename of the ragtimer file to parse
 			 * */
-			DependencyGraph(std::string ragtimer_filename);
+			DependencyGraph(std::string ragtimerFilename);
 			/**
 			 * Builds a dependency graph from a built CRN
 			 *
