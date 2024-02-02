@@ -18,11 +18,15 @@ namespace stamina {
 			};
 			Crn(std::string ragtimerFilename);
 
+			uint16_t numberSpecies() const;
 		private:
 			Eigen::MatrixXd reactMatrix;
 			std::vector<Reaction> reactions;
 			Subspace & solutionSpace;
 			Subspace & reachableSpace;
+			std::map<std::string, uint16_t> nameToIdx;
+			std::string[] idxToName;
+			uint16_t numSpecies;
 		};
 	}
 }
