@@ -30,6 +30,8 @@ namespace stamina {
 			 * */
 			OrthSubspace(std::vector<std::pair<uint16_t, double>> speciesAndValues);
 			OrthSubspace(std::vector<Eigen::VectorXd> combinationVectors, Eigen::VectorXd translation) = delete;
+
+			double distance(Eigen::VectorXd vec) override;
 		}
 	} // namespace rare
 } // namespace stamina
