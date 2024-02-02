@@ -30,9 +30,18 @@ namespace stamina {
 			std::vector<std::vector<Crn::Reaction &>> getCycles();
 			std::vector<std::shared_ptr<Subspace>> buildSubspaces();
 
+		protected:
+			class Node {
+			public:
+				Node(const Crn::Reaction & reaction, std::vector<std::shared_ptr<Node>> successors);
+				void computeMld();
+				const Crn::Reaction & reaction;
+				std::vector<std::shared_ptr<Node>> successors;
+				uint16_t mld;
+			};
 		private:
 			std::shared_ptr<Crn> crn = nullptr;
-
+			std::shared_ptr<Node> root = nullptr;
 		};
 	} // namespace rare
 } // namespace stamina
