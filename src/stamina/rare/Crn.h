@@ -12,6 +12,7 @@ namespace stamina {
 			class Reaction {
 			public:
 				Reaction(std::string ragtimerLine, const Crn & parent);
+				Reaction(Eigen::VectorXd updateVec);
 
 				Eigen::VectorXd updateVector;
 				const Crn & parent;
@@ -20,6 +21,9 @@ namespace stamina {
 
 			uint16_t numberSpecies() const;
 		private:
+			Eigen::VectorXd ragtimerLineToVector(std::string line);
+			void createReaction(Eigen::VectorXd updateVec);
+
 			Eigen::MatrixXd reactMatrix;
 			std::vector<Reaction> reactions;
 			Subspace & solutionSpace;
