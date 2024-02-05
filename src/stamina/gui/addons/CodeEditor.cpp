@@ -132,7 +132,7 @@ CodeEditor::addWordToModel(QString word) {
 			}
 		}
 		if (!matched) {
-			StaminaMessages::info("Adding word to model: " + word.toStdString());
+			// StaminaMessages::info("Adding word to model: " + word.toStdString());
 			model->setStringList(model->stringList() << word);
 		}
 	}
@@ -142,7 +142,21 @@ CodeEditor::addWordToModel(QString word) {
 }
 
 void
-CodeEditor::resizeEvent(QResizeEvent *e)
+CodeEditor::setColorsFromScheme(highlighter::ColorScheme * colors) {
+	if (!hl) { return; }
+	hl->setColorsFromScheme(colors);
+	// Invoke the highlighter's event
+	hl->rehighlight();
+}
+
+highlighter::ColorScheme *
+CodeEditor::getColorsAsScheme() {
+	if (!hl) { return nullptr; }
+	return hl->getColorsAsScheme();
+}
+
+void
+CodeEditor::resizeEvent(QResizeEvent * e)
 {
 	QPlainTextEdit::resizeEvent(e);
 
@@ -457,6 +471,15 @@ CodeEditor::indentNextLine() {
 	// Insert indentation
 	for (int i = 0; i < indentationCount; i++) {
 		cursor.insertText(CodeEditor::indent);
+	}
+
+	// Insert comment if last line has it
+	if (lastLine.startsWith("//")) {
+		cursor.insertText("//");
+		// Some people, like me, like spaces after our single-line comments
+		if (lastLine.size() > 3 && lastLine[2] == ' ') {
+			cursor.insertText(" ");
+		}
 	}
 
 	this->setTextCursor(cursor);

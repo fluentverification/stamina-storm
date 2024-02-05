@@ -138,14 +138,19 @@ void StaminaMessages::debugPrint(std::string msg) {
 #endif
 
 void
-StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream & out) {
+StaminaMessages::writeResults(ResultInformation resultInformation, std::ostream & out, bool isEstimate) {
 	out.setf( std:: ios::floatfield );
 	out << std::fixed << std::setprecision(12);
 	out << horizontalSeparator << std::endl;
 	out << "RESULTS" << std::endl << horizontalSeparator << std::endl;
 	out << "Property: " << resultInformation.property << std::endl;
-	out << "Probability Minimum: " << resultInformation.pMin << std::endl;
-	out << "Probability Maximum: " << resultInformation.pMax << std::endl;
+	if (isEstimate) {
+		out << "Estimated Results: " << resultInformation.pMin << std::endl;
+	}
+	else {
+		out << "Probability Minimum: " << resultInformation.pMin << std::endl;
+		out << "Probability Maximum: " << resultInformation.pMax << std::endl;
+	}
 	out << "Window: " << (resultInformation.pMax - resultInformation.pMin) << std::endl;
 	out << horizontalSeparator << std::endl;
 	out << "Model: " << resultInformation.numberStates << " states with " << resultInformation.numberInitial << " initial." << std::endl;

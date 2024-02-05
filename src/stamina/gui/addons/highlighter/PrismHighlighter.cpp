@@ -45,11 +45,15 @@ PrismHighlighter::PrismHighlighter(QTextDocument * parent, bool darkMode)
 void
 PrismHighlighter::setupKeyWordPatterns() {
 	ColorScheme * cs;
-	if (darkMode) {
+	if (darkMode && !colorsWereSetup) {
 		cs = &ColorSchemes::darkMode;
 	}
-	else {
+	else if (!colorsWereSetup) {
 		cs = &ColorSchemes::lightMode;
+	}
+	else {
+		cs = getColorsAsScheme();
+		highlightingRules.clear();
 	}
 	HighlightingRule rule;
 
@@ -129,17 +133,18 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = classFormat;
 	highlightingRules.append(rule);
 
+	// Constants
+	constFormat.setFontItalic(true);
+	constFormat.setForeground(cs->constant);
+	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z0-9_]+\\b"));
+	rule.format = constFormat;
+	highlightingRules.append(rule);
+
 	// Numbers
 	numberFormat.setFontWeight(QFont::Bold);
 	numberFormat.setForeground(cs->number);
 	rule.pattern = QRegularExpression(QStringLiteral("\\b([eE\\.]?\\d+)"));
 	rule.format = numberFormat;
-	highlightingRules.append(rule);
-
-	// String literals
-	quotationFormat.setForeground(cs->string);
-	rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
-	rule.format = quotationFormat;
 	highlightingRules.append(rule);
 
 	// Functions
@@ -149,14 +154,7 @@ PrismHighlighter::setupKeyWordPatterns() {
 	rule.format = functionFormat;
 	highlightingRules.append(rule);
 
-	// Constants
-	constFormat.setFontItalic(true);
-	constFormat.setForeground(cs->constant);
-	rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z_]+\\b"));
-	rule.format = constFormat;
-	highlightingRules.append(rule);
-
-	// Keywords have highest priority, with the exception of comments and types
+	// Keywords have highest priority, with the exception of comments, strings, and types
 	for (const QString &pattern : keywordPatterns) {
 		rule.pattern = QRegularExpression(pattern);
 		rule.format = keywordFormat;
@@ -170,6 +168,12 @@ PrismHighlighter::setupKeyWordPatterns() {
 		highlightingRules.append(rule);
 	}
 
+	// String literals
+	quotationFormat.setForeground(cs->string);
+	rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
+	rule.format = quotationFormat;
+	highlightingRules.append(rule);
+
 	// Single line comments
 	singleLineCommentFormat.setForeground(cs->comment);
 	rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
@@ -181,6 +185,12 @@ PrismHighlighter::setupKeyWordPatterns() {
 
 	commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
 	commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
+	if (colorsWereSetup) {
+		delete cs;
+	}
+	else {
+		colorsWereSetup = true;
+	}
 }
 
 

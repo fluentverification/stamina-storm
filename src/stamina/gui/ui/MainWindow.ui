@@ -1211,7 +1211,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionProperties_File">
    <property name="icon">
     <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/file-plus.svg</normaloff>../resources/bootstrap-icons-1.10.5/file-plus.svg</iconset>
    </property>
    <property name="text">
     <string>Properties File</string>
@@ -1223,7 +1223,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionPRISM_Language">
    <property name="icon">
     <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/file-plus.svg</normaloff>../resources/bootstrap-icons-1.10.5/file-plus.svg</iconset>
    </property>
    <property name="text">
     <string>PRISM Language</string>
@@ -1235,7 +1235,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionJANI_Language">
    <property name="icon">
     <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/file-plus.svg</normaloff>../resources/bootstrap-icons-1.10.5/file-plus.svg</iconset>
    </property>
    <property name="text">
     <string>JANI Language</string>
@@ -1244,7 +1244,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionOpen">
    <property name="icon">
     <iconset theme="document-open">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/folder2-open.svg</normaloff>../resources/bootstrap-icons-1.10.5/folder2-open.svg</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -1256,7 +1256,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionSave">
    <property name="icon">
     <iconset theme="document-save">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/save.svg</normaloff>../resources/bootstrap-icons-1.10.5/save.svg</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -1268,7 +1268,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionSave_As">
    <property name="icon">
     <iconset theme="document-save-as">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/save.svg</normaloff>../resources/bootstrap-icons-1.10.5/save.svg</iconset>
    </property>
    <property name="text">
     <string>Save As</string>
@@ -1280,7 +1280,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionExport">
    <property name="icon">
     <iconset theme="document-export">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/box-arrow-down.svg</normaloff>../resources/bootstrap-icons-1.10.5/box-arrow-down.svg</iconset>
    </property>
    <property name="text">
     <string>Export</string>
@@ -1292,7 +1292,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionCut">
    <property name="icon">
     <iconset theme="edit-cut">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/scissors.svg</normaloff>../resources/bootstrap-icons-1.10.5/scissors.svg</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -1304,7 +1304,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionCopy">
    <property name="icon">
     <iconset theme="edit-copy">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/clipboard-plus.svg</normaloff>../resources/bootstrap-icons-1.10.5/clipboard-plus.svg</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -1316,7 +1316,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionPaste">
    <property name="icon">
     <iconset theme="edit-paste">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/clipboard.svg</normaloff>../resources/bootstrap-icons-1.10.5/clipboard.svg</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -1352,7 +1352,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionFind">
    <property name="icon">
     <iconset theme="document-find">
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff>../resources/bootstrap-icons-1.10.5/search.svg</normaloff>../resources/bootstrap-icons-1.10.5/search.svg</iconset>
    </property>
    <property name="text">
     <string>Find</string>
@@ -1840,7 +1840,8 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="text-wrap"/>
+    <iconset theme="text-wrap">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Word Wrap</string>

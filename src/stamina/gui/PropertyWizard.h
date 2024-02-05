@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_PROPERTY_WIZARD_H
-#define STAMINA_PROPERTY_WIZARD_H
+#ifndef STAMINA_GUI_PROPERTY_WIZARD_H
+#define STAMINA_GUI_PROPERTY_WIZARD_H
 
 #include <ui_PropertyWizard.h>
 
@@ -128,4 +128,4 @@ namespace stamina {
 		};
 	}
 }
-#endif // STAMINA_PROPERTY_WIZARD_H
+#endif // STAMINA_GUI_PROPERTY_WIZARD_H

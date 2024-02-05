@@ -26,6 +26,8 @@
 #include "ANSIColors.h"
 #include "core/StaminaMessages.h"
 
+#include <storm/exceptions/InvalidPropertyException.h>
+
 #include <stdlib.h>
 #include <iomanip>
 #include <stdlib.h>
@@ -102,18 +104,29 @@ Stamina::run(bool rebuild) {
 	}
 	// Check each property in turn
 	for (auto & prop : *propertiesVector) {
-		auto propMin = modelModify->modifyProperty(prop, true);
-		auto propMax = modelModify->modifyProperty(prop, false);
-		// Re-initialize
-		// initialize();
-		modelChecker->modelCheckProperty(
-			propMin
-			, propMax
-			, prop
-			, *modelFile
-			, fv
-			, rebuild
-		);
+		if (prop.getRawFormula()->isProbabilityOperatorFormula()) {
+			auto propMin = modelModify->modifyProperty(prop, true);
+			auto propMax = modelModify->modifyProperty(prop, false);
+			// Re-initialize
+			// initialize();
+			modelChecker->modelCheckProperty(
+				propMin
+				, propMax
+				, prop
+				, *modelFile
+				, fv
+				, rebuild
+			);
+		}
+		else {
+			StaminaMessages::warning("The formula is not a probability operator formula! STAMINA can only give an estimate of the value");
+			modelChecker->estimateResultProperty(
+				prop
+				, *modelFile
+				, fv
+				, rebuild
+			);
+		}
 	}
 	// Finished!
 	StaminaMessages::good("Finished running!");
@@ -181,14 +194,29 @@ Stamina::checkSingleProperty(const storm::jani::Property & property) {
 	auto propMax = modelModify->modifyProperty(property, false);
 	// Re-initialize
 	// initialize();
-	modelChecker->modelCheckProperty(
-		propMin
-		, propMax
-		, property
-		, *modelFile
-		, fv
-		, false // Do NOT rebuild
-	);
+	try {
+		modelChecker->modelCheckProperty(
+			propMin
+			, propMax
+			, property
+			, *modelFile
+			, fv
+			, false // Do NOT rebuild
+		);
+	}
+	catch (storm::exceptions::InvalidPropertyException & e) {
+		std::stringstream errMsg("Cannot check property with existing built model! Label does not exist:\n");
+		errMsg << e.what() << "\n(Don't worry, we will rebuild the model)";
+		StaminaMessages::error(errMsg.str());
+		modelChecker->modelCheckProperty(
+			propMin
+			, propMax
+			, property
+			, *modelFile
+			, fv
+			, true // We will need to rebuild
+		);
+	}
 }
 
 /* ===== IMPLEMENTATION FOR OTHER CLASSES IN THE `stamina` NAMESPACE ===== */

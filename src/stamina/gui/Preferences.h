@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_PREFERENCES_H
-#define STAMINA_PREFERENCES_H
+#ifndef STAMINA_GUI_PREFERENCES_H
+#define STAMINA_GUI_PREFERENCES_H
 
 #include <QDialog>
 #include <cstdint>
@@ -130,6 +130,9 @@ namespace stamina {
 			 * */
 			void setUIFromPreferences();
 			void getPreferencesFromUI();
+			void preloadColors();
+			void setColorsFromPrefs();
+
 			/**
 			 * Functions for reading and writing from the settings object
 			 * */
@@ -146,4 +149,4 @@ namespace stamina {
 	}
 }
 
-#endif // STAMINA_PREFERENCES_H
+#endif // STAMINA_GUI_PREFERENCES_H

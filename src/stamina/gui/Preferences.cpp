@@ -32,6 +32,7 @@ const std::string PrefInfo::prefPath = ".xstaminarc";
 
 Preferences::Preferences(QWidget * parent)
 	: QDialog(parent)
+	, window((Ui::MainWindow * ) parent)
 {
 	setupActions();
 	readSettingsFromFile();
@@ -50,12 +51,49 @@ Preferences::show(int tabIndex) {
 }
 
 void
+Preferences::preloadColors() {
+	StaminaMessages::info("Reading color scheme");
+	// ui.editorBaseColor->setColor(
+	auto colorScheme = window->modelFile->getColorsAsScheme();
+	if (colorScheme) {
+		ui.keywordColor->setColor(colorScheme->keyword);
+		ui.commentColor->setColor(colorScheme->comment);
+		ui.numberColor->setColor(colorScheme->number);
+		ui.typeColor->setColor(colorScheme->type);
+		ui.functionColor->setColor(colorScheme->function);
+		ui.stringColor->setColor(colorScheme->string);
+		ui.constantsColor->setColor(colorScheme->constant);
+		// colorScheme is not a QObject!
+		delete colorScheme;
+	}
+	else {
+		StaminaMessages::warning("Cannot set color scheme!");
+	}
+}
+
+void
+Preferences::setColorsFromPrefs() {
+	addons::highlighter::ColorScheme colorScheme(
+		ui.keywordColor->color()
+		, ui.commentColor->color()
+		, ui.numberColor->color()
+		, ui.typeColor->color()
+		, ui.functionColor->color()
+		, ui.stringColor->color()
+		, ui.constantsColor->color()
+	);
+	window->modelFile->setColorsFromScheme(&colorScheme);
+	window->propertiesEditor->setColorsFromScheme(&colorScheme);
+}
+
+void
 Preferences::accept() {
 	getPreferencesFromUI();
 	StaminaMessages::info("Updating accepted preferences");
 	setOptionsFromPreferences();
 	setUIFromPreferences();
 	writeSettingsToFile();
+	setColorsFromPrefs();
 	this->hide();
 }
 
@@ -216,6 +254,50 @@ Preferences::readSettingsFromFile() {
 	PrefInfo::General::useTabs = settings.value("useTabs", PrefInfo::General::useTabs) == "true";
 	ui.useTabs->setChecked(PrefInfo::General::useTabs);
 	settings.endGroup();
+	settings.beginGroup("SyntaxColors");
+	ui.keywordColor->setColor(
+		QColor(settings.value(
+			"keywords"
+			, ui.keywordColor->color().name()
+		).toString())
+	);
+	ui.commentColor->setColor(
+		QColor(settings.value(
+			"comments"
+			, ui.commentColor->color().name()
+		).toString())
+	);
+	ui.numberColor->setColor(
+		QColor(settings.value(
+			"numbers"
+			, ui.numberColor->color()
+		).toString())
+	);
+	ui.typeColor->setColor(
+		QColor(settings.value(
+			"types"
+			, ui.typeColor->color()
+		).toString())
+	);
+	ui.functionColor->setColor(
+		QColor(settings.value(
+			"functions"
+			, ui.functionColor->color()
+		).toString())
+	);
+	ui.stringColor->setColor(
+		QColor(settings.value(
+			"strings"
+			, ui.stringColor->color()
+		).toString())
+	);
+	ui.constantsColor->setColor(
+		QColor(settings.value(
+			"constants"
+			, ui.stringColor->color()
+		).toString())
+	);
+	settings.endGroup();
 }
 
 void
@@ -227,6 +309,17 @@ Preferences::writeSettingsToFile() {
 	settings.setValue("editorFontSize", PrefInfo::General::editorFont.pointSize());
 	settings.setValue("tabSize", PrefInfo::General::tabSize);
 	settings.setValue("useTabs", PrefInfo::General::useTabs);
+	settings.endGroup();
+	settings.beginGroup("SyntaxColors");
+
+	settings.setValue("keywords", ui.keywordColor->color().name());
+	settings.setValue("comments", ui.commentColor->color().name());
+	settings.setValue("numbers", ui.numberColor->color().name());
+	settings.setValue("types", ui.typeColor->color().name());
+	settings.setValue("functions", ui.functionColor->color().name());
+	settings.setValue("strings", ui.stringColor->color().name());
+	settings.setValue("constants", ui.constantsColor->color().name());
+
 	settings.endGroup();
 }
 

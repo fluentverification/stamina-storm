@@ -1,0 +1,8 @@
+[Desktop Entry]
+GenericName=CTMC Truncation Tool
+Type=Application
+Exec=xstamina
+Name=xSTAMINA
+Comment=Stochastic Approximate Model-checker for INfinite-state Analysis
+Keywords=ctmc;prism;markov;verification;biology;synthetic
+Icon=/usr/share/applications/staminaIcon.svg

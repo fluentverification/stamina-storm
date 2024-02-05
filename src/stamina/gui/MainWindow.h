@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_MAIN_WINDOW_H
-#define STAMINA_MAIN_WINDOW_H
+#ifndef STAMINA_GUI_MAIN_WINDOW_H
+#define STAMINA_GUI_MAIN_WINDOW_H
 
 #include <KXmlGuiWindow>
 #include <kfilecustomdialog.h>
@@ -142,4 +142,4 @@ namespace stamina {
 		};
 	} // namespace gui
 } // namespace stamina
-#endif // STAMINA_MAIN_WINDOW_H
+#endif // STAMINA_GUI_MAIN_WINDOW_H

@@ -21,8 +21,8 @@
  * Code editor with line numbers--extends QPlainTextEdit ~~KDE's KTextEdit~~
  * */
 
-#ifndef STAMINA_CODE_EDITOR_H
-#define STAMINA_CODE_EDITOR_H
+#ifndef STAMINA_GUI_ADDONS_CODE_EDITOR_H
+#define STAMINA_GUI_ADDONS_CODE_EDITOR_H
 
 #include <cstdint>
 #include <QTextEdit>
@@ -46,6 +46,8 @@ namespace stamina {
 				QCompleter * completer() const;
 				void setTabWidth(int numChars);
 				void addWordToModel(QString word);
+				void setColorsFromScheme(highlighter::ColorScheme * colors);
+				highlighter::ColorScheme * getColorsAsScheme();
 				static void setIndent(QString idt) { indent = idt; }
 				static QString getIndent() { return indent; }
 			public slots:
@@ -76,4 +78,4 @@ namespace stamina {
 		}
 	}
 }
-#endif // STAMINA_CODE_EDITOR_H
+#endif // STAMINA_GUI_ADDONS_CODE_EDITOR_H

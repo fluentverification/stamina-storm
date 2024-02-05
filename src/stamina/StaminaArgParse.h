@@ -115,9 +115,9 @@ static struct argp_option options[] = {
 };
 
 struct version {
-	static const uint8_t version_major = 0;
-	static const uint8_t version_minor = 2;
-	static const uint8_t version_sub_minor = 5;
+	static const uint8_t version_major =     STAMINA_VERSION_MAJOR;
+	static const uint8_t version_minor =     STAMINA_VERSION_MINOR;
+	static const uint8_t version_sub_minor = STAMINA_VERSION_PATCH;
 };
 
 /**

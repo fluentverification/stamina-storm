@@ -81,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
 	StaminaMessages::raiseExceptionsRatherThanExit = true;
 	ui.setupUi(this);
 	MessageBridge::logOutput = ui.logOutput;
+	MessageBridge::statusBar = ui.statusbar;
 	MessageBridge::initMessageBridge();
 	setupActions();
 	setup();
@@ -140,8 +141,13 @@ MainWindow::setup() {
 		QTextOption::WrapAnywhere : QTextOption::NoWrap
 	);
 	prefs->setMainWindow(&ui);
+	// TODO: This region is really hackey.
+	prefs->preloadColors();
+	prefs->readSettingsFromFile();
+	prefs->setColorsFromPrefs();
 	prefs->getPreferencesFromUI();
 	prefs->setUIFromPreferences();
+	prefs->setColorsFromPrefs();
 	// Set the default sizes for the splitters
 	// QList<int> modelSizes = ui.modelSplitter->sizes();
 	// // int totalSize = modelSizes[0] + modelSizes[1];
@@ -170,7 +176,7 @@ MainWindow::setupActions() {
 
 void
 MainWindow::setupFileActions() {
-	// New
+	// The "New" SubMenu
 	connect(
 		ui.actionPRISM_Language
 		, &QAction::triggered
@@ -1012,6 +1018,10 @@ MainWindow::saveToActiveModelFile() {
 		// unsavedChangesModel = false;
 		// setCaption(baseWindowTitle);
 		stayOpen = false;
+		if (s) {
+			delete s;
+			s = nullptr;
+		}
 	}
 	else {
 		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
@@ -1091,6 +1101,11 @@ MainWindow::openModelFromAcceptedPath() {
 			, i18n("There appears to be a property file in this directory with the same base name as the model file you opened. Would you like to open this property file as well?")
 			) == KMessageBox::Yes;
 			if (shouldOpenPropFile) {
+				// Get a new instance of MainWindow::s
+				if (s) {
+					delete s;
+					s = nullptr;
+				}
 				QString pFileName = QString::fromStdString(propFileName);
 				QFileInfo pInfo(pFileName);
 				activePropertiesFile = pFileName;
