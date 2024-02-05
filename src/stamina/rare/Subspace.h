@@ -1,17 +1,29 @@
 #ifndef STAMINA_RARE_SUBSPACE_H
 #define STAMINA_RARE_SUBSPACE_H
 
+#include <memory>
+
 namespace stamina {
 	namespace rare {
 		class Subspace {
+		public static:
+			void initializeStatic(uint16_t speciesCount);
+			void initializeScaling(std::shared_ptr<EigenMatrixXd> scaling);
+
+		protected static:
+			EigenVectorXd zero;
+			std::shared_ptr<EigenMatrixXd> scaling = nullptr;
+			std::unique_ptr<EigenMatrixXd> scalingInv = nullptr;
+			bool initialized = false;
+
 		public:
-			static EigenVectorXd zero;
 			Subspace(std::vector<Eigen::VectorXd> combinationVectors, Eigen::VectorXd translation = Subspace::zero);
 
 			uint16_t numSpecies() const;
 			uint16_t dimension() const;
 			const Eigen::MatrixXd & projectionMatrix();
 			virtual double distance(Eigen::VectorXd vec);
+
 		private:
 			std::vector<Eigen::VectorXd> combinationVectors;
 			Eigen::MatrixXd pMatrix;
