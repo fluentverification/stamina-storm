@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <string>
 
+#include "addons/highlighter/Highlighter.h"
 #include "stamina/core/Options.h"
 
 #include <ui_Preferences.h>
@@ -115,11 +116,14 @@ namespace stamina {
 		class Preferences : public QDialog {
 			Q_OBJECT
 		public:
+
 			Preferences(QWidget * parent = 0);
 			void show(int tabIndex = 0);
 			void accept() override;
 			Ui::MainWindow * getMainWindow() { return window; }
 			void setMainWindow(Ui::MainWindow * window) { this->window = window; }
+
+			void setupColorSchemes();
 			/**
 			 * Sets the "options" values in Stamina::core::Options
 			 * from the preferences selected on this window.
@@ -140,12 +144,15 @@ namespace stamina {
 			void writeSettingsToFile();
 		private slots:
 			void replaceAllIndentation();
+			void handleThemeChange(int index);
 		private:
 			void setupActions();
 			// Data members
 			Ui::Preferences ui;
 			Ui::MainWindow * window;
+			std::vector<std::pair<QString, addons::highlighter::ColorScheme>> themes;
 		};
+
 	}
 }
 

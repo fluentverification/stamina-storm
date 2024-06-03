@@ -471,7 +471,7 @@
              <item row="3" column="0">
               <widget class="QLabel" name="label_13">
                <property name="text">
-                <string>Keyword</string>
+                <string>Keywords</string>
                </property>
               </widget>
              </item>
@@ -492,7 +492,7 @@
              <item row="4" column="0">
               <widget class="QLabel" name="label_15">
                <property name="text">
-                <string>Comment</string>
+                <string>Comments</string>
                </property>
               </widget>
              </item>
@@ -548,7 +548,7 @@
              <item row="8" column="0">
               <widget class="QLabel" name="label_18">
                <property name="text">
-                <string>String</string>
+                <string>Strings</string>
                </property>
               </widget>
              </item>
@@ -562,7 +562,7 @@
              <item row="9" column="0">
               <widget class="QLabel" name="label_19">
                <property name="text">
-                <string>Constant</string>
+                <string>Constants</string>
                </property>
               </widget>
              </item>

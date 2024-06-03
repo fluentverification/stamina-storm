@@ -22,6 +22,8 @@
 #include <QMessageBox>
 #include <QSettings>
 
+#include "MessageBridge.h"
+#include "addons/highlighter/Highlighter.h"
 #include "stamina/StaminaArgParse.h"
 #include "stamina/core/StaminaMessages.h"
 
@@ -52,6 +54,7 @@ Preferences::show(int tabIndex) {
 
 void
 Preferences::preloadColors() {
+	setupColorSchemes();
 	StaminaMessages::info("Reading color scheme");
 	// ui.editorBaseColor->setColor(
 	auto colorScheme = window->modelFile->getColorsAsScheme();
@@ -350,6 +353,67 @@ Preferences::replaceAllIndentation() {
 	}
 
 	window->propertiesEditor->setTextCursor(oldCursProp);
+}
+
+void
+Preferences::setupColorSchemes() {
+	MessageBridge::info("Setting up color scheme options");
+	// Make sure we're empty
+	ui.themeComboBox->clear();
+
+	// Colorful theme
+	this->themes.push_back(
+		std::make_pair(
+			QString("Colorful")
+			, addons::highlighter::ColorScheme(
+				QColor("#00aaff")
+				, QColor("#919191")
+				, QColor("#ff4747")
+				, QColor("#0090bc")
+				, QColor("#629aa8")
+				, QColor("#ff9040")
+				, QColor("#3cbc00")
+			)
+		)
+	);
+	// Desaturated theme
+	this->themes.push_back(
+		std::make_pair(
+			QString("Desaturated")
+			, addons::highlighter::ColorScheme(
+				QColor("#b4e6ff")
+				, QColor("#919191")
+				, QColor("#ffb4b4")
+				, QColor("#85afbc")
+				, QColor("#506a70")
+				, QColor("#ffd3b4")
+				, QColor("#97bc85")
+			)
+		)
+	);
+
+	uint8_t index;
+	for (auto const & themePair : this->themes) {
+		QString themeName = themePair.first;
+		ui.themeComboBox->insertItem(index, themeName);
+		index++;
+	}
+
+	connect(
+		ui.themeComboBox
+		, SIGNAL(currentIndexChanged)
+		, this
+		, SLOT(handleThemeChange())
+	);
+}
+
+void
+Preferences::handleThemeChange(int index) {
+	addons::highlighter::ColorScheme & theme = this->themes[index].second;
+	MessageBridge::info(this->themes[index].first.toStdString() + " is new color scheme");
+	window->modelFile->setColorsFromScheme(&theme);
+	window->propertiesEditor->setColorsFromScheme(&theme);
+
 }
 
 } // namespace gui
