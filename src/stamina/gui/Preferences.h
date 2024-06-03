@@ -59,6 +59,8 @@ namespace stamina {
 				inline static uint8_t tabSize;
 				// Use tabs or spaces
 				inline static bool useTabs;
+				// Use desktop default colors (i.e., no stylesheet) for the editor
+				inline static bool useDesktopColors;
 			};
 			// "Model Building" tab
 			struct ModelBuilding {
@@ -144,7 +146,6 @@ namespace stamina {
 			void writeSettingsToFile();
 		private slots:
 			void replaceAllIndentation();
-			void handleThemeChange(int index);
 		private:
 			void setupActions();
 			// Data members

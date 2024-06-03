@@ -38,6 +38,7 @@ Preferences::Preferences(QWidget * parent)
 {
 	setupActions();
 	readSettingsFromFile();
+	setupColorSchemes();
 }
 
 void
@@ -54,7 +55,6 @@ Preferences::show(int tabIndex) {
 
 void
 Preferences::preloadColors() {
-	setupColorSchemes();
 	StaminaMessages::info("Reading color scheme");
 	// ui.editorBaseColor->setColor(
 	auto colorScheme = window->modelFile->getColorsAsScheme();
@@ -107,7 +107,7 @@ Preferences::setOptionsFromPreferences() {
 
 	// ModelBuilding tab Options
 	core::Options::kappa = PrefInfo::ModelBuilding::kappa;
-	core::Options::reduce_kappa =PrefInfo:: ModelBuilding::rKappa;
+	core::Options::reduce_kappa = PrefInfo:: ModelBuilding::rKappa;
 	core::Options::prob_win = PrefInfo::ModelBuilding::window;
 	core::Options::no_prop_refine = !PrefInfo::ModelBuilding::earlyTerminationProperty;
 	// TODO: maxIterations
@@ -141,6 +141,15 @@ Preferences::setUIFromPreferences() {
 	}
 	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
 	addons::CodeEditor::setIndent(indentation);
+	if (!ui.useDesktopDefaults->isChecked()) {
+		QString newStylesheet = "background-color: " + ui.backgroundColor->color().name() + ";\ncolor: " + ui.foregroundColor->color().name() + ";";
+		window->modelFile->setStyleSheet(newStylesheet);
+		window->propertiesEditor->setStyleSheet(newStylesheet);
+	}
+	else {
+		window->modelFile->setStyleSheet("");
+		window->propertiesEditor->setStyleSheet("");
+	}
 }
 
 void
@@ -300,6 +309,19 @@ Preferences::readSettingsFromFile() {
 			, ui.stringColor->color()
 		).toString())
 	);
+	ui.foregroundColor->setColor(
+		QColor(settings.value(
+			"editorForegroundColor"
+			, ui.foregroundColor->color()
+		).toString())
+	);
+	ui.backgroundColor->setColor(
+		QColor(settings.value(
+			"editorBackgroundColor"
+			, ui.backgroundColor->color()
+		).toString())
+	);
+	ui.useDesktopDefaults->setChecked(settings.value("useCustomEditorColors", true) == "true");
 	settings.endGroup();
 }
 
@@ -322,6 +344,9 @@ Preferences::writeSettingsToFile() {
 	settings.setValue("functions", ui.functionColor->color().name());
 	settings.setValue("strings", ui.stringColor->color().name());
 	settings.setValue("constants", ui.constantsColor->color().name());
+	settings.setValue("editorBackgroundColor", ui.backgroundColor->color());
+	settings.setValue("editorForegroundColor", ui.foregroundColor->color());
+	settings.setValue("useCustomEditorColors", ui.useDesktopDefaults->isChecked());
 
 	settings.endGroup();
 }
@@ -360,6 +385,21 @@ Preferences::setupColorSchemes() {
 	MessageBridge::info("Setting up color scheme options");
 	// Make sure we're empty
 	ui.themeComboBox->clear();
+	// Last custom theme
+	this->themes.push_back(
+		std::make_pair(
+			QString("Last Custom Settings")
+			, addons::highlighter::ColorScheme(
+				ui.keywordColor->color()
+				, ui.commentColor->color()
+				, ui.numberColor->color()
+				, ui.typeColor->color()
+				, ui.functionColor->color()
+				, ui.stringColor->color()
+				, ui.constantsColor->color()
+			)
+		)
+	);
 
 	// Colorful theme
 	this->themes.push_back(
@@ -401,18 +441,22 @@ Preferences::setupColorSchemes() {
 
 	connect(
 		ui.themeComboBox
-		, SIGNAL(currentIndexChanged)
+		, QOverload<int>::of(&QComboBox::currentIndexChanged)
 		, this
-		, SLOT(handleThemeChange())
+		, [this](int index) {
+			addons::highlighter::ColorScheme & theme = this->themes[index].second;
+			MessageBridge::info(this->themes[index].first.toStdString() + " is new color scheme");
+			// window->modelFile->setColorsFromScheme(&theme);
+			// window->propertiesEditor->setColorsFromScheme(&theme);
+			ui.keywordColor->setColor(theme.keyword);
+			ui.commentColor->setColor(theme.comment);
+			ui.numberColor->setColor(theme.number);
+			ui.typeColor->setColor(theme.type);
+			ui.functionColor->setColor(theme.function);
+			ui.stringColor->setColor(theme.string);
+			ui.constantsColor->setColor(theme.constant);
+		}
 	);
-}
-
-void
-Preferences::handleThemeChange(int index) {
-	addons::highlighter::ColorScheme & theme = this->themes[index].second;
-	MessageBridge::info(this->themes[index].first.toStdString() + " is new color scheme");
-	window->modelFile->setColorsFromScheme(&theme);
-	window->propertiesEditor->setColorsFromScheme(&theme);
 
 }
 
