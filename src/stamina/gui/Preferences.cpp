@@ -321,7 +321,10 @@ Preferences::readSettingsFromFile() {
 			, ui.backgroundColor->color()
 		).toString())
 	);
-	ui.useDesktopDefaults->setChecked(settings.value("useCustomEditorColors", true) == "true");
+	bool desktopDefaultColors = settings.value("useCustomEditorColors", true) == "true";
+	ui.useDesktopDefaults->setChecked(desktopDefaultColors);
+	ui.foregroundColor->setEnabled(!desktopDefaultColors);
+	ui.backgroundColor->setEnabled(!desktopDefaultColors);
 	settings.endGroup();
 }
 
@@ -455,6 +458,17 @@ Preferences::setupColorSchemes() {
 			ui.functionColor->setColor(theme.function);
 			ui.stringColor->setColor(theme.string);
 			ui.constantsColor->setColor(theme.constant);
+		}
+	);
+
+	connect(
+		ui.useDesktopDefaults
+		, &QCheckBox::clicked
+		, this
+		, [this](bool checked) {
+			ui.foregroundColor->setEnabled(!checked);
+			ui.backgroundColor->setEnabled(!checked);
+
 		}
 	);
 
