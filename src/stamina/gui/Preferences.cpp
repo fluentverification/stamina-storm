@@ -22,6 +22,7 @@
 #include <QMessageBox>
 #include <QSettings>
 
+#include "MainWindow.h"
 #include "MessageBridge.h"
 #include "addons/highlighter/Highlighter.h"
 #include "stamina/StaminaArgParse.h"
@@ -32,9 +33,10 @@ namespace gui {
 
 const std::string PrefInfo::prefPath = ".xstaminarc";
 
-Preferences::Preferences(QWidget * parent)
+Preferences::Preferences(QWidget * parent, MainWindow * parentWrapper)
 	: QDialog(parent)
 	, window((Ui::MainWindow * ) parent)
+	, windowWrapper(parentWrapper)
 {
 	setupActions();
 	readSettingsFromFile();
@@ -142,13 +144,16 @@ Preferences::setUIFromPreferences() {
 	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
 	addons::CodeEditor::setIndent(indentation);
 	if (!ui.useDesktopDefaults->isChecked()) {
-		QString newStylesheet = "background-color: " + ui.backgroundColor->color().name() + ";\ncolor: " + ui.foregroundColor->color().name() + ";";
-		window->modelFile->setStyleSheet(newStylesheet);
-		window->propertiesEditor->setStyleSheet(newStylesheet);
+		QString editorStylesheet = "background-color: " + ui.backgroundColor->color().name() + ";\ncolor: " + ui.foregroundColor->color().name() + ";";
+		QString uiStylesheet = "background-color: " + ui.uiBackground->color().name() + ";\ncolor: " + ui.uiForeground->color().name() + ";";
+		window->modelFile->setStyleSheet(editorStylesheet);
+		window->propertiesEditor->setStyleSheet(editorStylesheet);
+		windowWrapper->setStyleSheet(uiStylesheet);
 	}
 	else {
 		window->modelFile->setStyleSheet("");
 		window->propertiesEditor->setStyleSheet("");
+		windowWrapper->setStyleSheet("");
 	}
 }
 
@@ -321,10 +326,26 @@ Preferences::readSettingsFromFile() {
 			, ui.backgroundColor->color()
 		).toString())
 	);
+	ui.uiForeground->setColor(
+		QColor(settings.value(
+			"uiForegroundColor"
+			, ui.uiForeground->color()
+		).toString())
+	);
+	ui.uiBackground->setColor(
+		QColor(settings.value(
+			"uiBackgroundColor"
+			, ui.uiBackground->color()
+		).toString())
+	);
+
+
 	bool desktopDefaultColors = settings.value("useCustomEditorColors", true) == "true";
 	ui.useDesktopDefaults->setChecked(desktopDefaultColors);
 	ui.foregroundColor->setEnabled(!desktopDefaultColors);
 	ui.backgroundColor->setEnabled(!desktopDefaultColors);
+	ui.uiForeground->setEnabled(!desktopDefaultColors);
+	ui.uiBackground->setEnabled(!desktopDefaultColors);
 	settings.endGroup();
 }
 
@@ -349,6 +370,8 @@ Preferences::writeSettingsToFile() {
 	settings.setValue("constants", ui.constantsColor->color().name());
 	settings.setValue("editorBackgroundColor", ui.backgroundColor->color());
 	settings.setValue("editorForegroundColor", ui.foregroundColor->color());
+	settings.setValue("uiForegroundColor", ui.uiForeground->color());
+	settings.setValue("uiBackgroundColor", ui.uiBackground->color());
 	settings.setValue("useCustomEditorColors", ui.useDesktopDefaults->isChecked());
 
 	settings.endGroup();
@@ -468,7 +491,8 @@ Preferences::setupColorSchemes() {
 		, [this](bool checked) {
 			ui.foregroundColor->setEnabled(!checked);
 			ui.backgroundColor->setEnabled(!checked);
-
+			ui.uiForeground->setEnabled(!checked);
+			ui.uiBackground->setEnabled(!checked);
 		}
 	);
 

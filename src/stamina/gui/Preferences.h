@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <string>
 
+#include "MainWindow.h"
 #include "addons/highlighter/Highlighter.h"
 #include "stamina/core/Options.h"
 
@@ -32,6 +33,9 @@
 
 namespace stamina {
 	namespace gui {
+
+		// Forward declare
+		class MainWindow;
 
 		// A class that keeps track of preferences
 		class PrefInfo {
@@ -119,13 +123,17 @@ namespace stamina {
 			Q_OBJECT
 		public:
 
-			Preferences(QWidget * parent = 0);
+			Preferences(QWidget * parent = 0, MainWindow * parentWrapper = 0);
 			void show(int tabIndex = 0);
 			void accept() override;
 			Ui::MainWindow * getMainWindow() { return window; }
 			void setMainWindow(Ui::MainWindow * window) { this->window = window; }
 
 			void setupColorSchemes();
+			void setStyleSheet(QString sheet) {
+				ui.prefTabs->setStyleSheet(sheet);
+				ui.buttonBox->setStyleSheet(sheet);
+			}
 			/**
 			 * Sets the "options" values in Stamina::core::Options
 			 * from the preferences selected on this window.
@@ -151,6 +159,7 @@ namespace stamina {
 			// Data members
 			Ui::Preferences ui;
 			Ui::MainWindow * window;
+			MainWindow * windowWrapper;
 			std::vector<std::pair<QString, addons::highlighter::ColorScheme>> themes;
 		};
 

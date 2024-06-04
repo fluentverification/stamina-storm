@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, ofdp(new KFileCustomDialog(this))
 	, exportDialog(new KFileCustomDialog(this))
 	, about(new About(this))
-	, prefs(new Preferences(this))
+	, prefs(new Preferences(this, this))
 	, propWizard(new PropertyWizard(this))
 	, modelFindReplace(new FindReplace(this))
 	, propFindReplace(new FindReplace(this))
@@ -114,6 +114,17 @@ void
 MainWindow::setActivePropFileName(QString propFileName) {
 	this->activePropertiesFile = propFileName;
 }
+
+void
+MainWindow::setStyleSheet(QString sheet) {
+	ui.centralwidget->setStyleSheet(sheet);
+	ui.menubar->setStyleSheet(sheet);
+	ui.statusbar->setStyleSheet(sheet);
+	ui.mainToolBar->setStyleSheet(sheet);
+	prefs->setStyleSheet(sheet);
+	about->setStyleSheet(sheet);
+}
+
 
 void
 MainWindow::setup() {

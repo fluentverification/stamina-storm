@@ -40,6 +40,7 @@
 
 namespace stamina {
 	namespace gui {
+		class Preferences;
 
 		class MainWindow : public KXmlGuiWindow {
 			Q_OBJECT
@@ -48,6 +49,8 @@ namespace stamina {
 			MainWindow(QWidget * parent = 0);
 			void setActiveModelFileName(QString modelFileName);
 			void setActivePropFileName(QString propFileName);
+
+			void setStyleSheet(QString sheet);
 		private:
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();

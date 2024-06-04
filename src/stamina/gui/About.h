@@ -33,6 +33,9 @@ namespace stamina {
 			About(QWidget * parent = 0);
 			void show();
 			void hide();
+			void setStyleSheet(QString sheet) {
+				ui.tabWidget->setStyleSheet(sheet);
+			}
 		private:
 			void setupActions();
 			// Data members
