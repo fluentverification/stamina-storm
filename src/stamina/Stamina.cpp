@@ -97,7 +97,7 @@ Stamina::run(bool rebuild) {
 		initialize();
 	}
 	// Create formulas vector
-	std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
+	// std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
 	for (auto & prop : *propertiesVector) {
 		auto formula = prop.getFilter().getFormula();
 		fv.push_back(formula);
@@ -184,10 +184,11 @@ Stamina::reInitialize() {
 void
 Stamina::checkSingleProperty(const storm::jani::Property & property) {
 	// Create formulas vector
-	std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
-	for (auto & prop : *propertiesVector) {
-		auto formula = prop.getFilter().getFormula();
-		fv.push_back(formula);
+	if (fv.size() == 0) {
+		for (auto & prop : *propertiesVector) {
+			auto formula = prop.getFilter().getFormula();
+			fv.push_back(formula);
+		}
 	}
 
 	auto propMin = modelModify->modifyProperty(property, true);

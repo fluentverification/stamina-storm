@@ -79,6 +79,8 @@ namespace stamina {
 		std::shared_ptr<storm::prism::Program> modelFile;
 		std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
 		std::shared_ptr<util::ModelModify> modelModify;
+
+		std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
 		bool wasInitialized;
 	};
 }
