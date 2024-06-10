@@ -1,0 +1,30 @@
+<RCC>
+  <qresource prefix="bootstrap-dark">
+    <file>resources/bootstrap-icons-1.10.5/text-wrap.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/code-slash.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/diagram-2.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/unindent.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/indent.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/bug.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/info-circle.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/check-square.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/check-all.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/check.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/zoom-out.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/zoom-in.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/x-circle.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/gear.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/arrow-clockwise.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/arrow-counterclockwise.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/search.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/braces.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/braces-asterisk.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/clipboard.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/clipboard-plus.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/scissors.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/box-arrow-right.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/file-arrow-up.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/file-plus.svg</file>
+    <file>resources/bootstrap-icons-1.10.5/save.svg</file>
+  </qresource>
+</RCC>

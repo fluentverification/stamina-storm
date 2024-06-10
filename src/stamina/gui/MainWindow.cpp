@@ -43,7 +43,7 @@
 #include "MessageBridge.h"
 #include "GuiWorkerThread.h"
 
-#include <iostream>
+// #include <iostream>
 #include <regex>
 #include <filesystem>
 
