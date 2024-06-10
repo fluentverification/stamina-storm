@@ -136,6 +136,7 @@ set(UIC_UI_FILES
 
 set(GUI_RECS
 	${GUI_PREFIX}/resources.qrc
+	${GUI_PREFIX}/icons.qrc
 )
 
 option(STAMINA_BUILD_STORM "Build Storm in this directory and package with STAMINA" OFF)

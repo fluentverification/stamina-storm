@@ -123,6 +123,7 @@ MainWindow::setStyleSheet(QString sheet) {
 	ui.mainToolBar->setStyleSheet(sheet);
 	prefs->setStyleSheet(sheet);
 	about->setStyleSheet(sheet);
+
 }
 
 

@@ -278,8 +278,8 @@
                <string>Build Model and Check Properties</string>
               </property>
               <property name="icon">
-               <iconset theme="run-build">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="run-build" resource="../icons.qrc">
+                <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</iconset>
               </property>
               <property name="flat">
                <bool>true</bool>
@@ -1827,6 +1827,10 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionParse_Model">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</iconset>
+   </property>
    <property name="text">
     <string>Parse Model</string>
    </property>
