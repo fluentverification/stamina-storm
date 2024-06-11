@@ -127,6 +127,8 @@ Stamina::run(bool rebuild) {
 				, rebuild
 			);
 		}
+		// Once we've gone through one iteration, we don't need to rebuild
+		rebuild = false;
 	}
 	// Finished!
 	StaminaMessages::good("Finished running!");
