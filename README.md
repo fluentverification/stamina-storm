@@ -61,14 +61,14 @@ The basic syntax of running STAMINA is as follows:
 
 A new GUI is being written using QtWidgets5. This GUI will be called `xstamina` and will feature comprehensive access to all of the features of STAMINA, and will also include a few extra "goodies", such as help creating CSL properties and PRISM models.
 
-Some features of this new GUI include (or rather, *will include*:
+Some features of this new GUI include:
 	- PRISM File editing/CSL Properties editing
 	- Syntax highlighting for PRISM model files
 	- Direct "Check" button included in the GUI
-	- CSL Properties wizard
+	- (Planned) CSL Properties wizard
 	- Label Editor
 	- State viewer
-	- Counterexample viewer (to integrate with the other FLUENT projects)
+	- (Planned) Counterexample viewer (to integrate with the other FLUENT projects)
 
 ![xstamina screenshot](doc/screenshots/xstamina.png)
 
