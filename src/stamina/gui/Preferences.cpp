@@ -21,10 +21,12 @@
 
 #include <QMessageBox>
 #include <QSettings>
+#include <filesystem>
 
 #include "MainWindow.h"
 #include "MessageBridge.h"
 #include "addons/highlighter/Highlighter.h"
+#include "addons/CodeEditor.h"
 #include "stamina/StaminaArgParse.h"
 #include "stamina/core/StaminaMessages.h"
 
@@ -149,11 +151,20 @@ Preferences::setUIFromPreferences() {
 		window->modelFile->setStyleSheet(editorStylesheet);
 		window->propertiesEditor->setStyleSheet(editorStylesheet);
 		windowWrapper->setStyleSheet(uiStylesheet);
+		addons::CodeEditor::lineNumberAreaColor = ui.backgroundColor->color().darker(100);
+		addons::CodeEditor::lineColor = ui.backgroundColor->color().lighter(100);
+		window->modelFile->viewport()->repaint();
+		window->propertiesEditor->viewport()->repaint();
 	}
 	else {
 		window->modelFile->setStyleSheet("");
 		window->propertiesEditor->setStyleSheet("");
 		windowWrapper->setStyleSheet("");
+		addons::CodeEditor::lineNumberAreaColor = QColor(this->palette().color(QPalette::Window)).darker(100);
+		addons::CodeEditor::lineColor = this->palette().color(QPalette::AlternateBase);
+		window->modelFile->viewport()->repaint();
+		window->propertiesEditor->viewport()->repaint();
+
 	}
 }
 

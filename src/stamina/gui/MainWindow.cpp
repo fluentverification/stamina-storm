@@ -42,6 +42,7 @@
 
 #include "MessageBridge.h"
 #include "GuiWorkerThread.h"
+#include "addons/CodeEditor.h"
 
 // #include <iostream>
 #include <regex>
@@ -79,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	// Make it so StaminaMessages doesn't kill the program
 	StaminaMessages::raiseExceptionsRatherThanExit = true;
+	QGuiApplication::setPalette(this->palette());
 	ui.setupUi(this);
 	MessageBridge::logOutput = ui.logOutput;
 	MessageBridge::statusBar = ui.statusbar;
@@ -123,7 +125,6 @@ MainWindow::setStyleSheet(QString sheet) {
 	ui.mainToolBar->setStyleSheet(sheet);
 	prefs->setStyleSheet(sheet);
 	about->setStyleSheet(sheet);
-
 }
 
 

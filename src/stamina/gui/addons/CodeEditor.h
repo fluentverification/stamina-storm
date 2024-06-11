@@ -29,6 +29,7 @@
 #include <QPlainTextEdit>
 #include <QPainter>
 #include <QCompleter>
+#include <QGuiApplication>
 
 #include "highlighter/Highlighter.h"
 
@@ -50,6 +51,8 @@ namespace stamina {
 				highlighter::ColorScheme * getColorsAsScheme();
 				static void setIndent(QString idt) { indent = idt; }
 				static QString getIndent() { return indent; }
+				inline static QColor lineNumberAreaColor;
+				inline static QColor lineColor = QGuiApplication::palette().color(QPalette::AlternateBase);// QColor("#FF2222");
 			public slots:
 				void changeIndent(bool increase = true);
 				void changeComment(bool uncomment = false);

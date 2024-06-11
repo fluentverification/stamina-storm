@@ -51,6 +51,9 @@ CodeEditor::CodeEditor(QWidget * parent)
 	updateLineNumberAreaWidth(0);
 	highlightCurrentLine();
 
+	CodeEditor::lineNumberAreaColor = QColor(this->palette().color(QPalette::Window)).darker(100);
+	CodeEditor::lineColor = this->palette().color(QPalette::AlternateBase);
+	this->viewport()->repaint();
 // 	std::cout << "Amount of black in color palette is: " << this->palette().color(QPalette::AlternateBase).black() << std::endl;
 }
 
@@ -147,6 +150,7 @@ CodeEditor::setColorsFromScheme(highlighter::ColorScheme * colors) {
 	hl->setColorsFromScheme(colors);
 	// Invoke the highlighter's event
 	hl->rehighlight();
+
 }
 
 highlighter::ColorScheme *
@@ -174,8 +178,6 @@ CodeEditor::highlightCurrentLine()
 
 // 		QColor selectionColor = QPalette::Base; // selection.format.background().color();
 
-		QColor lineColor(this->palette().color(QPalette::AlternateBase));
-
 		selection.format.setBackground(lineColor);
 		selection.format.setProperty(QTextFormat::FullWidthSelection, true);
 		selection.cursor = textCursor();
@@ -189,7 +191,7 @@ CodeEditor::highlightCurrentLine()
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent * event)
 {
 	QPainter painter(lineNumberArea);
-	painter.fillRect(event->rect(), QColor(this->palette().color(QPalette::Window)).darker(100)); //  QColor(Qt::darkGray).darker(400)
+	painter.fillRect(event->rect(), lineNumberAreaColor); //  QColor(Qt::darkGray).darker(400)
 	QTextBlock block = firstVisibleBlock();
 	int blockNumber = block.blockNumber();
 	int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
