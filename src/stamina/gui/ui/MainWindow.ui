@@ -1075,6 +1075,24 @@ p, li { white-space: pre-wrap; }
      <addaction name="actionComment_Lines"/>
      <addaction name="actionUncomment_Lines"/>
     </widget>
+    <widget class="QMenu" name="menuFormatting">
+     <property name="title">
+      <string>Formatting</string>
+     </property>
+     <widget class="QMenu" name="menuCase">
+      <property name="title">
+       <string>Capitalization</string>
+      </property>
+      <property name="icon">
+       <iconset theme="format-text-capitalize"/>
+      </property>
+      <addaction name="actionTitle_Case"/>
+      <addaction name="actionLower_Case"/>
+      <addaction name="actionCapital_Case"/>
+     </widget>
+     <addaction name="actionTrim_Whitespace"/>
+     <addaction name="menuCase"/>
+    </widget>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
@@ -1090,6 +1108,8 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionIncrease_Indent"/>
     <addaction name="actionDecrease_Indent"/>
     <addaction name="menuToggle_Comment"/>
+    <addaction name="separator"/>
+    <addaction name="menuFormatting"/>
     <addaction name="separator"/>
     <addaction name="actionWord_Wrap"/>
     <addaction name="separator"/>
@@ -1869,6 +1889,44 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Word Wrap</string>
+   </property>
+  </action>
+  <action name="actionTrim_Whitespace">
+   <property name="text">
+    <string>Trim Whitespace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Space</string>
+   </property>
+  </action>
+  <action name="actionTitle_Case">
+   <property name="icon">
+    <iconset theme="format-text-capitalize"/>
+   </property>
+   <property name="text">
+    <string>Title Case</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+U</string>
+   </property>
+  </action>
+  <action name="actionLower_Case">
+   <property name="icon">
+    <iconset theme="format-text-lowercase"/>
+   </property>
+   <property name="text">
+    <string>lower case</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+U</string>
+   </property>
+  </action>
+  <action name="actionCapital_Case">
+   <property name="text">
+    <string>CAPITAL CASE</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
    </property>
   </action>
  </widget>

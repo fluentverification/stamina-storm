@@ -534,6 +534,93 @@ MainWindow::setupEditActions() {
 		, this
 		, SLOT(showPreferences())
 	);
+	connect(
+		ui.actionTitle_Case
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				QString titleCase = selection.toLower();
+				// Convert to title case
+				titleCase[0] = titleCase[0].toUpper();
+				for (uint16_t i = 1; i < titleCase.length(); ++i) {
+					if (titleCase[i - 1].isSpace()) {
+						titleCase[i] = titleCase[i].toUpper();
+					}
+				}
+				c.insertText(titleCase);
+			}
+		}
+	);
+	connect(
+		ui.actionLower_Case
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				QString lowerCase = selection.toLower();
+				// Convert to lower case
+				c.insertText(lowerCase);
+			}
+		}
+	);
+	connect(
+		ui.actionCapital_Case
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				QString upperCase = selection.toUpper();
+				c.insertText(upperCase);
+			}
+		}
+	);
+	connect(
+		ui.actionTrim_Whitespace
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			QRegularExpression whiteSpaceRegex = QRegularExpression("\\s*$");
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				selection.replace(whiteSpaceRegex, "");
+				c.insertText(selection);
+			}
+			// Otherwise we want to do this to the whole document
+			else {
+				QString content = textEdit->toPlainText();
+				content.replace(whiteSpaceRegex, "");
+				textEdit->setPlainText(content);
+			}
+		}
+	);
 }
 
 void
