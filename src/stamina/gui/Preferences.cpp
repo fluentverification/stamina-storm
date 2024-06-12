@@ -146,22 +146,22 @@ Preferences::setUIFromPreferences() {
 	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
 	addons::CodeEditor::setIndent(indentation);
 	if (!ui.useDesktopDefaults->isChecked()) {
+		addons::CodeEditor::lineNumberAreaColor = ui.backgroundColor->color().darker(100);
+		addons::CodeEditor::lineColor = ui.backgroundColor->color().lighter(100);
 		QString editorStylesheet = "background-color: " + ui.backgroundColor->color().name() + ";\ncolor: " + ui.foregroundColor->color().name() + ";";
 		QString uiStylesheet = "background-color: " + ui.uiBackground->color().name() + ";\ncolor: " + ui.uiForeground->color().name() + ";";
 		window->modelFile->setStyleSheet(editorStylesheet);
 		window->propertiesEditor->setStyleSheet(editorStylesheet);
 		windowWrapper->setStyleSheet(uiStylesheet);
-		addons::CodeEditor::lineNumberAreaColor = ui.backgroundColor->color().darker(100);
-		addons::CodeEditor::lineColor = ui.backgroundColor->color().lighter(100);
 		window->modelFile->viewport()->repaint();
 		window->propertiesEditor->viewport()->repaint();
 	}
 	else {
+		addons::CodeEditor::lineNumberAreaColor = QColor(this->palette().color(QPalette::Window)).darker(100);
+		addons::CodeEditor::lineColor = this->palette().color(QPalette::AlternateBase);
 		window->modelFile->setStyleSheet("");
 		window->propertiesEditor->setStyleSheet("");
 		windowWrapper->setStyleSheet("");
-		addons::CodeEditor::lineNumberAreaColor = QColor(this->palette().color(QPalette::Window)).darker(100);
-		addons::CodeEditor::lineColor = this->palette().color(QPalette::AlternateBase);
 		window->modelFile->viewport()->repaint();
 		window->propertiesEditor->viewport()->repaint();
 

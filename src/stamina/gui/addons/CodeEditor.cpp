@@ -53,7 +53,6 @@ CodeEditor::CodeEditor(QWidget * parent)
 
 	CodeEditor::lineNumberAreaColor = QColor(this->palette().color(QPalette::Window)).darker(100);
 	CodeEditor::lineColor = this->palette().color(QPalette::AlternateBase);
-	this->viewport()->repaint();
 // 	std::cout << "Amount of black in color palette is: " << this->palette().color(QPalette::AlternateBase).black() << std::endl;
 }
 
@@ -454,9 +453,9 @@ CodeEditor::indentNextLine() {
 			int nextIndentPos = getNextPosition(indentable);
 			// If the next instance of `module` is sooner than the next instance of endmodule
 			if (nextIndentPos < nextEndPos || nextEndPos == END_OF_DOCUMENT) {
-				StaminaMessages::info("Line starts with: "
+				/*StaminaMessages::info("Line starts with: "
 					+ lastLine.toStdString() + " so inserting end (positions: "
-					+ std::to_string(nextIndentPos) + " / " + std::to_string(nextEndPos) + ")");
+					+ std::to_string(nextIndentPos) + " / " + std::to_string(nextEndPos) + ")");*/
 				// Insert indentation
 				cursor.insertBlock(format);
 				for (int i = 0; i < indentationCount; i++) {

@@ -49,8 +49,11 @@ namespace stamina {
 				void addWordToModel(QString word);
 				void setColorsFromScheme(highlighter::ColorScheme * colors);
 				highlighter::ColorScheme * getColorsAsScheme();
+				void refresh() { highlightCurrentLine(); }
+
 				static void setIndent(QString idt) { indent = idt; }
 				static QString getIndent() { return indent; }
+
 				inline static QColor lineNumberAreaColor;
 				inline static QColor lineColor = QGuiApplication::palette().color(QPalette::AlternateBase);// QColor("#FF2222");
 			public slots:
