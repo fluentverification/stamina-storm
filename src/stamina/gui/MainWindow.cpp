@@ -2011,7 +2011,6 @@ MainWindow::handleTabChange() {
 
 void
 MainWindow::populateRecentFiles() {
-	core::StaminaMessages::info("populating recent files");
 	QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
 	// QStringList recentFileList;
 	for (uint8_t i = 0; i < NUMBER_RECENT_FILES; ++i) {
