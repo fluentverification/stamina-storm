@@ -1027,6 +1027,9 @@ p, li { white-space: pre-wrap; }
      <property name="title">
       <string>Open Recent</string>
      </property>
+     <property name="icon">
+      <iconset theme="document-open-recent"/>
+     </property>
      <addaction name="actionClear_Recent_Files"/>
      <addaction name="separator"/>
      <addaction name="actionNo_Recent_Files"/>

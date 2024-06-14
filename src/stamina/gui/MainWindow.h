@@ -126,7 +126,7 @@ namespace stamina {
 		private slots:
 			void showPreferences();
 			void openModelFile();
-			void openModelFromAcceptedPath();
+			void openModelFromAcceptedPath(QString pathOverride="");
 			void openPropertyFromAcceptedPath();
 			void saveModelFile();
 			void saveModelFileAs();

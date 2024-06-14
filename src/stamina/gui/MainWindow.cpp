@@ -51,7 +51,6 @@
 namespace stamina {
 namespace gui {
 
-
 MainWindow::MainWindow(QWidget *parent)
 	: KXmlGuiWindow(parent)
 	, sfdm(new KFileCustomDialog(this))
@@ -1222,9 +1221,9 @@ MainWindow::openModelFile() {
 }
 
 void
-MainWindow::openModelFromAcceptedPath() {
-	QString selectedFile = ofdm->fileWidget()->selectedFile();
-	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
+MainWindow::openModelFromAcceptedPath(QString pathOverride) {
+	QString selectedFile = pathOverride == "" ? ofdm->fileWidget()->selectedFile() : pathOverride;
+	StaminaMessages::info("Opening file " + selectedFile.toStdString());
 	activeModelFile = selectedFile;
 	if (selectedFile != "") {
 		mustRebuildModel = true;
@@ -1276,7 +1275,9 @@ MainWindow::openModelFromAcceptedPath() {
 	if (existingFileActionPair != recentFiles.end()) {
 		// Bring existing file pair to beginning of list
 		std::rotate(recentFiles.begin(), existingFileActionPair, existingFileActionPair + 1);
-		// TODO: update UI
+		// update UI
+		ui.menuOpen_Recent->removeAction(existingFileActionPair->second);
+		ui.menuOpen_Recent->addAction(existingFileActionPair->second);
 		return;
 	}
 	// If we reach this point, it wasn't in the existing list
@@ -1294,7 +1295,7 @@ MainWindow::openModelFromAcceptedPath() {
 	connect(openAction, &QAction::triggered, this, [this, selectedFile]() {
 		// Hackey but what the hell
 		this->ofdm->fileWidget()->setSelectedUrl(QUrl(selectedFile));
-		openModelFromAcceptedPath();
+		openModelFromAcceptedPath(selectedFile);
 	});
 	ui.menuOpen_Recent->addAction(openAction);
 	recentFiles.emplace(recentFiles.begin(), std::make_pair(selectedFile, openAction));
@@ -2020,7 +2021,7 @@ MainWindow::populateRecentFiles() {
 		connect(openAction, &QAction::triggered, this, [this, file]() {
 			// Hackey but what the hell
 			this->ofdm->fileWidget()->setSelectedUrl(QUrl(file));
-			openModelFromAcceptedPath();
+			openModelFromAcceptedPath(file);
 		});
 		ui.menuOpen_Recent->addAction(openAction);
 		recentFiles.emplace(recentFiles.begin(), std::make_pair(file, openAction));
