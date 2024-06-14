@@ -350,6 +350,23 @@ MainWindow::setupFileActions() {
 			exit(0);
 		}
 	);
+
+	connect(
+		ui.actionClear_Recent_Files
+		, &QAction::triggered
+		, this
+		, [this]() {
+			// Delete the list of recent files stored on disk
+			QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
+			recentFileSettings.clear();
+			for (auto & fileActionPair : recentFiles) {
+				this->ui.menuOpen_Recent->removeAction(fileActionPair.second);
+				delete fileActionPair.second;
+			}
+			recentFiles.clear();
+			ui.actionNo_Recent_Files->setVisible(true);
+		}
+	);
 }
 
 void
@@ -1994,6 +2011,7 @@ MainWindow::handleTabChange() {
 
 void
 MainWindow::populateRecentFiles() {
+	core::StaminaMessages::info("populating recent files");
 	QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
 	// QStringList recentFileList;
 	for (uint8_t i = 0; i < NUMBER_RECENT_FILES; ++i) {
@@ -2005,6 +2023,9 @@ MainWindow::populateRecentFiles() {
 			this->ofdm->fileWidget()->setSelectedUrl(QUrl(file));
 			openModelFromAcceptedPath();
 		});
+		ui.menuOpen_Recent->addAction(openAction);
+		recentFiles.emplace(recentFiles.begin(), std::make_pair(file, openAction));
+		ui.actionNo_Recent_Files->setVisible(false);
 	}
 }
 
