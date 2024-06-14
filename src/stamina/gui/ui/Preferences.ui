@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>780</width>
+    <width>820</width>
     <height>899</height>
    </rect>
   </property>
@@ -382,6 +382,12 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="toolTip">
+                  <string>UI Foreground Color</string>
+                 </property>
+                 <property name="text">
+                  <string>Foreground</string>
+                 </property>
                  <property name="flat">
                   <bool>true</bool>
                  </property>
@@ -405,6 +411,12 @@
                 <widget class="KColorButton" name="backgroundColor">
                  <property name="enabled">
                   <bool>true</bool>
+                 </property>
+                 <property name="toolTip">
+                  <string>UI Background Color</string>
+                 </property>
+                 <property name="text">
+                  <string>Background</string>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
@@ -584,6 +596,12 @@
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
                 <widget class="KColorButton" name="uiForeground">
+                 <property name="toolTip">
+                  <string>UI Foreground Color</string>
+                 </property>
+                 <property name="text">
+                  <string>Foreground</string>
+                 </property>
                  <property name="color">
                   <color>
                    <red>255</red>
@@ -594,7 +612,14 @@
                 </widget>
                </item>
                <item>
-                <widget class="KColorButton" name="uiBackground"/>
+                <widget class="KColorButton" name="uiBackground">
+                 <property name="toolTip">
+                  <string>UI Background Color</string>
+                 </property>
+                 <property name="text">
+                  <string>Background</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>

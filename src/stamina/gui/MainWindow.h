@@ -40,6 +40,7 @@
 
 namespace stamina {
 	namespace gui {
+		const uint8_t NUMBER_RECENT_FILES = 5;
 		class Preferences;
 
 		class MainWindow : public KXmlGuiWindow {
@@ -71,6 +72,7 @@ namespace stamina {
 			void populateModelInformationTree(std::shared_ptr<storm::prism::Program> program);
 			void initializeModel();
 			void populateTruncatedStates();
+			void populateRecentFiles();
 
 		private:
 			Stamina * s;
@@ -110,6 +112,10 @@ namespace stamina {
 			QFuture<void> staminaJob;
 			// Hackey way to get the file dialog to stay open
 			bool stayOpen;
+			// Actions to open recent files. Each element is a pair
+			// containing the filename as a string and the action which opens that file
+			std::vector<std::pair<QString, QAction *>> recentFiles;
+
 			int modZoom = 0;
 			int propZoom = 0;
 			// If the model has been changed and should be rebuilt
@@ -142,6 +148,7 @@ namespace stamina {
 			// Method that gets a model from a filename
 			QAbstractItemModel * modelFromFile(const QString & fileName, QCompleter * completer);
 			void exportCSV();
+			void saveRecentFiles();
 		};
 	} // namespace gui
 } // namespace stamina

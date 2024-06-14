@@ -1023,8 +1023,17 @@ p, li { white-space: pre-wrap; }
      <addaction name="actionImport_JANI"/>
      <addaction name="actionImport_SBML"/>
     </widget>
+    <widget class="QMenu" name="menuOpen_Recent">
+     <property name="title">
+      <string>Open Recent</string>
+     </property>
+     <addaction name="actionClear_Recent_Files"/>
+     <addaction name="separator"/>
+     <addaction name="actionNo_Recent_Files"/>
+    </widget>
     <addaction name="menuNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="menuOpen_Recent"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
@@ -1084,7 +1093,8 @@ p, li { white-space: pre-wrap; }
        <string>Capitalization</string>
       </property>
       <property name="icon">
-       <iconset theme="format-text-capitalize"/>
+       <iconset theme="format-text-capitalize">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <addaction name="actionTitle_Case"/>
       <addaction name="actionLower_Case"/>
@@ -1901,7 +1911,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionTitle_Case">
    <property name="icon">
-    <iconset theme="format-text-capitalize"/>
+    <iconset theme="format-text-capitalize">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Title Case</string>
@@ -1912,7 +1923,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionLower_Case">
    <property name="icon">
-    <iconset theme="format-text-lowercase"/>
+    <iconset theme="format-text-lowercase">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>lower case</string>
@@ -1927,6 +1939,23 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+U</string>
+   </property>
+  </action>
+  <action name="actionClear_Recent_Files">
+   <property name="icon">
+    <iconset theme="delete" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Recent Files</string>
+   </property>
+  </action>
+  <action name="actionNo_Recent_Files">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>No Recent Files</string>
    </property>
   </action>
  </widget>

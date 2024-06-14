@@ -267,7 +267,7 @@ Preferences::getPreferencesFromUI() {
 
 void
 Preferences::readSettingsFromFile() {
-	QSettings settings(QSettings::UserScope, "FLUENT Verification", "xSTAMINA");
+	QSettings settings(QSettings::UserScope, "xSTAMINA", "xSTAMINA");
 	StaminaMessages::info("Reading preferences from: " + settings.fileName().toStdString());
 	settings.beginGroup("General");
 	getPreferencesFromUI();
@@ -362,7 +362,7 @@ Preferences::readSettingsFromFile() {
 
 void
 Preferences::writeSettingsToFile() {
-	QSettings settings(QSettings::UserScope, "FLUENT Verification", "xSTAMINA");
+	QSettings settings(QSettings::UserScope, "xSTAMINA", "xSTAMINA");
 	StaminaMessages::info("Writing preferences to: " + settings.fileName().toStdString());
 	settings.beginGroup("General");
 	settings.setValue("editorFontFamily", PrefInfo::General::editorFont.family());

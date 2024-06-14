@@ -105,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
 	killButton->setFlat(true);
 	ui.earlyTerminatedGroup->hide();
 	ui.constantsGroup->hide();
+	populateRecentFiles();
 }
 
 void
@@ -267,6 +268,29 @@ MainWindow::setupFileActions() {
 			else if (idx == 1) { this->savePropertyFileAs(); }
 		}
 	);
+
+	connect(
+		ui.actionImport_JANI
+		, &QAction::triggered
+		, this
+		, [this] () {
+			// storm::jani::Model janiModel = /* TODO */;
+			// std::vector<storm::jani::Property> props;
+			// std::stringstream ss;
+			// storm::api::printJaniToStream(janiModel,
+			KMessageBox::error(this, "Not implemented!");
+		}
+	);
+
+	connect(
+		ui.actionImport_SBML
+		, &QAction::triggered
+		, this
+		, [this] () {
+			KMessageBox::error(this, "Not implemented!");
+		}
+	);
+
 	connect(
 		ui.actionExport
 		, &QAction::triggered
@@ -1225,6 +1249,39 @@ MainWindow::openModelFromAcceptedPath() {
 		, 0
 		, 0
 	);
+	// Update recent files
+	auto existingFileActionPair = std::find_if(
+		recentFiles.begin()
+		, recentFiles.end()
+		, [&selectedFile](std::pair<QString, QAction *> fileActionPair) -> bool {
+			return selectedFile == fileActionPair.first;
+		});
+	if (existingFileActionPair != recentFiles.end()) {
+		// Bring existing file pair to beginning of list
+		std::rotate(recentFiles.begin(), existingFileActionPair, existingFileActionPair + 1);
+		// TODO: update UI
+		return;
+	}
+	// If we reach this point, it wasn't in the existing list
+	// We should evict the last element
+	if (recentFiles.size() >= NUMBER_RECENT_FILES) {
+		auto & evictedRecentFile = recentFiles.back();
+		recentFiles.pop_back();
+		if (evictedRecentFile.second) {
+			ui.menuOpen_Recent->removeAction(evictedRecentFile.second);
+			delete evictedRecentFile.second;
+		}
+	}
+	// Add new element
+	QAction * openAction = new QAction(selectedFile, this); // TODO: maybe not like to have full path in UI
+	connect(openAction, &QAction::triggered, this, [this, selectedFile]() {
+		// Hackey but what the hell
+		this->ofdm->fileWidget()->setSelectedUrl(QUrl(selectedFile));
+		openModelFromAcceptedPath();
+	});
+	ui.menuOpen_Recent->addAction(openAction);
+	recentFiles.emplace(recentFiles.begin(), std::make_pair(selectedFile, openAction));
+	ui.actionNo_Recent_Files->setVisible(false);
 }
 
 void
@@ -1437,6 +1494,7 @@ MainWindow::setActivePropertyFileAndSave() {
 void
 MainWindow::closeEvent(QCloseEvent *event) {
 	handleClose();
+	saveRecentFiles();
 }
 
 void
@@ -1931,6 +1989,34 @@ MainWindow::handleTabChange() {
 		this->ui.actionModel_Editor->setChecked(false);
 		this->ui.actionProperties_Editor->setChecked(false);
 		this->ui.actionResults_Viewer->setChecked(false);
+	}
+}
+
+void
+MainWindow::populateRecentFiles() {
+	QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
+	// QStringList recentFileList;
+	for (uint8_t i = 0; i < NUMBER_RECENT_FILES; ++i) {
+		QString file = recentFileSettings.value(QString("recentFile") + QString::number(i)).toString();
+		if (file == "") { continue; }
+		QAction * openAction = new QAction(file, this); // TODO: maybe not like to have full path in UI
+		connect(openAction, &QAction::triggered, this, [this, file]() {
+			// Hackey but what the hell
+			this->ofdm->fileWidget()->setSelectedUrl(QUrl(file));
+			openModelFromAcceptedPath();
+		});
+	}
+}
+
+void
+MainWindow::saveRecentFiles() {
+	QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
+	uint8_t i;
+	for (auto & fileActionPair : recentFiles) {
+		QString file = fileActionPair.first;
+		recentFileSettings.setValue(QString("recentFile") + QString::number(i), file);
+		++i;
+		// We are calling this at the end of the application's lifetime, so no need to delete the QActions
 	}
 }
 
