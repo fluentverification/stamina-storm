@@ -368,7 +368,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	, boost::optional<storm::storage::sparse::StateValuationsBuilder>& stateValuationsBuilder
 ) {
 	piHat = 1.0;
-	numberTransitions = 0;
+	// numberTransitions = 0;
 	// Builds model
 	// Initialize building state valuations (if necessary)
 	if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
@@ -571,7 +571,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 						if (!nextProbabilityState->isPreTerminated()) {
 							// Our state is not pre-terminated
 							this->createTransition(currentIndex, sPrime, stateProbabilityPair.second);
-							numberTransitions++;
+							// numberTransitions++;
 						}
 						else {
 							if (!nextProbabilityState->preTerminatedTransitions) {
