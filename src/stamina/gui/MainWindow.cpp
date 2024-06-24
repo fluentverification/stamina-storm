@@ -44,7 +44,7 @@
 #include "GuiWorkerThread.h"
 #include "addons/CodeEditor.h"
 
-// #include <iostream>
+#include <iostream>
 #include <regex>
 #include <filesystem>
 
@@ -646,6 +646,7 @@ MainWindow::setupEditActions() {
 		, [this]() {
 			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
 			QRegularExpression whiteSpaceRegex = QRegularExpression("\\s*$");
+			// QRegularExpression whiteSpaceRegex2 = QRegularExpression("\\s*\n");
 			auto & textEdit =
 				this->ui.mainTabs->currentIndex() == 0
 				? this->ui.modelFile
@@ -654,13 +655,29 @@ MainWindow::setupEditActions() {
 			if (c.hasSelection()) {
 				QString selection = c.selectedText();
 				selection.replace(whiteSpaceRegex, "");
-				c.insertText(selection);
+				std::cout << "selection: " << selection.toStdString();
+				QString newSelectionText = "";
+				for (auto & line : selection.split(QRegExp("[\r\n]"), QString::SkipEmptyParts)) {
+					line.replace(whiteSpaceRegex, "");
+					std::cout << line.toStdString() << std::endl;
+					newSelectionText += line;
+				}
+				// selection.replace(whiteSpaceRegex2, "\n");
+				c.insertText(newSelectionText);
 			}
 			// Otherwise we want to do this to the whole document
 			else {
 				QString content = textEdit->toPlainText();
 				content.replace(whiteSpaceRegex, "");
-				textEdit->setPlainText(content);
+				QString newContent = "";
+				std::cout << "content: " << content.toStdString();
+				for (auto & line : content.split(QRegExp("[\r\n]"), QString::SkipEmptyParts)) {
+					line.replace(whiteSpaceRegex, "");
+					std::cout << line.toStdString() << std::endl;
+					newContent += line;
+				}
+				// content.replace(whiteSpaceRegex2, "\n");
+				textEdit->setPlainText(newContent);
 			}
 		}
 	);
