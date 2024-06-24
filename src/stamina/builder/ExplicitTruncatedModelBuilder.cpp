@@ -403,7 +403,7 @@ storm::storage::sparse::ModelComponents<ValueType, RewardModelType> ExplicitTrun
     }
     // If requested, build the state valuations and choice origins
     if (stateAndChoiceInformationBuilder.isBuildStateValuations()) {
-        modelComponents.stateValuations = stateAndChoiceInformationBuilder.stateValuationsBuilder().build(numStates);
+        modelComponents.stateValuations = stateAndChoiceInformationBuilder.stateValuationsBuilder().build();
     }
     if (stateAndChoiceInformationBuilder.isBuildChoiceOrigins()) {
         auto originData = stateAndChoiceInformationBuilder.buildDataOfChoiceOrigins(numChoices);
