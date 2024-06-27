@@ -1028,7 +1028,8 @@ p, li { white-space: pre-wrap; }
       <string>Open Recent</string>
      </property>
      <property name="icon">
-      <iconset theme="document-open-recent"/>
+      <iconset theme="document-open-recent">
+       <normaloff>.</normaloff>.</iconset>
      </property>
      <addaction name="actionClear_Recent_Files"/>
      <addaction name="separator"/>
@@ -1069,9 +1070,11 @@ p, li { white-space: pre-wrap; }
       <property name="title">
        <string>Properties</string>
       </property>
-      <addaction name="actionForever_Property"/>
+      <addaction name="actionGlobal_Property"/>
       <addaction name="actionUntil_Property"/>
       <addaction name="actionBounded_Until_Property"/>
+      <addaction name="actionEventually_Property"/>
+      <addaction name="actionSteady_State_Query"/>
      </widget>
      <addaction name="menuModel"/>
      <addaction name="menuProperties"/>
@@ -1719,9 +1722,9 @@ p, li { white-space: pre-wrap; }
     <string>Lock Toolbar</string>
    </property>
   </action>
-  <action name="actionForever_Property">
+  <action name="actionGlobal_Property">
    <property name="text">
-    <string>Forever Property</string>
+    <string>Global Property</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+F</string>
@@ -1959,6 +1962,16 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>No Recent Files</string>
+   </property>
+  </action>
+  <action name="actionEventually_Property">
+   <property name="text">
+    <string>Eventually Property</string>
+   </property>
+  </action>
+  <action name="actionSteady_State_Query">
+   <property name="text">
+    <string>Steady State Query</string>
    </property>
   </action>
  </widget>

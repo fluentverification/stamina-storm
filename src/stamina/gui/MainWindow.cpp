@@ -429,11 +429,29 @@ MainWindow::setupEditActions() {
 		}
 	);
 	connect(
-		ui.actionForever_Property
+		ui.actionGlobal_Property
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.propertiesEditor->insertPlainText("\n// Forever property\nP=?[TODO: Forever property];\n");
+			this->ui.propertiesEditor->insertPlainText("\n// Forever property\nP=? [ G : STATE_FORMULA ];\n");
+			ui.actionProperties_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionEventually_Property
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.propertiesEditor->insertPlainText("\n// Eventually property\nP=? [ F : STATE_FORMULA ];\n");
+			ui.actionProperties_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionSteady_State_Query
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.propertiesEditor->insertPlainText("\n// Steady State Query Property\nS=? [ STATE_FORMULA ];\n");
 			ui.actionProperties_Editor->trigger();
 		}
 	);
