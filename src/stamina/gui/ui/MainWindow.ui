@@ -1067,6 +1067,7 @@ p, li { white-space: pre-wrap; }
       <addaction name="actionBounded_Variable"/>
       <addaction name="actionFormula"/>
       <addaction name="actionLabel"/>
+      <addaction name="actionRewards"/>
      </widget>
      <widget class="QMenu" name="menuProperties">
       <property name="title">
@@ -1996,6 +1997,11 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Alt+L</string>
+   </property>
+  </action>
+  <action name="actionRewards">
+   <property name="text">
+    <string>Rewards</string>
    </property>
   </action>
  </widget>

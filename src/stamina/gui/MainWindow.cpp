@@ -438,6 +438,15 @@ MainWindow::setupEditActions() {
 		}
 	);
 	connect(
+		ui.actionRewards
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.modelFile->insertPlainText("\nrewards \"rewardname\"\n\t[action] guard : reward;\nendrewards\n");
+			ui.actionModel_Editor->trigger();
+		}
+	);
+	connect(
 		ui.actionLabel
 		, &QAction::triggered
 		, this
