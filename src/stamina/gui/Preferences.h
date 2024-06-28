@@ -17,13 +17,15 @@
  *
  **/
 
-#ifndef STAMINA_PREFERENCES_H
-#define STAMINA_PREFERENCES_H
+#ifndef STAMINA_GUI_PREFERENCES_H
+#define STAMINA_GUI_PREFERENCES_H
 
 #include <QDialog>
 #include <cstdint>
 #include <string>
 
+#include "MainWindow.h"
+#include "addons/highlighter/Highlighter.h"
 #include "stamina/core/Options.h"
 
 #include <ui_Preferences.h>
@@ -31,6 +33,9 @@
 
 namespace stamina {
 	namespace gui {
+
+		// Forward declare
+		class MainWindow;
 
 		// A class that keeps track of preferences
 		class PrefInfo {
@@ -58,6 +63,8 @@ namespace stamina {
 				inline static uint8_t tabSize;
 				// Use tabs or spaces
 				inline static bool useTabs;
+				// Use desktop default colors (i.e., no stylesheet) for the editor
+				inline static bool useDesktopColors;
 			};
 			// "Model Building" tab
 			struct ModelBuilding {
@@ -115,11 +122,18 @@ namespace stamina {
 		class Preferences : public QDialog {
 			Q_OBJECT
 		public:
-			Preferences(QWidget * parent = 0);
+
+			Preferences(QWidget * parent = 0, MainWindow * parentWrapper = 0);
 			void show(int tabIndex = 0);
 			void accept() override;
 			Ui::MainWindow * getMainWindow() { return window; }
 			void setMainWindow(Ui::MainWindow * window) { this->window = window; }
+
+			void setupColorSchemes();
+			void setStyleSheet(QString sheet) {
+				ui.prefTabs->setStyleSheet(sheet);
+				ui.buttonBox->setStyleSheet(sheet);
+			}
 			/**
 			 * Sets the "options" values in Stamina::core::Options
 			 * from the preferences selected on this window.
@@ -130,6 +144,9 @@ namespace stamina {
 			 * */
 			void setUIFromPreferences();
 			void getPreferencesFromUI();
+			void preloadColors();
+			void setColorsFromPrefs();
+
 			/**
 			 * Functions for reading and writing from the settings object
 			 * */
@@ -142,8 +159,11 @@ namespace stamina {
 			// Data members
 			Ui::Preferences ui;
 			Ui::MainWindow * window;
+			MainWindow * windowWrapper;
+			std::vector<std::pair<QString, addons::highlighter::ColorScheme>> themes;
 		};
+
 	}
 }
 
-#endif // STAMINA_PREFERENCES_H
+#endif // STAMINA_GUI_PREFERENCES_H

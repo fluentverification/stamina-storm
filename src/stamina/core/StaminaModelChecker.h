@@ -81,7 +81,7 @@ namespace stamina {
 			*
 			* @param propMin Minimum variant of the property to check
 			* @param propMax Maximum variant of the property to check
-			* @propOriginal The original version of the property to check
+			* @param propOriginal The original version of the property to check
 			* @param modulesFile The modules file to work with
 			* @param formulasVector The vector of all properties (optional). If the model is to check multiple
 			* properties then this is required as labeling must be created which matches each one.
@@ -97,10 +97,26 @@ namespace stamina {
 				, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
 				, bool forceRebuildModel=false
 			);
+			/**
+			 * Works like modelCheckProperty, except only provides an estimate.
+			 *
+			 * @param propOriginal The original version of the property to check
+			 * @param modulesFile The modules file to work with
+			 * @param formulasVector The vector of all properties (optional). If the model is to check multiple
+			 * properties then this is required as labeling must be created which matches each one.
+			 * @return A pointer to the result of the model checking
+			 * */
+			std::unique_ptr<storm::modelchecker::CheckResult> estimateResultProperty(
+				storm::jani::Property propOriginal
+				, storm::prism::Program const& modulesFile
+				, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
+				, bool forceRebuildModel=false
+			);
 			void checkFromBuiltModel(
 				storm::jani::Property propMin
 				, storm::jani::Property propMax
 				, storm::jani::Property propOriginal
+				, bool isEstimate = false
 			);
 			/**
 			 * Gets a list of the labels and the associated counts of states

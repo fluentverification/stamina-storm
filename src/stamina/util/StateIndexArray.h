@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STATEINDEXARRAY_H
-#define STATEINDEXARRAY_H
+#ifndef STAMINA_UTIL_STATEINDEXARRAY_H
+#define STAMINA_UTIL_STATEINDEXARRAY_H
 
 #include <boost/pool/object_pool.hpp>
 
@@ -99,4 +99,4 @@ namespace stamina {
 	}
 }
 
-#endif // STATEINDEXARRAY_H
+#endif // STAMINA_UTIL_STATEINDEXARRAY_H

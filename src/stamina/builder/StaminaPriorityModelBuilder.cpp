@@ -421,8 +421,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	bool hold = true;
 	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
-	while (hold || (!statePriorityQueue.empty() && (piHat > std::max(windowPower / Options::approx_factor, 1e-14)))) {
-		std::cout << "PiHat = " << piHat << std::endl;
+	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
+		// std::cout << "PiHat = " << piHat << std::endl;
 		// std::cout << "cond = " << windowPower / Options::approx_factor << std::endl;
 		hold = false;
 		auto currentProbabilityStatePair = *statePriorityQueue.top();
@@ -613,8 +613,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 			++currentRowGroup;
 		}
 
-		++numberOfExploredStates;
 		windowPower = pow(Options::prob_win, Options::fudge_factor * (std::log10(std::max(numberOfExploredStates, (uint64_t) 2))));
+		++numberOfExploredStates;
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
 
@@ -669,7 +669,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 			// actually create the transition
 			this->createTransition(transition.from, 0, transition.transition);
 			// Make preterminated state have a self loop
-			this->createTransition(transition.to, transition.to, 1.0);
+			// this->createTransition(transition.to, transition.to, 1.0);
 			numberOfPreTerminatedTransitions++;
 		}
 	}

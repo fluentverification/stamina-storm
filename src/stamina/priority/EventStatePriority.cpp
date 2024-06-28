@@ -26,6 +26,8 @@
 
 #include "core/StateSpaceInformation.h"
 
+#include <storm/storage/expressions/OperatorType.h>
+
 namespace stamina {
 namespace priority {
 

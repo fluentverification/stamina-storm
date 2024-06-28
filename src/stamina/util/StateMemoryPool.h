@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STATEMEMORYPOOL_H
-#define STATEMEMORYPOOL_H
+#ifndef STAMINA_UTIL_STATEMEMORYPOOL_H
+#define STAMINA_UTIL_STATEMEMORYPOOL_H
 
 // #include <deque>
 // #include <ordered_set>
@@ -82,4 +82,4 @@ namespace stamina {
 	}
 }
 
-#endif // STATEMEMORYPOOL_H
+#endif // STAMINA_UTIL_STATEMEMORYPOOL_H
