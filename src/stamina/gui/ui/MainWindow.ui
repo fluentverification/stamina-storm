@@ -1065,6 +1065,8 @@ p, li { white-space: pre-wrap; }
       <addaction name="actionModule"/>
       <addaction name="actionUnbounded_Variable"/>
       <addaction name="actionBounded_Variable"/>
+      <addaction name="actionFormula"/>
+      <addaction name="actionLabel"/>
      </widget>
      <widget class="QMenu" name="menuProperties">
       <property name="title">
@@ -1968,10 +1970,32 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Eventually Property</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+Shift+E</string>
+   </property>
   </action>
   <action name="actionSteady_State_Query">
    <property name="text">
     <string>Steady State Query</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionFormula">
+   <property name="text">
+    <string>Formula</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+F</string>
+   </property>
+  </action>
+  <action name="actionLabel">
+   <property name="text">
+    <string>Label</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+L</string>
    </property>
   </action>
  </widget>

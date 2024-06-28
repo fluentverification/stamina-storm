@@ -406,7 +406,7 @@ MainWindow::setupEditActions() {
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.modelFile->insertPlainText("module MODULE_NAME\n\nendmodule\n");
+			this->ui.modelFile->insertPlainText("module ModuleName\n\nendmodule\n");
 			ui.actionModel_Editor->trigger();
 		}
 	);
@@ -415,7 +415,7 @@ MainWindow::setupEditActions() {
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.modelFile->insertPlainText("\nVARIABLE_NAME : int init 0;\n");
+			this->ui.modelFile->insertPlainText("\nvariableName : int init 0;\n");
 			ui.actionModel_Editor->trigger();
 		}
 	);
@@ -424,7 +424,25 @@ MainWindow::setupEditActions() {
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.modelFile->insertPlainText("\nVARIABLE_NAME : [LOWER_BOUND..UPPER_BOUND] init 0;\n");
+			this->ui.modelFile->insertPlainText("\nvariableName : [LOWER_BOUND..UPPER_BOUND] init 0;\n");
+			ui.actionModel_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionFormula
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.modelFile->insertPlainText("\nformula formulaName = EXPRESSION;\n");
+			ui.actionModel_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionLabel
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.modelFile->insertPlainText("\nlabel \"labelName\" = EXPRESSION;\n");
 			ui.actionModel_Editor->trigger();
 		}
 	);
