@@ -163,7 +163,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMatr
 		if (currentProbabilityState->isTerminal() && currentProbabilityState->getPi() < localKappa) {
 			if (!currentProbabilityState->wasPutInTerminalQueue) {
 				// Do not connect to absorbing yet--only connect at the end
-				statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
+				this->statesTerminatedLastIteration.push_back(currentProbabilityStatePair);
 				++numberOfExploredStates;
 				currentProbabilityState->wasPutInTerminalQueue = true;
 				++currentRow;
@@ -476,7 +476,7 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 
 	// No remapping is necessary
 	this->purgeAbsorbingTransitions();
-	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
+	this->connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 	this->flushToTransitionMatrix(transitionMatrixBuilder);
 
 	// Using the information from buildMatrices, initialize the model components
@@ -511,34 +511,6 @@ StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::buildMode
 		}
 	}
 	return modelComponents;
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaReExploringModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
-	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-) {
-// 	std::cout << "connecting all terminal states to absorbing" << std::endl;
-// 	std::cout << "The number of states to connect is " << statesTerminatedLastIteration.size() << "." << std::endl;
-	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
-	// register new states
-	while (!statesTerminatedLastIteration.empty()) {
-		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
-		auto state = statesTerminatedLastIteration.front().second;
-		if (!currentProbabilityState->wasPutInTerminalQueue) {
-			statesTerminatedLastIteration.pop_front();
-			continue;
-		}
-		currentProbabilityState->wasPutInTerminalQueue = false;
-// 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
-		this->connectTerminalStatesToAbsorbing(
-			transitionMatrixBuilder
-			, state
-			, currentProbabilityState->index
-			, this->terminalStateToIdCallback
-		);
-		statesTerminatedLastIteration.pop_front();
-	}
 }
 
 template class StaminaReExploringModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;
