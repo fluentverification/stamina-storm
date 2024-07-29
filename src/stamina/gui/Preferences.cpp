@@ -21,7 +21,12 @@
 
 #include <QMessageBox>
 #include <QSettings>
+#include <filesystem>
 
+#include "MainWindow.h"
+#include "MessageBridge.h"
+#include "addons/highlighter/Highlighter.h"
+#include "addons/CodeEditor.h"
 #include "stamina/StaminaArgParse.h"
 #include "stamina/core/StaminaMessages.h"
 
@@ -30,11 +35,14 @@ namespace gui {
 
 const std::string PrefInfo::prefPath = ".xstaminarc";
 
-Preferences::Preferences(QWidget * parent)
+Preferences::Preferences(QWidget * parent, MainWindow * parentWrapper)
 	: QDialog(parent)
+	, window((Ui::MainWindow * ) parent)
+	, windowWrapper(parentWrapper)
 {
 	setupActions();
 	readSettingsFromFile();
+	setupColorSchemes();
 }
 
 void
@@ -50,12 +58,49 @@ Preferences::show(int tabIndex) {
 }
 
 void
+Preferences::preloadColors() {
+	StaminaMessages::info("Reading color scheme");
+	// ui.editorBaseColor->setColor(
+	auto colorScheme = window->modelFile->getColorsAsScheme();
+	if (colorScheme) {
+		ui.keywordColor->setColor(colorScheme->keyword);
+		ui.commentColor->setColor(colorScheme->comment);
+		ui.numberColor->setColor(colorScheme->number);
+		ui.typeColor->setColor(colorScheme->type);
+		ui.functionColor->setColor(colorScheme->function);
+		ui.stringColor->setColor(colorScheme->string);
+		ui.constantsColor->setColor(colorScheme->constant);
+		// colorScheme is not a QObject!
+		delete colorScheme;
+	}
+	else {
+		StaminaMessages::warning("Cannot set color scheme!");
+	}
+}
+
+void
+Preferences::setColorsFromPrefs() {
+	addons::highlighter::ColorScheme colorScheme(
+		ui.keywordColor->color()
+		, ui.commentColor->color()
+		, ui.numberColor->color()
+		, ui.typeColor->color()
+		, ui.functionColor->color()
+		, ui.stringColor->color()
+		, ui.constantsColor->color()
+	);
+	window->modelFile->setColorsFromScheme(&colorScheme);
+	window->propertiesEditor->setColorsFromScheme(&colorScheme);
+}
+
+void
 Preferences::accept() {
 	getPreferencesFromUI();
 	StaminaMessages::info("Updating accepted preferences");
 	setOptionsFromPreferences();
 	setUIFromPreferences();
 	writeSettingsToFile();
+	setColorsFromPrefs();
 	this->hide();
 }
 
@@ -66,7 +111,7 @@ Preferences::setOptionsFromPreferences() {
 
 	// ModelBuilding tab Options
 	core::Options::kappa = PrefInfo::ModelBuilding::kappa;
-	core::Options::reduce_kappa =PrefInfo:: ModelBuilding::rKappa;
+	core::Options::reduce_kappa = PrefInfo:: ModelBuilding::rKappa;
 	core::Options::prob_win = PrefInfo::ModelBuilding::window;
 	core::Options::no_prop_refine = !PrefInfo::ModelBuilding::earlyTerminationProperty;
 	// TODO: maxIterations
@@ -100,6 +145,27 @@ Preferences::setUIFromPreferences() {
 	}
 	// StaminaMessages::info("Setting indentation to '" + indentation.toStdString() + "' in CodeEditor");
 	addons::CodeEditor::setIndent(indentation);
+	if (!ui.useDesktopDefaults->isChecked()) {
+		addons::CodeEditor::lineNumberAreaColor = ui.backgroundColor->color().darker(100);
+		addons::CodeEditor::lineColor = ui.backgroundColor->color().lighter(100);
+		QString editorStylesheet = "background-color: " + ui.backgroundColor->color().name() + ";\ncolor: " + ui.foregroundColor->color().name() + ";";
+		QString uiStylesheet = "background-color: " + ui.uiBackground->color().name() + ";\ncolor: " + ui.uiForeground->color().name() + ";";
+		window->modelFile->setStyleSheet(editorStylesheet);
+		window->propertiesEditor->setStyleSheet(editorStylesheet);
+		windowWrapper->setStyleSheet(uiStylesheet);
+		window->modelFile->viewport()->repaint();
+		window->propertiesEditor->viewport()->repaint();
+	}
+	else {
+		addons::CodeEditor::lineNumberAreaColor = QColor(this->palette().color(QPalette::Window)).darker(100);
+		addons::CodeEditor::lineColor = this->palette().color(QPalette::AlternateBase);
+		window->modelFile->setStyleSheet("");
+		window->propertiesEditor->setStyleSheet("");
+		windowWrapper->setStyleSheet("");
+		window->modelFile->viewport()->repaint();
+		window->propertiesEditor->viewport()->repaint();
+
+	}
 }
 
 void
@@ -201,7 +267,7 @@ Preferences::getPreferencesFromUI() {
 
 void
 Preferences::readSettingsFromFile() {
-	QSettings settings(QSettings::UserScope, "FLUENT Verification", "xSTAMINA");
+	QSettings settings(QSettings::UserScope, "xSTAMINA", "xSTAMINA");
 	StaminaMessages::info("Reading preferences from: " + settings.fileName().toStdString());
 	settings.beginGroup("General");
 	getPreferencesFromUI();
@@ -216,17 +282,109 @@ Preferences::readSettingsFromFile() {
 	PrefInfo::General::useTabs = settings.value("useTabs", PrefInfo::General::useTabs) == "true";
 	ui.useTabs->setChecked(PrefInfo::General::useTabs);
 	settings.endGroup();
+	settings.beginGroup("SyntaxColors");
+	ui.keywordColor->setColor(
+		QColor(settings.value(
+			"keywords"
+			, ui.keywordColor->color().name()
+		).toString())
+	);
+	ui.commentColor->setColor(
+		QColor(settings.value(
+			"comments"
+			, ui.commentColor->color().name()
+		).toString())
+	);
+	ui.numberColor->setColor(
+		QColor(settings.value(
+			"numbers"
+			, ui.numberColor->color()
+		).toString())
+	);
+	ui.typeColor->setColor(
+		QColor(settings.value(
+			"types"
+			, ui.typeColor->color()
+		).toString())
+	);
+	ui.functionColor->setColor(
+		QColor(settings.value(
+			"functions"
+			, ui.functionColor->color()
+		).toString())
+	);
+	ui.stringColor->setColor(
+		QColor(settings.value(
+			"strings"
+			, ui.stringColor->color()
+		).toString())
+	);
+	ui.constantsColor->setColor(
+		QColor(settings.value(
+			"constants"
+			, ui.stringColor->color()
+		).toString())
+	);
+	ui.foregroundColor->setColor(
+		QColor(settings.value(
+			"editorForegroundColor"
+			, ui.foregroundColor->color()
+		).toString())
+	);
+	ui.backgroundColor->setColor(
+		QColor(settings.value(
+			"editorBackgroundColor"
+			, ui.backgroundColor->color()
+		).toString())
+	);
+	ui.uiForeground->setColor(
+		QColor(settings.value(
+			"uiForegroundColor"
+			, ui.uiForeground->color()
+		).toString())
+	);
+	ui.uiBackground->setColor(
+		QColor(settings.value(
+			"uiBackgroundColor"
+			, ui.uiBackground->color()
+		).toString())
+	);
+
+
+	bool desktopDefaultColors = settings.value("useCustomEditorColors", true) == "true";
+	ui.useDesktopDefaults->setChecked(desktopDefaultColors);
+	ui.foregroundColor->setEnabled(!desktopDefaultColors);
+	ui.backgroundColor->setEnabled(!desktopDefaultColors);
+	ui.uiForeground->setEnabled(!desktopDefaultColors);
+	ui.uiBackground->setEnabled(!desktopDefaultColors);
+	settings.endGroup();
 }
 
 void
 Preferences::writeSettingsToFile() {
-	QSettings settings(QSettings::UserScope, "FLUENT Verification", "xSTAMINA");
+	QSettings settings(QSettings::UserScope, "xSTAMINA", "xSTAMINA");
 	StaminaMessages::info("Writing preferences to: " + settings.fileName().toStdString());
 	settings.beginGroup("General");
 	settings.setValue("editorFontFamily", PrefInfo::General::editorFont.family());
 	settings.setValue("editorFontSize", PrefInfo::General::editorFont.pointSize());
 	settings.setValue("tabSize", PrefInfo::General::tabSize);
 	settings.setValue("useTabs", PrefInfo::General::useTabs);
+	settings.endGroup();
+	settings.beginGroup("SyntaxColors");
+
+	settings.setValue("keywords", ui.keywordColor->color().name());
+	settings.setValue("comments", ui.commentColor->color().name());
+	settings.setValue("numbers", ui.numberColor->color().name());
+	settings.setValue("types", ui.typeColor->color().name());
+	settings.setValue("functions", ui.functionColor->color().name());
+	settings.setValue("strings", ui.stringColor->color().name());
+	settings.setValue("constants", ui.constantsColor->color().name());
+	settings.setValue("editorBackgroundColor", ui.backgroundColor->color());
+	settings.setValue("editorForegroundColor", ui.foregroundColor->color());
+	settings.setValue("uiForegroundColor", ui.uiForeground->color());
+	settings.setValue("uiBackgroundColor", ui.uiBackground->color());
+	settings.setValue("useCustomEditorColors", ui.useDesktopDefaults->isChecked());
+
 	settings.endGroup();
 }
 
@@ -257,6 +415,98 @@ Preferences::replaceAllIndentation() {
 	}
 
 	window->propertiesEditor->setTextCursor(oldCursProp);
+}
+
+void
+Preferences::setupColorSchemes() {
+	MessageBridge::info("Setting up color scheme options");
+	// Make sure we're empty
+	ui.themeComboBox->clear();
+	// Last custom theme
+	this->themes.push_back(
+		std::make_pair(
+			QString("Last Custom Settings")
+			, addons::highlighter::ColorScheme(
+				ui.keywordColor->color()
+				, ui.commentColor->color()
+				, ui.numberColor->color()
+				, ui.typeColor->color()
+				, ui.functionColor->color()
+				, ui.stringColor->color()
+				, ui.constantsColor->color()
+			)
+		)
+	);
+
+	// Colorful theme
+	this->themes.push_back(
+		std::make_pair(
+			QString("Colorful")
+			, addons::highlighter::ColorScheme(
+				QColor("#00aaff")
+				, QColor("#919191")
+				, QColor("#ff4747")
+				, QColor("#0090bc")
+				, QColor("#629aa8")
+				, QColor("#ff9040")
+				, QColor("#3cbc00")
+			)
+		)
+	);
+	// Desaturated theme
+	this->themes.push_back(
+		std::make_pair(
+			QString("Desaturated")
+			, addons::highlighter::ColorScheme(
+				QColor("#b4e6ff")
+				, QColor("#919191")
+				, QColor("#ffb4b4")
+				, QColor("#85afbc")
+				, QColor("#506a70")
+				, QColor("#ffd3b4")
+				, QColor("#97bc85")
+			)
+		)
+	);
+
+	uint8_t index;
+	for (auto const & themePair : this->themes) {
+		QString themeName = themePair.first;
+		ui.themeComboBox->insertItem(index, themeName);
+		index++;
+	}
+
+	connect(
+		ui.themeComboBox
+		, QOverload<int>::of(&QComboBox::currentIndexChanged)
+		, this
+		, [this](int index) {
+			addons::highlighter::ColorScheme & theme = this->themes[index].second;
+			MessageBridge::info(this->themes[index].first.toStdString() + " is new color scheme");
+			// window->modelFile->setColorsFromScheme(&theme);
+			// window->propertiesEditor->setColorsFromScheme(&theme);
+			ui.keywordColor->setColor(theme.keyword);
+			ui.commentColor->setColor(theme.comment);
+			ui.numberColor->setColor(theme.number);
+			ui.typeColor->setColor(theme.type);
+			ui.functionColor->setColor(theme.function);
+			ui.stringColor->setColor(theme.string);
+			ui.constantsColor->setColor(theme.constant);
+		}
+	);
+
+	connect(
+		ui.useDesktopDefaults
+		, &QCheckBox::clicked
+		, this
+		, [this](bool checked) {
+			ui.foregroundColor->setEnabled(!checked);
+			ui.backgroundColor->setEnabled(!checked);
+			ui.uiForeground->setEnabled(!checked);
+			ui.uiBackground->setEnabled(!checked);
+		}
+	);
+
 }
 
 } // namespace gui

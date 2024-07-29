@@ -18,6 +18,7 @@
  **/
 
 #include <cstdlib>
+#include <csignal>
 #include <regex>
 #include <filesystem>
 
@@ -44,7 +45,7 @@ set_default_values() {
 	core::Options::kappa = 1.0;
 	core::Options::reduce_kappa = 1.25; // 2.0;
 	core::Options::approx_factor = 2.0;
-	core::Options::fudge_factor = 1.0;
+	core::Options::fudge_factor = 1.255;
 	core::Options::prob_win = 1.0e-3;
 	core::Options::max_approx_count = 10;
 	core::Options::no_prop_refine = false;
@@ -90,12 +91,24 @@ parse_positional_arguments(const QStringList & args, MainWindow * window) {
 	}
 }
 
+void
+handle_signals(int signal) {
+	// Test to see if we received
+	if (signal == SIGSEGV) {
+		StaminaMessages::errorAndExit("STAMINA has experienced an internal error (Segmentation Fault). Please report this bug to us on our GitHub page.");
+	}
+	else {
+		// TODO
+	}
+}
+
 } // namespace gui
 
 } // namespace stamina
 
-int main (int argc, char *argv[])
-{
+int
+main (int argc, char ** argv) {
+	signal(SIGSEGV, stamina::gui::handle_signals);
 	stamina::set_default_values();
 	QApplication app(argc, argv);
 
@@ -103,9 +116,9 @@ int main (int argc, char *argv[])
 
 	KAboutData aboutData(
 						 // The program name used internally. (componentName)
-						 QStringLiteral("stamina"),
+						 QStringLiteral("xstamina"),
 						 // A displayable program name string. (displayName)
-						 i18n("STAMINA"),
+						 i18n("xSTAMINA"),
 						 // The program version string. (version)
 						 QStringLiteral("0.2.5"),
 						 // Short description of what the app does. (shortDescription)
@@ -113,14 +126,14 @@ int main (int argc, char *argv[])
 						 // The license this code is released under
 						 , KAboutLicense::GPL,
 						 // Copyright Statement (copyrightStatement = QString())
-						 i18n("(c) 2022"),
+						 i18n("(c) 2022-2023"),
 						 // Optional text shown in the About box.
 						 // Can contain any information desired. (otherText)
 						 i18n("Developed at Utah State University"),
 						 // The program homepage string. (homePageAddress = QString())
 						 QStringLiteral("https://staminachecker.org/"),
 						 // The bug report email address
-						 QStringLiteral("[email protected]"));
+						 QStringLiteral("staminamodelchecker [at] gmail [dot] com"));
 	aboutData.addAuthor(i18n("Joshua Jeppson"), i18n("Principle Developer"), QStringLiteral("[email protected]"),
 						QStringLiteral("https://ifndefjosh.github.io"), QStringLiteral("OSC Username"));
 	KAboutData::setApplicationData(aboutData);

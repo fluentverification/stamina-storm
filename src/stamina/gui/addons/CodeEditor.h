@@ -21,14 +21,15 @@
  * Code editor with line numbers--extends QPlainTextEdit ~~KDE's KTextEdit~~
  * */
 
-#ifndef STAMINA_CODE_EDITOR_H
-#define STAMINA_CODE_EDITOR_H
+#ifndef STAMINA_GUI_ADDONS_CODE_EDITOR_H
+#define STAMINA_GUI_ADDONS_CODE_EDITOR_H
 
 #include <cstdint>
 #include <QTextEdit>
 #include <QPlainTextEdit>
 #include <QPainter>
 #include <QCompleter>
+#include <QGuiApplication>
 
 #include "highlighter/Highlighter.h"
 
@@ -46,8 +47,15 @@ namespace stamina {
 				QCompleter * completer() const;
 				void setTabWidth(int numChars);
 				void addWordToModel(QString word);
+				void setColorsFromScheme(highlighter::ColorScheme * colors);
+				highlighter::ColorScheme * getColorsAsScheme();
+				void refresh() { highlightCurrentLine(); }
+
 				static void setIndent(QString idt) { indent = idt; }
 				static QString getIndent() { return indent; }
+
+				inline static QColor lineNumberAreaColor;
+				inline static QColor lineColor = QGuiApplication::palette().color(QPalette::AlternateBase);// QColor("#FF2222");
 			public slots:
 				void changeIndent(bool increase = true);
 				void changeComment(bool uncomment = false);
@@ -76,4 +84,4 @@ namespace stamina {
 		}
 	}
 }
-#endif // STAMINA_CODE_EDITOR_H
+#endif // STAMINA_GUI_ADDONS_CODE_EDITOR_H

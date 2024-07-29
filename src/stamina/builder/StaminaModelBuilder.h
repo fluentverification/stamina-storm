@@ -214,6 +214,10 @@ namespace stamina {
 				, std::function<StateType (CompressedState const&)> stateToIdCallback
 			);
 			/**
+			 * Connects all states which are terminal
+			 * */
+			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
+			/**
 			* Builds transition matrix of truncated state space for the given program.
 			*
 			* @param transitionMatrixBuilder The builder of the transition matrix.
@@ -274,6 +278,10 @@ namespace stamina {
 			util::StateMemoryPool<ProbabilityState<StateType>> memoryPool;
 
 			std::deque<std::pair<ProbabilityState<StateType> *, CompressedState> > statesToExplore;
+			// Dynamic programming improvement: we keep an ordered set of the states terminated
+			// during the previous iteration (in an order that prevents needing to use a remapping
+			// vector for state indecies.
+			std::deque<std::pair<ProbabilityState<StateType> *, CompressedState>> statesTerminatedLastIteration;
 
 			// The following data members must be accessible to threads
 			util::StateIndexArray<StateType, ProbabilityState<StateType>> stateMap;

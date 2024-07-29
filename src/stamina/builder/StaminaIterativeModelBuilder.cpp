@@ -168,7 +168,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildMatric
 			// Do not connect to absorbing yet
 			// Place this in statesTerminatedLastIteration
 			if ( !currentProbabilityState->wasPutInTerminalQueue ) {
-				statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
+				this->statesTerminatedLastIteration.emplace_back(currentProbabilityStatePair);
 				currentProbabilityState->wasPutInTerminalQueue = true;
 				++currentRow;
 				++currentRowGroup;
@@ -498,7 +498,7 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 
 	// No remapping is necessary
 	this->purgeAbsorbingTransitions();
-	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
+	this->connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 	this->flushToTransitionMatrix(transitionMatrixBuilder);
 
 	// Using the information from buildMatrices, initialize the model components
@@ -538,49 +538,18 @@ StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::buildModelC
 template <typename ValueType, typename RewardModelType, typename StateType>
 void
 StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::flushStatesTerminated() {
-	while (!statesTerminatedLastIteration.empty()) {
-		auto probabilityStatePair = statesTerminatedLastIteration.front();
+	while (!this->statesTerminatedLastIteration.empty()) {
+		auto probabilityStatePair = this->statesTerminatedLastIteration.front();
 		// States can be marked as not put in terminal queue and when we flush the terminal queue we
 		// ignore those estates
 		if (! probabilityStatePair.first->wasPutInTerminalQueue) {
-			statesTerminatedLastIteration.pop_front();
+			this->statesTerminatedLastIteration.pop_front();
 			continue;
 		}
 		statesToExplore.emplace_back(probabilityStatePair);
 		probabilityStatePair.first->wasPutInTerminalQueue = false;
-		statesTerminatedLastIteration.pop_front();
+		this->statesTerminatedLastIteration.pop_front();
 		probabilityStatePair.first->isNew = true;
-	}
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaIterativeModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
-	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-) {
-	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
-	// register new states
-	while (!statesTerminatedLastIteration.empty()) {
-		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
-		auto state = statesTerminatedLastIteration.front().second;
-// 		std::cerr << "Connecting state to absorbing" << StateSpaceInformation::stateToString(currentProbabilityState->state, currentProbabilityState->getPi()) << std::endl;
-		statesTerminatedLastIteration.pop_front();
-		// If the state is not marked as terminal, we've already connected it to absorbing
-		// Additionally, if it was marked as not being put in the terminal queue, it should be
-		// ignored by this step.
-		if (!currentProbabilityState->isTerminal()
-				|| !currentProbabilityState->wasPutInTerminalQueue
-				|| currentProbabilityState->deadlock) {
-			continue;
-		}
-		this->connectTerminalStatesToAbsorbing(
-			transitionMatrixBuilder
-			, state
-			, currentProbabilityState->index
-			, this->terminalStateToIdCallback
-		);
-		currentProbabilityState->setTerminal(false);
-		currentProbabilityState->wasPutInTerminalQueue = false;
 	}
 }
 

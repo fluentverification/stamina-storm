@@ -142,10 +142,6 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
-			/**
-			 * Connects all states which are terminal
-			 * */
-			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
 			/* Data members */
 			std::priority_queue<
 				std::shared_ptr<ProbabilityStatePair<StateType>>

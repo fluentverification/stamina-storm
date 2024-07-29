@@ -51,6 +51,8 @@ CodeEditor::CodeEditor(QWidget * parent)
 	updateLineNumberAreaWidth(0);
 	highlightCurrentLine();
 
+	CodeEditor::lineNumberAreaColor = QColor(this->palette().color(QPalette::Window)).darker(100);
+	CodeEditor::lineColor = this->palette().color(QPalette::AlternateBase);
 // 	std::cout << "Amount of black in color palette is: " << this->palette().color(QPalette::AlternateBase).black() << std::endl;
 }
 
@@ -132,7 +134,7 @@ CodeEditor::addWordToModel(QString word) {
 			}
 		}
 		if (!matched) {
-			StaminaMessages::info("Adding word to model: " + word.toStdString());
+			// StaminaMessages::info("Adding word to model: " + word.toStdString());
 			model->setStringList(model->stringList() << word);
 		}
 	}
@@ -142,7 +144,22 @@ CodeEditor::addWordToModel(QString word) {
 }
 
 void
-CodeEditor::resizeEvent(QResizeEvent *e)
+CodeEditor::setColorsFromScheme(highlighter::ColorScheme * colors) {
+	if (!hl) { return; }
+	hl->setColorsFromScheme(colors);
+	// Invoke the highlighter's event
+	hl->rehighlight();
+
+}
+
+highlighter::ColorScheme *
+CodeEditor::getColorsAsScheme() {
+	if (!hl) { return nullptr; }
+	return hl->getColorsAsScheme();
+}
+
+void
+CodeEditor::resizeEvent(QResizeEvent * e)
 {
 	QPlainTextEdit::resizeEvent(e);
 
@@ -160,8 +177,6 @@ CodeEditor::highlightCurrentLine()
 
 // 		QColor selectionColor = QPalette::Base; // selection.format.background().color();
 
-		QColor lineColor(this->palette().color(QPalette::AlternateBase));
-
 		selection.format.setBackground(lineColor);
 		selection.format.setProperty(QTextFormat::FullWidthSelection, true);
 		selection.cursor = textCursor();
@@ -175,7 +190,7 @@ CodeEditor::highlightCurrentLine()
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent * event)
 {
 	QPainter painter(lineNumberArea);
-	painter.fillRect(event->rect(), QColor(this->palette().color(QPalette::Window)).darker(100)); //  QColor(Qt::darkGray).darker(400)
+	painter.fillRect(event->rect(), lineNumberAreaColor); //  QColor(Qt::darkGray).darker(400)
 	QTextBlock block = firstVisibleBlock();
 	int blockNumber = block.blockNumber();
 	int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
@@ -438,9 +453,9 @@ CodeEditor::indentNextLine() {
 			int nextIndentPos = getNextPosition(indentable);
 			// If the next instance of `module` is sooner than the next instance of endmodule
 			if (nextIndentPos < nextEndPos || nextEndPos == END_OF_DOCUMENT) {
-				StaminaMessages::info("Line starts with: "
+				/*StaminaMessages::info("Line starts with: "
 					+ lastLine.toStdString() + " so inserting end (positions: "
-					+ std::to_string(nextIndentPos) + " / " + std::to_string(nextEndPos) + ")");
+					+ std::to_string(nextIndentPos) + " / " + std::to_string(nextEndPos) + ")");*/
 				// Insert indentation
 				cursor.insertBlock(format);
 				for (int i = 0; i < indentationCount; i++) {
@@ -457,6 +472,15 @@ CodeEditor::indentNextLine() {
 	// Insert indentation
 	for (int i = 0; i < indentationCount; i++) {
 		cursor.insertText(CodeEditor::indent);
+	}
+
+	// Insert comment if last line has it
+	if (lastLine.startsWith("//")) {
+		cursor.insertText("//");
+		// Some people, like me, like spaces after our single-line comments
+		if (lastLine.size() > 3 && lastLine[2] == ' ') {
+			cursor.insertText(" ");
+		}
 	}
 
 	this->setTextCursor(cursor);

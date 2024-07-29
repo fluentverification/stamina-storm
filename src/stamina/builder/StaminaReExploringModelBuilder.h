@@ -118,14 +118,6 @@ namespace stamina {
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::numberTransitions;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRowGroup;
 			using StaminaModelBuilder<ValueType, RewardModelType, StateType>::currentRow;
-			/**
-			 * Connects all states which are terminal
-			 * */
-			void connectAllTerminalStatesToAbsorbing(storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder);
-			// Dynamic programming improvement: we keep an ordered set of the states terminated
-			// during the previous iteration (in an order that prevents needing to use a remapping
-			// vector for state indecies.
-			std::deque<std::pair<ProbabilityState<StateType> *, CompressedState>> statesTerminatedLastIteration;
 			uint64_t numberOfExploredStates;
 			uint64_t numberOfExploredStatesSinceLastMessage;
 		};

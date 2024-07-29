@@ -72,6 +72,9 @@ MessageBridge::error(std::string err) {
 		logOutput->append("<b style='color: #c11a1a'>[ERROR]:</b>&nbsp;&nbsp;&nbsp;<span class=error>"
 			+ sanitize(QString::fromStdString(err)) + "</span>");
 	}
+	if (statusBar) {
+		statusBar->showMessage(QString::fromStdString(err));
+	}
 }
 
 void
@@ -79,6 +82,9 @@ MessageBridge::warning(std::string warn) {
 	if (logOutput) {
 		logOutput->append("<b style='color: #c19718'>[WARNING]:</b>&nbsp;<span class=warning>"
 			+ sanitize(QString::fromStdString(warn)) + "</span>");
+	}
+	if (statusBar) {
+		statusBar->showMessage(QString::fromStdString(warn));
 	}
 }
 
@@ -88,12 +94,18 @@ MessageBridge::info(std::string info) {
 		logOutput->append("<b style='color: #2073c1'>[INFO]:</b>&nbsp;&nbsp;&nbsp;&nbsp;<span class=info>"
 			+ sanitize(QString::fromStdString(info)) + "</span>");
 	}
+	if (statusBar) {
+		statusBar->showMessage(QString::fromStdString(info));
+	}
 }
 void
 MessageBridge::good(std::string good) {
 	if (logOutput) {
 		logOutput->append("<b style='color: #28c11d'>[MESSAGE]:</b>&nbsp;<span class=good>"
 			+ sanitize(QString::fromStdString(good)) + "</span>");
+	}
+	if (statusBar) {
+		statusBar->showMessage(QString::fromStdString(good));
 	}
 }
 

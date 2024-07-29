@@ -278,8 +278,8 @@
                <string>Build Model and Check Properties</string>
               </property>
               <property name="icon">
-               <iconset theme="run-build">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="run-build" resource="../icons.qrc">
+                <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</iconset>
               </property>
               <property name="flat">
                <bool>true</bool>
@@ -1023,8 +1023,21 @@ p, li { white-space: pre-wrap; }
      <addaction name="actionImport_JANI"/>
      <addaction name="actionImport_SBML"/>
     </widget>
+    <widget class="QMenu" name="menuOpen_Recent">
+     <property name="title">
+      <string>Open Recent</string>
+     </property>
+     <property name="icon">
+      <iconset theme="document-open-recent">
+       <normaloff>.</normaloff>.</iconset>
+     </property>
+     <addaction name="actionClear_Recent_Files"/>
+     <addaction name="separator"/>
+     <addaction name="actionNo_Recent_Files"/>
+    </widget>
     <addaction name="menuNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="menuOpen_Recent"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
@@ -1052,14 +1065,19 @@ p, li { white-space: pre-wrap; }
       <addaction name="actionModule"/>
       <addaction name="actionUnbounded_Variable"/>
       <addaction name="actionBounded_Variable"/>
+      <addaction name="actionFormula"/>
+      <addaction name="actionLabel"/>
+      <addaction name="actionRewards"/>
      </widget>
      <widget class="QMenu" name="menuProperties">
       <property name="title">
        <string>Properties</string>
       </property>
-      <addaction name="actionForever_Property"/>
+      <addaction name="actionGlobal_Property"/>
       <addaction name="actionUntil_Property"/>
       <addaction name="actionBounded_Until_Property"/>
+      <addaction name="actionEventually_Property"/>
+      <addaction name="actionSteady_State_Query"/>
      </widget>
      <addaction name="menuModel"/>
      <addaction name="menuProperties"/>
@@ -1074,6 +1092,25 @@ p, li { white-space: pre-wrap; }
      </property>
      <addaction name="actionComment_Lines"/>
      <addaction name="actionUncomment_Lines"/>
+    </widget>
+    <widget class="QMenu" name="menuFormatting">
+     <property name="title">
+      <string>Formatting</string>
+     </property>
+     <widget class="QMenu" name="menuCase">
+      <property name="title">
+       <string>Capitalization</string>
+      </property>
+      <property name="icon">
+       <iconset theme="format-text-capitalize">
+        <normaloff>.</normaloff>.</iconset>
+      </property>
+      <addaction name="actionTitle_Case"/>
+      <addaction name="actionLower_Case"/>
+      <addaction name="actionCapital_Case"/>
+     </widget>
+     <addaction name="actionTrim_Whitespace"/>
+     <addaction name="menuCase"/>
     </widget>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
@@ -1090,6 +1127,8 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionIncrease_Indent"/>
     <addaction name="actionDecrease_Indent"/>
     <addaction name="menuToggle_Comment"/>
+    <addaction name="separator"/>
+    <addaction name="menuFormatting"/>
     <addaction name="separator"/>
     <addaction name="actionWord_Wrap"/>
     <addaction name="separator"/>
@@ -1210,8 +1249,8 @@ p, li { white-space: pre-wrap; }
   </widget>
   <action name="actionProperties_File">
    <property name="icon">
-    <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-new" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-plus.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-plus.svg</iconset>
    </property>
    <property name="text">
     <string>Properties File</string>
@@ -1222,8 +1261,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionPRISM_Language">
    <property name="icon">
-    <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-new" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-plus.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-plus.svg</iconset>
    </property>
    <property name="text">
     <string>PRISM Language</string>
@@ -1234,8 +1273,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionJANI_Language">
    <property name="icon">
-    <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-new" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-plus.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-plus.svg</iconset>
    </property>
    <property name="text">
     <string>JANI Language</string>
@@ -1243,8 +1282,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-open" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-arrow-up.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/file-arrow-up.svg</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -1255,8 +1294,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="document-save">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-save" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/save.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/save.svg</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -1267,8 +1306,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset theme="document-save-as">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-save-as" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/save.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/save.svg</iconset>
    </property>
    <property name="text">
     <string>Save As</string>
@@ -1279,8 +1318,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionExport">
    <property name="icon">
-    <iconset theme="document-export">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-export" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/box-arrow-right.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/box-arrow-right.svg</iconset>
    </property>
    <property name="text">
     <string>Export</string>
@@ -1291,8 +1330,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset theme="edit-cut">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="edit-cut" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/scissors.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/scissors.svg</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -1303,8 +1342,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset theme="edit-copy">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="edit-copy" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/clipboard-plus.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/clipboard-plus.svg</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -1315,8 +1354,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset theme="edit-paste">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="edit-paste" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/clipboard.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/clipboard.svg</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -1326,6 +1365,10 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionModule">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces-asterisk.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces-asterisk.svg</iconset>
+   </property>
    <property name="text">
     <string>Module</string>
    </property>
@@ -1334,6 +1377,10 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionUnbounded_Variable">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces.svg</iconset>
+   </property>
    <property name="text">
     <string>Variable</string>
    </property>
@@ -1342,6 +1389,10 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionBounded_Variable">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces.svg</iconset>
+   </property>
    <property name="text">
     <string>Bounded Variable</string>
    </property>
@@ -1351,8 +1402,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionFind">
    <property name="icon">
-    <iconset theme="document-find">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-find" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/search.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/search.svg</iconset>
    </property>
    <property name="text">
     <string>Find</string>
@@ -1363,8 +1414,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionReplace">
    <property name="icon">
-    <iconset theme="document-replace">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-replace" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/search.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/search.svg</iconset>
    </property>
    <property name="text">
     <string>Replace</string>
@@ -1375,8 +1426,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset theme="edit-undo">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="edit-undo" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/arrow-counterclockwise.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/arrow-counterclockwise.svg</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -1387,8 +1438,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset theme="edit-redo">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="edit-redo" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/arrow-clockwise.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/arrow-clockwise.svg</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -1399,8 +1450,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset theme="gtk-preferences">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="gtk-preferences" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/gear.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/gear.svg</iconset>
    </property>
    <property name="text">
     <string>Preferences</string>
@@ -1411,8 +1462,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionClose">
    <property name="icon">
-    <iconset theme="document-close">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-close" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</iconset>
    </property>
    <property name="text">
     <string>Close</string>
@@ -1420,8 +1471,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="exit">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="exit" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -1436,6 +1487,10 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="checked">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces-asterisk.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces-asterisk.svg</iconset>
    </property>
    <property name="text">
     <string>Model Editor</string>
@@ -1468,8 +1523,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionZoom_In">
    <property name="icon">
-    <iconset theme="zoom-in">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="zoom-in" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/zoom-in.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/zoom-in.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -1480,8 +1535,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionZoom_Out">
    <property name="icon">
-    <iconset theme="zoom-out">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="zoom-out" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/zoom-out.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/zoom-out.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
@@ -1501,8 +1556,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionCheck_Current_Property">
    <property name="icon">
-    <iconset theme="checkmark">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="checkmark" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/check.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/check.svg</iconset>
    </property>
    <property name="text">
     <string>Check Current Property</string>
@@ -1513,8 +1568,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionCheck_All_Properties">
    <property name="icon">
-    <iconset theme="kt-start-all">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="kt-start-all" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/check-all.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/check-all.svg</iconset>
    </property>
    <property name="text">
     <string>Check All Properties</string>
@@ -1525,8 +1580,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionCheck_Specific_Properties">
    <property name="icon">
-    <iconset theme="label">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="label" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/check-square.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/check-square.svg</iconset>
    </property>
    <property name="text">
     <string>Check Specific Properties</string>
@@ -1577,8 +1632,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionDocumentation">
    <property name="icon">
-    <iconset theme="help">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="help" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/info-circle.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/info-circle.svg</iconset>
    </property>
    <property name="text">
     <string>Documentation</string>
@@ -1586,8 +1641,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionReport_A_Bug">
    <property name="icon">
-    <iconset theme="bug">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="bug" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/bug.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/bug.svg</iconset>
    </property>
    <property name="text">
     <string>Report A Bug</string>
@@ -1670,9 +1725,9 @@ p, li { white-space: pre-wrap; }
     <string>Lock Toolbar</string>
    </property>
   </action>
-  <action name="actionForever_Property">
+  <action name="actionGlobal_Property">
    <property name="text">
-    <string>Forever Property</string>
+    <string>Global Property</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+F</string>
@@ -1683,7 +1738,7 @@ p, li { white-space: pre-wrap; }
     <string>Until Property</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+U</string>
+    <string>Ctrl+Alt+Shift+U</string>
    </property>
   </action>
   <action name="actionBounded_Until_Property">
@@ -1698,8 +1753,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionIncrease_Indent">
    <property name="icon">
-    <iconset theme="format-indent-more">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="format-indent-more" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/indent.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/indent.svg</iconset>
    </property>
    <property name="text">
     <string>Increase Indent</string>
@@ -1710,8 +1765,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionDecrease_Indent">
    <property name="icon">
-    <iconset theme="format-indent-less">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="format-indent-less" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/unindent.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/unindent.svg</iconset>
    </property>
    <property name="text">
     <string>Decrease Indent</string>
@@ -1746,8 +1801,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionBuild_Model">
    <property name="icon">
-    <iconset theme="run-build">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="run-build" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/diagram-2.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/diagram-2.svg</iconset>
    </property>
    <property name="text">
     <string>Build Model</string>
@@ -1760,6 +1815,10 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionView_State_Graph">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/diagram-2.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/diagram-2.svg</iconset>
+   </property>
    <property name="text">
     <string>View State Graph</string>
    </property>
@@ -1771,8 +1830,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionState_Graph">
    <property name="icon">
-    <iconset theme="distribute-graph">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="distribute-graph" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/diagram-2.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/diagram-2.svg</iconset>
    </property>
    <property name="text">
     <string>State Graph</string>
@@ -1807,14 +1866,18 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionParse_Model">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/database-gear.svg</iconset>
+   </property>
    <property name="text">
     <string>Parse Model</string>
    </property>
   </action>
   <action name="actionImport_JANI">
    <property name="icon">
-    <iconset theme="code-context">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="code-context" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/braces.svg</iconset>
    </property>
    <property name="text">
     <string>Import JANI</string>
@@ -1825,8 +1888,8 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionImport_SBML">
    <property name="icon">
-    <iconset theme="dialog-xml-editor">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="dialog-xml-editor" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/code-slash.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/code-slash.svg</iconset>
    </property>
    <property name="text">
     <string>Import SBML</string>
@@ -1840,10 +1903,105 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="text-wrap"/>
+    <iconset theme="text-wrap" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/text-wrap.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/text-wrap.svg</iconset>
    </property>
    <property name="text">
     <string>Word Wrap</string>
+   </property>
+  </action>
+  <action name="actionTrim_Whitespace">
+   <property name="text">
+    <string>Trim Whitespace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Space</string>
+   </property>
+  </action>
+  <action name="actionTitle_Case">
+   <property name="icon">
+    <iconset theme="format-text-capitalize">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Title Case</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+U</string>
+   </property>
+  </action>
+  <action name="actionLower_Case">
+   <property name="icon">
+    <iconset theme="format-text-lowercase">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>lower case</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+U</string>
+   </property>
+  </action>
+  <action name="actionCapital_Case">
+   <property name="text">
+    <string>CAPITAL CASE</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
+  </action>
+  <action name="actionClear_Recent_Files">
+   <property name="icon">
+    <iconset theme="delete" resource="../icons.qrc">
+     <normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</normaloff>:/bootstrap-dark/resources/bootstrap-icons-1.10.5/x-circle.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Recent Files</string>
+   </property>
+  </action>
+  <action name="actionNo_Recent_Files">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>No Recent Files</string>
+   </property>
+  </action>
+  <action name="actionEventually_Property">
+   <property name="text">
+    <string>Eventually Property</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+E</string>
+   </property>
+  </action>
+  <action name="actionSteady_State_Query">
+   <property name="text">
+    <string>Steady State Query</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionFormula">
+   <property name="text">
+    <string>Formula</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+F</string>
+   </property>
+  </action>
+  <action name="actionLabel">
+   <property name="text">
+    <string>Label</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+L</string>
+   </property>
+  </action>
+  <action name="actionRewards">
+   <property name="text">
+    <string>Rewards</string>
    </property>
   </action>
  </widget>
@@ -1856,6 +2014,7 @@ p, li { white-space: pre-wrap; }
  </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

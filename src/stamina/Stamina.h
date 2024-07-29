@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_STAMINA
-#define STAMINA_STAMINA
+#ifndef STAMINA_STAMINA_H
+#define STAMINA_STAMINA_H
 
 #include <iostream>
 #include <ostream>
@@ -79,8 +79,10 @@ namespace stamina {
 		std::shared_ptr<storm::prism::Program> modelFile;
 		std::shared_ptr<std::vector<storm::jani::Property>> propertiesVector;
 		std::shared_ptr<util::ModelModify> modelModify;
+
+		std::vector<std::shared_ptr< storm::logic::Formula const>> fv;
 		bool wasInitialized;
 	};
 }
 
-#endif // STAMINA_STAMINA
+#endif // STAMINA_STAMINA_H
