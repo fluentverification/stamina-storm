@@ -10,7 +10,7 @@ project(stamina)
 set(LIB_NAME stamina)
 set(CLI_EXECUTABLE_NAME sstamina)
 # Enable c++17 standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
