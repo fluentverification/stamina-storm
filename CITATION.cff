@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "This software may be either cited via this paper: https://doi.org/10.1007/978-3-031-43835-6_7, or as follows"
+authors:
+- family-names: "Jeppson"
+  given-names: "Joshua Gordon"
+  orcid: "https://orcid.org/0000-0002-4177-7604"
+- family-names: "Roberts"
+  given-names: "Riley"
+  orcid: "https://orcid.org/0000-0002-8676-3767"
+- family-names: "Gerber"
+  given-names: "Andrew"
+title: "STAMINA (Storm Integration)"
+version: 0.2.5
+date-released: 2023-06-12
+url: "https://github.com/fluentverification/stamina-storm"
