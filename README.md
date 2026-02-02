@@ -8,6 +8,8 @@
 ![Downloads](https://img.shields.io/github/downloads/fluentverification/stamina-storm/total)
 ![Issues](https://img.shields.io/github/issues/fluentverification/stamina-storm)
 
+You can try STAMINA [online](https://staminachecker.org/run) and even [self host a backend for the web frontend we've written](https://github.com/fluentverification/stamina-server/blob/main/README.md#self-hosting). We also have an offline Qt-based GUI for power users.
+
 ## Parent Repository
 
 To get both STAMINA/PRISM and STAMINA/STORM, please clone the parent repository, at [https://github.com/fluentverification/stamina](https://github.com/fluentverification/stamina)

@@ -11,6 +11,7 @@ set(LIB_NAME stamina)
 set(CLI_EXECUTABLE_NAME sstamina)
 # Enable c++17 standard
 set(CMAKE_CXX_STANDARD 20)
+
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -92,7 +93,7 @@ set(LIB_FILES
 	${STAMINA_NAMESPACE_DIR}/builder/StaminaThreadedIterativeModelBuilder.cpp
 	${STAMINA_NAMESPACE_DIR}/builder/StaminaPriorityModelBuilder.cpp
 	${STAMINA_NAMESPACE_DIR}/builder/StaminaReExploringModelBuilder.cpp
-	${STAMINA_NAMESPACE_DIR}/builder/ExplicitTruncatedModelBuilder.cpp
+	# ${STAMINA_NAMESPACE_DIR}/builder/ExplicitTruncatedModelBuilder.cpp
 	# Files for `stamina::builder::threads` namespace
 	${STAMINA_NAMESPACE_DIR}/builder/threads/BaseThread.cpp
 	${STAMINA_NAMESPACE_DIR}/builder/threads/ControlThread.cpp
