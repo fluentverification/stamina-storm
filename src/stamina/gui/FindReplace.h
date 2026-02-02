@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_FIND_REPLACE_H
-#define STAMINA_FIND_REPLACE_H
+#ifndef STAMINA_GUI_FIND_REPLACE_H
+#define STAMINA_GUI_FIND_REPLACE_H
 
 #include <ui_FindReplace.h>
 
@@ -49,4 +49,4 @@ namespace stamina {
 	}
 }
 
-#endif // STAMINA_FIND_REPLACE_H
+#endif // STAMINA_GUI_FIND_REPLACE_H

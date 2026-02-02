@@ -1,6 +1,6 @@
-from movesrwth/storm:ci-release
+from movesrwth/storm:ci
 
-RUN apt-get update && apt-get install -y build-essential libboost-all-dev git cmake clang 
+RUN apt-get update && apt-get install -y build-essential libboost-all-dev git cmake clang
 RUN apt-get install git
 
 ENV STORM_DIR=/opt/storm

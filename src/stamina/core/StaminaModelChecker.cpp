@@ -306,11 +306,193 @@ StaminaModelChecker::modelCheckProperty(
 	return nullptr;
 }
 
+std::unique_ptr<storm::modelchecker::CheckResult>
+StaminaModelChecker::estimateResultProperty(
+	storm::jani::Property propOriginal
+	, storm::prism::Program const& modulesFile
+	, std::vector<std::shared_ptr< storm::logic::Formula const>> const & formulasVector
+	, bool forceRebuildModel
+) {
+	if (modelBuilt && !forceRebuildModel) {
+		StaminaMessages::info("Model is already built. Using existing model.");
+		// TODO
+		checkFromBuiltModel(propOriginal, propOriginal, propOriginal, true);
+		return nullptr;
+	}
+	// Create allocators for shared pointers
+	std::allocator<Result> allocatorResult;
+	storm::builder::BuilderOptions options;
+	options = BuilderOptions(formulasVector);
+	// Create PrismNextStateGenerator. May need to create a NextStateGeneratorOptions for it if default is not working
+	auto generator = std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options);
+	StateSpaceInformation::setVariableInformation(generator->getVariableInformation());
+	if (Options::method == STAMINA_METHODS::ITERATIVE_METHOD) {
+		// The reason that this splits into two separate classes is that when calling STAMINA
+		// as a single-threaded application there is less overhead to use just StaminaIterativeModelBuilder
+		// rather than the threaded version
+		if (Options::threads == 1) {
+			// Create StaminaModelBuilder
+			auto builderPointer = std::make_shared<StaminaIterativeModelBuilder<double>> (generator, modulesFile, options);
+			builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+		}
+		else {
+			StaminaMessages::info("Using thread-count: " + std::to_string(Options::threads));
+			auto builderPointer = std::make_shared<StaminaThreadedIterativeModelBuilder<double>> (generator, modulesFile, options);
+			builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+			std::vector<std::shared_ptr<storm::generator::PrismNextStateGenerator<double, uint32_t>>> generators;
+			for (int i = 0; i < Options::threads; i++) {
+				generators.push_back(std::make_shared<storm::generator::PrismNextStateGenerator<double, uint32_t>>(modulesFile, options));
+			}
+			// Give to model builder.
+			//
+			// This must be builderPointer because when we pointer-cast to a
+			// std::shared_ptr<StaminaModelBuilder> we lose the knowledge that this is a
+			// StaminaThreadedIterativeModelBuilder, which has this method.
+			builderPointer->setGeneratorsVector(generators);
+		}
+	}
+	else if (Options::method == STAMINA_METHODS::PRIORITY_METHOD) {
+		StaminaMessages::warning("Not fully implemented yet!");
+		// Create StaminaModelBuilder
+		auto builderPointer = std::make_shared<StaminaPriorityModelBuilder<double>> (generator, modulesFile, options);
+		builderPointer->initializeEventStatePriority(&propOriginal);
+		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+	}
+	else if (Options::method == STAMINA_METHODS::RE_EXPLORING_METHOD) {
+		if (Options::threads != 1) {
+			StaminaMessages::error("The re-exploring method (STAMINA 2.0) does not support multithreading!");
+		}
+		auto builderPointer = std::make_shared<StaminaReExploringModelBuilder<double>> (generator, modulesFile, options);
+		builder = std::static_pointer_cast<StaminaModelBuilder<double>>(builderPointer);
+	}
+	else {
+		StaminaMessages::errorAndExit("Truncation method is invalid!");
+	}
+
+	auto startTime = std::chrono::high_resolution_clock::now();
+	auto modelTime = startTime;
+	// Instantiate lower and upper results
+	min_results = std::allocate_shared<Result>(allocatorResult);
+	max_results = min_results;
+
+	// Create number of refined iterations and reachability threshold
+	int numRefineIterations = 0;
+	double reachThreshold = Options::kappa;
+	// Property refinement optimization
+	if (!Options::no_prop_refine) {
+		// Get the expression for the current property
+		StaminaMessages::warning("Cannot use lack of property refinement on estimated models");
+		// builder->setPropertyFormula(nullptr, modulesFile);
+		Options::no_prop_refine = true;
+	}
+
+	// While we should not terminate
+	// All versions of the STAMINA algorithm (except for the heuristic version use refinement iterations)
+	while (numRefineIterations == 0
+		|| (!terminateModelCheck() && numRefineIterations < Options::max_approx_count)
+	) {
+		// Print out our current refinement iteration
+		StaminaMessages::info("Approximation [Refine Iterations: " + std::to_string(numRefineIterations) + ", kappa = " + std::to_string(reachThreshold) + "]");
+		// Reset the reachability threshold
+		reachThreshold = Options::kappa;
+
+		checker = nullptr;
+		model = builder->build()->template as<storm::models::sparse::Ctmc<double>>();
+
+		// Rebuild the initial state labels
+		labeling = &( model->getStateLabeling());
+
+		std::cout << "Labeling:\n" << model->getStateLabeling() << std::endl;
+
+		checker = std::make_shared<CtmcModelChecker>(*model);
+
+		builder->setLocalKappaToGlobal();
+		modelTime = std::chrono::high_resolution_clock::now();
+		// Instruct STORM to compute P_min and P_max
+		// We will need to get info from the terminal states
+		try {
+			// storm::Environment env;
+			// env.solver().native().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-9));
+			auto result = checker->check(
+				// env,
+				storm::modelchecker::CheckTask<>(*(propOriginal.getRawFormula()), true)
+			);
+			min_results->result = result->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+
+			// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
+			builder->printStateSpaceInformation();
+			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+				"\tEstimated Results: " + std::to_string(min_results->result) + "\n"
+			);
+
+		}
+		catch (std::exception& e) {
+			StaminaMessages::errorAndExit(e.what());
+		}
+		double percentOff = max_results->result - min_results->result;
+		percentOff *= (double) 4.0 / Options::prob_win;
+		// max percent off at 100%
+		if (percentOff > 1.0) {
+			percentOff = 1.0;
+		}
+		Options::approx_factor *= percentOff;
+
+		// Increment the refinement count
+		if (Options::export_perimeter_states != "") {
+			writePerimeterStates(numRefineIterations);
+		}
+
+		// Increment number of refine iterations
+		++numRefineIterations;
+	}
+
+	// Export transitions to file if desired
+	if (Options::export_trans != "") {
+		StaminaMessages::info("Exporting transitions to file: " + Options::export_trans);
+		builder->printTransitionActions();
+		StaminaMessages::good("Export Complete!");
+	}
+
+	auto endTime = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> timeTaken = endTime - startTime;
+	std::chrono::duration<double> timeTakenModel = modelTime - startTime;
+	std::chrono::duration<double> timeTakenCheck = endTime - modelTime;
+	std::stringstream ss;
+	ss.setf( std::ios::floatfield );
+	ss << std::fixed << std::setprecision(12);
+	ss << "The following summary shows the time for each step:" << std::endl;
+	ss << "\tTime taken for model building: " << timeTakenModel.count() << " s\n";
+	ss << "\tTime taken for model checking: " << timeTakenCheck.count() << " s\n";
+	ss << "\tTaken total time: " << timeTaken.count() << " s\n";
+	StaminaMessages::info(ss.str());
+
+	// Print results
+	std::stringstream resultInfo;
+	resultInfo.setf( std::ios::floatfield );
+	resultInfo << std::fixed << std::setprecision(12);
+	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
+	resultInfo << "\t" << BOLD(FMAG("Estimated Results: ")) << min_results->result << std::endl;
+	resultTable.push_back( { min_results->result, max_results->result, propOriginal.asPrismSyntax() } );
+	StaminaMessages::info(resultInfo.str());
+
+	ResultInformation r(
+		min_results->result
+		, max_results->result
+		, getStateCount()
+		, 1 // TODO: Actual number of initial states
+		, propOriginal.asPrismSyntax() // name?
+	);
+	StaminaMessages::writeResults(r, std::cout, true);
+	modelBuilt = true;
+	return nullptr;
+}
+
 void
 StaminaModelChecker::checkFromBuiltModel(
 	storm::jani::Property propMin
 	, storm::jani::Property propMax
 	, storm::jani::Property propOriginal
+	, bool isEstimate
 ) {
 	StaminaMessages::info("Using existing built model");
 	if (!checker) {
@@ -324,18 +506,26 @@ StaminaModelChecker::checkFromBuiltModel(
 			storm::modelchecker::CheckTask<>(*(propMin.getRawFormula()), true)
 		);
 		min_results->result = result_lower->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
-		auto result_upper = checker->check(
-			// env,
-			storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
-		);
-		max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
-		// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
-		builder->printStateSpaceInformation();
-		StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
-		"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
-		"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
-		"This gives us a window of " + std::to_string(max_results->result - min_results->result)
-		);
+		if (!isEstimate) {
+			auto result_upper = checker->check(
+				// env,
+				storm::modelchecker::CheckTask<>(*(propMax.getRawFormula()), true)
+			);
+			max_results->result = result_upper->asExplicitQuantitativeCheckResult<double>()[*model->getInitialStates().begin()];
+			// min_results->result = max_results->result - result_upper->asExplicitQuantitativeCheckResult<double>()[1]; // value of the absorbing state
+			builder->printStateSpaceInformation();
+			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+				"\tMinimum Results: " + std::to_string(min_results->result) + "\n" +
+				"\tMaximum Results: " + std::to_string(max_results->result) + "\n"  +
+				"This gives us a window of " + std::to_string(max_results->result - min_results->result)
+			);
+		}
+		else {
+			builder->printStateSpaceInformation();
+			StaminaMessages::info(std::string("At this refine iteration, the following result values are found:\n") +
+				"\tEstimated Results: " + std::to_string(min_results->result) + "\n"
+			);
+		}
 
 	}
 	catch (std::exception& e) {
@@ -346,8 +536,13 @@ StaminaModelChecker::checkFromBuiltModel(
 	resultInfo.setf( std::ios::floatfield );
 	resultInfo << std::fixed << std::setprecision(12);
 	resultInfo << "Finished checking property: " << propOriginal.getName() << std::endl;
-	resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
-	resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	if (isEstimate) {
+		resultInfo << "\t" << BOLD(FMAG("Result (Estimate): ")) << min_results->result << std::endl;
+	}
+	else {
+		resultInfo << "\t" << BOLD(FMAG("Probability Minimum: ")) << min_results->result << std::endl;
+		resultInfo << "\t" << BOLD(FMAG("Probability Maximum: ")) << max_results->result << std::endl;
+	}
 	resultTable.push_back( { min_results->result, max_results->result, propOriginal.asPrismSyntax() } );
 	StaminaMessages::info(resultInfo.str());
 
@@ -358,7 +553,7 @@ StaminaModelChecker::checkFromBuiltModel(
 		, 1 // TODO: Actual number of initial states
 		, propOriginal.asPrismSyntax() // name?
 	);
-	StaminaMessages::writeResults(r, std::cout);
+	StaminaMessages::writeResults(r, std::cout, isEstimate);
 }
 
 std::shared_ptr<std::vector<std::pair<std::string, uint64_t>>>

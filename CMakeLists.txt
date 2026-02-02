@@ -5,26 +5,25 @@
 ##
 
 cmake_minimum_required(VERSION 3.10)
-project(stamina)			   # Create project "stamina"
+# Create project "stamina"
+project(stamina)
 set(LIB_NAME stamina)
 set(CLI_EXECUTABLE_NAME sstamina)
-set(CMAKE_CXX_STANDARD 20)			# Enable c++17 standard
+# Enable c++17 standard
+set(CMAKE_CXX_STANDARD 20)
+
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(MACOSX TRUE)
+endif()
 
 option(STAMINA_DEBUG "Include debug information in the executables" OFF)
 if (STAMINA_DEBUG)
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-# STAMINA Build
-# option(STAMINA_BUILD_TAG "Build tag information" "unspecified")
-execute_process(
-	COMMAND git rev-parse HEAD
-	WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-	OUTPUT_VARIABLE GIT_HASH
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-add_compile_definitions(STAMINA_BUILD_INFO="Debug Build")
+include(StaminaVersion.cmake)
 
 # Build options
 option(BUILD_GUI "Build XStamina GUI" OFF)
@@ -49,15 +48,15 @@ if (BUILD_GUI)
 	find_package(KF5TextEditor)
 
 	find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
-		Core	# QCommandLineParser, QStringLiteral
-		Widgets # QApplication
+		Core         # QCommandLineParser, QStringLiteral
+		Widgets      # QApplication
 	)
 
 	find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
-		CoreAddons	  # KAboutData
-		I18n			# KLocalizedString
-		XmlGui		  # KXmlGuiWindow
-		TextWidgets	 # KTextEdit
+		CoreAddons        # KAboutData
+		I18n              # KLocalizedString
+		XmlGui            # KXmlGuiWindow
+		TextWidgets       # KTextEdit
 	)
 	find_package(KF5KIO)
 
@@ -138,6 +137,7 @@ set(UIC_UI_FILES
 
 set(GUI_RECS
 	${GUI_PREFIX}/resources.qrc
+	${GUI_PREFIX}/icons.qrc
 )
 
 option(STAMINA_BUILD_STORM "Build Storm in this directory and package with STAMINA" OFF)
@@ -205,12 +205,21 @@ endif()
 
 # Install stuff
 # install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+# MacOS requires a MACOSX_BUNDLE setting
 if (BUILD_GUI)
-	install(TARGETS ${GUI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applications)
+	install(TARGETS ${GUI_EXECUTABLE_NAME} RUNTIME DESTINATION bin BUNDLE DESTINATION bin COMPONENT applications)
 endif()
+install(TARGETS ${CLI_EXECUTABLE_NAME} RUNTIME DESTINATION bin BUNDLE DESTINATION  bin COMPONENT applications)
 
-install(TARGETS ${CLI_EXECUTABLE_NAME} RUNTIME DESTINATION bin COMPONENT applications)
 # This installs libstamina
-install(TARGETS ${LIB_NAME} RUNTIME DESTINATION lib COMPONENT libraries)
+install(TARGETS ${LIB_NAME} RUNTIME DESTINATION lib BUNDLE DESTINATION  lib COMPONENT libraries)
 
 include(StaminaCPackConfig.cmake)
+
+# Tests are not included in packaging
+
+option(STAMINA_BUILD_TESTS "Build STAMINA unit tests" OFF)
+
+if (STAMINA_BUILD_TESTS)
+	include(test/unit/CMakeLists.txt)
+endif()

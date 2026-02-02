@@ -318,7 +318,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildModelCo
 
 	// No remapping is necessary
 	this->purgeAbsorbingTransitions();
-	connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
+	this->connectAllTerminalStatesToAbsorbing(transitionMatrixBuilder);
 	this->flushToTransitionMatrix(transitionMatrixBuilder);
 
 	generator = std::make_shared<storm::generator::PrismNextStateGenerator<ValueType, StateType>>(modulesFile, this->options);
@@ -421,8 +421,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 	bool hold = true;
 	windowPower = 0; // Always explore at least the first state
 	// Perform a search through the model.
-	while (hold || (!statePriorityQueue.empty() && (piHat > std::max(windowPower / Options::approx_factor, 1e-14)))) {
-		std::cout << "PiHat = " << piHat << std::endl;
+	while (hold || (!statePriorityQueue.empty() && (piHat > windowPower / Options::approx_factor))) {
+		// std::cout << "PiHat = " << piHat << std::endl;
 		// std::cout << "cond = " << windowPower / Options::approx_factor << std::endl;
 		hold = false;
 		auto currentProbabilityStatePair = *statePriorityQueue.top();
@@ -613,8 +613,8 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::buildMatrice
 			++currentRowGroup;
 		}
 
-		++numberOfExploredStates;
 		windowPower = pow(Options::prob_win, Options::fudge_factor * (std::log10(std::max(numberOfExploredStates, (uint64_t) 2))));
+		++numberOfExploredStates;
 		if (generator->getOptions().isShowProgressSet()) {
 			++numberOfExploredStatesSinceLastMessage;
 
@@ -669,7 +669,7 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushFromPri
 			// actually create the transition
 			this->createTransition(transition.from, 0, transition.transition);
 			// Make preterminated state have a self loop
-			this->createTransition(transition.to, transition.to, 1.0);
+			// this->createTransition(transition.to, transition.to, 1.0);
 			numberOfPreTerminatedTransitions++;
 		}
 	}
@@ -685,32 +685,6 @@ StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::flushStatesT
 		statesTerminatedLastIteration.pop_front();
 		probabilityStatePair->first->isNew = true;
 	}
-}
-
-template <typename ValueType, typename RewardModelType, typename StateType>
-void
-StaminaPriorityModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
-	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
-) {
-	// Terminal states are any remaining states in the state transition queue
-	while (!statesTerminatedLastIteration.empty()) {
-		auto currentProbabilityState = statesTerminatedLastIteration.front()->first;
-		auto state = statesTerminatedLastIteration.front()->second;
-		statesTerminatedLastIteration.pop_front();
-		// If the state is not marked as terminal, we've already connected it to absorbing
-		if (!currentProbabilityState->isTerminal()
-				|| currentProbabilityState->deadlock) {
-			continue;
-		}
-		this->connectTerminalStatesToAbsorbing(
-			transitionMatrixBuilder
-			, state
-			, currentProbabilityState->index
-			, this->terminalStateToIdCallback
-		);
-		currentProbabilityState->setTerminal(false);
-	}
-
 }
 
 template class StaminaPriorityModelBuilder<double, storm::models::sparse::StandardRewardModel<double>, uint32_t>;

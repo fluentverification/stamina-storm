@@ -17,8 +17,8 @@
  *
  **/
 
-#ifndef STAMINA_MAIN_WINDOW_H
-#define STAMINA_MAIN_WINDOW_H
+#ifndef STAMINA_GUI_MAIN_WINDOW_H
+#define STAMINA_GUI_MAIN_WINDOW_H
 
 #include <KXmlGuiWindow>
 #include <kfilecustomdialog.h>
@@ -40,6 +40,8 @@
 
 namespace stamina {
 	namespace gui {
+		const uint8_t NUMBER_RECENT_FILES = 5;
+		class Preferences;
 
 		class MainWindow : public KXmlGuiWindow {
 			Q_OBJECT
@@ -48,6 +50,8 @@ namespace stamina {
 			MainWindow(QWidget * parent = 0);
 			void setActiveModelFileName(QString modelFileName);
 			void setActivePropFileName(QString propFileName);
+
+			void setStyleSheet(QString sheet);
 		private:
 			void saveToActiveModelFile();
 			void saveToActivePropertiesFile();
@@ -68,6 +72,7 @@ namespace stamina {
 			void populateModelInformationTree(std::shared_ptr<storm::prism::Program> program);
 			void initializeModel();
 			void populateTruncatedStates();
+			void populateRecentFiles();
 
 		private:
 			Stamina * s;
@@ -107,6 +112,10 @@ namespace stamina {
 			QFuture<void> staminaJob;
 			// Hackey way to get the file dialog to stay open
 			bool stayOpen;
+			// Actions to open recent files. Each element is a pair
+			// containing the filename as a string and the action which opens that file
+			std::vector<std::pair<QString, QAction *>> recentFiles;
+
 			int modZoom = 0;
 			int propZoom = 0;
 			// If the model has been changed and should be rebuilt
@@ -117,7 +126,7 @@ namespace stamina {
 		private slots:
 			void showPreferences();
 			void openModelFile();
-			void openModelFromAcceptedPath();
+			void openModelFromAcceptedPath(QString pathOverride="");
 			void openPropertyFromAcceptedPath();
 			void saveModelFile();
 			void saveModelFileAs();
@@ -139,7 +148,8 @@ namespace stamina {
 			// Method that gets a model from a filename
 			QAbstractItemModel * modelFromFile(const QString & fileName, QCompleter * completer);
 			void exportCSV();
+			void saveRecentFiles();
 		};
 	} // namespace gui
 } // namespace stamina
-#endif // STAMINA_MAIN_WINDOW_H
+#endif // STAMINA_GUI_MAIN_WINDOW_H

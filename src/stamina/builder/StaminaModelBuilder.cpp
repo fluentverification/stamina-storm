@@ -225,7 +225,7 @@ StaminaModelBuilder<ValueType, RewardModelType, StateType>::createTransition(Sta
 			StaminaMessages::errorAndExit("Transition list is malformed!");
 		}
 		if (trans.to == to) {
-			StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!\n\tFrom: " + std::to_string(from) + " To: " + std::to_string(to) + " Rates: " + std::to_string(probability) + " / " + std::to_string(trans.transition) );
+			// StaminaMessages::warning("Attempting to create transition to a state there is already a transition to!\n\tFrom: " + std::to_string(from) + " To: " + std::to_string(to) + " Rates: " + std::to_string(probability) + " / " + std::to_string(trans.transition) );
 			if (trans.transition != probability) {
 				StaminaMessages::error("The transitions should have the same probability but do not!");
 			}
@@ -580,6 +580,34 @@ template <typename StateType>
 bool set_contains(std::unordered_set<StateType> current_set, StateType value) {
 	auto search = current_set.find(value);
 	return (search != current_set.end());
+}
+
+template <typename ValueType, typename RewardModelType, typename StateType>
+void
+StaminaModelBuilder<ValueType, RewardModelType, StateType>::connectAllTerminalStatesToAbsorbing(
+	storm::storage::SparseMatrixBuilder<ValueType>& transitionMatrixBuilder
+) {
+// 	std::cout << "connecting all terminal states to absorbing" << std::endl;
+// 	std::cout << "The number of states to connect is " << statesTerminatedLastIteration.size() << "." << std::endl;
+	// The perimeter states require a second custom stateToIdCallback which does not enqueue or
+	// register new states
+	while (!statesTerminatedLastIteration.empty()) {
+		auto currentProbabilityState = statesTerminatedLastIteration.front().first;
+		auto state = statesTerminatedLastIteration.front().second;
+		if (!currentProbabilityState->wasPutInTerminalQueue) {
+			statesTerminatedLastIteration.pop_front();
+			continue;
+		}
+		currentProbabilityState->wasPutInTerminalQueue = false;
+// 		std::cout << "Connecting state " << StateSpaceInformation::stateToString(currentProbabilityState->state, 0) << " to terminal" << std::endl;
+		this->connectTerminalStatesToAbsorbing(
+			transitionMatrixBuilder
+			, state
+			, currentProbabilityState->index
+			, this->terminalStateToIdCallback
+		);
+		statesTerminatedLastIteration.pop_front();
+	}
 }
 
 } // namespace builder

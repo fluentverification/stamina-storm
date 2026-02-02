@@ -1,6 +1,5 @@
 option(BUILD_CPACK "Creates/includes CPack file" Off)
 if (BUILD_CPACK)
-
 	set(CPACK_PACKAGE_VERSION_MAJOR "0")
 	set(CPACK_PACKAGE_VERSION_MINOR "2")
 	set(CPACK_PACKAGE_VERSION_PATCH "5")

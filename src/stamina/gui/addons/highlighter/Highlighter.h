@@ -35,6 +35,8 @@ namespace stamina {
 					Q_OBJECT
 				public:
 					Highlighter(QTextDocument * parent = nullptr);
+					void setColorsFromScheme(ColorScheme * colors);
+					ColorScheme * getColorsAsScheme();
 				protected:
 					// Rules
 					virtual void setupKeyWordPatterns() = 0;
@@ -59,6 +61,8 @@ namespace stamina {
 					QTextCharFormat functionFormat;
 					QTextCharFormat numberFormat;
 					QTextCharFormat constFormat;
+
+					bool colorsWereSetup = false;
 				};
 			}
 		}

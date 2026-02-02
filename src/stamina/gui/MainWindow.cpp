@@ -42,6 +42,7 @@
 
 #include "MessageBridge.h"
 #include "GuiWorkerThread.h"
+#include "addons/CodeEditor.h"
 
 #include <iostream>
 #include <regex>
@@ -49,7 +50,6 @@
 
 namespace stamina {
 namespace gui {
-
 
 MainWindow::MainWindow(QWidget *parent)
 	: KXmlGuiWindow(parent)
@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, ofdp(new KFileCustomDialog(this))
 	, exportDialog(new KFileCustomDialog(this))
 	, about(new About(this))
-	, prefs(new Preferences(this))
+	, prefs(new Preferences(this, this))
 	, propWizard(new PropertyWizard(this))
 	, modelFindReplace(new FindReplace(this))
 	, propFindReplace(new FindReplace(this))
@@ -79,8 +79,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	// Make it so StaminaMessages doesn't kill the program
 	StaminaMessages::raiseExceptionsRatherThanExit = true;
+	QGuiApplication::setPalette(this->palette());
 	ui.setupUi(this);
 	MessageBridge::logOutput = ui.logOutput;
+	MessageBridge::statusBar = ui.statusbar;
 	MessageBridge::initMessageBridge();
 	setupActions();
 	setup();
@@ -102,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent)
 	killButton->setFlat(true);
 	ui.earlyTerminatedGroup->hide();
 	ui.constantsGroup->hide();
+	populateRecentFiles();
 }
 
 void
@@ -113,6 +116,19 @@ void
 MainWindow::setActivePropFileName(QString propFileName) {
 	this->activePropertiesFile = propFileName;
 }
+
+void
+MainWindow::setStyleSheet(QString sheet) {
+	ui.centralwidget->setStyleSheet(sheet);
+	ui.menubar->setStyleSheet(sheet);
+	ui.statusbar->setStyleSheet(sheet);
+	ui.mainToolBar->setStyleSheet(sheet);
+	prefs->setStyleSheet(sheet);
+	about->setStyleSheet(sheet);
+	ui.modelFile->refresh();
+	ui.propertiesEditor->refresh();
+}
+
 
 void
 MainWindow::setup() {
@@ -140,8 +156,13 @@ MainWindow::setup() {
 		QTextOption::WrapAnywhere : QTextOption::NoWrap
 	);
 	prefs->setMainWindow(&ui);
+	// TODO: This region is really hackey.
+	prefs->preloadColors();
+	prefs->readSettingsFromFile();
+	prefs->setColorsFromPrefs();
 	prefs->getPreferencesFromUI();
 	prefs->setUIFromPreferences();
+	prefs->setColorsFromPrefs();
 	// Set the default sizes for the splitters
 	// QList<int> modelSizes = ui.modelSplitter->sizes();
 	// // int totalSize = modelSizes[0] + modelSizes[1];
@@ -170,7 +191,7 @@ MainWindow::setupActions() {
 
 void
 MainWindow::setupFileActions() {
-	// New
+	// The "New" SubMenu
 	connect(
 		ui.actionPRISM_Language
 		, &QAction::triggered
@@ -246,6 +267,29 @@ MainWindow::setupFileActions() {
 			else if (idx == 1) { this->savePropertyFileAs(); }
 		}
 	);
+
+	connect(
+		ui.actionImport_JANI
+		, &QAction::triggered
+		, this
+		, [this] () {
+			// storm::jani::Model janiModel = /* TODO */;
+			// std::vector<storm::jani::Property> props;
+			// std::stringstream ss;
+			// storm::api::printJaniToStream(janiModel,
+			KMessageBox::error(this, "Not implemented!");
+		}
+	);
+
+	connect(
+		ui.actionImport_SBML
+		, &QAction::triggered
+		, this
+		, [this] () {
+			KMessageBox::error(this, "Not implemented!");
+		}
+	);
+
 	connect(
 		ui.actionExport
 		, &QAction::triggered
@@ -305,6 +349,23 @@ MainWindow::setupFileActions() {
 			exit(0);
 		}
 	);
+
+	connect(
+		ui.actionClear_Recent_Files
+		, &QAction::triggered
+		, this
+		, [this]() {
+			// Delete the list of recent files stored on disk
+			QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
+			recentFileSettings.clear();
+			for (auto & fileActionPair : recentFiles) {
+				this->ui.menuOpen_Recent->removeAction(fileActionPair.second);
+				delete fileActionPair.second;
+			}
+			recentFiles.clear();
+			ui.actionNo_Recent_Files->setVisible(true);
+		}
+	);
 }
 
 void
@@ -345,7 +406,7 @@ MainWindow::setupEditActions() {
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.modelFile->insertPlainText("module MODULE_NAME\n\nendmodule\n");
+			this->ui.modelFile->insertPlainText("module ModuleName\n\nendmodule\n");
 			ui.actionModel_Editor->trigger();
 		}
 	);
@@ -354,7 +415,7 @@ MainWindow::setupEditActions() {
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.modelFile->insertPlainText("\nVARIABLE_NAME : int init 0;\n");
+			this->ui.modelFile->insertPlainText("\nvariableName : int init 0;\n");
 			ui.actionModel_Editor->trigger();
 		}
 	);
@@ -363,16 +424,61 @@ MainWindow::setupEditActions() {
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.modelFile->insertPlainText("\nVARIABLE_NAME : [LOWER_BOUND..UPPER_BOUND] init 0;\n");
+			this->ui.modelFile->insertPlainText("\nvariableName : [LOWER_BOUND..UPPER_BOUND] init 0;\n");
 			ui.actionModel_Editor->trigger();
 		}
 	);
 	connect(
-		ui.actionForever_Property
+		ui.actionFormula
 		, &QAction::triggered
 		, this
 		, [this]() {
-			this->ui.propertiesEditor->insertPlainText("\n// Forever property\nP=?[TODO: Forever property];\n");
+			this->ui.modelFile->insertPlainText("\nformula formulaName = EXPRESSION;\n");
+			ui.actionModel_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionRewards
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.modelFile->insertPlainText("\nrewards \"rewardname\"\n\t[action] guard : reward;\nendrewards\n");
+			ui.actionModel_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionLabel
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.modelFile->insertPlainText("\nlabel \"labelName\" = EXPRESSION;\n");
+			ui.actionModel_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionGlobal_Property
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.propertiesEditor->insertPlainText("\n// Forever property\nP=? [ G : STATE_FORMULA ];\n");
+			ui.actionProperties_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionEventually_Property
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.propertiesEditor->insertPlainText("\n// Eventually property\nP=? [ F : STATE_FORMULA ];\n");
+			ui.actionProperties_Editor->trigger();
+		}
+	);
+	connect(
+		ui.actionSteady_State_Query
+		, &QAction::triggered
+		, this
+		, [this]() {
+			this->ui.propertiesEditor->insertPlainText("\n// Steady State Query Property\nS=? [ STATE_FORMULA ];\n");
 			ui.actionProperties_Editor->trigger();
 		}
 	);
@@ -515,6 +621,110 @@ MainWindow::setupEditActions() {
 		, SIGNAL(triggered())
 		, this
 		, SLOT(showPreferences())
+	);
+	connect(
+		ui.actionTitle_Case
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				QString titleCase = selection.toLower();
+				// Convert to title case
+				titleCase[0] = titleCase[0].toUpper();
+				for (uint16_t i = 1; i < titleCase.length(); ++i) {
+					if (titleCase[i - 1].isSpace()) {
+						titleCase[i] = titleCase[i].toUpper();
+					}
+				}
+				c.insertText(titleCase);
+			}
+		}
+	);
+	connect(
+		ui.actionLower_Case
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				QString lowerCase = selection.toLower();
+				// Convert to lower case
+				c.insertText(lowerCase);
+			}
+		}
+	);
+	connect(
+		ui.actionCapital_Case
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				QString upperCase = selection.toUpper();
+				c.insertText(upperCase);
+			}
+		}
+	);
+	connect(
+		ui.actionTrim_Whitespace
+		, &QAction::triggered
+		, this
+		, [this]() {
+			if (this->ui.mainTabs->currentIndex() >= 2) { return; }
+			QRegularExpression whiteSpaceRegex = QRegularExpression("\\s*$");
+			// QRegularExpression whiteSpaceRegex2 = QRegularExpression("\\s*\n");
+			auto & textEdit =
+				this->ui.mainTabs->currentIndex() == 0
+				? this->ui.modelFile
+				: this->ui.propertiesEditor;
+			QTextCursor c = textEdit->textCursor();
+			if (c.hasSelection()) {
+				QString selection = c.selectedText();
+				selection.replace(whiteSpaceRegex, "");
+				std::cout << "selection: " << selection.toStdString();
+				QString newSelectionText = "";
+				for (auto & line : selection.split(QRegExp("[\r\n]"), QString::SkipEmptyParts)) {
+					line.replace(whiteSpaceRegex, "");
+					std::cout << line.toStdString() << std::endl;
+					newSelectionText += line;
+				}
+				// selection.replace(whiteSpaceRegex2, "\n");
+				c.insertText(newSelectionText);
+			}
+			// Otherwise we want to do this to the whole document
+			else {
+				QString content = textEdit->toPlainText();
+				content.replace(whiteSpaceRegex, "");
+				QString newContent = "";
+				std::cout << "content: " << content.toStdString();
+				for (auto & line : content.split(QRegExp("[\r\n]"), QString::SkipEmptyParts)) {
+					line.replace(whiteSpaceRegex, "");
+					std::cout << line.toStdString() << std::endl;
+					newContent += line;
+				}
+				// content.replace(whiteSpaceRegex2, "\n");
+				textEdit->setPlainText(newContent);
+			}
+		}
 	);
 }
 
@@ -1012,6 +1222,10 @@ MainWindow::saveToActiveModelFile() {
 		// unsavedChangesModel = false;
 		// setCaption(baseWindowTitle);
 		stayOpen = false;
+		if (s) {
+			delete s;
+			s = nullptr;
+		}
 	}
 	else {
 		StaminaMessages::error("No active model file exists! (This is a bug, please report.)");
@@ -1069,9 +1283,9 @@ MainWindow::openModelFile() {
 }
 
 void
-MainWindow::openModelFromAcceptedPath() {
-	QString selectedFile = ofdm->fileWidget()->selectedFile();
-	StaminaMessages::info( "Opening file " + selectedFile.toStdString());
+MainWindow::openModelFromAcceptedPath(QString pathOverride) {
+	QString selectedFile = pathOverride == "" ? ofdm->fileWidget()->selectedFile() : pathOverride;
+	StaminaMessages::info("Opening file " + selectedFile.toStdString());
 	activeModelFile = selectedFile;
 	if (selectedFile != "") {
 		mustRebuildModel = true;
@@ -1091,6 +1305,11 @@ MainWindow::openModelFromAcceptedPath() {
 			, i18n("There appears to be a property file in this directory with the same base name as the model file you opened. Would you like to open this property file as well?")
 			) == KMessageBox::Yes;
 			if (shouldOpenPropFile) {
+				// Get a new instance of MainWindow::s
+				if (s) {
+					delete s;
+					s = nullptr;
+				}
 				QString pFileName = QString::fromStdString(propFileName);
 				QFileInfo pInfo(pFileName);
 				activePropertiesFile = pFileName;
@@ -1108,6 +1327,41 @@ MainWindow::openModelFromAcceptedPath() {
 		, 0
 		, 0
 	);
+	// Update recent files
+	auto existingFileActionPair = std::find_if(
+		recentFiles.begin()
+		, recentFiles.end()
+		, [&selectedFile](std::pair<QString, QAction *> fileActionPair) -> bool {
+			return selectedFile == fileActionPair.first;
+		});
+	if (existingFileActionPair != recentFiles.end()) {
+		// Bring existing file pair to beginning of list
+		std::rotate(recentFiles.begin(), existingFileActionPair, existingFileActionPair + 1);
+		// update UI
+		ui.menuOpen_Recent->removeAction(existingFileActionPair->second);
+		ui.menuOpen_Recent->addAction(existingFileActionPair->second);
+		return;
+	}
+	// If we reach this point, it wasn't in the existing list
+	// We should evict the last element
+	if (recentFiles.size() >= NUMBER_RECENT_FILES) {
+		auto & evictedRecentFile = recentFiles.back();
+		recentFiles.pop_back();
+		if (evictedRecentFile.second) {
+			ui.menuOpen_Recent->removeAction(evictedRecentFile.second);
+			delete evictedRecentFile.second;
+		}
+	}
+	// Add new element
+	QAction * openAction = new QAction(selectedFile, this); // TODO: maybe not like to have full path in UI
+	connect(openAction, &QAction::triggered, this, [this, selectedFile]() {
+		// Hackey but what the hell
+		this->ofdm->fileWidget()->setSelectedUrl(QUrl(selectedFile));
+		openModelFromAcceptedPath(selectedFile);
+	});
+	ui.menuOpen_Recent->addAction(openAction);
+	recentFiles.emplace(recentFiles.begin(), std::make_pair(selectedFile, openAction));
+	ui.actionNo_Recent_Files->setVisible(false);
 }
 
 void
@@ -1320,6 +1574,7 @@ MainWindow::setActivePropertyFileAndSave() {
 void
 MainWindow::closeEvent(QCloseEvent *event) {
 	handleClose();
+	saveRecentFiles();
 }
 
 void
@@ -1814,6 +2069,37 @@ MainWindow::handleTabChange() {
 		this->ui.actionModel_Editor->setChecked(false);
 		this->ui.actionProperties_Editor->setChecked(false);
 		this->ui.actionResults_Viewer->setChecked(false);
+	}
+}
+
+void
+MainWindow::populateRecentFiles() {
+	QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
+	// QStringList recentFileList;
+	for (uint8_t i = 0; i < NUMBER_RECENT_FILES; ++i) {
+		QString file = recentFileSettings.value(QString("recentFile") + QString::number(i)).toString();
+		if (file == "") { continue; }
+		QAction * openAction = new QAction(file, this); // TODO: maybe not like to have full path in UI
+		connect(openAction, &QAction::triggered, this, [this, file]() {
+			// Hackey but what the hell
+			this->ofdm->fileWidget()->setSelectedUrl(QUrl(file));
+			openModelFromAcceptedPath(file);
+		});
+		ui.menuOpen_Recent->addAction(openAction);
+		recentFiles.emplace(recentFiles.begin(), std::make_pair(file, openAction));
+		ui.actionNo_Recent_Files->setVisible(false);
+	}
+}
+
+void
+MainWindow::saveRecentFiles() {
+	QSettings recentFileSettings(QSettings::UserScope, "xSTAMINA", "recentFiles");
+	uint8_t i;
+	for (auto & fileActionPair : recentFiles) {
+		QString file = fileActionPair.first;
+		recentFileSettings.setValue(QString("recentFile") + QString::number(i), file);
+		++i;
+		// We are calling this at the end of the application's lifetime, so no need to delete the QActions
 	}
 }
 

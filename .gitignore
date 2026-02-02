@@ -3,6 +3,7 @@ build
 bin
 tmp
 doxysite
+release
 storm
 *.o
 *.out
@@ -28,3 +29,9 @@ ecm_uninstall.cmake
 *_autogen
 prefix.sh
 
+# Third party icons
+src/stamina/gui/resources/*icons*
+
+# Distribution stuff
+PKGBUILD
+AppImageBuilder.yml
